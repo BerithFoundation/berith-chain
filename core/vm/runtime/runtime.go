@@ -110,12 +110,14 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	// set the receiver's (the executing contract) code for execution.
 	cfg.State.SetCode(address, code)
 	// Call the code with the given configuration.
+	// [BRT]
 	ret, _, err := vmenv.Call(
 		sender,
 		common.BytesToAddress([]byte("contract")),
 		input,
 		cfg.GasLimit,
 		cfg.Value,
+		false,
 	)
 
 	return ret, cfg.State, err
