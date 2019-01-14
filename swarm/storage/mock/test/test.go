@@ -25,9 +25,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/mock"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage/mock"
 )
 
 // MockStore creates NodeStore instances from provided GlobalStorer,

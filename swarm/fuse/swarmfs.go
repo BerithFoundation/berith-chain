@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
 )
 
 const (

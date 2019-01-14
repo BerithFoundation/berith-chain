@@ -21,13 +21,13 @@ import (
 	"os"
 	"sort"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	gethmetrics "github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/metrics/influxdb"
-	swarmmetrics "github.com/ethereum/go-ethereum/swarm/metrics"
-	"github.com/ethereum/go-ethereum/swarm/tracing"
+	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
+	gethmetrics "bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics/influxdb"
+	swarmmetrics "bitbucket.org/ibizsoftware/berith-chain/swarm/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/tracing"
 
-	"github.com/ethereum/go-ethereum/log"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

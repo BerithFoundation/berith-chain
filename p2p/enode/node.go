@@ -26,7 +26,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
 )
 
 // Node represents a host on the network.

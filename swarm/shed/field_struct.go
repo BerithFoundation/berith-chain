@@ -17,7 +17,7 @@
 package shed
 
 import (
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

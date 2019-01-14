@@ -19,7 +19,7 @@
 package ethdb_test
 
 import (
-	"github.com/ethereum/go-ethereum/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 )
 
 var _ ethdb.Database = &ethdb.LDBDatabase{}
