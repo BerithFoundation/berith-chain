@@ -7,7 +7,7 @@ type Stake struct{
 	value *big.Int
 }
 
-type Stakelist []*Stake
+type Stakelist []Stake
 
 
 func (s Stakelist) Len() int{

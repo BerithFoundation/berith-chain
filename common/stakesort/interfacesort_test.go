@@ -2,6 +2,7 @@ package stakesort
 
 import (
 	"fmt"
+	"math/big"
 	"sort"
 	"testing"
 )
@@ -9,10 +10,10 @@ import (
 func TestInterfacesort(t *testing.T){
 
 	items := []Stake{
-		{"a",10},
-		{"b",11},
-		{"c",20},
-		{"d",21},
+		{"a",big.NewInt(10)},
+		{"b",big.NewInt(11)},
+		{"c",big.NewInt(20)},
+		{"d",big.NewInt(21)},
 	}
 	//interfacesort := make(Stakelist,0)
 

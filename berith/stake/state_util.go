@@ -16,7 +16,7 @@ import (
 
 //StakingMap map implements StakingList
 type StakingMap struct {
-	storage *map[common.Address]*big.Int
+	storage map[common.Address]*big.Int
 	stakinglist *stakesort.Stakelist
 
 }
@@ -32,8 +32,7 @@ func (list StakingMap) GetRRList() *stakesort.Stakelist{
 }
 //Get getter of StakingMap
 func (list StakingMap) Get(address common.Address) (StakingInfo, error) {
-	value := list.storage
-	x:=value[address]
+	value := list.storage[address]
 
 	if value == nil {
 		value = big.NewInt(0)
@@ -89,12 +88,12 @@ func GetStakingMap(db DataBase, blockNumber *big.Int, hash common.Hash) (Staking
 	}
 	var stakelist stakesort.Stakelist
 	for addr,value := range result{
-		stakelist = append(stakelist,&stakesort.Stake{addr,value})
+		stakelist = append(stakelist,stakesort.Stake{addr,value})
 	}
 	sort.Sort(stakelist)
 
 	return &StakingMap{
-		storage: &result,
+		storage: result,
 		stakinglist: &stakelist,
 	}, nil
 }
