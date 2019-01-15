@@ -443,6 +443,12 @@
 			"revisionTime": "2016-06-18T19:32:21Z"
 		},
 		{
+			"checksumSHA1": "Hg2k/0kEWuB+2N5dJAWDB+C4mp4=",
+			"path": "github.com/stojg/golib/sortedmap",
+			"revision": "0e10ee026055847ede81cb69c638e26e22ce6287",
+			"revisionTime": "2014-03-24T03:52:24Z"
+		},
+		{
 			"checksumSHA1": "mGbTYZ8dHVTiPTTJu3ktp+84pPI=",
 			"path": "github.com/stretchr/testify/assert",
 			"revision": "890a5c3458b43e6104ff5da8dfa139d013d77544",
@@ -929,5 +935,5 @@
 			"revisionTime": "2017-08-11T01:42:03Z"
 		}
 	],
-	"rootPath": "github.com/ethereum/go-ethereum"
+	"rootPath": "bitbucket.org/ibizsoftware/berith-chain"
 }

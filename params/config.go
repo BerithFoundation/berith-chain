@@ -163,8 +163,15 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Bsrr * BSRRConfig `json:"bsrr,omitempty"`
 }
-
+type BSRRConfig struct{
+	Round uint64 `json:"round"`
+	Count_Candidate uint64 `json:"Candidate_num"`
+}
+func (b *BSRRConfig) String() string{
+	return "bsrr"
+}
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
 type EthashConfig struct{}
 
@@ -192,6 +199,8 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
+	case c.Bsrr != nil:
+		engine = c.Bsrr
 	default:
 		engine = "unknown"
 	}

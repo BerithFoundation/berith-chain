@@ -1,6 +1,7 @@
 package stake
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/common/stakesort"
 	"io"
 	"math/big"
 
@@ -15,7 +16,7 @@ type StakingList interface {
 	Get(address common.Address) (StakingInfo, error)
 	Set(address common.Address, x interface{}) error
 	Copy() StakingList
-	Print()
+	GetRRList () *stakesort.Stakelist
 	EncodeRLP(w io.Writer) error
 }
 
