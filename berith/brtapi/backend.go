@@ -2,6 +2,7 @@ package brtapi
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/core/state"
 	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
@@ -21,6 +22,8 @@ type Backend interface {
 
 	ChainConfig() *params.ChainConfig
 	CurrentBlock() *types.Block
+
+	StateAndHeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (*state.StateDB, *types.Header, error)
 }
 
 //GetAPIs get apis of berith serivce
