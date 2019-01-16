@@ -224,4 +224,3 @@ func (b *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 
 
 }
-//test
