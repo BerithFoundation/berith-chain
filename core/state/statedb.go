@@ -324,28 +324,11 @@ func (self *StateDB) HasSuicided(addr common.Address) bool {
  * SETTERS
  */
 
-// [BRT] SetStaking adds StakeBalance
+// brt SetStaking adds StakeBalance
 func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
 		stateObject.SetStaking(amount)
-	}
-}
-
-// [BRT] GetStakeBalance
-func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
-	stateObject := self.getStateObject(addr)
-	if stateObject != nil {
-		return stateObject.StakeBalance()
-	}
-	return common.Big0
-}
-
-// [BRT] SubStakeBalance
-func (self *StateDB) RemoveStakeBalance(addr common.Address) {
-	stateObject := self.GetOrNewStateObject(addr)
-	if stateObject != nil {
-		stateObject.RemoveStakeBalance()
 	}
 }
 

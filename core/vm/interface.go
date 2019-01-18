@@ -66,12 +66,7 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	//[BRT] add interface
 	StakingList() stake.StakingList
-	SetStaking(common.Address, *big.Int)
-	RemoveStakeBalance(common.Address)
-
-
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM

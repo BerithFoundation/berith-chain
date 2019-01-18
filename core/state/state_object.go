@@ -388,7 +388,8 @@ func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
 
-//[BRT] SetStaking adds StakeBalance
+
+//brt set staking balance
 func (self *stateObject) SetStaking(amount *big.Int) {
 	self.db.journal.append(stakingChange{
 		account: &self.address,
@@ -399,17 +400,4 @@ func (self *stateObject) SetStaking(amount *big.Int) {
 
 func (self *stateObject) setStaking(amount *big.Int) {
 	self.data.StakeBalance = amount
-}
-
-func (self *stateObject) StakeBalance() *big.Int {
-	return self.data.StakeBalance
-}
-
-func (c *stateObject) RemoveStakeBalance() {
-	amount := c.StakeBalance()
-	if amount.Sign() == 0 {
-		return
-	}
-	c.SetStaking(new(big.Int).Sub(amount, amount))
-	c.AddBalance(amount)
 }

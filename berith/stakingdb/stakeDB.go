@@ -6,8 +6,6 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 )
 
-
-//Staking DB 레벨디비
 type StakingDB struct {
 	stakeDB *ethdb.LDBDatabase
 }

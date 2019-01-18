@@ -717,15 +717,6 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
-		new web3._extend.Method({
-			name: 'getStakeBalance',
-			call: 'berith_getStakeBalance',
-        	params: 2,
-        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
-        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
-		}),
-
-
 	]
 });
 `
