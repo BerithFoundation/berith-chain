@@ -1,21 +1,25 @@
 package stake
 
 import (
+
+	"bitbucket.org/ibizsoftware/berith-chain/common/stakesort"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"math/big"
+	"sort"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
 //StakingMap map implements StakingList
 type StakingMap struct {
 	storage map[common.Address]*big.Int
-}
+	stakinglist *stakesort.Stakelist
 
+}
 type storage struct {
 	address common.Address
 	value   *big.Int
@@ -23,10 +27,13 @@ type storage struct {
 
 func (s storage) Address() common.Address { return s.address }
 func (s storage) Value() *big.Int         { return s.value }
-
+func (list StakingMap) GetRRList() *stakesort.Stakelist{
+	return list.stakinglist
+}
 //Get getter of StakingMap
 func (list StakingMap) Get(address common.Address) (StakingInfo, error) {
 	value := list.storage[address]
+
 	if value == nil {
 		value = big.NewInt(0)
 	}
@@ -67,9 +74,7 @@ func (list StakingMap) EncodeRLP(w io.Writer) error {
 func GetStakingMap(db DataBase, blockNumber *big.Int, hash common.Hash) (StakingList, error) {
 	rlpData, err1 := db.GetValue(hash.Hex() + ":" + blockNumber.String())
 	if err1 != nil {
-		return &StakingMap{
-			storage: make(map[common.Address]*big.Int, 0),
-		}, nil
+		return nil, nil
 	}
 
 	var btValue []byte
@@ -81,9 +86,15 @@ func GetStakingMap(db DataBase, blockNumber *big.Int, hash common.Hash) (Staking
 	if err := json.Unmarshal(btValue, &result); err != nil {
 		return nil, err
 	}
+	var stakelist stakesort.Stakelist
+	for addr,value := range result{
+		stakelist = append(stakelist,stakesort.Stake{addr,value})
+	}
+	sort.Sort(stakelist)
 
 	return &StakingMap{
 		storage: result,
+		stakinglist: &stakelist,
 	}, nil
 }
 

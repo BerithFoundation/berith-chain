@@ -19,8 +19,8 @@ package enode
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/enr"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
 )
 
 func newLocalNodeForTesting() (*LocalNode, *DB) {

@@ -24,8 +24,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
+	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 )
 
 func TestFreeClientPoolL10C100(t *testing.T) {

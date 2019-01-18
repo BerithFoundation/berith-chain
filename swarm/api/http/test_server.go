@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage/feed"
 )
 
 type TestServer interface {

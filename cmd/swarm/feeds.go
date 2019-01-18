@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	swarm "github.com/ethereum/go-ethereum/swarm/api/client"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
+	swarm "bitbucket.org/ibizsoftware/berith-chain/swarm/api/client"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage/feed"
 	"gopkg.in/urfave/cli.v1"
 )
 

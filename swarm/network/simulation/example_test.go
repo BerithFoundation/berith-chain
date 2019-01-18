@@ -19,8 +19,8 @@ package simulation_test
 import (
 	"context"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/network/simulation"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/network/simulation"
 )
 
 // Every node can have a Kademlia associated using the node bucket under

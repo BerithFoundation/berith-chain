@@ -20,7 +20,7 @@ package storage
 // no need for queueing/caching
 
 import (
-	"github.com/ethereum/go-ethereum/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"

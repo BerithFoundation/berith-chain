@@ -24,9 +24,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarm "github.com/ethereum/go-ethereum/swarm/api/client"
-	swarmhttp "github.com/ethereum/go-ethereum/swarm/api/http"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
+	swarm "bitbucket.org/ibizsoftware/berith-chain/swarm/api/client"
+	swarmhttp "bitbucket.org/ibizsoftware/berith-chain/swarm/api/http"
 )
 
 // TestManifestChange tests manifest add, update and remove

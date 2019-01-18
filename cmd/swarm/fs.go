@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/fuse"
+	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/fuse"
 	"gopkg.in/urfave/cli.v1"
 )
 

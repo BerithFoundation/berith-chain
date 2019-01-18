@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/event"
+	"bitbucket.org/ibizsoftware/berith-chain/event"
 )
 
 func ExampleNewSubscription() {

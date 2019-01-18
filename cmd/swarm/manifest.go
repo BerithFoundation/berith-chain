@@ -22,9 +22,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarm "github.com/ethereum/go-ethereum/swarm/api/client"
+	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
+	swarm "bitbucket.org/ibizsoftware/berith-chain/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

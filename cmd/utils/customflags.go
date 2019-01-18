@@ -27,7 +27,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"bitbucket.org/ibizsoftware/berith-chain/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 

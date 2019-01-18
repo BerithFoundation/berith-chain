@@ -3,7 +3,7 @@ package stakingdb
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 )
 
 type StakingDB struct {
