@@ -33,15 +33,15 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/internal/cmdtest"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarmhttp "github.com/ethereum/go-ethereum/swarm/api/http"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/cmdtest"
+	"bitbucket.org/ibizsoftware/berith-chain/node"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
+	swarmhttp "bitbucket.org/ibizsoftware/berith-chain/swarm/api/http"
 )
 
 var loglevel = flag.Int("loglevel", 3, "verbosity of logs")

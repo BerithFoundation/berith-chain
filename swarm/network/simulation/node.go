@@ -24,10 +24,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/adapters"
 )
 
 // NodeIDs returns NodeIDs for all nodes in the network.

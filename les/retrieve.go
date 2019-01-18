@@ -26,8 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/light"
+	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
+	"bitbucket.org/ibizsoftware/berith-chain/light"
 )
 
 var (

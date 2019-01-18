@@ -24,7 +24,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/testutil"
 )
 
 const testDataSize = 0x0001000

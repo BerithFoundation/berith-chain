@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/log"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service

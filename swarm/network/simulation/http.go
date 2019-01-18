@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations"
 )
 
 // Package defaults.

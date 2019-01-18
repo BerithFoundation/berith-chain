@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ethereum/go-ethereum/log"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
 // ethstatsDockerfile is the Dockerfile required to build an ethstats backend

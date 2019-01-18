@@ -25,11 +25,11 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
 	duktape "gopkg.in/olebedev/go-duktape.v3"
 )
 

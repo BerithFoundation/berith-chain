@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
+	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
 )
 
 const (

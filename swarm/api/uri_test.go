@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
 )
 
 func TestParseURI(t *testing.T) {

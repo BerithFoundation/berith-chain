@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 )
 
 func TestVM(t *testing.T) {

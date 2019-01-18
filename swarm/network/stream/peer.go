@@ -23,14 +23,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	pq "github.com/ethereum/go-ethereum/swarm/network/priorityqueue"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/protocols"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
+	pq "bitbucket.org/ibizsoftware/berith-chain/swarm/network/priorityqueue"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/network/stream/intervals"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/spancontext"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/state"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

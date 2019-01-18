@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/core/types"
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 )
 
 var (

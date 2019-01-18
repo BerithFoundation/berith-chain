@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/params"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
 // Config are the configuration options for the Interpreter

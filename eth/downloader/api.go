@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/rpc"
+	ethereum "bitbucket.org/ibizsoftware/berith-chain"
+	"bitbucket.org/ibizsoftware/berith-chain/event"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.

@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/log"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
 // deployFaucet queries the user for various input on deploying a faucet, after

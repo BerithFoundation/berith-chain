@@ -23,17 +23,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"bitbucket.org/ibizsoftware/berith-chain/core"
+	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
+	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/light"
+	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
 type odrTestFn func(ctx context.Context, db ethdb.Database, config *params.ChainConfig, bc *core.BlockChain, lc *light.LightChain, bhash common.Hash) []byte

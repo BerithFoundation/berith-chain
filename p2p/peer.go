@@ -25,12 +25,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
+	"bitbucket.org/ibizsoftware/berith-chain/event"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
 var (

@@ -25,17 +25,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/pot"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/protocols"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/network"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/network/stream/intervals"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/pot"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/state"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
 )
 
 const (

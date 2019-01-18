@@ -23,11 +23,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	p2ptest "github.com/ethereum/go-ethereum/p2p/testing"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/protocols"
+	p2ptest "bitbucket.org/ibizsoftware/berith-chain/p2p/testing"
 )
 
 const (

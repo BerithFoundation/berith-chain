@@ -22,9 +22,9 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)

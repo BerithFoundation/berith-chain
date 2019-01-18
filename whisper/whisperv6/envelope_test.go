@@ -22,7 +22,7 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 )
 
 func TestEnvelopeOpenAcceptsOnlyOneKeyTypeInFilter(t *testing.T) {

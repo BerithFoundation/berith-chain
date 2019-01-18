@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/prque"
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 )
 
 var (

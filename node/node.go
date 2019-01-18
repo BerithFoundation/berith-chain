@@ -26,13 +26,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/internal/debug"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts"
+	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/event"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"github.com/prometheus/prometheus/util/flock"
 )
 

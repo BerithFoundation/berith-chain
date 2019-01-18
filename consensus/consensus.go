@@ -20,11 +20,11 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
 
 // ChainReader defines a small collection of methods needed to access the local

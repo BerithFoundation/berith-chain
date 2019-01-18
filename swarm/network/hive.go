@@ -21,11 +21,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/state"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/state"
 )
 
 /*

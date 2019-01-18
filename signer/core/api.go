@@ -25,15 +25,15 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/accounts/usbwallet"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/usbwallet"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
 // numberOfAccountsToDerive For hardware wallets, the number of accounts to derive
@@ -518,7 +518,7 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 //
 // The key used to calculate the signature is decrypted with the given password.
 //
-// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
+// https://bitbucket.org/ibizsoftware/berith-chain/wiki/Management-APIs#personal_sign
 func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, data hexutil.Bytes) (hexutil.Bytes, error) {
 	sighash, msg := SignHash(data)
 	// We make the request prior to looking up if we actually have the account, to prevent

@@ -24,9 +24,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/api"
 )
 
 var (

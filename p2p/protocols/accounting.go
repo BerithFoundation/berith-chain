@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 )
 
 //define some metrics

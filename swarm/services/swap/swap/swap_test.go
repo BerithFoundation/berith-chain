@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
 )
 
 type testInPayment struct {

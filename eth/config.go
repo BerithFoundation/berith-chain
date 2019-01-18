@@ -24,13 +24,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/gasprice"
-	"github.com/ethereum/go-ethereum/params"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/consensus/ethash"
+	"bitbucket.org/ibizsoftware/berith-chain/core"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/gasprice"
+	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.

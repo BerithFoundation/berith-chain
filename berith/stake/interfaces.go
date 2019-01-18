@@ -1,10 +1,11 @@
 package stake
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/common/stakesort"
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
 )
 
 //stakingListKey trieDB's key for staking list
@@ -15,7 +16,7 @@ type StakingList interface {
 	Get(address common.Address) (StakingInfo, error)
 	Set(address common.Address, x interface{}) error
 	Copy() StakingList
-	Print()
+	GetRRList () *stakesort.Stakelist
 	EncodeRLP(w io.Writer) error
 }
 

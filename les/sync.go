@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/light"
+	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/light"
 )
 
 // syncer is responsible for periodically synchronising with the network, both

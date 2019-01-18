@@ -23,10 +23,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto/secp256k1"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
 )
 
 // node represents a host on the network.

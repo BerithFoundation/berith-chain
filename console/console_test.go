@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/node"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/consensus/ethash"
+	"bitbucket.org/ibizsoftware/berith-chain/core"
+	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/jsre"
+	"bitbucket.org/ibizsoftware/berith-chain/node"
 )
 
 const (

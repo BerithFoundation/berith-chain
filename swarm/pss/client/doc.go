@@ -28,11 +28,11 @@
 //  	"context"
 //  	"fmt"
 //  	"os"
-//  	pss "github.com/ethereum/go-ethereum/swarm/pss/client"
-//  	"github.com/ethereum/go-ethereum/p2p/protocols"
-//  	"github.com/ethereum/go-ethereum/p2p"
-//  	"github.com/ethereum/go-ethereum/swarm/pot"
-//  	"github.com/ethereum/go-ethereum/swarm/log"
+//  	pss "bitbucket.org/ibizsoftware/berith-chain/swarm/pss/client"
+//  	"bitbucket.org/ibizsoftware/berith-chain/p2p/protocols"
+//  	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+//  	"bitbucket.org/ibizsoftware/berith-chain/swarm/pot"
+//  	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
 //  )
 //
 //  type FooMsg struct {

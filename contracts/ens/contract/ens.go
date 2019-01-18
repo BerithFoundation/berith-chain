@@ -6,12 +6,12 @@ package contract
 import (
 	"strings"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+	ethereum "bitbucket.org/ibizsoftware/berith-chain"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"bitbucket.org/ibizsoftware/berith-chain/event"
 )
 
 // ENSABI is the input ABI used to generate the binding from.

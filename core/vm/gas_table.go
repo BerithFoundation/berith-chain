@@ -17,9 +17,9 @@
 package vm
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/params"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
 // memoryGasCosts calculates the quadratic gas for memory expansion. It does so

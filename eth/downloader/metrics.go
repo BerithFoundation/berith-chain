@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"github.com/ethereum/go-ethereum/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 )
 
 var (

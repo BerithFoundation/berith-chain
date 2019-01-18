@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv5"
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
+	whisper "bitbucket.org/ibizsoftware/berith-chain/whisper/whisperv5"
 )
 
 const (

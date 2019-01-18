@@ -25,11 +25,11 @@ import (
 	"io/ioutil"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	"github.com/ethereum/go-ethereum/contracts/chequebook/contract"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/crypto"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind"
+	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind/backends"
+	"bitbucket.org/ibizsoftware/berith-chain/contracts/chequebook/contract"
+	"bitbucket.org/ibizsoftware/berith-chain/core"
+	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 )
 
 var (

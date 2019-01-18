@@ -50,4 +50,5 @@ profile.cov
 /swk
 /swk/geth/
 /swk/keystore
-*/geth
+/cmd/geth/stakingDB
+/cmd/geth/geth

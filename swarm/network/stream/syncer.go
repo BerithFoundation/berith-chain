@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
+	"bitbucket.org/ibizsoftware/berith-chain/swarm/storage"
 )
 
 const (

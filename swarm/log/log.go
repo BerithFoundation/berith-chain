@@ -1,8 +1,8 @@
 package log
 
 import (
-	l "github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	l "bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 )
 
 const (

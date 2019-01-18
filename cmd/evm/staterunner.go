@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/tests"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
+	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"bitbucket.org/ibizsoftware/berith-chain/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )
