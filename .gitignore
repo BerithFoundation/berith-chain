@@ -52,3 +52,4 @@ profile.cov
 /swk/keystore
 /cmd/geth/stakingDB
 /cmd/geth/geth
+**/testStakingDB

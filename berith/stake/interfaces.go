@@ -1,7 +1,6 @@
 package stake
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/common/stakesort"
 	"io"
 	"math/big"
 
@@ -15,9 +14,11 @@ const stakingListKey = "staking_list"
 type StakingList interface {
 	Get(address common.Address) (StakingInfo, error)
 	Set(address common.Address, x interface{}) error
-	Copy() StakingList
-	GetRRList () *stakesort.Stakelist
 	EncodeRLP(w io.Writer) error
+	Commit(db DataBase, blockNumber *big.Int, blockHash common.Hash) error
+	NextMiner(address common.Address) (common.Address, error)
+	PrevMiner(address common.Address) (common.Address, error)
+	GetMiner(index int) (common.Address, error)
 }
 
 type StakingInfo interface {

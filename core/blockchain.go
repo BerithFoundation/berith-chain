@@ -934,23 +934,30 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	bc.wg.Add(1)
 	defer bc.wg.Done()
 
-	stakingList, stkErr := stake.GetStakingMap(bc.stakingDB, big.NewInt(0).Sub(block.Number(), big.NewInt(1)), block.Header().ParentHash)
+	stakingList, stkErr := stake.NewStakingMap(bc.stakingDB, big.NewInt(0).Sub(block.Number(), big.NewInt(1)), block.Header().ParentHash)
 	if stkErr != nil {
 		return NonStatTy, stkErr
 	}
 
-	fmt.Println(stakingList)
+	//fmt.Println(stakingList)
 	for _, tx := range block.Transactions() {
 		msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
 		if msg.Staking() {
-			stkErr = stake.AppendTransaction(stakingList, msg)
+			old, getErr := stakingList.Get(msg.From())
+			if getErr != nil {
+				return NonStatTy, getErr
+			}
+
+			if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
+				return NonStatTy, setErr
+			}
 			if stkErr != nil {
 				return NonStatTy, stkErr
 			}
 		}
 	}
 
-	stake.Commit(stakingList, bc.stakingDB, block.Number(), block.Hash())
+	stakingList.Commit(bc.stakingDB, block.Number(), block.Hash())
 
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
