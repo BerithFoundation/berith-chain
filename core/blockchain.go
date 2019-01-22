@@ -939,7 +939,7 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 		return NonStatTy, stkErr
 	}
 
-	//fmt.Println(stakingList)
+    stakingList.Print()
 	for _, tx := range block.Transactions() {
 		msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
         

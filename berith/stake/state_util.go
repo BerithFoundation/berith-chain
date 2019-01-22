@@ -108,7 +108,7 @@ func (list *StakingMap) Set(address common.Address, x interface{}) error {
 
 
 // UnSet address from the staking list
-func (list StakingMap) Delete(address common.Address) error {
+func (list *StakingMap) Delete(address common.Address) error {
     if _, ok := list.storage[address]; ok {
         delete(list.storage, address)
     }
@@ -116,9 +116,14 @@ func (list StakingMap) Delete(address common.Address) error {
 }
 
 
+// Print is
 func (list *StakingMap) Print() {
-	fmt.Println(list)
+    fmt.Println("==== Staking List ====")
+    for k, v := range list.storage {
+        fmt.Println("** [key : ",k," | value : ",v,"]")
+    }
 }
+
 
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	rlpVal := make([][]byte, 2)
