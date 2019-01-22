@@ -128,8 +128,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
+    
 	stakingDB := &stakingdb.StakingDB{}
-	if stkErr := stakingDB.CreateDB("stakingDB"); stkErr != nil {
+    stakingDBPath := ctx.ResolvePath("stakingDB")
+	if stkErr := stakingDB.CreateDB(stakingDBPath); stkErr != nil {
 		return nil, stkErr
 	}
 

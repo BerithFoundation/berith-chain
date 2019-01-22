@@ -106,6 +106,16 @@ func (list *StakingMap) Set(address common.Address, x interface{}) error {
 	return errors.New("invalid value")
 }
 
+
+// UnSet address from the staking list
+func (list StakingMap) Delete(address common.Address) error {
+    if _, ok := list.storage[address]; ok {
+        delete(list.storage, address)
+    }
+    return nil
+}
+
+
 func (list *StakingMap) Print() {
 	fmt.Println(list)
 }
@@ -187,5 +197,4 @@ func (list *StakingMap) Commit(db DataBase, blockNumber *big.Int, hash common.Ha
 	db.PushValue(hash.Hex()+":"+blockNumber.String(), rlpValue)
 
 	return nil
-
 }
