@@ -69,6 +69,7 @@ type StateDB interface {
 	//[BRT] add interface
 	StakingList() stake.StakingList
 	SetStaking(common.Address, *big.Int)
+	GetStakeBalance(common.Address) *big.Int
 	RemoveStakeBalance(common.Address, *big.Int)
 }
 
