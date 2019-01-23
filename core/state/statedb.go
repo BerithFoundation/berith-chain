@@ -342,10 +342,10 @@ func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 }
 
 // [BRT] SubStakeBalance
-func (self *StateDB) RemoveStakeBalance(addr common.Address) {
+func (self *StateDB) RemoveStakeBalance(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.RemoveStakeBalance()
+		stateObject.RemoveStakeBalance(amount)
 	}
 }
 
