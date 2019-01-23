@@ -1,6 +1,7 @@
 package brtapi
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"context"
 	"math/big"
 
@@ -21,6 +22,8 @@ type Backend interface {
 
 	ChainConfig() *params.ChainConfig
 	CurrentBlock() *types.Block
+
+	StateAndHeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (*state.StateDB, *types.Header, error)
 }
 
 //GetAPIs get apis of berith serivce

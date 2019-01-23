@@ -1,6 +1,7 @@
 package brtapi
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"context"
 	"errors"
@@ -200,4 +201,12 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 		return common.Hash{}, err
 	}
 	return submitTransaction(ctx, s.backend, signed)
+}
+
+func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
+	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return (*hexutil.Big)(state.GetStakeBalance(address)), state.Error()
 }
