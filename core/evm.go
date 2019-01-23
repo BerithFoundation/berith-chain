@@ -96,12 +96,15 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, 
 		if staking {
 			//start staking
 			db.SubBalance(sender, amount)
-			db.SetStaking(recipient, amount)
+
+			bal := db.GetStakeBalance(recipient)
+			sum := bal.Add(bal, amount)
+			db.SetStaking(recipient, sum)
 
 		} else {
 			//stop staking
 			//remove staking balance
-			db.RemoveStakeBalance(sender)
+			db.RemoveStakeBalance(sender, amount)
 		}
 	} else {
 		db.SubBalance(sender, amount)
