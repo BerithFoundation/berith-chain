@@ -106,9 +106,24 @@ func (list *StakingMap) Set(address common.Address, x interface{}) error {
 	return errors.New("invalid value")
 }
 
-func (list *StakingMap) Print() {
-	fmt.Println(list)
+
+// UnSet address from the staking list
+func (list *StakingMap) Delete(address common.Address) error {
+    if _, ok := list.storage[address]; ok {
+        delete(list.storage, address)
+    }
+    return nil
 }
+
+
+// Print is
+func (list *StakingMap) Print() {
+    fmt.Println("==== Staking List ====")
+    for k, v := range list.storage {
+        fmt.Println("** [key : ",k," | value : ",v,"]")
+    }
+}
+
 
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	rlpVal := make([][]byte, 2)
@@ -187,5 +202,4 @@ func (list *StakingMap) Commit(db DataBase, blockNumber *big.Int, hash common.Ha
 	db.PushValue(hash.Hex()+":"+blockNumber.String(), rlpValue)
 
 	return nil
-
 }

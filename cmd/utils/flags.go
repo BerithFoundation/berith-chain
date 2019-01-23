@@ -1443,10 +1443,10 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		cache.TrieDirtyLimit = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheGCFlag.Name) / 100
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
-
+    
 	stakingDB := &stakingdb.StakingDB{}
-
-	stakingDB.CreateDB("stakingDB")
+    stakingDBPath := stack.ResolvePath("stakingDB")
+	stakingDB.CreateDB(stakingDBPath)
 
 	chain, err = core.NewBlockChain(stakingDB, chainDb, cache, config, engine, vmcfg, nil)
 	if err != nil {

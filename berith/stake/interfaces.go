@@ -14,6 +14,7 @@ const stakingListKey = "staking_list"
 type StakingList interface {
 	Get(address common.Address) (StakingInfo, error)
 	Set(address common.Address, x interface{}) error
+    Delete(address common.Address) error
 	EncodeRLP(w io.Writer) error
 	Commit(db DataBase, blockNumber *big.Int, blockHash common.Hash) error
 	NextMiner(address common.Address) (common.Address, error)
@@ -29,6 +30,7 @@ type StakingInfo interface {
 // message represents a message sent to a contract.
 type Transaction interface {
 	From() common.Address
+    To() common.Address
 	//FromFrontier() (common.Address, error)
 	Value() *big.Int
 	Staking() bool
