@@ -406,11 +406,16 @@ func (self *stateObject) StakeBalance() *big.Int {
 	return self.data.StakeBalance
 }
 
-func (c *stateObject) RemoveStakeBalance() {
-	amount := c.StakeBalance()
-	if amount.Sign() == 0 {
+func (c *stateObject) RemoveStakeBalance(amount *big.Int) {
+	stakeBalance := c.StakeBalance()
+	if stakeBalance.Sign() == 0 {
 		return
 	}
-	c.SetStaking(new(big.Int).Sub(amount, amount))
+
+	if stakeBalance.Sign() < amount.Sign() {
+		return
+	}
+
+	c.SetStaking(new(big.Int).Sub(stakeBalance, amount))
 	c.AddBalance(amount)
 }

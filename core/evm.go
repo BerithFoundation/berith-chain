@@ -101,7 +101,7 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, 
 		} else {
 			//stop staking
 			//remove staking balance
-			db.RemoveStakeBalance(sender)
+			db.RemoveStakeBalance(sender, amount)
 		}
 	} else {
 		db.SubBalance(sender, amount)
