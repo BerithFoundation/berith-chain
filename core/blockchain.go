@@ -957,7 +957,17 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
                     return NonStatTy, stkErr
                 }
             } else {
-                stakingList.Delete(old.Address())
+                oldStakingBalance := old.Value()
+                stakingAmount := msg.Value()
+                
+                if oldStakingBalance.Cmp(stakingAmount) <= 0 {
+                    log.Info("Try delete from staking list...","[",msg.From().String(),"]")
+                    stakingList.Delete(old.Address())
+                } else {
+                    oldStakingBalance = oldStakingBalance.Sub(oldStakingBalance, stakingAmount)
+                    log.Info("Modified staking balance","[",msg.From().String(),":",oldStakingBalance,"]")
+                    stakingList.Set(old.Address(), oldStakingBalance)
+                }
             }
 		}
 	}
