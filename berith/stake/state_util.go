@@ -120,7 +120,7 @@ func (list *StakingMap) Delete(address common.Address) error {
 func (list *StakingMap) Print() {
     fmt.Println("==== Staking List ====")
     for k, v := range list.storage {
-        fmt.Println("** [key : ",k," | value : ",v,"]")
+        fmt.Println("** [address :",k.String(),"| amount :",v,"]")
     }
 }
 
