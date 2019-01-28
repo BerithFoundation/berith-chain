@@ -412,7 +412,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 
 		signers := make(map[common.Address]struct{}, 0)
 
-		for i := 0; uint64(i) < c.config.Epoch; i++ {
+		for i := 0; i < stakingList.Len() && uint64(i) < c.config.Epoch; i++ {
 			miner, minerErr := stakingList.GetMiner(i)
 			if minerErr != nil {
 				return minerErr

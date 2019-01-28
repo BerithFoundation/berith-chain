@@ -20,6 +20,7 @@ type StakingList interface {
 	NextMiner(address common.Address) (common.Address, error)
 	PrevMiner(address common.Address) (common.Address, error)
 	GetMiner(index int) (common.Address, error)
+	Len() int
 }
 
 type StakingInfo interface {

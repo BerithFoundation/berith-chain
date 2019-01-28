@@ -33,6 +33,10 @@ func (list *StakingMap) getAddressWithIndex(index int) (common.Address, error) {
 	return list.sortedList[index], nil
 }
 
+func (list *StakingMap) Len() int {
+	return len(list.storage)
+}
+
 func (list *StakingMap) getIndexWithAddress(address common.Address) (int, error) {
 	for i, value := range list.sortedList {
 		if bytes.Compare(value.Bytes(), address.Bytes()) == 0 {
