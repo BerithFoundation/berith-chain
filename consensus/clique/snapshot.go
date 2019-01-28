@@ -19,6 +19,7 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"sort"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -197,6 +198,8 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	// Iterate through the headers and create a new snapshot
 	snap := s.copy()
 
+	fmt.Println("== Voting Start [ Number : ", s.Number, " ] ==")
+
 	for _, header := range headers {
 		// Remove any votes on checkpoint blocks
 		number := header.Number.Uint64()
@@ -210,6 +213,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		}
 		// Resolve the authorization key and check against signers
 		signer, err := ecrecover(header, s.sigcache)
+
+		fmt.Println("numer : ", number, " signer : ", signer.Hex(), " coinbase : ", header.Coinbase.Hex())
+
 		if err != nil {
 			return nil, err
 		}
@@ -253,38 +259,39 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			})
 		}
 		// If the vote passed, update the list of signers
-		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
-			if tally.Authorize {
-				snap.Signers[header.Coinbase] = struct{}{}
-			} else {
-				delete(snap.Signers, header.Coinbase)
+		// if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
+		// 	if tally.Authorize {
+		// 		snap.Signers[header.Coinbase] = struct{}{}
+		// 	} else {
+		// 		delete(snap.Signers, header.Coinbase)
 
-				// Signer list shrunk, delete any leftover recent caches
-				if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
-					delete(snap.Recents, number-limit)
-				}
-				// Discard any previous votes the deauthorized signer cast
-				for i := 0; i < len(snap.Votes); i++ {
-					if snap.Votes[i].Signer == header.Coinbase {
-						// Uncast the vote from the cached tally
-						snap.uncast(snap.Votes[i].Address, snap.Votes[i].Authorize)
+		// 		// Signer list shrunk, delete any leftover recent caches
+		// 		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
+		// 			delete(snap.Recents, number-limit)
+		// 		}
+		// 		// Discard any previous votes the deauthorized signer cast
+		// 		for i := 0; i < len(snap.Votes); i++ {
+		// 			if snap.Votes[i].Signer == header.Coinbase {
+		// 				// Uncast the vote from the cached tally
+		// 				snap.uncast(snap.Votes[i].Address, snap.Votes[i].Authorize)
 
-						// Uncast the vote from the chronological list
-						snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 				// Uncast the vote from the chronological list
+		// 				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
 
-						i--
-					}
-				}
-			}
-			// Discard any previous votes around the just changed account
-			for i := 0; i < len(snap.Votes); i++ {
-				if snap.Votes[i].Address == header.Coinbase {
-					snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-					i--
-				}
-			}
-			delete(snap.Tally, header.Coinbase)
-		}
+		// 				i--
+		// 			}
+		// 		}
+		// 	}
+		// 	// Discard any previous votes around the just changed account
+		// 	for i := 0; i < len(snap.Votes); i++ {
+		// 		if snap.Votes[i].Address == header.Coinbase {
+		// 			snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 			i--
+		// 		}
+		// 	}
+		// 	delete(snap.Tally, header.Coinbase)
+		// }
+
 	}
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()

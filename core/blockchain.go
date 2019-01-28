@@ -938,27 +938,27 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	if stkErr != nil {
 		return NonStatTy, stkErr
 	}
-
-    stakingList.Print()
+	fmt.Println("== Write Block [", block.Hash().Hex(), "]==")
+	//stakingList.Print()
 	for _, tx := range block.Transactions() {
 		msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
-        
-        if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
 
-            old, getErr := stakingList.Get(msg.From())
-            if getErr != nil {
-                return NonStatTy, getErr
-            }
-            if msg.Staking() {
-                if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
-                    return NonStatTy, setErr
-                }
-                if stkErr != nil {
-                    return NonStatTy, stkErr
-                }
-            } else {
-                stakingList.Delete(old.Address())
-            }
+		if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
+
+			old, getErr := stakingList.Get(msg.From())
+			if getErr != nil {
+				return NonStatTy, getErr
+			}
+			if msg.Staking() {
+				if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
+					return NonStatTy, setErr
+				}
+				if stkErr != nil {
+					return NonStatTy, stkErr
+				}
+			} else {
+				stakingList.Delete(old.Address())
+			}
 		}
 	}
 
@@ -1171,11 +1171,11 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 	block, err := it.next()
 	switch {
-        // First block is pruned, insert as sidechain and reorg only if TD grows enough
+	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(it)
 
-        // First block is future, shove it (and all children) to the future queue (unknown ancestor)
+	// First block is future, shove it (and all children) to the future queue (unknown ancestor)
 	case err == consensus.ErrFutureBlock || (err == consensus.ErrUnknownAncestor && bc.futureBlocks.Contains(it.first().ParentHash())):
 		for block != nil && (it.index == 0 || err == consensus.ErrUnknownAncestor) {
 			if err := bc.addFutureBlock(block); err != nil {
@@ -1189,10 +1189,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		// If there are any still remaining, mark as ignored
 		return it.index, events, coalescedLogs, err
 
-        // First block (and state) is known
-        //   1. We did a roll-back, and should now do a re-import
-        //   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
-        // 	    from the canonical chain, which has not been verified.
+		// First block (and state) is known
+		//   1. We did a roll-back, and should now do a re-import
+		//   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
+		// 	    from the canonical chain, which has not been verified.
 	case err == ErrKnownBlock:
 		// Skip all known blocks that behind us
 		current := bc.CurrentBlock().NumberU64()
@@ -1203,7 +1203,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		}
 		// Falls through to the block import
 
-        // Some other error occurred, abort
+		// Some other error occurred, abort
 	case err != nil:
 		stats.ignored += len(it.chain)
 		bc.reportBlock(block, nil, err)

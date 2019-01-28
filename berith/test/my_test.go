@@ -84,3 +84,10 @@ func Test6(t *testing.T) {
 type typ5 struct {
 	storage map[string]*big.Int
 }
+
+func TestStr(t *testing.T) {
+
+	var str string
+	t.Log("str : \"", str, "\"")
+
+}
