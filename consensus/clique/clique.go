@@ -389,6 +389,14 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		}
 
 		max := 0
+
+		test := snap.Votes
+		fmt.Println("========================[Votes]============================")
+		for _, value := range test {
+			fmt.Println(value.Address.Hex(), " : ", value.Signer.Hex())
+		}
+		fmt.Println("===========================================================")
+
 		voteResult := common.Address{}
 		for key, tally := range snap.Tally {
 			if max < tally.Votes {
@@ -396,8 +404,8 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			}
 		}
 		hash := common.BytesToAddress(rlpVal)
-		fmt.Println("=========[remote : ", hash.Hex(), "]==============")
-		fmt.Println("=========[voteRS : ", voteResult.Hex(), "]==============")
+		//fmt.Println("=========[remote : ", hash.Hex(), "]==============")
+		//fmt.Println("=========[voteRS : ", voteResult.Hex(), "]==============")
 		if !bytes.Equal(hash[:], voteResult[:]) {
 			return errors.New("invalid staking list")
 		}
