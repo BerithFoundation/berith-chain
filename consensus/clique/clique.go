@@ -395,8 +395,10 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 				max, voteResult = tally.Votes, key
 			}
 		}
-
-		if hash := common.BytesToAddress(rlpVal); !bytes.Equal(hash[:], voteResult[:]) {
+		hash := common.BytesToAddress(rlpVal)
+		fmt.Println("=========[remote : ", hash.Hex(), "]==============")
+		fmt.Println("=========[voteRS : ", voteResult.Hex(), "]==============")
+		if !bytes.Equal(hash[:], voteResult[:]) {
 			return errors.New("invalid staking list")
 		}
 
