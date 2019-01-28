@@ -203,10 +203,10 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	for _, header := range headers {
 		// Remove any votes on checkpoint blocks
 		number := header.Number.Uint64()
-		if number%s.config.Epoch == 0 {
-			snap.Votes = nil
-			snap.Tally = make(map[common.Address]Tally)
-		}
+		// if number%s.config.Epoch == 0 {
+		// 	snap.Votes = nil
+		// 	snap.Tally = make(map[common.Address]Tally)
+		// }
 		// Delete the oldest signer from the recent list to allow it signing again
 		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
 			delete(snap.Recents, number-limit)
@@ -241,21 +241,21 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 		}
 		// Tally up the new vote from the signer
-		var authorize bool
-		switch {
-		case bytes.Equal(header.Nonce[:], nonceAuthVote):
-			authorize = true
-		case bytes.Equal(header.Nonce[:], nonceDropVote):
-			authorize = false
-		default:
-			return nil, errInvalidVote
-		}
-		if snap.cast(header.Coinbase, authorize) {
+		// var authorize bool
+		// switch {
+		// case bytes.Equal(header.Nonce[:], nonceAuthVote):
+		// 	authorize = true
+		// case bytes.Equal(header.Nonce[:], nonceDropVote):
+		// 	authorize = false
+		// default:
+		// 	return nil, errInvalidVote
+		// }
+		if snap.cast(header.Coinbase, true) {
 			snap.Votes = append(snap.Votes, &Vote{
 				Signer:    signer,
 				Block:     number,
 				Address:   header.Coinbase,
-				Authorize: authorize,
+				Authorize: true,
 			})
 		}
 		// If the vote passed, update the list of signers

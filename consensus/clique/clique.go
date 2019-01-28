@@ -421,6 +421,8 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		}
 		if len(signers) > 0 {
 			snap.Signers = signers
+			snap.Votes = nil
+			snap.Tally = make(map[common.Address]Tally)
 		}
 
 		// signers := make([]byte, len(snap.Signers)*common.AddressLength)
