@@ -600,9 +600,6 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	header.Nonce = parent.Nonce
-	if number%c.config.Epoch == 0 {
-		header.Nonce = types.EncodeNonce(number)
-	}
 
 	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 	if target == nil {
@@ -648,6 +645,10 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	//}
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
+
+	if number%c.config.Epoch == 0 {
+		header.Nonce = types.EncodeNonce(number)
+	}
 
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
