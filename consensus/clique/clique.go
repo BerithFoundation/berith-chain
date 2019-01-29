@@ -600,6 +600,9 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	header.Nonce = parent.Nonce
+	if number%c.config.Epoch == 0 {
+		header.Nonce = types.EncodeNonce(number)
+	}
 
 	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 	if target == nil {
@@ -620,29 +623,29 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 
 	header.Coinbase = common.BytesToAddress(rlpVal)
 
-	if number%c.config.Epoch != 0 {
-		//c.lock.RLock()
+	//if number%c.config.Epoch != 0 {
+	//c.lock.RLock()
 
-		//header.Nonce = types.EncodeNonce(header.Number.Uint64())
+	//header.Nonce = types.EncodeNonce(header.Number.Uint64())
 
-		// // Gather all the proposals that make sense voting on
-		// addresses := make([]common.Address, 0, len(c.proposals))
-		// for address, authorize := range c.proposals {
-		// 	if snap.validVote(address, authorize) {
-		// 		addresses = append(addresses, address)
-		// 	}
-		// }
-		// // If there's pending proposals, cast a vote on them
-		// if len(addresses) > 0 {
-		// 	header.Coinbase = addresses[rand.Intn(len(addresses))]
-		// 	if c.proposals[header.Coinbase] {
-		// 		copy(header.Nonce[:], nonceAuthVote)
-		// 	} else {
-		// 		copy(header.Nonce[:], nonceDropVote)
-		// 	}
-		// }
-		// c.lock.RUnlock()
-	}
+	// // Gather all the proposals that make sense voting on
+	// addresses := make([]common.Address, 0, len(c.proposals))
+	// for address, authorize := range c.proposals {
+	// 	if snap.validVote(address, authorize) {
+	// 		addresses = append(addresses, address)
+	// 	}
+	// }
+	// // If there's pending proposals, cast a vote on them
+	// if len(addresses) > 0 {
+	// 	header.Coinbase = addresses[rand.Intn(len(addresses))]
+	// 	if c.proposals[header.Coinbase] {
+	// 		copy(header.Nonce[:], nonceAuthVote)
+	// 	} else {
+	// 		copy(header.Nonce[:], nonceDropVote)
+	// 	}
+	// }
+	// c.lock.RUnlock()
+	//}
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
 
