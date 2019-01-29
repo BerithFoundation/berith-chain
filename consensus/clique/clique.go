@@ -412,6 +412,9 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		}
 
 		fmt.Println("========================[Signers]============================")
+		fmt.Println("nonce : ", header.Nonce.Uint64())
+		fmt.Println("stakingList.Len() : ", stakingList.Len())
+		stakingList.Print()
 		for key, value := range signers {
 			fmt.Println(key.Hex(), value)
 		}
