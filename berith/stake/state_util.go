@@ -122,7 +122,7 @@ func (list *StakingMap) Delete(address common.Address) error {
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
 	for k, v := range list.storage {
-		fmt.Println("** [key : ", k, " | value : ", v, "]")
+		fmt.Println("** [key : ", k.Hex(), " | value : ", v.String(), "]")
 	}
 }
 
@@ -137,7 +137,6 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 //NewStakingList get staking list to trie
 func NewStakingMap(db DataBase, blockNumber *big.Int, hash common.Hash) (*StakingMap, error) {
 	if blockNumber.Cmp(big.NewInt(0)) <= 0 {
-		fmt.Println("low number parent block ========>>>>>>>", blockNumber.String())
 		return &StakingMap{
 			storage:    make(map[common.Address]*big.Int, 0),
 			sortedList: make([]common.Address, 0),
@@ -199,7 +198,6 @@ func (list *StakingMap) Commit(db DataBase, blockNumber *big.Int, hash common.Ha
 	if err != nil {
 		return err
 	}
-	fmt.Println("COMMIT ======>>>>> ", hash.Hex()+":"+blockNumber.String(), rlpValue)
 	db.PushValue(hash.Hex()+":"+blockNumber.String(), rlpValue)
 
 	return nil

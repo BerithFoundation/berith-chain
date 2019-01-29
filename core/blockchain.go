@@ -938,8 +938,8 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	if stkErr != nil {
 		return NonStatTy, stkErr
 	}
-	fmt.Println("== Write Block [", block.Hash().Hex(), "]==")
-	//stakingList.Print()
+
+	stakingList.Print()
 	for _, tx := range block.Transactions() {
 		msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
 

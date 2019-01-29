@@ -390,13 +390,6 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 
 		max := 0
 
-		test := snap.Votes
-		fmt.Println("========================[Votes]============================")
-		for _, value := range test {
-			fmt.Println(value.Address.Hex(), " : ", value.Signer.Hex())
-		}
-		fmt.Println("===========================================================")
-
 		voteResult := common.Address{}
 		for key, tally := range snap.Tally {
 			if max < tally.Votes {
@@ -404,8 +397,6 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			}
 		}
 		hash := common.BytesToAddress(rlpVal)
-		//fmt.Println("=========[remote : ", hash.Hex(), "]==============")
-		//fmt.Println("=========[voteRS : ", voteResult.Hex(), "]==============")
 		if !bytes.Equal(hash[:], voteResult[:]) {
 			return errors.New("invalid staking list")
 		}
@@ -419,6 +410,13 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			}
 			signers[miner] = struct{}{}
 		}
+
+		fmt.Println("========================[Signers]============================")
+		for key, value := range signers {
+			fmt.Println(key.Hex(), value)
+		}
+		fmt.Println("===========================================================")
+
 		if len(signers) > 0 {
 			snap.Signers = signers
 			snap.Votes = nil
@@ -579,7 +577,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
 func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) error {
-	fmt.Println("Block Prepare [number : ", header.Number.String(), "]")
+
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -597,14 +595,12 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	header.Nonce = parent.Nonce
-	fmt.Println(header.Nonce.Uint64())
 
 	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 	if target == nil {
 		return consensus.ErrUnknownAncestor
 	}
 
-	fmt.Println("CALL ===>>>", target.Hash().Hex()+":"+target.Number.String())
 	stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
 
 	if listErr != nil {
