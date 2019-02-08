@@ -288,6 +288,9 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 		// 	}
 		// 	delete(snap.Tally, header.Coinbase)
 		// }
+
+		//[Berith] 투표내용을 블록넘버가 Epoch으로 나누어 떨어지는 경우에, 가장 많은 stakingList의 해쉬가 선택되고 singers를 로컬의 stakingList의
+		//스테이킹 총량순으로 Epoch개 만큼 선정하도록 수정
 		if number%s.config.Epoch == 0 {
 
 			target := chain.GetHeaderByNumber(header.Number.Uint64() - 1)

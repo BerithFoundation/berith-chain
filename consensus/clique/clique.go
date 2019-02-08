@@ -372,6 +372,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 	}
 	// If the block is a checkpoint block, verify the signer list
 
+	//[Berith] 스냅샷의 투표결과와 로컬의 stakingList의 해쉬가 같지 않으면 해당블록을 받지 않음(해당 정책에 대한 논의 필요)
 	if number%c.config.Epoch == 0 && number != 0 {
 
 		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
@@ -575,8 +576,12 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		return consensus.ErrUnknownAncestor
 	}
 
+	//[BERITH] stakingList를 확인할 블록번호를 논스로 지정하여 전파
+	//블록넘버가 Epoch으로 나누어 떨어지지 않는경우 부모의 논스를 다시 전파
 	header.Nonce = parent.Nonce
 
+	//[BERITH] 부모의 논스에 저장한 블록번호를 가진 블록에서 stakingList를 얻어내어
+	//rlp 인코딩 한 뒤, 그 해쉬값을 address형식으로 저장하여 coinbase로 지정한다.
 	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 	if target == nil {
 		return consensus.ErrUnknownAncestor
@@ -594,6 +599,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		return rlpErr
 	}
 
+	//[BERITH] coinbase로 보내진 stakingList의 해쉬는 stakingList의 유효성 검사에 사용됨
 	header.Coinbase = common.BytesToAddress(rlpVal)
 
 	//if number%c.config.Epoch != 0 {
@@ -622,6 +628,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
 
+	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 noncd값을 현재 블록의 번호로 변경한다.
 	if number%c.config.Epoch == 0 {
 		header.Nonce = types.EncodeNonce(number)
 	}
