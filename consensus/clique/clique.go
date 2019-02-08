@@ -20,7 +20,6 @@ package clique
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -411,17 +410,6 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			}
 			signers[miner] = struct{}{}
 		}
-
-		fmt.Println("========================[Signers]============================")
-		fmt.Println("nonce : ", header.Nonce.Uint64())
-		fmt.Println("blockHash : ", target.Hash().Hex())
-		fmt.Println("blockNumber : ", target.Number.String())
-		fmt.Println("stakingList.Len() : ", stakingList.Len())
-		stakingList.Print()
-		for key, value := range signers {
-			fmt.Println(key.Hex(), value)
-		}
-		fmt.Println("===========================================================")
 
 		if len(signers) > 0 {
 			snap.Signers = signers

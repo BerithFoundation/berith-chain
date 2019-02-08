@@ -19,7 +19,6 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"sort"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -198,8 +197,6 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	// Iterate through the headers and create a new snapshot
 	snap := s.copy()
 
-	fmt.Println("== Voting Start [ Number : ", s.Number, " ] ==")
-
 	for _, header := range headers {
 		// Remove any votes on checkpoint blocks
 		number := header.Number.Uint64()
@@ -213,8 +210,6 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		}
 		// Resolve the authorization key and check against signers
 		signer, err := ecrecover(header, s.sigcache)
-
-		fmt.Println("numer : ", number, " signer : ", signer.Hex(), " coinbase : ", header.Coinbase.Hex())
 
 		if err != nil {
 			return nil, err
@@ -231,7 +226,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 
 		// Header authorized, discard any previous votes from the signer
 		for i, vote := range snap.Votes {
-			if vote.Signer == signer && vote.Address == header.Coinbase {
+			if vote.Signer == signer {
 				// Uncast the vote from the cached tally
 				snap.uncast(vote.Address, vote.Authorize)
 
