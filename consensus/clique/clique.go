@@ -376,55 +376,41 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 
 		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
 
-		stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
+		if target != nil {
 
-		if listErr != nil {
-			return listErr
-		}
+			stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
 
-		rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
+			if listErr == nil && stakingList != nil {
 
-		if rlpErr != nil {
-			return rlpErr
-		}
+				rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
 
-		max := 0
+				if rlpErr != nil {
+					return rlpErr
+				}
 
-		voteResult := common.Address{}
-		for key, tally := range snap.Tally {
-			if max < tally.Votes {
-				max, voteResult = tally.Votes, key
+				max := 0
+
+				voteResult := common.Address{}
+				for key, tally := range snap.Tally {
+					if max < tally.Votes {
+						max, voteResult = tally.Votes, key
+					}
+				}
+				hash := common.BytesToAddress(rlpVal)
+				if !bytes.Equal(hash[:], voteResult[:]) {
+					return errors.New("invalid staking list")
+				}
+
+				// signers := make([]byte, len(snap.Signers)*common.AddressLength)
+				// for i, signer := range snap.signers() {
+				// 	copy(signers[i*common.AddressLength:], signer[:])
+				// }
+				// extraSuffix := len(header.Extra) - extraSeal
+				// if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
+				// 	return errMismatchingCheckpointSigners
+				// }
 			}
 		}
-		hash := common.BytesToAddress(rlpVal)
-		if !bytes.Equal(hash[:], voteResult[:]) {
-			return errors.New("invalid staking list")
-		}
-
-		signers := make(map[common.Address]struct{}, 0)
-
-		for i := 0; i < stakingList.Len() && uint64(i) < c.config.Epoch; i++ {
-			miner, minerErr := stakingList.GetMiner(i)
-			if minerErr != nil {
-				return minerErr
-			}
-			signers[miner] = struct{}{}
-		}
-
-		if len(signers) > 0 {
-			snap.Signers = signers
-			snap.Votes = nil
-			snap.Tally = make(map[common.Address]Tally)
-		}
-
-		// signers := make([]byte, len(snap.Signers)*common.AddressLength)
-		// for i, signer := range snap.signers() {
-		// 	copy(signers[i*common.AddressLength:], signer[:])
-		// }
-		// extraSuffix := len(header.Extra) - extraSeal
-		// if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
-		// 	return errMismatchingCheckpointSigners
-		// }
 	}
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
@@ -492,7 +478,8 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 	for i := 0; i < len(headers)/2; i++ {
 		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
 	}
-	snap, err := snap.apply(headers)
+
+	snap, err := snap.apply(chain, c.stakingDB, headers)
 	if err != nil {
 		return nil, err
 	}

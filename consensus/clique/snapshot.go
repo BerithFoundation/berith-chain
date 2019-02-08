@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 	"sort"
 
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -180,7 +182,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, headers []*types.Header) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -253,7 +255,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				Authorize: true,
 			})
 		}
-		// If the vote passed, update the list of signers
+		//If the vote passed, update the list of signers
 		// if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
 		// 	if tally.Authorize {
 		// 		snap.Signers[header.Coinbase] = struct{}{}
@@ -286,8 +288,37 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		// 	}
 		// 	delete(snap.Tally, header.Coinbase)
 		// }
+		if number%s.config.Epoch == 0 {
 
+			target := chain.GetHeaderByNumber(header.Number.Uint64() - 1)
+
+			if target != nil {
+
+				stakingList, listErr := stake.NewStakingMap(stakingDB, target.Number, target.Hash())
+
+				if listErr == nil && stakingList != nil {
+
+					signers := make(map[common.Address]struct{}, 0)
+
+					for i := 0; i < stakingList.Len() && uint64(i) < s.config.Epoch; i++ {
+						miner, minerErr := stakingList.GetMiner(i)
+						if minerErr != nil {
+							return nil, minerErr
+						}
+						signers[miner] = struct{}{}
+					}
+
+					snap.Votes = nil
+					snap.Tally = make(map[common.Address]Tally)
+
+					if len(signers) > 0 {
+						snap.Signers = signers
+					}
+				}
+			}
+		}
 	}
+
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 
