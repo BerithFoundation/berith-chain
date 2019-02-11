@@ -18,6 +18,7 @@
 package les
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"fmt"
 	"sync"
 	"time"
@@ -91,6 +92,12 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 	peers := newPeerSet()
 	quitSync := make(chan struct{})
 
+	stakingDB := &stakingdb.StakingDB{}
+	stakingDBPath := ctx.ResolvePath("stakingDB")
+	if stkErr := stakingDB.CreateDB(stakingDBPath); stkErr != nil {
+		return nil, stkErr
+	}
+
 	leth := &LightEthereum{
 		lesCommons: lesCommons{
 			chainDb: chainDb,
@@ -102,7 +109,7 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 		peers:          peers,
 		reqDist:        newRequestDistributor(peers, quitSync),
 		accountManager: ctx.AccountManager,
-		engine:         eth.CreateConsensusEngine(ctx, chainConfig, &config.Ethash, nil, false, chainDb),
+		engine:         eth.CreateConsensusEngine(ctx, chainConfig, &config.Ethash, nil, false, chainDb, stakingDB),
 		shutdownChan:   make(chan bool),
 		networkId:      config.NetworkId,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),

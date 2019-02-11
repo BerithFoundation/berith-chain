@@ -166,8 +166,8 @@ type ChainConfig struct {
 	Bsrr   *BSRRConfig   `json:"bsrr,omitempty"`
 }
 type BSRRConfig struct {
-	Round           uint64 `json:"round"`
-	Count_Candidate uint64 `json:"Candidate_num"`
+	Period uint64 `json:"period"` // Number of seconds between blocks to enforce
+	Epoch  uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
 }
 
 func (b *BSRRConfig) String() string {
