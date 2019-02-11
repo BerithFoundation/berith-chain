@@ -27,7 +27,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/elastic/gosigar"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
@@ -38,7 +37,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/elastic/gosigar"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 const (

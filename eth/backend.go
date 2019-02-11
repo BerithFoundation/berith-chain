@@ -128,11 +128,16 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
-    
 	stakingDB := &stakingdb.StakingDB{}
-    stakingDBPath := ctx.ResolvePath("stakingDB")
+	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath); stkErr != nil {
 		return nil, stkErr
+	}
+
+	engine := CreateConsensusEngine(ctx, chainConfig, &config.Ethash, config.MinerNotify, config.MinerNoverify, chainDb)
+
+	if chainConfig.Clique != nil {
+		engine = clique.NewCliqueWithStakingDB(stakingDB, chainConfig.Clique, chainDb)
 	}
 
 	eth := &Ethereum{
@@ -141,7 +146,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		chainConfig:    chainConfig,
 		eventMux:       ctx.EventMux,
 		accountManager: ctx.AccountManager,
-		engine:         CreateConsensusEngine(ctx, chainConfig, &config.Ethash, config.MinerNotify, config.MinerNoverify, chainDb),
+		engine:         engine,
 		shutdownChan:   make(chan bool),
 		networkID:      config.NetworkId,
 		gasPrice:       config.MinerGasPrice,
@@ -153,7 +158,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	log.Info("Initialising Ethereum protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 
-	if chainConfig.Bsrr != nil{
+	if chainConfig.Bsrr != nil {
 		//Bsrr 인터페이스 작성후 변경
 		//eth.engine = berith.New()
 
@@ -239,12 +244,12 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Data
 // CreateConsensusEngine creates the required type of consensus engine instance for an Ethereum service
 func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db ethdb.Database) consensus.Engine {
 	// If proof-of-authority is requested, set it up
-	if chainConfig.Bsrr != nil{
+	if chainConfig.Bsrr != nil {
 		//interface 만들고 수정
 		//return berith.New(chainConfig.Bsrr,db)
 		return nil
 
-	}else if chainConfig.Clique != nil {
+	} else if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
 	}
 	// Otherwise assume proof-of-work

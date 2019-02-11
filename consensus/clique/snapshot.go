@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 	"sort"
 
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -180,7 +182,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, headers []*types.Header) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -200,16 +202,17 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	for _, header := range headers {
 		// Remove any votes on checkpoint blocks
 		number := header.Number.Uint64()
-		if number%s.config.Epoch == 0 {
-			snap.Votes = nil
-			snap.Tally = make(map[common.Address]Tally)
-		}
+		// if number%s.config.Epoch == 0 {
+		// 	snap.Votes = nil
+		// 	snap.Tally = make(map[common.Address]Tally)
+		// }
 		// Delete the oldest signer from the recent list to allow it signing again
 		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
 			delete(snap.Recents, number-limit)
 		}
 		// Resolve the authorization key and check against signers
 		signer, err := ecrecover(header, s.sigcache)
+
 		if err != nil {
 			return nil, err
 		}
@@ -225,7 +228,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 
 		// Header authorized, discard any previous votes from the signer
 		for i, vote := range snap.Votes {
-			if vote.Signer == signer && vote.Address == header.Coinbase {
+			if vote.Signer == signer {
 				// Uncast the vote from the cached tally
 				snap.uncast(vote.Address, vote.Authorize)
 
@@ -235,57 +238,90 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 		}
 		// Tally up the new vote from the signer
-		var authorize bool
-		switch {
-		case bytes.Equal(header.Nonce[:], nonceAuthVote):
-			authorize = true
-		case bytes.Equal(header.Nonce[:], nonceDropVote):
-			authorize = false
-		default:
-			return nil, errInvalidVote
-		}
-		if snap.cast(header.Coinbase, authorize) {
+		// var authorize bool
+		// switch {
+		// case bytes.Equal(header.Nonce[:], nonceAuthVote):
+		// 	authorize = true
+		// case bytes.Equal(header.Nonce[:], nonceDropVote):
+		// 	authorize = false
+		// default:
+		// 	return nil, errInvalidVote
+		// }
+		if snap.cast(header.Coinbase, true) {
 			snap.Votes = append(snap.Votes, &Vote{
 				Signer:    signer,
 				Block:     number,
 				Address:   header.Coinbase,
-				Authorize: authorize,
+				Authorize: true,
 			})
 		}
-		// If the vote passed, update the list of signers
-		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
-			if tally.Authorize {
-				snap.Signers[header.Coinbase] = struct{}{}
-			} else {
-				delete(snap.Signers, header.Coinbase)
+		//If the vote passed, update the list of signers
+		// if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
+		// 	if tally.Authorize {
+		// 		snap.Signers[header.Coinbase] = struct{}{}
+		// 	} else {
+		// 		delete(snap.Signers, header.Coinbase)
 
-				// Signer list shrunk, delete any leftover recent caches
-				if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
-					delete(snap.Recents, number-limit)
-				}
-				// Discard any previous votes the deauthorized signer cast
-				for i := 0; i < len(snap.Votes); i++ {
-					if snap.Votes[i].Signer == header.Coinbase {
-						// Uncast the vote from the cached tally
-						snap.uncast(snap.Votes[i].Address, snap.Votes[i].Authorize)
+		// 		// Signer list shrunk, delete any leftover recent caches
+		// 		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
+		// 			delete(snap.Recents, number-limit)
+		// 		}
+		// 		// Discard any previous votes the deauthorized signer cast
+		// 		for i := 0; i < len(snap.Votes); i++ {
+		// 			if snap.Votes[i].Signer == header.Coinbase {
+		// 				// Uncast the vote from the cached tally
+		// 				snap.uncast(snap.Votes[i].Address, snap.Votes[i].Authorize)
 
-						// Uncast the vote from the chronological list
-						snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 				// Uncast the vote from the chronological list
+		// 				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
 
-						i--
+		// 				i--
+		// 			}
+		// 		}
+		// 	}
+		// 	// Discard any previous votes around the just changed account
+		// 	for i := 0; i < len(snap.Votes); i++ {
+		// 		if snap.Votes[i].Address == header.Coinbase {
+		// 			snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 			i--
+		// 		}
+		// 	}
+		// 	delete(snap.Tally, header.Coinbase)
+		// }
+
+		//[Berith] 투표내용을 블록넘버가 Epoch으로 나누어 떨어지는 경우에, 가장 많은 stakingList의 해쉬가 선택되고 singers를 로컬의 stakingList의
+		//스테이킹 총량순으로 Epoch개 만큼 선정하도록 수정
+		if number%s.config.Epoch == 0 {
+
+			target := chain.GetHeaderByNumber(header.Number.Uint64() - 1)
+
+			if target != nil {
+
+				stakingList, listErr := stake.NewStakingMap(stakingDB, target.Number, target.Hash())
+
+				if listErr == nil && stakingList != nil {
+
+					signers := make(map[common.Address]struct{}, 0)
+
+					for i := 0; i < stakingList.Len() && uint64(i) < s.config.Epoch; i++ {
+						miner, minerErr := stakingList.GetMiner(i)
+						if minerErr != nil {
+							return nil, minerErr
+						}
+						signers[miner] = struct{}{}
+					}
+
+					snap.Votes = nil
+					snap.Tally = make(map[common.Address]Tally)
+
+					if len(signers) > 0 {
+						snap.Signers = signers
 					}
 				}
 			}
-			// Discard any previous votes around the just changed account
-			for i := 0; i < len(snap.Votes); i++ {
-				if snap.Votes[i].Address == header.Coinbase {
-					snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-					i--
-				}
-			}
-			delete(snap.Tally, header.Coinbase)
 		}
 	}
+
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 

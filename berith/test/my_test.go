@@ -5,12 +5,14 @@ import (
 	"math/big"
 	"testing"
 
+	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 )
 
-func Test5(t *testing.T) {
+func Test1(t *testing.T) {
 	test := &typ5{
 		storage: make(map[string]*big.Int, 0),
 	}
@@ -39,7 +41,29 @@ func Test5(t *testing.T) {
 
 }
 
-func Test6(t *testing.T) {
+func Test2(t *testing.T) {
+	db := new(stakingdb.StakingDB)
+	db.CreateDB("/Users/swk/clique/geth/stakingDB")
+
+	stakingMap, err := stake.NewStakingMap(db, big.NewInt(15), common.HexToHash("0xf7bf2369f84d6886e1671cb25eb72089fb227b5865daf85a7258ad9976933285"))
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	stakingMap.Print()
+
+	rlpVal, rlpErr := rlp.EncodeToBytes(stakingMap)
+
+	if rlpErr != nil {
+		t.Error(err)
+	}
+
+	t.Log(common.BytesToAddress(rlpVal).Hex())
+
+}
+
+func Test3(t *testing.T) {
 	db := new(stakingdb.StakingDB)
 	db.CreateDB("testStakingDB")
 
@@ -83,4 +107,11 @@ func Test6(t *testing.T) {
 
 type typ5 struct {
 	storage map[string]*big.Int
+}
+
+func TestStr(t *testing.T) {
+
+	var str string
+	t.Log("str : \"", str, "\"")
+
 }

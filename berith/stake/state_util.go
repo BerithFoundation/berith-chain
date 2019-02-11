@@ -33,6 +33,10 @@ func (list *StakingMap) getAddressWithIndex(index int) (common.Address, error) {
 	return list.sortedList[index], nil
 }
 
+func (list *StakingMap) Len() int {
+	return len(list.storage)
+}
+
 func (list *StakingMap) getIndexWithAddress(address common.Address) (int, error) {
 	for i, value := range list.sortedList {
 		if bytes.Compare(value.Bytes(), address.Bytes()) == 0 {
@@ -106,24 +110,21 @@ func (list *StakingMap) Set(address common.Address, x interface{}) error {
 	return errors.New("invalid value")
 }
 
-
 // UnSet address from the staking list
 func (list *StakingMap) Delete(address common.Address) error {
-    if _, ok := list.storage[address]; ok {
-        delete(list.storage, address)
-    }
-    return nil
+	if _, ok := list.storage[address]; ok {
+		delete(list.storage, address)
+	}
+	return nil
 }
-
 
 // Print is
 func (list *StakingMap) Print() {
-    fmt.Println("==== Staking List ====")
-    for k, v := range list.storage {
-        fmt.Println("** [address :",k.String(),"| amount :",v,"]")
-    }
+	fmt.Println("==== Staking List ====")
+	for k, v := range list.storage {
+		fmt.Println("** [key : ", k.Hex(), " | value : ", v.String(), "]")
+	}
 }
-
 
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	rlpVal := make([][]byte, 2)
@@ -136,7 +137,6 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 //NewStakingList get staking list to trie
 func NewStakingMap(db DataBase, blockNumber *big.Int, hash common.Hash) (*StakingMap, error) {
 	if blockNumber.Cmp(big.NewInt(0)) <= 0 {
-		fmt.Println("low number parent block ========>>>>>>>", blockNumber.String())
 		return &StakingMap{
 			storage:    make(map[common.Address]*big.Int, 0),
 			sortedList: make([]common.Address, 0),
@@ -198,7 +198,6 @@ func (list *StakingMap) Commit(db DataBase, blockNumber *big.Int, hash common.Ha
 	if err != nil {
 		return err
 	}
-
 	db.PushValue(hash.Hex()+":"+blockNumber.String(), rlpValue)
 
 	return nil
