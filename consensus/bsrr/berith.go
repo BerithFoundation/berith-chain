@@ -35,8 +35,11 @@ const (
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
-// Clique proof-of-authority protocol constants.
 var (
+	FrontierBlockReward       = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
+	ByzantiumBlockReward      = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
+	ConstantinopleBlockReward = big.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
+
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
@@ -347,54 +350,6 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	if parent.Time.Uint64()+c.config.Period > header.Time.Uint64() {
 		return ErrInvalidTimestamp
 	}
-	// Retrieve the snapshot needed to verify this header and cache it
-	snap, err := c.snapshot(chain, number-1, header.ParentHash, parents)
-	if err != nil {
-		return err
-	}
-	// If the block is a checkpoint block, verify the signer list
-
-	//[Berith] 스냅샷의 투표결과와 로컬의 stakingList의 해쉬가 같지 않으면 해당블록을 받지 않음(해당 정책에 대한 논의 필요)
-	if number%c.config.Epoch == 0 && number != 0 {
-
-		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
-
-		if target != nil {
-
-			stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
-
-			if listErr == nil && stakingList != nil {
-
-				rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
-
-				if rlpErr != nil {
-					return rlpErr
-				}
-
-				max := 0
-
-				voteResult := common.Address{}
-				for key, tally := range snap.Tally {
-					if max < tally.Votes {
-						max, voteResult = tally.Votes, key
-					}
-				}
-				hash := common.BytesToAddress(rlpVal)
-				if !bytes.Equal(hash[:], voteResult[:]) {
-					return errors.New("invalid staking list")
-				}
-
-				// signers := make([]byte, len(snap.Signers)*common.AddressLength)
-				// for i, signer := range snap.signers() {
-				// 	copy(signers[i*common.AddressLength:], signer[:])
-				// }
-				// extraSuffix := len(header.Extra) - extraSeal
-				// if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
-				// 	return errMismatchingCheckpointSigners
-				// }
-			}
-		}
-	}
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
@@ -647,6 +602,9 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
+
+	accumulateRewards(chain.Config(), state, header, uncles)
+
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -765,6 +723,25 @@ func (c *BSRR) SealHash(header *types.Header) common.Hash {
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
 func (c *BSRR) Close() error {
 	return nil
+}
+
+
+var (
+	big8  = big.NewInt(8)
+	big32 = big.NewInt(32)
+)
+
+// AccumulateRewards credits the coinbase of the given block with the mining
+// reward. The total reward consists of the static block reward and rewards for
+// included uncles. The coinbase of each uncle block is also rewarded.
+func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	//[BERITH]갯수 제한 코드 필요
+
+	blockReward := FrontierBlockReward
+	
+	// Accumulate the rewards for the miner and any included uncles
+	reward := new(big.Int).Set(blockReward)
+	state.AddBalance(header.Coinbase, reward)
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
