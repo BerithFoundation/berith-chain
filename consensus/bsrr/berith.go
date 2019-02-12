@@ -498,7 +498,7 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error {
 
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
-	header.Coinbase = common.Address{}
+	//header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
 
 	number := header.Number.Uint64()
@@ -519,25 +519,26 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 
 	//[BERITH] 부모의 논스에 저장한 블록번호를 가진 블록에서 stakingList를 얻어내어
 	//rlp 인코딩 한 뒤, 그 해쉬값을 address형식으로 저장하여 coinbase로 지정한다.
-	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
-	if target == nil {
-		return consensus.ErrUnknownAncestor
-	}
+	//target := chain.GetHeaderByNumber(header.Nonce.Uint64())
+	//if target == nil {
+	//	return consensus.ErrUnknownAncestor
+	//}
 
-	stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
+	//stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
+	//
+	//if listErr != nil {
+	//	return listErr
+	//}
 
-	if listErr != nil {
-		return listErr
-	}
-
-	rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
-
-	if rlpErr != nil {
-		return rlpErr
-	}
+	//rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
+	//
+	//
+	//if rlpErr != nil {
+	//	return rlpErr
+	//}
 
 	//[BERITH] coinbase로 보내진 stakingList의 해쉬는 stakingList의 유효성 검사에 사용됨
-	header.Coinbase = common.BytesToAddress(rlpVal)
+	//header.Coinbase = common.BytesToAddress(rlpVal)
 
 	//if number%c.config.Epoch != 0 {
 	//c.lock.RLock()
@@ -736,7 +737,6 @@ var (
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	//[BERITH]갯수 제한 코드 필요
-
 	blockReward := FrontierBlockReward
 	
 	// Accumulate the rewards for the miner and any included uncles
