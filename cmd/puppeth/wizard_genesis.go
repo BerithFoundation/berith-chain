@@ -57,6 +57,7 @@ func (w *wizard) makeGenesis() {
 	fmt.Println("Which consensus engine to use? (default = clique)")
 	fmt.Println(" 1. Ethash - proof-of-work")
 	fmt.Println(" 2. Clique - proof-of-authority")
+	fmt.Println(" 3. Bsrr - proof-of-stake")
 
 	choice := w.read()
 	switch {
@@ -75,6 +76,44 @@ func (w *wizard) makeGenesis() {
 		fmt.Println()
 		fmt.Println("How many seconds should blocks take? (default = 15)")
 		genesis.Config.Clique.Period = uint64(w.readDefaultInt(15))
+
+		// We also need the initial list of signers
+		fmt.Println()
+		fmt.Println("Which accounts are allowed to seal? (mandatory at least one)")
+
+		var signers []common.Address
+		for {
+			if address := w.readAddress(); address != nil {
+				signers = append(signers, *address)
+				continue
+			}
+			if len(signers) > 0 {
+				break
+			}
+		}
+		// Sort the signers and embed into the extra-data section
+		for i := 0; i < len(signers); i++ {
+			for j := i + 1; j < len(signers); j++ {
+				if bytes.Compare(signers[i][:], signers[j][:]) > 0 {
+					signers[i], signers[j] = signers[j], signers[i]
+				}
+			}
+		}
+		genesis.ExtraData = make([]byte, 32+len(signers)*common.AddressLength+65)
+		for i, signer := range signers {
+			copy(genesis.ExtraData[32+i*common.AddressLength:], signer[:])
+		}
+	case choice == "3":
+		// In the case of clique, configure the consensus parameters
+		genesis.Difficulty = big.NewInt(1)
+		genesis.Config.Bsrr = &params.BSRRConfig{
+			Period: 60,
+			Epoch:  300,
+			Rewards:  new(big.Int).Mul(big.NewInt(50000000000), big.NewInt(1000000000000000000)),
+		}
+		fmt.Println()
+		fmt.Println("How many seconds should blocks take? (default = 15)")
+		genesis.Config.Bsrr.Period = uint64(w.readDefaultInt(15))
 
 		// We also need the initial list of signers
 		fmt.Println()
