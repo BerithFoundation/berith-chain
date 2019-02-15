@@ -27,7 +27,6 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 )
 
-
 const (
 	checkpointInterval = 1024 // Number of blocks after which to save the vote snapshot to the database
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
@@ -37,10 +36,8 @@ const (
 )
 
 var (
-	FrontierBlockReward       = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	TotalRewards      =   new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(5e+10) ) // Total reward
-
-
+	FrontierBlockReward = big.NewInt(5e+18)                                      // Block reward in wei for successfully mining a block
+	TotalRewards        = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(5e+10)) // Total reward
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -186,9 +183,9 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	return signer, nil
 }
 
-type BSRR struct{
+type BSRR struct {
 	config *params.BSRRConfig // Consensus engine configuration parameters
-	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
+	db     ethdb.Database     // Database to store and retrieve snapshot checkpoints
 
 	//[BERITH] stakingDB clique 구조체에 추가
 	stakingDB stake.DataBase //stakingList를 저장하는 DB
@@ -206,13 +203,12 @@ type BSRR struct{
 	fakeDiff bool // Skip difficulty verifications
 }
 
-func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
+func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 
 	conf := *config
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
 	}
-
 
 	if conf.Rewards != nil {
 		if conf.Rewards.Cmp(big.NewInt(0)) == 0 {
@@ -220,19 +216,16 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		}
 	}
 
-
-
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 
 	return &BSRR{
 		config:     &conf,
-		db: db,
+		db:         db,
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
 	}
-
 
 }
 
@@ -473,14 +466,16 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errRecentlySigned
-			}
-		}
-	}
+
+	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+	// for seen, recent := range snap.Recents {
+	// 	if recent == signer {
+	// 		// Signer is among recents, only fail if the current block doesn't shift it out
+	// 		if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
+	// 			return errRecentlySigned
+	// 		}
+	// 	}
+	// }
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
 	if !c.fakeDiff {
 		inturn := snap.inturn(header.Number.Uint64(), signer)
@@ -653,15 +648,17 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-				log.Info("Signed recently, must wait for others")
-				return nil
-			}
-		}
-	}
+
+	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+	// for seen, recent := range snap.Recents {
+	// 	if recent == signer {
+	// 		// Signer is among recents, only wait if the current block doesn't shift it out
+	// 		if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
+	// 			log.Info("Signed recently, must wait for others")
+	// 			return nil
+	// 		}
+	// 	}
+	// }
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
 	if header.Difficulty.Cmp(diffNoTurn) == 0 {
@@ -736,17 +733,15 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	//여기서는 남은 총 리워드에서 차감 (정책이 우선적으로 필요)
 
-
 	temp := config.Bsrr.Rewards.Sub(config.Bsrr.Rewards, blockReward)
 
-	fmt.Println("[TOTAL BRT] :: " , config.Bsrr.Rewards)
-	fmt.Println("[TOTAL BRT >> TEMP] :: " , temp)
+	fmt.Println("[TOTAL BRT] :: ", config.Bsrr.Rewards)
+	fmt.Println("[TOTAL BRT >> TEMP] :: ", temp)
 
-	
 	// Accumulate the rewards for the miner and any included uncles
 	//reward := new(big.Int).Set(blockReward)
 
-	fmt.Println("[REWORD BRT] :: " , blockReward)
+	fmt.Println("[REWORD BRT] :: ", blockReward)
 
 	//state.AddStakeBalance(header.Coinbase, reward)
 	state.AddBalance(header.Coinbase, blockReward)
