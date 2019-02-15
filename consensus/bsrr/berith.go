@@ -3,6 +3,7 @@ package bsrr
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -37,8 +38,9 @@ const (
 
 var (
 	FrontierBlockReward       = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	ByzantiumBlockReward      = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
-	ConstantinopleBlockReward = big.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
+	TotalRewards      =   new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(5e+10) ) // Total reward
+
+
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -211,6 +213,15 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		conf.Epoch = epochLength
 	}
 
+
+	if conf.Rewards != nil {
+		if conf.Rewards.Cmp(big.NewInt(0)) == 0 {
+			conf.Rewards = TotalRewards
+		}
+	}
+
+
+
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 
@@ -279,16 +290,6 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 	}
 	// Checkpoint blocks need to enforce zero beneficiary
 	checkpoint := (number % c.config.Epoch) == 0
-	// if checkpoint && header.Coinbase != (common.Address{}) {
-	// 	return errInvalidCheckpointBeneficiary
-	// }
-	// Nonces must be 0x00..0 or 0xff..f, zeroes enforced on checkpoints
-	// if !bytes.Equal(header.Nonce[:], nonceAuthVote) && !bytes.Equal(header.Nonce[:], nonceDropVote) {
-	// 	return errInvalidVote
-	// }
-	//if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
-	//	return errInvalidCheckpointVote
-	//}
 
 	// Check that the extra-data contains both the vanity and signature
 	if len(header.Extra) < extraVanity {
@@ -566,7 +567,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
 
-	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 noncd값을 현재 블록의 번호로 변경한다.
+	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 nonce값을 현재 블록의 번호로 변경한다.
 	if number%c.config.Epoch == 0 {
 		header.Nonce = types.EncodeNonce(number)
 	}
@@ -726,22 +727,29 @@ func (c *BSRR) Close() error {
 	return nil
 }
 
-
-var (
-	big8  = big.NewInt(8)
-	big32 = big.NewInt(32)
-)
-
 // AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	//[BERITH]갯수 제한 코드 필요
 	blockReward := FrontierBlockReward
+
+	//여기서는 남은 총 리워드에서 차감 (정책이 우선적으로 필요)
+
+
+	temp := config.Bsrr.Rewards.Sub(config.Bsrr.Rewards, blockReward)
+
+	fmt.Println("[TOTAL BRT] :: " , config.Bsrr.Rewards)
+	fmt.Println("[TOTAL BRT >> TEMP] :: " , temp)
+
 	
 	// Accumulate the rewards for the miner and any included uncles
-	reward := new(big.Int).Set(blockReward)
-	state.AddBalance(header.Coinbase, reward)
+	//reward := new(big.Int).Set(blockReward)
+
+	fmt.Println("[REWORD BRT] :: " , blockReward)
+
+	//state.AddStakeBalance(header.Coinbase, reward)
+	state.AddBalance(header.Coinbase, blockReward)
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow

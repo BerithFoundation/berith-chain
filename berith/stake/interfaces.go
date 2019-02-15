@@ -28,15 +28,6 @@ type StakingInfo interface {
 	Value() *big.Int
 }
 
-// message represents a message sent to a contract.
-type Transaction interface {
-	From() common.Address
-	To() common.Address
-	//FromFrontier() (common.Address, error)
-	Value() *big.Int
-	Staking() bool
-}
-
 type DataBase interface {
 	GetValue(key string) ([]byte, error)
 	PushValue(key string, value []byte) error

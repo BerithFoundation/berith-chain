@@ -419,3 +419,16 @@ func (c *stateObject) RemoveStakeBalance(amount *big.Int) {
 	c.SetStaking(new(big.Int).Sub(stakeBalance, amount))
 	c.AddBalance(amount)
 }
+
+func (c *stateObject) AddStakeBalance(amount *big.Int) {
+	// EIP158: We must check emptiness for the objects such that the account
+	// clearing (0,0,0 objects) can take effect.
+	if amount.Sign() == 0 {
+		if c.empty() {
+			c.touch()
+		}
+
+		return
+	}
+	c.SetStaking(new(big.Int).Add(c.StakeBalance(), amount))
+}

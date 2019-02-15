@@ -349,6 +349,14 @@ func (self *StateDB) RemoveStakeBalance(addr common.Address, amount *big.Int) {
 	}
 }
 
+// [BRT] AddStakeBalance
+func (self *StateDB) AddStakeBalance(addr common.Address, amount *big.Int) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.AddStakeBalance(amount)
+	}
+}
+
 // AddBalance adds amount to the account associated with addr.
 func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)

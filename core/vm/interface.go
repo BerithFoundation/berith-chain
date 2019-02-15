@@ -71,6 +71,7 @@ type StateDB interface {
 	SetStaking(common.Address, *big.Int)
 	GetStakeBalance(common.Address) *big.Int
 	RemoveStakeBalance(common.Address, *big.Int)
+	AddStakeBalance(common.Address, *big.Int)
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM
