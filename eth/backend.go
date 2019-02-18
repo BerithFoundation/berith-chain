@@ -273,9 +273,11 @@ func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainCo
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (s *Ethereum) APIs() []rpc.API {
 	apis := ethapi.GetAPIs(s.APIBackend)
-	apis = append(apis, brtapi.GetAPIs(s.APIBackend)...)
+	apis = append(apis, brtapi.GetAPIs(s.APIBackend, s.miner)...)
 	// Append any APIs exposed explicitly by the consensus engine
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
+
+
 
 	// Append all the local APIs and return
 	return append(apis, []rpc.API{

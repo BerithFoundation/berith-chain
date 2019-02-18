@@ -748,6 +748,9 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	fmt.Println("[REWORD BRT] :: " , blockReward)
 
+
+	fmt.Println("[COINBASE] :: ", header.Coinbase)
+
 	//state.AddStakeBalance(header.Coinbase, reward)
 	state.AddBalance(header.Coinbase, blockReward)
 }

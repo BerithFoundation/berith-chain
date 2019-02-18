@@ -1,10 +1,12 @@
 package brtapi
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/miner"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
@@ -18,6 +20,7 @@ import (
 //PrivateBerithAPI struct of berith private apis
 type PrivateBerithAPI struct {
 	backend        Backend
+	miner		   *miner.Miner
 	nonceLock *AddrLocker
 	accountManager *accounts.Manager
 }
@@ -92,9 +95,10 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 }
 
 //NewPrivateBerithAPI make new instance of PrivateBerithAPI
-func NewPrivateBerithAPI(b Backend, nonceLock *AddrLocker) *PrivateBerithAPI {
+func NewPrivateBerithAPI(b Backend, m *miner.Miner,nonceLock *AddrLocker) *PrivateBerithAPI {
 	return &PrivateBerithAPI{
 		backend:        b,
+		miner:			m,
 		accountManager: b.AccountManager(),
 		nonceLock: nonceLock,
 	}
@@ -161,6 +165,10 @@ type StakingTxArgs struct {
 
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (common.Hash, error) {
+
+	if s.miner.Mining() {
+		fmt.Println("마이닝 중")
+	}
 
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)

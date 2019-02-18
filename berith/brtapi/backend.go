@@ -2,6 +2,7 @@ package brtapi
 
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+	"bitbucket.org/ibizsoftware/berith-chain/miner"
 	"context"
 	"math/big"
 
@@ -27,14 +28,14 @@ type Backend interface {
 }
 
 //GetAPIs get apis of berith serivce
-func GetAPIs(b Backend) []rpc.API {
+func GetAPIs(b Backend, miner *miner.Miner) []rpc.API {
 	nonceLock := new(AddrLocker)
 
 	return []rpc.API{
 		{
 			Namespace: "berith",
 			Version:   "1.0",
-			Service:   NewPrivateBerithAPI(b, nonceLock),
+			Service:   NewPrivateBerithAPI(b, miner, nonceLock),
 			Public:    false,
 		},
 	}
