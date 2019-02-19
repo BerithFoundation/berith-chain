@@ -92,7 +92,9 @@ func (list *StakingMap) Get(address common.Address) (StakingInfo, error) {
 
 	if value == nil {
 		value = big.NewInt(0)
+		return nil, errors.New("Couldn't find the address")
 	}
+	
 	return &info{
 		address: address,
 		value:   value,

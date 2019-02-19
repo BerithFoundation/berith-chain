@@ -30,7 +30,7 @@ type Backend interface {
 //GetAPIs get apis of berith serivce
 func GetAPIs(b Backend, miner *miner.Miner) []rpc.API {
 	nonceLock := new(AddrLocker)
-
+	
 	return []rpc.API{
 		{
 			Namespace: "berith",

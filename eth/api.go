@@ -39,6 +39,9 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
+	
+	// "bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	// "bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related
@@ -109,6 +112,25 @@ func NewPrivateMinerAPI(e *Ethereum) *PrivateMinerAPI {
 // number of threads allowed to use and updates the minimum price required by the
 // transaction pool.
 func (api *PrivateMinerAPI) Start(threads *int) error {
+	
+	// minerAddr := api.e.etherbase
+	// parentNum := api.e.BlockChain().CurrentBlock().Number()
+	// parentNum = parentNum.Sub(parentNum, big.NewInt(1))
+	
+	// parentHeaderHash := api.e.BlockChain().GetHeaderByNumber(parentNum.Uint64()).Hash()
+	// stakingList, err:= stake.NewStakingMap(api.e.stakingDB, parentNum, parentHeaderHash)
+	
+	// if err != nil {
+	// log.Error("Getting staking list was failed.")
+	// return errors.New("getting staking list was failed")
+	// }
+	
+	// _, err = stakingList.Get(minerAddr)
+	// if err != nil {
+	// log.Error("Coinbase was not staked.")
+	// return errors.New("etherbase was not staked")
+	// }
+	
 	if threads == nil {
 		return api.e.StartMining(runtime.NumCPU())
 	}
