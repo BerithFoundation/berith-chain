@@ -218,6 +218,8 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		if conf.Rewards.Cmp(big.NewInt(0)) == 0 {
 			conf.Rewards = TotalRewards
 		}
+	} else {
+		conf.Rewards = TotalRewards
 	}
 
 
