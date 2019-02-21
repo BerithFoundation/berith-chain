@@ -136,9 +136,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 
 	engine := CreateConsensusEngine(ctx, chainConfig, &config.Ethash, config.MinerNotify, config.MinerNoverify, chainDb, stakingDB)
-
-
-
+	
 	eth := &Ethereum{
 		config:         config,
 		chainDb:        chainDb,
@@ -239,8 +237,8 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Data
 func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db ethdb.Database,stakingDB *stakingdb.StakingDB) consensus.Engine {
 	// If proof-of-authority is requested, set it up
 	if chainConfig.Bsrr != nil {
-		return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
-
+		return bsrr.NewCliqueWithStakingDB(stakingDB, &chainConfig.Bsrr, db)
+		
 	} else if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
 	}
