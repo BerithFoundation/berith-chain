@@ -233,8 +233,6 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
 	}
-
-
 }
 
 func NewCliqueWithStakingDB(stakingDB stake.DataBase, config **params.BSRRConfig, db ethdb.Database) *BSRR {

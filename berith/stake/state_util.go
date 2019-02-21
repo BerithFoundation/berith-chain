@@ -23,6 +23,13 @@ type info struct {
 	value   *big.Int
 }
 
+func NewStakingInfo(address *common.Address, value *big.Int) StakingInfo {
+	return &info {
+		address : *address,
+		value : value,
+	}
+}
+
 func (s *info) Address() common.Address { return s.address }
 func (s *info) Value() *big.Int         { return s.value }
 
@@ -92,7 +99,7 @@ func (list *StakingMap) Get(address common.Address) (StakingInfo, error) {
 
 	if value == nil {
 		value = big.NewInt(0)
-		return nil, errors.New("Couldn't find the address")
+		return nil, nil
 	}
 	
 	return &info{
