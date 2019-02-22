@@ -416,7 +416,12 @@ func (c *stateObject) RemoveStakeBalance(amount *big.Int) {
 		return
 	}
 
-	c.SetStaking(new(big.Int).Sub(stakeBalance, amount))
+	calcResult := new(big.Int).Sub(stakeBalance, amount)
+	if calcResult.Cmp(big.NewInt(0)) < 0 {
+		return
+	}
+	
+	c.SetStaking(calcResult)
 	c.AddBalance(amount)
 }
 

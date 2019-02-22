@@ -218,9 +218,10 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		if conf.Rewards.Cmp(big.NewInt(0)) == 0 {
 			conf.Rewards = TotalRewards
 		}
+	} else {
+		conf.Rewards = TotalRewards
 	}
-
-
+	
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
@@ -232,13 +233,15 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR{
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
 	}
-
-
 }
 
-func NewCliqueWithStakingDB(stakingDB stake.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
-	engine := New(config, db)
+func NewCliqueWithStakingDB(stakingDB stake.DataBase, config **params.BSRRConfig, db ethdb.Database) *BSRR {
+	engine := New(*config, db)
 	engine.stakingDB = stakingDB
+
+	// Synchronize the engine.config and chainConfig.
+	*config = engine.config
+	
 	return engine
 }
 

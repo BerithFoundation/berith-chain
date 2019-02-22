@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
@@ -15,6 +15,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
+	
+	// "bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 )
 
 //PrivateBerithAPI struct of berith private apis
@@ -167,8 +169,11 @@ type StakingTxArgs struct {
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (common.Hash, error) {
 
 	if s.miner.Mining() {
-		fmt.Println("마이닝 중")
+		log.Info("Please stop the mining job, Before conduct staking balance.")
+		return 	common.Hash{}, errors.New("stkaing balance failed")
 	}
+	
+	s.miner.Mining()
 
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)

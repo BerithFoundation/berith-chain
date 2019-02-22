@@ -945,19 +945,45 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 
 		if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
 
-			old, getErr := stakingList.Get(msg.From())
-			if getErr != nil {
-				return NonStatTy, getErr
+			targetStaking, err := stakingList.Get(msg.From())
+			if err != nil {
+				return NonStatTy, err
 			}
+			
+			msgFromAddress := msg.From()
+			msgValue := msg.Value()
+
+
+			if msgValue.Cmp(big.NewInt(0)) == 0{
+				log.Warn("You tried to unstake 0 balance.")
+				continue
+			}
+			
+			if targetStaking == nil {
+				targetStaking = stake.NewStakingInfo(&msgFromAddress, msgValue)
+			}
+
+			
 			if msg.Staking() {
-				if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
-					return NonStatTy, setErr
+				if err := stakingList.Set(targetStaking.Address(), new(big.Int).Add(targetStaking.Value(), msg.Value())); err != nil {
+					return NonStatTy, err
 				}
-				if stkErr != nil {
-					return NonStatTy, stkErr
+				if err != nil {
+					return NonStatTy, err
 				}
 			} else {
-				stakingList.Delete(old.Address())
+				if targetStaking.Value().Cmp(msgValue) > 0{
+					err := stakingList.Set(targetStaking.Address(), new(big.Int).Sub(targetStaking.Value(), msg.Value()))
+					if err != nil {
+						log.Error("Unstaking the balance was failed...[address : %s, balance : %d] [value : %d]",
+							targetStaking.Address().String(),
+							targetStaking.Value().Int64(),
+							msgValue.Int64(),
+						)
+					}
+				} else {
+					stakingList.Delete(targetStaking.Address())
+				}
 			}
 		}
 	}
@@ -1171,11 +1197,11 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 	block, err := it.next()
 	switch {
-	// First block is pruned, insert as sidechain and reorg only if TD grows enough
+		// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(it)
 
-	// First block is future, shove it (and all children) to the future queue (unknown ancestor)
+		// First block is future, shove it (and all children) to the future queue (unknown ancestor)
 	case err == consensus.ErrFutureBlock || (err == consensus.ErrUnknownAncestor && bc.futureBlocks.Contains(it.first().ParentHash())):
 		for block != nil && (it.index == 0 || err == consensus.ErrUnknownAncestor) {
 			if err := bc.addFutureBlock(block); err != nil {
