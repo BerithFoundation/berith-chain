@@ -670,7 +670,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	}
 	// If we're amongst the recent signers, wait for the next block
 
-	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 변경
 	// for seen, recent := range snap.Recents {
 	// 	if recent == signer {
 	// 		// Signer is among recents, only wait if the current block doesn't shift it out
