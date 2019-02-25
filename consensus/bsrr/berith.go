@@ -775,8 +775,8 @@ func slashBadSigner(state *state.StateDB, header *types.Header, snap *Snapshot) 
 	target := signers[number%uint64(len(signers))]
 
 	if bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
-		state.AddBalance(header.Coinbase, state.GetStakeBalance(header.Coinbase))
-		state.SetStaking(header.Coinbase, big.NewInt(0))
+		state.AddBalance(target, state.GetStakeBalance(target))
+		state.SetStaking(target, big.NewInt(0))
 	}
 
 }
@@ -844,7 +844,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 		target := signers[number%uint64(len(signers))]
 		coinbase := block.Header().Coinbase
 		if !bytes.Equal(target.Bytes(), coinbase.Bytes()) {
-			stakingList.Delete(coinbase)
+			stakingList.Delete(target)
 		}
 	}
 
