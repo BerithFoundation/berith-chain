@@ -18,10 +18,12 @@
 package les
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"fmt"
 	"sync"
 	"time"
+
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -94,7 +96,7 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 
 	stakingDB := &stakingdb.StakingDB{}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
-	if stkErr := stakingDB.CreateDB(stakingDBPath); stkErr != nil {
+	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New); stkErr != nil {
 		return nil, stkErr
 	}
 

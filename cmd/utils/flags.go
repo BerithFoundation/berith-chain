@@ -30,6 +30,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/fdlimit"
@@ -1443,10 +1444,10 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		cache.TrieDirtyLimit = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheGCFlag.Name) / 100
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
-    
+
 	stakingDB := &stakingdb.StakingDB{}
-    stakingDBPath := stack.ResolvePath("stakingDB")
-	stakingDB.CreateDB(stakingDBPath)
+	stakingDBPath := stack.ResolvePath("stakingDB")
+	stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New)
 
 	chain, err = core.NewBlockChain(stakingDB, chainDb, cache, config, engine, vmcfg, nil)
 	if err != nil {

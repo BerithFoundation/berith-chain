@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 )
@@ -43,7 +44,7 @@ func Test1(t *testing.T) {
 
 func Test2(t *testing.T) {
 	db := new(stakingdb.StakingDB)
-	db.CreateDB("/Users/swk/clique/geth/stakingDB")
+	db.CreateDB("/Users/swk/clique/geth/stakingDB", staking.Decode, staking.Encode, staking.New)
 
 	stakingMap, err := stake.NewStakingMap(db, big.NewInt(15), common.HexToHash("0xf7bf2369f84d6886e1671cb25eb72089fb227b5865daf85a7258ad9976933285"))
 
@@ -65,7 +66,7 @@ func Test2(t *testing.T) {
 
 func Test3(t *testing.T) {
 	db := new(stakingdb.StakingDB)
-	db.CreateDB("testStakingDB")
+	db.CreateDB("testStakingDB", staking.Decode, staking.Encode, staking.New)
 
 	blockHash0 := common.BigToHash(big.NewInt(0))
 

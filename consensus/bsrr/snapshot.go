@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
@@ -186,7 +186,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, headers []*types.Header) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -305,24 +305,28 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 
 			if target != nil {
 
-				stakingList, listErr := stake.NewStakingMap(stakingDB, target.Number, target.Hash())
+				stakingList, listErr := stakingDB.GetStakingList(target.Hash().Hex())
 
 				if listErr == nil && stakingList != nil {
 
 					signers := make(map[common.Address]struct{}, 0)
 
 					for i := 0; i < stakingList.Len() && uint64(i) < s.config.Epoch; i++ {
-						miner, minerErr := stakingList.GetMiner(i)
+						info, minerErr := stakingList.GetInfoWithIndex(i)
 
 						if minerErr != nil {
 							return nil, minerErr
 						}
+
+						signers[info.Address()] = struct{}{}
+
+						//[BERITH] 이전 라운드의 마이너를 거르는 로직 제거
 						//[BERITH] 이전 라운드의 마이너를 거르는 로직 추가
-						for prevRound, _ := range snap.Signers {
-							if bytes.Compare(prevRound.Bytes(), miner.Bytes()) != 0 {
-								signers[miner] = struct{}{}
-							}
-						}
+						// for prevRound, _ := range snap.Signers {
+						// 	if bytes.Compare(prevRound.Bytes(), miner.Bytes()) != 0 {
+						// 		signers[miner] = struct{}{}
+						// 	}
+						// }
 					}
 
 					snap.Votes = nil

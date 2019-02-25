@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
@@ -188,7 +188,8 @@ type BSRR struct {
 	db     ethdb.Database     // Database to store and retrieve snapshot checkpoints
 
 	//[BERITH] stakingDB clique 구조체에 추가
-	stakingDB stake.DataBase //stakingList를 저장하는 DB
+	stakingDB staking.DataBase //stakingList를 저장하는 DB
+	cache     *lru.ARCCache    //stakingList를 저장하는 cache
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
@@ -218,18 +219,21 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
+	//[Berith] 캐쉬 인스턴스 생성및 사이즈 지정
+	cache, _ := lru.NewARC(128)
 
 	return &BSRR{
 		config:     &conf,
 		db:         db,
 		recents:    recents,
 		signatures: signatures,
+		cache:      cache,
 		proposals:  make(map[common.Address]bool),
 	}
 
 }
 
-func NewCliqueWithStakingDB(stakingDB stake.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
+func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
 	return engine
@@ -520,7 +524,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	//	return consensus.ErrUnknownAncestor
 	//}
 
-	//stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
+	//stakingList, listErr := staking.NewStakingMap(c.stakingDB, target.Number, target.Hash())
 	//
 	//if listErr != nil {
 	//	return listErr
@@ -599,9 +603,24 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
-
 	accumulateRewards(chain.Config(), state, header, uncles)
+	//[Berith] stakingList 처리 로직 추가
+	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return nil, err
+	}
+	err = c.setStakingListWithTxs(chain, stakingList, txs, header.Number)
+	if err != nil {
+		return nil, err
+	}
 
+	var snap *Snapshot
+	snap, err = c.snapshot(chain, header.Number.Uint64(), header.ParentHash, nil)
+	if err != nil {
+		return nil, err
+	}
+	slashBadSigner(state, header, snap)
+	stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -745,6 +764,120 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	//state.AddStakeBalance(header.Coinbase, reward)
 	state.AddBalance(header.Coinbase, blockReward)
+}
+
+//[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
+func slashBadSigner(state *state.StateDB, header *types.Header, snap *Snapshot) {
+	number := header.Number.Uint64()
+	signers := snap.signers()
+	target := signers[number%uint64(len(signers))]
+
+	if bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
+		state.AddBalance(header.Coinbase, state.GetStakeBalance(header.Coinbase))
+		state.SetStaking(header.Coinbase, big.NewInt(0))
+	}
+
+}
+
+//[Berith] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
+func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
+	var (
+		list   staking.StakingList
+		blocks []*types.Block
+	)
+
+	for list == nil {
+		if val, ok := c.cache.Get(hash); ok {
+			bytes := val.([]byte)
+			var err error
+			list, err = staking.Decode(bytes)
+			if err != nil {
+				return nil, err
+			}
+			break
+		}
+
+		if number == 0 {
+			list = c.stakingDB.NewStakingList()
+			break
+		}
+
+		block := chain.GetBlock(hash, number)
+		if block == nil {
+			return nil, errors.New("unknown anccesstor")
+		}
+
+		blocks = append(blocks, block)
+		number--
+		hash = block.ParentHash()
+	}
+
+	for i := 0; i < len(blocks)/2; i++ {
+		blocks[i], blocks[len(blocks)-1-i] = blocks[len(blocks)-1-i], blocks[i]
+	}
+
+	err := c.checkBlocks(chain, list, blocks)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+
+}
+
+//[Berith] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
+func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block) error {
+	if len(blocks) == 0 {
+		return nil
+	}
+
+	for _, block := range blocks {
+		c.setStakingListWithTxs(chain, stakingList, block.Transactions(), block.Number())
+		number := block.NumberU64()
+		snap, err := c.snapshot(chain, number, block.Hash(), nil)
+		if err != nil {
+			return err
+		}
+		signers := snap.signers()
+		target := signers[number%uint64(len(signers))]
+		coinbase := block.Header().Coinbase
+		if !bytes.Equal(target.Bytes(), coinbase.Bytes()) {
+			stakingList.Delete(coinbase)
+		}
+	}
+
+	bytes, err := stakingList.Encode()
+	if err != nil {
+		return err
+	}
+	c.cache.Add(blocks[len(blocks)-1].Hash(), bytes)
+
+	return nil
+}
+
+//[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
+func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, number *big.Int) error {
+	for _, tx := range txs {
+		msg, err := tx.AsMessage(types.MakeSigner(chain.Config(), number))
+		if err != nil {
+			return err
+		}
+
+		var info staking.StakingInfo
+		info, err = list.GetInfo(msg.From())
+
+		if err != nil {
+			return err
+		}
+
+		value := msg.Value()
+		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+			value.Mul(value, big.NewInt(-1))
+		}
+
+		list.SetInfo(msg.From(), new(big.Int).Add(info.Value(), value))
+	}
+	return nil
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
