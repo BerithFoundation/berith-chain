@@ -169,12 +169,15 @@ type StakingTxArgs struct {
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (common.Hash, error) {
 
 	if s.miner.Mining() {
-		log.Info("Please stop the mining job, Before conduct staking balance.")
-		return 	common.Hash{}, errors.New("stkaing balance failed")
+		log.Info("Stop the mining job, Before conduct staking balance.")
+		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
+	}
+
+	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
+		log.Info("Couldn't stake a zero(0) balance.")
+		return 	common.Hash{}, errors.New("stkaing balance failed : 0 balance can't be staking")
 	}
 	
-	s.miner.Mining()
-
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
 
