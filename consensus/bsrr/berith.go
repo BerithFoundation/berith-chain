@@ -415,7 +415,7 @@ func (c *BSRR) snapshot(chain consensus.ChainReader, number uint64, hash common.
 		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
 	}
 
-	snap, err := snap.apply(chain, c.stakingDB, headers)
+	snap, err := snap.apply(chain, c.stakingDB, headers, c)
 	if err != nil {
 		return nil, err
 	}
@@ -613,12 +613,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
+	stakingList.Finalize()
 
 	var snap *Snapshot
 	snap, err = c.snapshot(chain, header.Number.Uint64(), header.ParentHash, nil)
 	if err != nil {
 		return nil, err
 	}
+
 	slashBadSigner(state, header, snap)
 	stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
@@ -820,7 +822,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	if err != nil {
 		return nil, err
 	}
-
+	list.Finalize()
 	return list, nil
 
 }

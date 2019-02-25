@@ -186,7 +186,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header, c *BSRR) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -235,16 +235,16 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 		//snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
-		for i, vote := range snap.Votes {
-			if vote.Signer == signer {
-				// Uncast the vote from the cached tally
-				snap.uncast(vote.Address, vote.Authorize)
+		// for i, vote := range snap.Votes {
+		// 	if vote.Signer == signer {
+		// 		// Uncast the vote from the cached tally
+		// 		snap.uncast(vote.Address, vote.Authorize)
 
-				// Uncast the vote from the chronological list
-				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-				break // only one vote allowed
-			}
-		}
+		// 		// Uncast the vote from the chronological list
+		// 		snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 		break // only one vote allowed
+		// 	}
+		// }
 		// Tally up the new vote from the signer
 		// var authorize bool
 		// switch {
@@ -255,14 +255,14 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 		// default:
 		// 	return nil, errInvalidVote
 		// }
-		if snap.cast(header.Coinbase, true) {
-			snap.Votes = append(snap.Votes, &Vote{
-				Signer:    signer,
-				Block:     number,
-				Address:   header.Coinbase,
-				Authorize: true,
-			})
-		}
+		// if snap.cast(header.Coinbase, true) {
+		// 	snap.Votes = append(snap.Votes, &Vote{
+		// 		Signer:    signer,
+		// 		Block:     number,
+		// 		Address:   header.Coinbase,
+		// 		Authorize: true,
+		// 	})
+		// }
 		//If the vote passed, update the list of signers
 		// if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
 		// 	if tally.Authorize {
@@ -299,13 +299,13 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 
 		//[Berith] 투표내용을 블록넘버가 Epoch으로 나누어 떨어지는 경우에, 가장 많은 stakingList의 해쉬가 선택되고 singers를 로컬의 stakingList의
 		//스테이킹 총량순으로 Epoch개 만큼 선정하도록 수정
-		if number%s.config.Epoch == 0 {
+		if (number+1)%s.config.Epoch == 0 {
 
-			target := chain.GetHeaderByNumber(header.Number.Uint64() - 1)
+			target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 
 			if target != nil {
 
-				stakingList, listErr := stakingDB.GetStakingList(target.Hash().Hex())
+				stakingList, listErr := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
 
 				if listErr == nil && stakingList != nil {
 
@@ -328,9 +328,6 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 						// 	}
 						// }
 					}
-
-					snap.Votes = nil
-					snap.Tally = make(map[common.Address]Tally)
 
 					if len(signers) > 0 {
 						snap.Signers = signers
