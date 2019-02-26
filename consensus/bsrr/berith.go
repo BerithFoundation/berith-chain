@@ -205,8 +205,7 @@ type BSRR struct {
 }
 
 func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
-
-	conf := *config
+	conf := config
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
 	}
@@ -218,7 +217,7 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	} else {
 		conf.Rewards = TotalRewards
 	}
-	
+
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
@@ -226,7 +225,7 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	cache, _ := lru.NewARC(128)
 
 	return &BSRR{
-		config:     &conf,
+		config:     conf,
 		db:         db,
 		recents:    recents,
 		signatures: signatures,
@@ -241,7 +240,6 @@ func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfi
 	engine.stakingDB = stakingDB
 
 	// Synchronize the engine.config and chainConfig.
-	*config = engine.config
 	
 	return engine
 }
