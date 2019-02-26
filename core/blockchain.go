@@ -1170,7 +1170,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 	block, err := it.next()
 	switch {
-		// First block is pruned, insert as sidechain and reorg only if TD grows enough
+	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(it)
 

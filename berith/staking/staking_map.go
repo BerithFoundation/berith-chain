@@ -14,16 +14,18 @@ import (
 
 //StakingMap map implements StakingList
 type StakingMap struct {
-	storage    map[common.Address]*big.Int
+	storage    map[common.Address]stkInfo
 	sortedList []common.Address
 }
-type info struct {
-	address common.Address
-	value   *big.Int
+type stkInfo struct {
+	address     common.Address
+	value       *big.Int
+	blockNumber *big.Int
 }
 
-func (s *info) Address() common.Address { return s.address }
-func (s *info) Value() *big.Int         { return s.value }
+func (s stkInfo) Address() common.Address { return s.address }
+func (s stkInfo) Value() *big.Int         { return s.value }
+func (s stkInfo) BlockNumber() *big.Int   { return s.blockNumber }
 
 func (list *StakingMap) Len() int {
 	return len(list.storage)
@@ -32,40 +34,39 @@ func (list *StakingMap) Len() int {
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
 func (list *StakingMap) GetInfoWithIndex(index int) (StakingInfo, error) {
 	if index < 0 || len(list.sortedList) < index {
-		return &info{}, errors.New("invalid index")
+		return stkInfo{}, errors.New("invalid index")
 	}
 	address := list.sortedList[index]
-	return &info{
-		address: address,
-		value:   list.storage[address],
-	}, nil
+	return list.storage[address], nil
 }
 
 //GetInfo is function to get "staking info" that is matched with address from parameter
 func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
-	value := list.storage[address]
+	info, ok := list.storage[address]
 
-	if value == nil {
-		value = big.NewInt(0)
+	if !ok {
+		return nil, errors.New("no info for " + address.Hex())
 	}
-	return &info{
-		address: address,
-		value:   value,
+	return &stkInfo{
+		address:     address,
+		value:       info.value,
+		blockNumber: info.blockNumber,
 	}, nil
 }
 
 //SetInfo is function to set "staking info"
-func (list *StakingMap) SetInfo(address common.Address, x interface{}) error {
-	info, ok := x.(*big.Int)
+func (list *StakingMap) SetInfo(info StakingInfo) error {
 
-	if ok {
-		if info.Cmp(big.NewInt(0)) < 1 {
-			delete(list.storage, address)
-		}
-		list.storage[address] = info
-		return nil
+	if info.Value().Cmp(big.NewInt(0)) < 1 {
+		delete(list.storage, info.Address())
 	}
-	return errors.New("invalid value")
+
+	list.storage[info.Address()] = stkInfo{
+		address:     info.Address(),
+		value:       info.Value(),
+		blockNumber: info.BlockNumber(),
+	}
+	return nil
 }
 
 //Delete is function to delete address from the staking list
@@ -80,7 +81,11 @@ func (list *StakingMap) Delete(address common.Address) error {
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
 	for k, v := range list.storage {
-		fmt.Println("** [key : ", k.Hex(), " | value : ", v.String(), "]")
+		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "]")
+	}
+	fmt.Println("==== sortedList ====")
+	for _, v := range list.sortedList {
+		fmt.Println(v.Hex())
 	}
 }
 
@@ -97,22 +102,30 @@ func (list *StakingMap) Finalize() {
 	list.sort()
 }
 
-type infoForSort []info
+type infoForSort []stkInfo
 
-func (info infoForSort) Len() int           { return len(info) }
-func (info infoForSort) Less(i, j int) bool { return info[i].Value().Cmp(info[j].Value()) > 0 }
-func (info infoForSort) Swap(i, j int)      { info[i], info[j] = info[j], info[i] }
+func (info infoForSort) Len() int { return len(info) }
+func (info infoForSort) Less(i, j int) bool {
+	if info[i].Value().Cmp(info[j].Value()) == 0 {
+		return info[i].BlockNumber().Cmp(info[j].BlockNumber()) < 0
+	}
+	return info[i].Value().Cmp(info[j].Value()) > 0
+}
+func (info infoForSort) Swap(i, j int) { info[i], info[j] = info[j], info[i] }
 
 func (list *StakingMap) sort() {
 	kv := make(infoForSort, 0)
-	for k, v := range list.storage {
-		kv = append(kv, info{address: k, value: v})
+	for _, v := range list.storage {
+		kv = append(kv, v)
 	}
 	sort.Sort(&kv)
 
 	sortedList := make([]common.Address, 0)
 	for _, info := range kv {
-		sortedList = append(sortedList, info.Address())
+		cnt := new(big.Int).Div(info.Value(), big.NewInt(2000))
+		for i := int64(0); cnt.Cmp(big.NewInt(i)) < 0; i++ {
+			sortedList = append(sortedList, info.Address())
+		}
 	}
 
 	list.sortedList = sortedList
@@ -162,7 +175,7 @@ func Decode(rlpData []byte) (StakingList, error) {
 //New is function to create new instance
 func New() StakingList {
 	return &StakingMap{
-		storage:    make(map[common.Address]*big.Int),
+		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 	}
 }
