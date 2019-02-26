@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
@@ -49,14 +49,15 @@ type Tally struct {
 // Snapshot is the state of the authorization voting at a given point in time.
 type Snapshot struct {
 	config   *params.BSRRConfig // Consensus engine parameters to fine tune behavior
-	sigcache *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
+	sigcache *lru.ARCCache      // Cache of recent block signatures to speed up ecrecover
 
 	Number  uint64                      `json:"number"`  // Block number where the snapshot was created
 	Hash    common.Hash                 `json:"hash"`    // Block hash where the snapshot was created
 	Signers map[common.Address]struct{} `json:"signers"` // Set of authorized signers at this moment
-	Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
-	Votes   []*Vote                     `json:"votes"`   // List of votes cast in chronological order
-	Tally   map[common.Address]Tally    `json:"tally"`   // Current vote tally to avoid recalculating
+	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+	//Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
+	Votes []*Vote                  `json:"votes"` // List of votes cast in chronological order
+	Tally map[common.Address]Tally `json:"tally"` // Current vote tally to avoid recalculating
 }
 
 // signersAscending implements the sort interface to allow sorting a list of addresses
@@ -76,8 +77,9 @@ func newSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, number uint6
 		Number:   number,
 		Hash:     hash,
 		Signers:  make(map[common.Address]struct{}),
-		Recents:  make(map[uint64]common.Address),
-		Tally:    make(map[common.Address]Tally),
+		//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+		//Recents:  make(map[uint64]common.Address),
+		Tally: make(map[common.Address]Tally),
 	}
 	for _, signer := range signers {
 		snap.Signers[signer] = struct{}{}
@@ -118,16 +120,18 @@ func (s *Snapshot) copy() *Snapshot {
 		Number:   s.Number,
 		Hash:     s.Hash,
 		Signers:  make(map[common.Address]struct{}),
-		Recents:  make(map[uint64]common.Address),
-		Votes:    make([]*Vote, len(s.Votes)),
-		Tally:    make(map[common.Address]Tally),
+		//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+		//Recents:  make(map[uint64]common.Address),
+		Votes: make([]*Vote, len(s.Votes)),
+		Tally: make(map[common.Address]Tally),
 	}
 	for signer := range s.Signers {
 		cpy.Signers[signer] = struct{}{}
 	}
-	for block, signer := range s.Recents {
-		cpy.Recents[block] = signer
-	}
+	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+	// for block, signer := range s.Recents {
+	// 	cpy.Recents[block] = signer
+	// }
 	for address, tally := range s.Tally {
 		cpy.Tally[address] = tally
 	}
@@ -182,7 +186,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, headers []*types.Header) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header, c *BSRR) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -207,9 +211,11 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 		// 	snap.Tally = make(map[common.Address]Tally)
 		// }
 		// Delete the oldest signer from the recent list to allow it signing again
-		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
-			delete(snap.Recents, number-limit)
-		}
+
+		//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+		// if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
+		// 	delete(snap.Recents, number-limit)
+		// }
 		// Resolve the authorization key and check against signers
 		signer, err := ecrecover(header, s.sigcache)
 
@@ -219,24 +225,26 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		for _, recent := range snap.Recents {
-			if recent == signer {
-				return nil, errRecentlySigned
-			}
-		}
-		snap.Recents[number] = signer
+
+		//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
+		// for _, recent := range snap.Recents {
+		// 	if recent == signer {
+		// 		return nil, errRecentlySigned
+		// 	}
+		// }
+		//snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
-		for i, vote := range snap.Votes {
-			if vote.Signer == signer {
-				// Uncast the vote from the cached tally
-				snap.uncast(vote.Address, vote.Authorize)
+		// for i, vote := range snap.Votes {
+		// 	if vote.Signer == signer {
+		// 		// Uncast the vote from the cached tally
+		// 		snap.uncast(vote.Address, vote.Authorize)
 
-				// Uncast the vote from the chronological list
-				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-				break // only one vote allowed
-			}
-		}
+		// 		// Uncast the vote from the chronological list
+		// 		snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
+		// 		break // only one vote allowed
+		// 	}
+		// }
 		// Tally up the new vote from the signer
 		// var authorize bool
 		// switch {
@@ -247,14 +255,14 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 		// default:
 		// 	return nil, errInvalidVote
 		// }
-		if snap.cast(header.Coinbase, true) {
-			snap.Votes = append(snap.Votes, &Vote{
-				Signer:    signer,
-				Block:     number,
-				Address:   header.Coinbase,
-				Authorize: true,
-			})
-		}
+		// if snap.cast(header.Coinbase, true) {
+		// 	snap.Votes = append(snap.Votes, &Vote{
+		// 		Signer:    signer,
+		// 		Block:     number,
+		// 		Address:   header.Coinbase,
+		// 		Authorize: true,
+		// 	})
+		// }
 		//If the vote passed, update the list of signers
 		// if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
 		// 	if tally.Authorize {
@@ -291,28 +299,35 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB stake.DataBase, 
 
 		//[Berith] 투표내용을 블록넘버가 Epoch으로 나누어 떨어지는 경우에, 가장 많은 stakingList의 해쉬가 선택되고 singers를 로컬의 stakingList의
 		//스테이킹 총량순으로 Epoch개 만큼 선정하도록 수정
-		if number%s.config.Epoch == 0 {
+		if (number+1)%s.config.Epoch == 0 {
 
-			target := chain.GetHeaderByNumber(header.Number.Uint64() - 1)
+			target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 
 			if target != nil {
 
-				stakingList, listErr := stake.NewStakingMap(stakingDB, target.Number, target.Hash())
+				stakingList, listErr := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
 
 				if listErr == nil && stakingList != nil {
 
 					signers := make(map[common.Address]struct{}, 0)
 
 					for i := 0; i < stakingList.Len() && uint64(i) < s.config.Epoch; i++ {
-						miner, minerErr := stakingList.GetMiner(i)
+						info, minerErr := stakingList.GetInfoWithIndex(i)
+
 						if minerErr != nil {
 							return nil, minerErr
 						}
-						signers[miner] = struct{}{}
-					}
 
-					snap.Votes = nil
-					snap.Tally = make(map[common.Address]Tally)
+						signers[info.Address()] = struct{}{}
+
+						//[BERITH] 이전 라운드의 마이너를 거르는 로직 제거
+						//[BERITH] 이전 라운드의 마이너를 거르는 로직 추가
+						// for prevRound, _ := range snap.Signers {
+						// 	if bytes.Compare(prevRound.Bytes(), miner.Bytes()) != 0 {
+						// 		signers[miner] = struct{}{}
+						// 	}
+						// }
+					}
 
 					if len(signers) > 0 {
 						snap.Signers = signers

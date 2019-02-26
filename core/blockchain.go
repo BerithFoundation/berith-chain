@@ -27,8 +27,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
-
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
@@ -934,61 +932,36 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	bc.wg.Add(1)
 	defer bc.wg.Done()
 
-	stakingList, stkErr := stake.NewStakingMap(bc.stakingDB, big.NewInt(0).Sub(block.Number(), big.NewInt(1)), block.Header().ParentHash)
-	if stkErr != nil {
-		return NonStatTy, stkErr
-	}
+	//[Berith] stakingList 관련 로직 bsrr/berith.Finalize로 이동
+	// stakingList, stkErr := stake.NewStakingMap(bc.stakingDB, big.NewInt(0).Sub(block.Number(), big.NewInt(1)), block.Header().ParentHash)
+	// if stkErr != nil {
+	// 	return NonStatTy, stkErr
+	// }
 
-	stakingList.Print()
-	for _, tx := range block.Transactions() {
-		msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
+	// stakingList.Print()
+	// for _, tx := range block.Transactions() {
+	// 	msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
 
-		if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
+	// 	if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
 
-			targetStaking, err := stakingList.Get(msg.From())
-			if err != nil {
-				return NonStatTy, err
-			}
-			
-			msgFromAddress := msg.From()
-			msgValue := msg.Value()
+	// 		old, getErr := stakingList.Get(msg.From())
+	// 		if getErr != nil {
+	// 			return NonStatTy, getErr
+	// 		}
+	// 		if msg.Staking() {
+	// 			if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
+	// 				return NonStatTy, setErr
+	// 			}
+	// 			if stkErr != nil {
+	// 				return NonStatTy, stkErr
+	// 			}
+	// 		} else {
+	// 			stakingList.Delete(old.Address())
+	// 		}
+	// 	}
+	// }
 
-
-			if msgValue.Cmp(big.NewInt(0)) == 0{
-				log.Warn("You tried to unstake 0 balance.")
-				continue
-			}
-			
-			if targetStaking == nil {
-				targetStaking = stake.NewStakingInfo(&msgFromAddress, msgValue)
-			}
-
-			
-			if msg.Staking() {
-				if err := stakingList.Set(targetStaking.Address(), new(big.Int).Add(targetStaking.Value(), msg.Value())); err != nil {
-					return NonStatTy, err
-				}
-				if err != nil {
-					return NonStatTy, err
-				}
-			} else {
-				if targetStaking.Value().Cmp(msgValue) > 0{
-					err := stakingList.Set(targetStaking.Address(), new(big.Int).Sub(targetStaking.Value(), msg.Value()))
-					if err != nil {
-						log.Error("Unstaking the balance was failed...[address : %s, balance : %d] [value : %d]",
-							targetStaking.Address().String(),
-							targetStaking.Value().Int64(),
-							msgValue.Int64(),
-						)
-					}
-				} else {
-					stakingList.Delete(targetStaking.Address())
-				}
-			}
-		}
-	}
-
-	stakingList.Commit(bc.stakingDB, block.Number(), block.Hash())
+	// stakingList.Commit(bc.stakingDB, block.Number(), block.Hash())
 
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
