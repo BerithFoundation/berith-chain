@@ -28,7 +28,7 @@ func (s stkInfo) Value() *big.Int         { return s.value }
 func (s stkInfo) BlockNumber() *big.Int   { return s.blockNumber }
 
 func (list *StakingMap) Len() int {
-	return len(list.storage)
+	return len(list.sortedList)
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
@@ -45,7 +45,11 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 	info, ok := list.storage[address]
 
 	if !ok {
-		return nil, errors.New("no info for " + address.Hex())
+		return &stkInfo{
+			address:     address,
+			value:       new(big.Int),
+			blockNumber: new(big.Int),
+		}, nil
 	}
 	return &stkInfo{
 		address:     address,
