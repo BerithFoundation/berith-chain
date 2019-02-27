@@ -882,10 +882,13 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 
 		value := msg.Value()
 		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
-			value.Mul(value, big.NewInt(-1))
+			// StopStaking()
+			list.Delete(msg.From())
+			
+		} else if msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
+			// Stake()
+			list.SetInfo(msg.From(), new(big.Int).Add(info.Value(), value))
 		}
-
-		list.SetInfo(msg.From(), new(big.Int).Add(info.Value(), value))
 	}
 	return nil
 }

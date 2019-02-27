@@ -765,6 +765,12 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'stopStaking',
+			call: 'berith_stopStaking',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getStakeBalance',
 			call: 'berith_getStakeBalance',
         	params: 2,
@@ -774,3 +780,4 @@ web3._extend({
 	]
 });
 `
+
