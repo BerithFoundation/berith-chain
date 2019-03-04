@@ -159,6 +159,7 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 	return tx.Hash(), nil
 }
 
+
 type StakingTxArgs struct {
 	From     common.Address  `json:"from"`
 	Value    *hexutil.Big    `json:"value"`
@@ -172,12 +173,13 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (commo
 		log.Info("Stop the mining job, Before conduct staking balance.")
 		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
 	}
+	
 
 	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
 		log.Info("Couldn't stake a zero(0) balance.")
 		return 	common.Hash{}, errors.New("stkaing balance failed : 0 balance can't be staking")
 	}
-	
+
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
 
@@ -185,9 +187,35 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (commo
 	sendTx.To = &args.From
 	sendTx.Value = args.Value
 	sendTx.staking = args.Staking
+	
+	return s.sendTransaction(ctx, *sendTx)
+}
+
+type StopStakingTxArgs struct {
+	From     common.Address  `json:"from"`
+	Value    *hexutil.Big    `json:"value"`
+	Staking    bool    `json:"staking"`
+}
+
+// SendStaking creates a transaction for user staking
+func (s *PrivateBerithAPI) StopStaking(ctx context.Context, address common.Address) (common.Hash, error) {
+	if s.miner.Mining() {
+		log.Info("Stop the mining job, Before conduct staking balance.")
+		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
+	}
+
+	// Look up the wallet containing the requested signer
+	sendTx := new(SendTxArgs)
+
+	sendTx.From = address
+	sendTx.To = &address
+	sendTx.Value = new(hexutil.Big)
+	sendTx.Value.UnmarshalText([]byte("0"))
+	sendTx.staking = false
 
 	return s.sendTransaction(ctx, *sendTx)
 }
+
 
 // private trasaction function
 func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error){
@@ -197,7 +225,7 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 	if err != nil {
 		return common.Hash{}, err
 	}
-
+	
 	s.nonceLock.LockAddr(args.From)
 	defer s.nonceLock.UnlockAddr(args.From)
 
@@ -207,7 +235,7 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-
+	
 	var chainID *big.Int
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
 		chainID = config.ChainID
@@ -216,8 +244,10 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 	if err != nil {
 		return common.Hash{}, err
 	}
+
 	return submitTransaction(ctx, s.backend, signed)
 }
+
 
 func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
