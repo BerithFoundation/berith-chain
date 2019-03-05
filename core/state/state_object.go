@@ -406,6 +406,10 @@ func (self *stateObject) StakeBalance() *big.Int {
 	return self.data.StakeBalance
 }
 
+func (self *stateObject) AccountInfo() Account {
+	return self.data
+}
+
 func (c *stateObject) RemoveStakeBalance(amount *big.Int) {
 	stakeBalance := c.StakeBalance()
 	if stakeBalance.Sign() == 0 {

@@ -523,13 +523,15 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	var snap *Snapshot
-	snap, err = c.snapshot(chain, header.Number.Uint64(), header.ParentHash, nil)
+	//var snap *Snapshot
+	_, err = c.snapshot(chain, header.Number.Uint64(), header.ParentHash, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	slashBadSigner(state, header, snap)
+	//slashBadSigner(state, header, snap)
+
+
 	stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
@@ -736,7 +738,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 		target := signers[number%uint64(len(signers))]
 		coinbase := block.Header().Coinbase
 		if !bytes.Equal(target.Bytes(), coinbase.Bytes()) {
-			stakingList.Delete(target)
+			//stakingList.Delete(target)
 		}
 	}
 

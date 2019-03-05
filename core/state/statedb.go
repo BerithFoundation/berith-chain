@@ -341,6 +341,20 @@ func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	return common.Big0
 }
 
+func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return &stateObject.data
+	}
+
+	return &Account{
+		Nonce: uint64(0),
+		Balance:common.Big0,
+		Root:emptyCode,
+		CodeHash: nil,
+		StakeBalance: nil}
+}
+
 // [BRT] SubStakeBalance
 func (self *StateDB) RemoveStakeBalance(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)

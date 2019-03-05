@@ -777,6 +777,12 @@ web3._extend({
         	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
         	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
 		}),
+		new web3._extend.Method({
+			name: 'getAccountInfo',
+			call: 'berith_getAccountInfo',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],        	
+		}),
 	]
 });
 `

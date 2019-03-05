@@ -1,6 +1,7 @@
 package brtapi
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/miner"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
@@ -255,4 +256,12 @@ func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.A
 		return nil, err
 	}
 	return (*hexutil.Big)(state.GetStakeBalance(address)), state.Error()
+}
+
+func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account, error) {
+	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetAccountInfo(address), state.Error()
 }
