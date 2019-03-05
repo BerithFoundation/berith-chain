@@ -218,7 +218,6 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 		conf.Rewards = TotalRewards
 	}
 
-
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 	//[Berith] 캐쉬 인스턴스 생성및 사이즈 지정
@@ -240,7 +239,7 @@ func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfi
 	engine.stakingDB = stakingDB
 
 	// Synchronize the engine.config and chainConfig.
-	
+
 	return engine
 }
 
@@ -754,6 +753,7 @@ func (c *BSRR) Close() error {
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+
 	//[BERITH]갯수 제한 코드 필요
 	blockReward := FrontierBlockReward
 
@@ -768,8 +768,6 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 	//reward := new(big.Int).Set(blockReward)
 
 	fmt.Println("[REWORD BRT] :: ", blockReward)
-
-
 	fmt.Println("[COINBASE] :: ", header.Coinbase)
 
 	//state.AddStakeBalance(header.Coinbase, reward)
@@ -801,6 +799,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			bytes := val.([]byte)
 			var err error
 			list, err = staking.Decode(bytes)
+
 			if err != nil {
 				return nil, err
 			}
@@ -831,6 +830,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 	list.Finalize()
+	list.Print()
 	return list, nil
 
 }
@@ -865,12 +865,26 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 	return nil
 }
 
+type stakingInfo struct {
+	address     common.Address
+	value       *big.Int
+	blockNumber *big.Int
+}
+
+func (info stakingInfo) Address() common.Address { return info.address }
+func (info stakingInfo) Value() *big.Int         { return info.value }
+func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
+
 //[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
 func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, number *big.Int) error {
 	for _, tx := range txs {
 		msg, err := tx.AsMessage(types.MakeSigner(chain.Config(), number))
 		if err != nil {
 			return err
+		}
+
+		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+			continue
 		}
 
 		var info staking.StakingInfo
@@ -881,14 +895,22 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 		}
 
 		value := msg.Value()
-		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
-			// StopStaking()
-			list.Delete(msg.From())
-			
-		} else if msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
-			// Stake()
-			list.SetInfo(msg.From(), new(big.Int).Add(info.Value(), value))
+		if !msg.Staking() {
+			value.Mul(value, big.NewInt(-1))
 		}
+
+		blockNumber := number
+		if info.BlockNumber().Cmp(blockNumber) > 0 {
+			blockNumber = info.BlockNumber()
+		}
+
+		input := stakingInfo{
+			address:     msg.From(),
+			value:       new(big.Int).Add(info.Value(), value),
+			blockNumber: blockNumber,
+		}
+
+		list.SetInfo(input)
 	}
 	return nil
 }
