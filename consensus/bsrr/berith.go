@@ -34,7 +34,7 @@ const (
 )
 
 var (
-	BlockReward = big.NewInt(5e+18)                                      // Block reward in wei for successfully mining a block
+	BlockReward = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(16))
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -778,23 +778,27 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 			return err
 		}
 
-		value := msg.Value()
-		if !msg.Staking() {
-			value.Mul(value, big.NewInt(-1))
-		}
-
 		blockNumber := number
 		if info.BlockNumber().Cmp(blockNumber) > 0 {
 			blockNumber = info.BlockNumber()
 		}
 
-		input := stakingInfo{
-			address:     msg.From(),
-			value:       new(big.Int).Add(info.Value(), value),
-			blockNumber: blockNumber,
-		}
+		value := msg.Value()
 
-		list.SetInfo(input)
+		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+			// StopStaking()
+			list.Delete(msg.From())
+
+		} else if msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
+			// Stake()
+			input := stakingInfo{
+				address:     msg.From(),
+				value:       new(big.Int).Add(info.Value(), value),
+				blockNumber: blockNumber,
+			}
+
+			list.SetInfo(input)
+		}
 	}
 	return nil
 }

@@ -12,6 +12,11 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
+
+var (
+	VoteRatio = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(1))
+)
+
 //StakingMap map implements StakingList
 type StakingMap struct {
 	storage    map[common.Address]stkInfo
@@ -125,7 +130,7 @@ func (list *StakingMap) sort() {
 
 	sortedList := make([]common.Address, 0)
 	for _, info := range kv {
-		cnt := new(big.Int).Div(info.Value(), big.NewInt(2000))
+		cnt := new(big.Int).Div(info.Value(), VoteRatio)
 		for i := int64(0); cnt.Cmp(big.NewInt(i)) > 0; i++ {
 			sortedList = append(sortedList, info.Address())
 		}
