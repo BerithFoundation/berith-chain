@@ -18,14 +18,14 @@ type StakingMap struct {
 	sortedList []common.Address
 }
 type stkInfo struct {
-	address     common.Address
-	value       *big.Int
-	blockNumber *big.Int
+	StkAddress     common.Address `json:"address"`
+	StkValue       *big.Int       `json:"value"`
+	StkBlockNumber *big.Int       `json:"blocknumber"`
 }
 
-func (s stkInfo) Address() common.Address { return s.address }
-func (s stkInfo) Value() *big.Int         { return s.value }
-func (s stkInfo) BlockNumber() *big.Int   { return s.blockNumber }
+func (s stkInfo) Address() common.Address { return s.StkAddress }
+func (s stkInfo) Value() *big.Int         { return s.StkValue }
+func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
 
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
@@ -46,15 +46,15 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 
 	if !ok {
 		return &stkInfo{
-			address:     address,
-			value:       new(big.Int),
-			blockNumber: new(big.Int),
+			StkAddress:     address,
+			StkValue:       big.NewInt(0),
+			StkBlockNumber: big.NewInt(0),
 		}, nil
 	}
 	return &stkInfo{
-		address:     address,
-		value:       info.value,
-		blockNumber: info.blockNumber,
+		StkAddress:     address,
+		StkValue:       info.Value(),
+		StkBlockNumber: info.BlockNumber(),
 	}, nil
 }
 
@@ -66,9 +66,9 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 	}
 
 	list.storage[info.Address()] = stkInfo{
-		address:     info.Address(),
-		value:       info.Value(),
-		blockNumber: info.BlockNumber(),
+		StkAddress:     info.Address(),
+		StkValue:       info.Value(),
+		StkBlockNumber: info.BlockNumber(),
 	}
 	return nil
 }
@@ -95,10 +95,9 @@ func (list *StakingMap) Print() {
 
 //EncodeRLP is function to encode
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
-	rlpVal := make([][]byte, 2)
 
-	rlpVal[0], _ = json.Marshal(list.storage)
-	rlpVal[1], _ = json.Marshal(list.sortedList)
+	rlpVal, _ := json.Marshal(list.storage)
+	//rlpVal[1], _ = json.Marshal(list.sortedList)
 	return rlp.Encode(w, rlpVal)
 }
 
@@ -127,7 +126,7 @@ func (list *StakingMap) sort() {
 	sortedList := make([]common.Address, 0)
 	for _, info := range kv {
 		cnt := new(big.Int).Div(info.Value(), big.NewInt(2000))
-		for i := int64(0); cnt.Cmp(big.NewInt(i)) < 0; i++ {
+		for i := int64(0); cnt.Cmp(big.NewInt(i)) > 0; i++ {
 			sortedList = append(sortedList, info.Address())
 		}
 	}
@@ -155,20 +154,16 @@ func Encode(stakingList StakingList) ([]byte, error) {
 }
 
 func Decode(rlpData []byte) (StakingList, error) {
-	var btValue [][]byte
+	var btValue []byte
 	if err := rlp.DecodeBytes(rlpData, &btValue); err != nil {
 		return nil, err
 	}
 
-	if len(btValue) != 2 {
-		return nil, errors.New("failed to get value")
+	result := &StakingMap{
+		storage:    make(map[common.Address]stkInfo),
+		sortedList: make([]common.Address, 0),
 	}
-
-	result := new(StakingMap)
-	if err := json.Unmarshal(btValue[0], &result.storage); err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(btValue[1], &result.sortedList); err != nil {
+	if err := json.Unmarshal(btValue, &result.storage); err != nil {
 		return nil, err
 	}
 

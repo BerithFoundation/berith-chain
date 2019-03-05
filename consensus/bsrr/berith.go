@@ -799,6 +799,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			bytes := val.([]byte)
 			var err error
 			list, err = staking.Decode(bytes)
+
 			if err != nil {
 				return nil, err
 			}
@@ -829,6 +830,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 	list.Finalize()
+	list.Print()
 	return list, nil
 
 }
@@ -893,7 +895,7 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 		}
 
 		value := msg.Value()
-		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+		if !msg.Staking() {
 			value.Mul(value, big.NewInt(-1))
 		}
 
