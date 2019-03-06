@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
@@ -40,8 +39,9 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
-	lru "github.com/hashicorp/golang-lru"
+	"github.com/hashicorp/golang-lru"
 )
+
 
 const (
 	checkpointInterval = 1024 // Number of blocks after which to save the vote snapshot to the database
@@ -203,9 +203,6 @@ type Clique struct {
 	config *params.CliqueConfig // Consensus engine configuration parameters
 	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
 
-	//[BERITH] stakingDB clique 구조체에 추가
-	stakingDB stake.DataBase //stakingList를 저장하는 DB
-
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
@@ -238,12 +235,6 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
 	}
-}
-
-func NewCliqueWithStakingDB(stakingDB stake.DataBase, config *params.CliqueConfig, db ethdb.Database) *Clique {
-	engine := New(config, db)
-	engine.stakingDB = stakingDB
-	return engine
 }
 
 // Author implements consensus.Engine, returning the Ethereum address recovered
@@ -294,17 +285,16 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	}
 	// Checkpoint blocks need to enforce zero beneficiary
 	checkpoint := (number % c.config.Epoch) == 0
-	// if checkpoint && header.Coinbase != (common.Address{}) {
-	// 	return errInvalidCheckpointBeneficiary
-	// }
+	if checkpoint && header.Coinbase != (common.Address{}) {
+		return errInvalidCheckpointBeneficiary
+	}
 	// Nonces must be 0x00..0 or 0xff..f, zeroes enforced on checkpoints
-	// if !bytes.Equal(header.Nonce[:], nonceAuthVote) && !bytes.Equal(header.Nonce[:], nonceDropVote) {
-	// 	return errInvalidVote
-	// }
-	//if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
-	//	return errInvalidCheckpointVote
-	//}
-
+	if !bytes.Equal(header.Nonce[:], nonceAuthVote) && !bytes.Equal(header.Nonce[:], nonceDropVote) {
+		return errInvalidVote
+	}
+	if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
+		return errInvalidCheckpointVote
+	}
 	// Check that the extra-data contains both the vanity and signature
 	if len(header.Extra) < extraVanity {
 		return errMissingVanity
@@ -371,46 +361,14 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		return err
 	}
 	// If the block is a checkpoint block, verify the signer list
-
-	//[Berith] 스냅샷의 투표결과와 로컬의 stakingList의 해쉬가 같지 않으면 해당블록을 받지 않음(해당 정책에 대한 논의 필요)
-	if number%c.config.Epoch == 0 && number != 0 {
-
-		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
-
-		if target != nil {
-
-			stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
-
-			if listErr == nil && stakingList != nil {
-
-				rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
-
-				if rlpErr != nil {
-					return rlpErr
-				}
-
-				max := 0
-
-				voteResult := common.Address{}
-				for key, tally := range snap.Tally {
-					if max < tally.Votes {
-						max, voteResult = tally.Votes, key
-					}
-				}
-				hash := common.BytesToAddress(rlpVal)
-				if !bytes.Equal(hash[:], voteResult[:]) {
-					return errors.New("invalid staking list")
-				}
-
-				// signers := make([]byte, len(snap.Signers)*common.AddressLength)
-				// for i, signer := range snap.signers() {
-				// 	copy(signers[i*common.AddressLength:], signer[:])
-				// }
-				// extraSuffix := len(header.Extra) - extraSeal
-				// if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
-				// 	return errMismatchingCheckpointSigners
-				// }
-			}
+	if number%c.config.Epoch == 0 {
+		signers := make([]byte, len(snap.Signers)*common.AddressLength)
+		for i, signer := range snap.signers() {
+			copy(signers[i*common.AddressLength:], signer[:])
+		}
+		extraSuffix := len(header.Extra) - extraSeal
+		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
+			return errMismatchingCheckpointSigners
 		}
 	}
 	// All basic checks passed, verify the seal and return
@@ -479,8 +437,7 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 	for i := 0; i < len(headers)/2; i++ {
 		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
 	}
-
-	snap, err := snap.apply(chain, c.stakingDB, headers)
+	snap, err := snap.apply(headers)
 	if err != nil {
 		return nil, err
 	}
@@ -559,7 +516,6 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
 func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) error {
-
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -570,68 +526,29 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	if err != nil {
 		return err
 	}
+	if number%c.config.Epoch != 0 {
+		c.lock.RLock()
 
-	parent := chain.GetHeader(header.ParentHash, number-1)
-	if parent == nil {
-		return consensus.ErrUnknownAncestor
+		// Gather all the proposals that make sense voting on
+		addresses := make([]common.Address, 0, len(c.proposals))
+		for address, authorize := range c.proposals {
+			if snap.validVote(address, authorize) {
+				addresses = append(addresses, address)
+			}
+		}
+		// If there's pending proposals, cast a vote on them
+		if len(addresses) > 0 {
+			header.Coinbase = addresses[rand.Intn(len(addresses))]
+			if c.proposals[header.Coinbase] {
+				copy(header.Nonce[:], nonceAuthVote)
+			} else {
+				copy(header.Nonce[:], nonceDropVote)
+			}
+		}
+		c.lock.RUnlock()
 	}
-
-	//[BERITH] stakingList를 확인할 블록번호를 논스로 지정하여 전파
-	//블록넘버가 Epoch으로 나누어 떨어지지 않는경우 부모의 논스를 다시 전파
-	header.Nonce = parent.Nonce
-
-	//[BERITH] 부모의 논스에 저장한 블록번호를 가진 블록에서 stakingList를 얻어내어
-	//rlp 인코딩 한 뒤, 그 해쉬값을 address형식으로 저장하여 coinbase로 지정한다.
-	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
-	if target == nil {
-		return consensus.ErrUnknownAncestor
-	}
-
-	stakingList, listErr := stake.NewStakingMap(c.stakingDB, target.Number, target.Hash())
-
-	if listErr != nil {
-		return listErr
-	}
-
-	rlpVal, rlpErr := rlp.EncodeToBytes(stakingList)
-
-	if rlpErr != nil {
-		return rlpErr
-	}
-
-	//[BERITH] coinbase로 보내진 stakingList의 해쉬는 stakingList의 유효성 검사에 사용됨
-	header.Coinbase = common.BytesToAddress(rlpVal)
-
-	//if number%c.config.Epoch != 0 {
-	//c.lock.RLock()
-
-	//header.Nonce = types.EncodeNonce(header.Number.Uint64())
-
-	// // Gather all the proposals that make sense voting on
-	// addresses := make([]common.Address, 0, len(c.proposals))
-	// for address, authorize := range c.proposals {
-	// 	if snap.validVote(address, authorize) {
-	// 		addresses = append(addresses, address)
-	// 	}
-	// }
-	// // If there's pending proposals, cast a vote on them
-	// if len(addresses) > 0 {
-	// 	header.Coinbase = addresses[rand.Intn(len(addresses))]
-	// 	if c.proposals[header.Coinbase] {
-	// 		copy(header.Nonce[:], nonceAuthVote)
-	// 	} else {
-	// 		copy(header.Nonce[:], nonceDropVote)
-	// 	}
-	// }
-	// c.lock.RUnlock()
-	//}
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
-
-	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 noncd값을 현재 블록의 번호로 변경한다.
-	if number%c.config.Epoch == 0 {
-		header.Nonce = types.EncodeNonce(number)
-	}
 
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
@@ -650,10 +567,10 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.MixDigest = common.Hash{}
 
 	// Ensure the timestamp has the correct delay
-	//parent := chain.GetHeader(header.ParentHash, number-1)
-	// if parent == nil {
-	// 	return consensus.ErrUnknownAncestor
-	// }
+	parent := chain.GetHeader(header.ParentHash, number-1)
+	if parent == nil {
+		return consensus.ErrUnknownAncestor
+	}
 	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(c.config.Period))
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
