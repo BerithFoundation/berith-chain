@@ -609,11 +609,11 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
 	accumulateRewards(chain.Config(), state, header, uncles)
 	//[Berith] stakingList 처리 로직 추가
-	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
+	stakingList, err := c.getStakingList(state, chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, err
 	}
-	err = c.setStakingListWithTxs(chain, stakingList, txs, header.Number)
+	err = c.setStakingListWithTxs(state, chain, stakingList, txs, header)
 	if err != nil {
 		return nil, err
 	}
@@ -625,7 +625,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
-	slashBadSigner(state, header, snap)
+	//slashBadSigner(state, header, snap)
 	//stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
@@ -775,8 +775,12 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
-func slashBadSigner(state *state.StateDB, header *types.Header, snap *Snapshot) {
+func (c *BSRR) slashBadSigner(chain consensus.ChainReader, state *state.StateDB, header *types.Header, list staking.StakingList) error {
 	number := header.Number.Uint64()
+	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
+	if err != nil {
+		return err
+	}
 	signers := snap.signers()
 	target := signers[number%uint64(len(signers))]
 
@@ -784,12 +788,14 @@ func slashBadSigner(state *state.StateDB, header *types.Header, snap *Snapshot) 
 		fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
 		state.AddBalance(target, state.GetStakeBalance(target))
 		state.SetStaking(target, big.NewInt(0))
+		list.Delete(target)
 	}
+	return nil
 
 }
 
 //[Berith] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
-func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
+func (c *BSRR) getStakingList(state *state.StateDB, chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
 	var (
 		list   staking.StakingList
 		blocks []*types.Block
@@ -826,7 +832,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		blocks[i], blocks[len(blocks)-1-i] = blocks[len(blocks)-1-i], blocks[i]
 	}
 
-	err := c.checkBlocks(chain, list, blocks)
+	err := c.checkBlocks(state, chain, list, blocks)
 	if err != nil {
 		return nil, err
 	}
@@ -837,25 +843,13 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 }
 
 //[Berith] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block) error {
+func (c *BSRR) checkBlocks(state *state.StateDB, chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block) error {
 	if len(blocks) == 0 {
 		return nil
 	}
 
 	for _, block := range blocks {
-		c.setStakingListWithTxs(chain, stakingList, block.Transactions(), block.Number())
-		number := block.NumberU64()
-		snap, err := c.snapshot(chain, number, block.Hash(), nil)
-		if err != nil {
-			return err
-		}
-		signers := snap.signers()
-		target := signers[number%uint64(len(signers))]
-		coinbase := block.Header().Coinbase
-		if !bytes.Equal(target.Bytes(), coinbase.Bytes()) {
-			fmt.Println("CHECKBLOCK ==>> [", target.Hex(), ",", coinbase.Hex(), "]")
-			stakingList.Delete(target)
-		}
+		c.setStakingListWithTxs(state, chain, stakingList, block.Transactions(), block.Header())
 	}
 
 	bytes, err := stakingList.Encode()
@@ -878,7 +872,8 @@ func (info stakingInfo) Value() *big.Int         { return info.value }
 func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
 
 //[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, number *big.Int) error {
+func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
+	number := header.Number
 	for _, tx := range txs {
 		msg, err := tx.AsMessage(types.MakeSigner(chain.Config(), number))
 		if err != nil {
@@ -914,7 +909,7 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 
 		list.SetInfo(input)
 	}
-	return nil
+	return c.slashBadSigner(chain, state, header, list)
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
