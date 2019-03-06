@@ -759,16 +759,16 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	//여기서는 남은 총 리워드에서 차감 (정책이 우선적으로 필요)
 
-	temp := config.Bsrr.Rewards.Sub(config.Bsrr.Rewards, blockReward)
+	//temp := config.Bsrr.Rewards.Sub(config.Bsrr.Rewards, blockReward)
 
-	fmt.Println("[TOTAL BRT] :: ", config.Bsrr.Rewards)
-	fmt.Println("[TOTAL BRT >> TEMP] :: ", temp)
+	// fmt.Println("[TOTAL BRT] :: ", config.Bsrr.Rewards)
+	// fmt.Println("[TOTAL BRT >> TEMP] :: ", temp)
 
-	// Accumulate the rewards for the miner and any included uncles
-	//reward := new(big.Int).Set(blockReward)
+	// // Accumulate the rewards for the miner and any included uncles
+	// //reward := new(big.Int).Set(blockReward)
 
-	fmt.Println("[REWORD BRT] :: ", blockReward)
-	fmt.Println("[COINBASE] :: ", header.Coinbase)
+	// fmt.Println("[REWORD BRT] :: ", blockReward)
+	// fmt.Println("[COINBASE] :: ", header.Coinbase)
 
 	//state.AddStakeBalance(header.Coinbase, reward)
 	state.AddBalance(header.Coinbase, blockReward)
@@ -831,7 +831,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 	list.Finalize()
-	list.Print()
+	//list.Print()
 	return list, nil
 
 }
