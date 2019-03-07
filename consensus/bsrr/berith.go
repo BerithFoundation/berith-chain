@@ -949,7 +949,7 @@ func (c *BSRR) changeSigners(state *state.StateDB, chain consensus.ChainReader, 
 
 		}
 
-		if 0 > len(signers) {
+		if len(signers) > 0 {
 			snap.Signers = signers
 		}
 
