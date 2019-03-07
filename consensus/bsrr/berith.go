@@ -1,3 +1,14 @@
+/*
+d8888b. d88888b d8888b. d888888b d888888b db   db
+88  `8D 88'     88  `8D   `88'   `~~88~~' 88   88
+88oooY' 88ooooo 88oobY'    88       88    88ooo88
+88~~~b. 88~~~~~ 88`8b      88       88    88~~~88
+88   8D 88.     88 `88.   .88.      88    88   88
+Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
+
+	  copyrights by ibizsoftware 2018 - 2019
+*/
+
 package bsrr
 
 import (
@@ -619,11 +630,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	var snap *Snapshot
-	snap, err = c.snapshot(chain, header.Number.Uint64(), header.ParentHash, nil)
-	if err != nil {
-		return nil, err
-	}
+	c.changeSigners(state, chain, header)
 
 	//slashBadSigner(state, header, snap)
 	//stakingList.Print()
@@ -910,6 +917,40 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		list.SetInfo(input)
 	}
 	return c.slashBadSigner(chain, state, header, list)
+}
+
+func (c *BSRR) changeSigners(state *state.StateDB, chain consensus.ChainReader, header *types.Header) error {
+	number := header.Number.Uint64()
+	if number%c.config.Epoch == 0 {
+		target := chain.GetHeaderByNumber(header.Nonce.Uint64())
+		if target == nil {
+			return errors.New("unknown ancestor")
+		}
+		list, err := c.getStakingList(state, chain, target.Number.Uint64(), target.Hash())
+		if err != nil {
+			return err
+		}
+		var snap *Snapshot
+		snap, err = c.snapshot(chain, number-1, header.ParentHash, nil)
+		if err != nil {
+			return err
+		}
+		signers := make(map[common.Address]struct{})
+		for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
+			var info staking.StakingInfo
+			info, err = list.GetInfoWithIndex(int(i))
+
+			signers[info.Address()] = struct{}{}
+
+		}
+
+		if 0 > len(signers) {
+			snap.Signers = signers
+		}
+
+		c.recents.Add(snap.Hash, snap)
+	}
+	return nil
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
