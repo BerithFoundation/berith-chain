@@ -630,10 +630,11 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	c.changeSigners(state, chain, header)
+	result := c.changeSigners(state, chain, header)
 
+	fmt.Println("RESULT ===>> ", result)
 	//slashBadSigner(state, header, snap)
-	//stakingList.Print()
+	stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -789,9 +790,9 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, state *state.StateDB,
 		return err
 	}
 	signers := snap.signers()
-	target := signers[number%uint64(len(signers))]
+	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
-	if bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
+	if number > 1 && bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
 		fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
 		state.AddBalance(target, state.GetStakeBalance(target))
 		state.SetStaking(target, big.NewInt(0))
@@ -922,7 +923,8 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 func (c *BSRR) changeSigners(state *state.StateDB, chain consensus.ChainReader, header *types.Header) error {
 	number := header.Number.Uint64()
 	if number%c.config.Epoch == 0 {
-		target := chain.GetHeaderByNumber(header.Nonce.Uint64())
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64())
+		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
 		if target == nil {
 			return errors.New("unknown ancestor")
 		}
