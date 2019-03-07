@@ -924,6 +924,9 @@ func (c *BSRR) changeSigners(state *state.StateDB, chain consensus.ChainReader, 
 	number := header.Number.Uint64()
 	if number%c.config.Epoch == 0 {
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64())
+		if parent == nil {
+			return errors.New("unknown parent")
+		}
 		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
 		if target == nil {
 			return errors.New("unknown ancestor")
