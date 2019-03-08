@@ -906,39 +906,38 @@ func (s signers) signersMap() map[common.Address]struct{} {
 }
 
 func (c *BSRR) getSigners(chain consensus.ChainReader, header *types.Header) signers {
-	number := header.Number.Uint64()
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
 	for i := 0; i < len(signers); i++ {
 		copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
 	}
-	if number%c.config.Epoch == 0 {
-		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64())
-		if parent == nil {
-			return signers
-		}
-		target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
-		if target == nil {
-			return signers
-		}
-		list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
-		if err != nil {
-			return signers
-		}
 
-		temp := make([]common.Address, 0)
-		for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
-			var info staking.StakingInfo
-			info, err = list.GetInfoWithIndex(int(i))
-
-			temp = append(temp, info.Address())
-
-		}
-
-		if len(temp) > 0 {
-			return temp
-		}
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return signers
 	}
+	target := chain.GetHeaderByNumber(parent.Nonce.Uint64())
+	if target == nil {
+		return signers
+	}
+	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
+	if err != nil {
+		return signers
+	}
+
+	temp := make([]common.Address, 0)
+	for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
+		var info staking.StakingInfo
+		info, err = list.GetInfoWithIndex(int(i))
+
+		temp = append(temp, info.Address())
+
+	}
+
+	if len(temp) > 0 {
+		return temp
+	}
+
 	return signers
 }
 
