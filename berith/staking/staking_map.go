@@ -134,7 +134,7 @@ func (list *StakingMap) sort() {
 	list.sortedList = sortedList
 }
 
-func (list *StakingMap) Copy() *StakingMap {
+func (list *StakingMap) Copy() StakingList {
 	return &StakingMap{
 		storage:    list.storage,
 		sortedList: list.sortedList,

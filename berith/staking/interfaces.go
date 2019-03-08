@@ -14,6 +14,7 @@ type StakingList interface {
 	Delete(address common.Address) error
 	Encode() ([]byte, error)
 	Decode(rlpData []byte) (StakingList, error)
+	Copy() StakingList
 	Len() int
 	Finalize()
 	Print()

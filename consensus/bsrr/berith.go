@@ -815,6 +815,8 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		blocks[i], blocks[len(blocks)-1-i] = blocks[len(blocks)-1-i], blocks[i]
 	}
 
+	list = list.Copy()
+
 	err := c.checkBlocks(chain, list, blocks)
 	if err != nil {
 		return nil, err
