@@ -770,38 +770,39 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 			return err
 		}
 
-		if msg.Base() != types.Stake && msg.Target() != types.Main {
-			continue
-		}
+		//only stake
+		if (msg.Base() == types.Main && msg.Target() == types.Stake) ||
+			(msg.Base() == types.Reward && msg.Target() ==types.Stake) &&
+			bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
 
-		//if !msg.Staking() && !bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
-		//	continue
-		//}
+			var info staking.StakingInfo
+			info, err = list.GetInfo(msg.From())
 
-		var info staking.StakingInfo
-		info, err = list.GetInfo(msg.From())
-
-		if err != nil {
-			return err
-		}
-
-		blockNumber := number
-		if info.BlockNumber().Cmp(blockNumber) > 0 {
-			blockNumber = info.BlockNumber()
-		}
-
-		value := msg.Value()
-
-		if msg.Base() == types.Stake && msg.Target() == types.Main {
-			list.Delete(msg.From())
-		} else if (msg.Base() == types.Main && msg.Target() ==types.Stake) && (msg.Base() == types.Reward && msg.Target() ==types.Stake) {
-			input := stakingInfo{
-				address:     msg.From(),
-				value:       new(big.Int).Add(info.Value(), value),
-				blockNumber: blockNumber,
+			if err != nil {
+				return err
 			}
 
-			list.SetInfo(input)
+			blockNumber := number
+			if info.BlockNumber().Cmp(blockNumber) > 0 {
+				blockNumber = info.BlockNumber()
+			}
+
+
+			if msg.Base() == types.Main && msg.Target() == types.Stake {
+				value := msg.Value()
+				input := stakingInfo{
+					address:     msg.From(),
+					value:       new(big.Int).Add(info.Value(), value),
+					blockNumber: blockNumber,
+				}
+
+				list.SetInfo(input)
+			}
+
+
+		} else if (msg.Base() == types.Stake && msg.Target() == types.Main) &&
+			bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
+			list.Delete(msg.From())
 		}
 
 		//if !msg.Staking() {
