@@ -618,7 +618,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	result := c.getSigners(chain, header.Number.Uint64(), header.ParentHash)
+	result := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 
 	fmt.Println("RESULT ===>> ", result)
 	//slashBadSigner(state, header, snap)
@@ -661,7 +661,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
-	signers := c.getSigners(chain, header.Number.Uint64(), header.ParentHash)
+	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 
 	if _, authorized := signers.signersMap()[signer]; !authorized {
 		return errUnauthorizedSigner
@@ -764,7 +764,7 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
 	number := header.Number.Uint64()
-	signers := c.getSigners(chain, header.Number.Uint64(), header.ParentHash)
+	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	target := signers[((number-1)%c.config.Epoch)%uint64(len(signers))]
 
 	if number > 1 && bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
