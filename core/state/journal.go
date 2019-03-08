@@ -136,6 +136,12 @@ type (
 		account *common.Address
 		prev    *big.Int
 	}
+
+	//brt staking change struct
+	rewardChange struct {
+		account *common.Address
+		prev    *big.Int
+	}
 )
 
 func (ch createObjectChange) revert(s *StateDB) {
@@ -238,10 +244,19 @@ func (ch addPreimageChange) dirtied() *common.Address {
 	return nil
 }
 
+//[Berith]
 func (ch stakingChange) revert(s *StateDB) {
 	s.getStateObject(*ch.account).setStaking(ch.prev)
 }
 
 func (ch stakingChange) dirtied() *common.Address {
+	return ch.account
+}
+
+func (ch rewardChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setReward(ch.prev)
+}
+
+func (ch rewardChange) dirtied() *common.Address {
 	return ch.account
 }

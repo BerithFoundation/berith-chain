@@ -16,7 +16,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
-	
+
 	// "bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 )
 
@@ -40,7 +40,8 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
-	staking bool `json:"staking"`
+	base  types.JobWallet `json:"base"`
+	target  types.JobWallet `json:"target"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -92,9 +93,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.staking)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.base, args.target)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.staking)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.base, args.target)
 }
 
 //NewPrivateBerithAPI make new instance of PrivateBerithAPI
@@ -106,40 +107,6 @@ func NewPrivateBerithAPI(b Backend, m *miner.Miner,nonceLock *AddrLocker) *Priva
 		nonceLock: nonceLock,
 	}
 }
-
-//Stake stake ether fo mining
-//func (s *PrivateBerithAPI) Stake(ctx context.Context, args SendTxArgs, passwd string) (common.Hash, error) {
-//	signed, err := s.signTransaction(ctx, &args, passwd)
-//	if err != nil {
-//		log.Warn("Failed transaction send attempt", "from", args.From, "to", args.To, "value", args.Value.ToInt(), "err", err)
-//		return common.Hash{}, err
-//	}
-//	return submitTransaction(ctx, s.backend, signed)
-//}
-//
-//// signTransaction sets defaults and signs the given transaction
-//// NOTE: the caller needs to ensure that the nonceLock is held, if applicable,
-//// and release it after the transaction has been submitted to the tx pool
-//func (s *PrivateBerithAPI) signTransaction(ctx context.Context, args *SendTxArgs, passwd string) (*types.Transaction, error) {
-//	// Look up the wallet containing the requested signer
-//	account := accounts.Account{Address: args.From}
-//	wallet, err := s.accountManager.Find(account)
-//	if err != nil {
-//		return nil, err
-//	}
-//	// Set some sanity defaults and terminate on failure
-//	if err := args.setDefaults(ctx, s.backend); err != nil {
-//		return nil, err
-//	}
-//	// Assemble the transaction and sign with the wallet
-//	tx := args.toTransaction()
-//
-//	var chainID *big.Int
-//	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
-//		chainID = config.ChainID
-//	}
-//	return wallet.SignTxWithPassphrase(account, passwd, tx, chainID)
-//}
 
 // submitTransaction is a helper function that submits tx to txPool and logs a message.
 func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (common.Hash, error) {
@@ -161,20 +128,54 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 }
 
 
-type StakingTxArgs struct {
+type WalletTxArgs struct {
 	From     common.Address  `json:"from"`
 	Value    *hexutil.Big    `json:"value"`
-	Staking    bool    `json:"staking"`
+}
+
+func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
+	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return (*hexutil.Big)(state.GetRewardBalance(address)), state.Error()
+}
+
+// RewardToStake
+func (s *PrivateBerithAPI) RewardToStake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
+	// Look up the wallet containing the requested signer
+	sendTx := new(SendTxArgs)
+
+	sendTx.From = args.From
+	sendTx.To = &args.From
+	sendTx.Value = args.Value
+	sendTx.base = types.Reward
+	sendTx.target = types.Stake
+
+	return s.sendTransaction(ctx, *sendTx)
+}
+
+// RewardToStake
+func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
+	// Look up the wallet containing the requested signer
+	sendTx := new(SendTxArgs)
+
+	sendTx.From = args.From
+	sendTx.To = &args.From
+	sendTx.Value = args.Value
+	sendTx.base = types.Reward
+	sendTx.target = types.Main
+
+	return s.sendTransaction(ctx, *sendTx)
 }
 
 // SendStaking creates a transaction for user staking
-func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (common.Hash, error) {
+func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
 	if s.miner.Mining() {
 		log.Info("Stop the mining job, Before conduct staking balance.")
 		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
 	}
-	
 
 	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
 		log.Info("Couldn't stake a zero(0) balance.")
@@ -187,15 +188,14 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args StakingTxArgs) (commo
 	sendTx.From = args.From
 	sendTx.To = &args.From
 	sendTx.Value = args.Value
-	sendTx.staking = args.Staking
+	sendTx.base = types.Main
+	sendTx.target = types.Stake
 	
 	return s.sendTransaction(ctx, *sendTx)
 }
 
 type StopStakingTxArgs struct {
 	From     common.Address  `json:"from"`
-	Value    *hexutil.Big    `json:"value"`
-	Staking    bool    `json:"staking"`
 }
 
 // SendStaking creates a transaction for user staking
@@ -205,14 +205,16 @@ func (s *PrivateBerithAPI) StopStaking(ctx context.Context, address common.Addre
 		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
 	}
 
+
+
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
 
 	sendTx.From = address
 	sendTx.To = &address
 	sendTx.Value = new(hexutil.Big)
-	sendTx.Value.UnmarshalText([]byte("0"))
-	sendTx.staking = false
+	sendTx.base = types.Stake
+	sendTx.target = types.Main
 
 	return s.sendTransaction(ctx, *sendTx)
 }

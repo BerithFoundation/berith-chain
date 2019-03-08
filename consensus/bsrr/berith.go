@@ -657,7 +657,8 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 	blockReward := BlockReward
 
 	//state.AddStakeBalance(header.Coinbase, reward)
-	state.AddBalance(header.Coinbase, blockReward)
+	state.AddRewardBalance(header.Coinbase, blockReward)
+	//state.AddBalance(header.Coinbase, blockReward)
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
@@ -769,9 +770,13 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 			return err
 		}
 
-		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+		if msg.Base() != types.Stake && msg.Target() != types.Main {
 			continue
 		}
+
+		//if !msg.Staking() && !bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+		//	continue
+		//}
 
 		var info staking.StakingInfo
 		info, err = list.GetInfo(msg.From())
@@ -787,12 +792,9 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 
 		value := msg.Value()
 
-		if !msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
-			// StopStaking()
+		if msg.Base() == types.Stake && msg.Target() == types.Main {
 			list.Delete(msg.From())
-
-		} else if msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
-			// Stake()
+		} else if (msg.Base() == types.Main && msg.Target() ==types.Stake) && (msg.Base() == types.Reward && msg.Target() ==types.Stake) {
 			input := stakingInfo{
 				address:     msg.From(),
 				value:       new(big.Int).Add(info.Value(), value),
@@ -801,6 +803,21 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 
 			list.SetInfo(input)
 		}
+
+		//if !msg.Staking() {
+		//	// StopStaking()
+		//	list.Delete(msg.From())
+		//
+		//} else if msg.Staking() && bytes.Equal(msg.From().Bytes(), msg.To().Bytes()){
+		//	// Stake()
+		//	input := stakingInfo{
+		//		address:     msg.From(),
+		//		value:       new(big.Int).Add(info.Value(), value),
+		//		blockNumber: blockNumber,
+		//	}
+		//
+		//	list.SetInfo(input)
+		//}
 	}
 	return nil
 }

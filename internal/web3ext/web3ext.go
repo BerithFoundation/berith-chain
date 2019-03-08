@@ -783,6 +783,25 @@ web3._extend({
         	params: 2,
         	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],        	
 		}),
+		new web3._extend.Method({
+			name: 'rewardToStake',
+			call: 'berith_rewardToStake',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'rewardToBalance',
+			call: 'berith_rewardToBalance',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRewardBalance',
+			call: 'berith_getRewardBalance',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
 	]
 });
 `

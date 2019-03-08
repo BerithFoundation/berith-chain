@@ -765,7 +765,8 @@ func opCall(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory 
 		gas += params.CallStipend
 	}
 	//ret, returnGas, err := interpreter.evm.Call(contract, toAddr, args, gas, value)
-	ret, returnGas, err := interpreter.evm.Call(contract, toAddr, args, gas, value, false)
+	//[Berith]
+	ret, returnGas, err := interpreter.evm.Call(contract, toAddr, args, gas, value, types.Main, types.Main)
 	if err != nil {
 		stack.push(interpreter.intPool.getZero())
 	} else {

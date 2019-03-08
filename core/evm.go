@@ -91,30 +91,40 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int) bool {
 }
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
-func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, staking bool) {
-	if sender == recipient {
-		if staking {
-			//start staking
+func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, base, target types.JobWallet) {
+	switch base {
+	case types.Main:
+		if target == types.Main {
+			db.SubBalance(sender, amount)
+			db.AddBalance(recipient, amount)
+		} else if target == types.Stake{
+			//스테이크 시
+			bal := db.GetBalance(sender)
+			if bal.Sign() == 0 {
+				return
+			}
+			//베이스 지갑 차감
 			db.SubBalance(sender, amount)
 
-			bal := db.GetStakeBalance(recipient)
-			sum := bal.Add(bal, amount)
+			//스테이크 지갑 증감
+			sbal := db.GetStakeBalance(recipient)
+			sum := sbal.Add(sbal, amount)
 			db.SetStaking(recipient, sum)
-
-		} else {
-			if amount.Cmp(big.NewInt(0)) == 0 {
-				
-				db.RemoveStakeBalance(sender, amount)
-				prevStaking := db.GetStakeBalance(recipient)
-				db.SetStaking(sender, amount)
-				db.AddBalance(sender, prevStaking)
-			}
-			//stop staking
-			//remove staking balance
-
 		}
-	} else {
-		db.SubBalance(sender, amount)
-		db.AddBalance(recipient, amount)
+
+		break
+	case types.Stake:
+		if target == types.Main {
+			//스테이크 풀시
+			db.RemoveStakeBalance(sender)
+		}
+		break
+	case types.Reward:
+		if target == types.Main {
+			db.RewardToMain(sender, amount, target)
+		} else if target == types.Stake {
+			db.RewardToStake(sender, amount, target)
+		}
+		break
 	}
 }

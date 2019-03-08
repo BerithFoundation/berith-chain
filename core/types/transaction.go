@@ -50,7 +50,8 @@ type txdata struct {
 	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
 	Amount       *big.Int        `json:"value"    gencodec:"required"`
 	Payload      []byte          `json:"input"    gencodec:"required"`
-	Staking      bool            `json:"staking"  gencodec:"required"` //brt :: staking txdata
+	Base      JobWallet            `json:"base"  gencodec:"required"` //[Berith] 작업 주체  ex) 스테이킹시 : Main
+	Target      JobWallet             `json:"target"  gencodec:"required"` //[Berith] 작업타겟 ex) 스테이킹시 : Stake
 
 	// Signature values
 	V *big.Int `json:"v" gencodec:"required"`
@@ -73,15 +74,16 @@ type txdataMarshaling struct {
 	S            *hexutil.Big
 }
 
-func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, staking bool) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, staking)
+//[Berith] Transaction
+func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target)
 }
 
-func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, staking bool) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, staking)
+func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, base, target)
 }
 
-func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, staking bool) *Transaction {
+func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -90,7 +92,8 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		Recipient:    to,
 		Payload:      data,
 		Amount:       new(big.Int),
-		Staking:      staking,
+		Base:		  base,
+		Target: 	  target,
 		GasLimit:     gasLimit,
 		Price:        new(big.Int),
 		V:            new(big.Int),
@@ -181,7 +184,8 @@ func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Pri
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool   { return true }
-func (tx *Transaction) Staking() bool      { return tx.data.Staking } //brt Staking
+func (tx *Transaction) Base() JobWallet      { return tx.data.Base } //[Berith] Tx JobWallet Base
+func (tx *Transaction) Target() JobWallet      { return tx.data.Target } //[Berith] Tx JobWallet Target
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -230,7 +234,8 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		amount:     tx.data.Amount,
 		data:       tx.data.Payload,
 		checkNonce: true,
-		staking:    tx.data.Staking,
+		base:    tx.data.Base,
+		target:    tx.data.Target,
 	}
 
 	var err error
@@ -397,7 +402,8 @@ type Message struct {
 	gasPrice   *big.Int
 	data       []byte
 	checkNonce bool
-	staking    bool
+	base 	   JobWallet
+	target 	   JobWallet
 }
 
 func NewMessage(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, checkNonce bool) Message {
@@ -421,4 +427,7 @@ func (m Message) Gas() uint64          { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
-func (m Message) Staking() bool        { return m.staking }
+//[Berith]
+func (m Message) Base() JobWallet { return m.base }
+func (m Message) Target() JobWallet { return m.target }
+

@@ -324,7 +324,7 @@ func (self *StateDB) HasSuicided(addr common.Address) bool {
  * SETTERS
  */
 
-// brt SetStaking adds StakeBalance
+// [Berith] SetStaking adds StakeBalance
 func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -332,7 +332,7 @@ func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
 	}
 }
 
-// [BRT] GetStakeBalance
+// [Berith] GetStakeBalance
 func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
@@ -340,6 +340,22 @@ func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	}
 	return common.Big0
 }
+// [BRT] RemoveStakeBalance
+func (self *StateDB) RemoveStakeBalance(addr common.Address) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.RemoveStakeBalance()
+	}
+}
+
+// [BRT] AddStakeBalance
+func (self *StateDB) AddStakeBalance(addr common.Address, amount *big.Int) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.AddStakeBalance(amount)
+	}
+}
+
 
 func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 	stateObject := self.getStateObject(addr)
@@ -355,21 +371,51 @@ func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 		StakeBalance: nil}
 }
 
-// [BRT] SubStakeBalance
-func (self *StateDB) RemoveStakeBalance(addr common.Address, amount *big.Int) {
+
+
+
+// [Berith] SetStaking adds SetReward
+func (self *StateDB) SetReward(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.RemoveStakeBalance(amount)
+		stateObject.SetReward(amount)
 	}
 }
 
-// [BRT] AddStakeBalance
-func (self *StateDB) AddStakeBalance(addr common.Address, amount *big.Int) {
+
+// [Berith] RewardToMain
+func (self *StateDB) RewardToMain(addr common.Address, amount *big.Int, target types.JobWallet) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.AddStakeBalance(amount)
+		stateObject.RewardToMain(amount, target)
 	}
 }
+// [Berith] RewardToStake
+func (self *StateDB) RewardToStake(addr common.Address, amount *big.Int, target types.JobWallet) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.RewardToStake(amount, target)
+	}
+}
+
+// [Berith] AddRewardBalance
+func (self *StateDB) AddRewardBalance(addr common.Address, amount *big.Int) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.AddRewardBalance(amount)
+	}
+}
+
+// [Berith] GetRewardBalance
+func (self *StateDB) GetRewardBalance(addr common.Address) *big.Int {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.RewardBalance()
+	}
+	return common.Big0
+}
+
+
 
 // AddBalance adds amount to the account associated with addr.
 func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {

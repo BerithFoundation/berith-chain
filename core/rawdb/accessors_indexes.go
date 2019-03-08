@@ -64,17 +64,17 @@ func DeleteTxLookupEntry(db DatabaseDeleter, hash common.Hash) {
 
 // ReadTransaction retrieves a specific transaction from the database, along with
 // its added positional metadata.
-func ReadTransaction(db DatabaseReader, hash common.Hash) (*types.Transaction, common.Hash, uint64, uint64, bool) {
+func ReadTransaction(db DatabaseReader, hash common.Hash) (*types.Transaction, common.Hash, uint64, uint64, types.JobWallet, types.JobWallet) {
 	blockHash, blockNumber, txIndex := ReadTxLookupEntry(db, hash)
 	if blockHash == (common.Hash{}) {
-		return nil, common.Hash{}, 0, 0, false
+		return nil, common.Hash{}, 0, 0, types.Main, types.Main
 	}
 	body := ReadBody(db, blockHash, blockNumber)
 	if body == nil || len(body.Transactions) <= int(txIndex) {
 		log.Error("Transaction referenced missing", "number", blockNumber, "hash", blockHash, "index", txIndex)
-		return nil, common.Hash{}, 0, 0, false
+		return nil, common.Hash{}, 0, 0, types.Main, types.Main
 	}
-	return body.Transactions[txIndex], blockHash, blockNumber, txIndex, body.Transactions[txIndex].Staking()
+	return body.Transactions[txIndex], blockHash, blockNumber, txIndex, body.Transactions[txIndex].Base(), body.Transactions[txIndex].Target()
 }
 
 // ReadReceipt retrieves a specific transaction receipt from the database, along with

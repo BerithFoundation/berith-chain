@@ -17,6 +17,7 @@
 package vm
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -35,7 +36,7 @@ type (
 	CanTransferFunc func(StateDB, common.Address, *big.Int) bool
 	// TransferFunc is the signature of a transfer function
 	//TransferFunc func(StateDB, common.Address, common.Address, *big.Int)
-	TransferFunc func(StateDB, common.Address, common.Address, *big.Int, bool)
+	TransferFunc func(StateDB, common.Address, common.Address, *big.Int, types.JobWallet, types.JobWallet)
 	// GetHashFunc returns the nth block hash in the blockchain
 	// and is used by the BLOCKHASH EVM op code.
 	GetHashFunc func(uint64) common.Hash
@@ -179,7 +180,7 @@ func (evm *EVM) Interpreter() Interpreter {
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
-func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, staking bool) (ret []byte, leftOverGas uint64, err error) {
+func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, base types.JobWallet, target types.JobWallet) (ret []byte, leftOverGas uint64, err error) {
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -213,7 +214,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		evm.StateDB.CreateAccount(addr)
 	}
 	//evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
-	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value, staking)
+	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value, base, target)
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
 	contract := NewContract(caller, to, value, gas)
@@ -397,7 +398,8 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		evm.StateDB.SetNonce(address, 1)
 	}
 	//evm.Transfer(evm.StateDB, caller.Address(), address, value)
-	evm.Transfer(evm.StateDB, caller.Address(), address, value, false)
+	//[Berith]
+	evm.Transfer(evm.StateDB, caller.Address(), address, value, types.Main, types.Main)
 
 	// initialise a new contract and set the code that is to be used by the
 	// EVM. The contract is a scoped environment for this execution context
