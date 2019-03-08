@@ -472,16 +472,16 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 		return errUnknownBlock
 	}
 
-	signers := c.getSigners(chain, header)
+	//signers := c.getSigners(chain, header)
 
 	// Resolve the authorization key and check against signers
-	signer, err := ecrecover(header, c.signatures)
-	if err != nil {
-		return err
-	}
-	if _, ok := signers.signersMap()[signer]; !ok {
-		return errUnauthorizedSigner
-	}
+	// signer, err := ecrecover(header, c.signatures)
+	// if err != nil {
+	// 	return err
+	// }
+	// if _, ok := signers.signersMap()[signer]; !ok {
+	// 	return errUnauthorizedSigner
+	// }
 
 	//[Berith] 동일한 계정이 연속적으로 블록을 쓸 수 있게 함
 	// for seen, recent := range snap.Recents {
@@ -494,15 +494,15 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	// }
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
 
-	if !c.fakeDiff {
-		inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
-		if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-			return errWrongDifficulty
-		}
-		if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-			return errWrongDifficulty
-		}
-	}
+	// if !c.fakeDiff {
+	// 	inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
+	// 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
+	// 		return errWrongDifficulty
+	// 	}
+	// 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
+	// 		return errWrongDifficulty
+	// 	}
+	// }
 	return nil
 }
 
