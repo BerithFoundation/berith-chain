@@ -765,7 +765,7 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
 	number := header.Number.Uint64()
 	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	target := signers[((number-1)%c.config.Epoch)%uint64(len(signers))]
+	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
 	if number > 1 && bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
 		fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
