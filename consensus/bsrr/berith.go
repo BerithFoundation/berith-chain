@@ -726,10 +726,9 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // current signer.
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 	signers := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
-	number := (parent.Number.Uint64() % c.config.Epoch) % uint64(len(signers))
-	signer, _ := ecrecover(parent, c.signatures)
+	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
-	if signers[number] == signer {
+	if signers[number] == c.signer {
 		return new(big.Int).Set(diffInTurn)
 	}
 	return new(big.Int).Set(diffNoTurn)
