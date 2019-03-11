@@ -618,7 +618,11 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	result := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	var result signers
+	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return nil, err
+	}
 	fmt.Println("##################FINALIZE THE BLOCK#################")
 	fmt.Println("NUMBER : ", header.Number.String())
 	fmt.Println("SIGNERS : [")
@@ -670,7 +674,10 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
-	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return err
+	}
 
 	if _, authorized := signers.signersMap()[signer]; !authorized {
 		return errUnauthorizedSigner
@@ -725,7 +732,10 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
-	signers := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
+	signers, err := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
+	if err != nil {
+		return new(big.Int).Set(diffNoTurn)
+	}
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
 	if signers[number] == c.signer {
@@ -772,7 +782,10 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
 	number := header.Number.Uint64()
-	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return err
+	}
 	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
 	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
@@ -915,7 +928,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
-func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash common.Hash) signers {
+func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash common.Hash) (signers, error) {
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
 	for i := 0; i < len(signers); i++ {
@@ -923,15 +936,15 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 	header := chain.GetHeader(hash, number)
 	if header == nil {
-		return signers
+		return nil, errors.New("unknown header")
 	}
 	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
 	if target == nil {
-		return signers
+		return nil, errors.New("unknown ancestor")
 	}
 	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
 	if err != nil {
-		return signers
+		return signers, err
 	}
 
 	temp := make([]common.Address, 0)
@@ -944,10 +957,10 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	if len(temp) > 0 {
-		return temp
+		return temp, nil
 	}
 
-	return signers
+	return signers, nil
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
