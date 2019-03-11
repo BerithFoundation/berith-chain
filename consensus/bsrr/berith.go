@@ -619,10 +619,19 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	stakingList.Finalize()
 
 	result := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-
-	fmt.Println("RESULT ===>> ", result)
-	//slashBadSigner(state, header, snap)
+	fmt.Println("##################FINALIZE THE BLOCK#################")
+	fmt.Println("NUMBER : ", header.Number.String())
+	fmt.Println("SIGNERS : [")
+	for _, signer := range result {
+		fmt.Println("\t", signer.Hex())
+	}
+	fmt.Println("]")
+	fmt.Println("COINBASE : ", header.Coinbase.Hex())
+	fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
 	stakingList.Print()
+	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
+	fmt.Println("PARENT : ", header.ParentHash.Hex())
+	fmt.Println("#####################################################")
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -768,7 +777,7 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
 	if number > 1 && bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
-		fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
+		//fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
 		//state.AddBalance(target, state.GetStakeBalance(target))
 		//state.SetStaking(target, big.NewInt(0))
 		list.Delete(target)
