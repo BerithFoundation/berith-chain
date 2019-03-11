@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -110,6 +111,9 @@ type infoForSort []stkInfo
 func (info infoForSort) Len() int { return len(info) }
 func (info infoForSort) Less(i, j int) bool {
 	if info[i].Value().Cmp(info[j].Value()) == 0 {
+		if info[i].BlockNumber().Cmp(info[j].BlockNumber()) == 0 {
+			return bytes.Compare(info[i].Address().Bytes(), info[j].Address().Bytes()) > 0
+		}
 		return info[i].BlockNumber().Cmp(info[j].BlockNumber()) < 0
 	}
 	return info[i].Value().Cmp(info[j].Value()) > 0
