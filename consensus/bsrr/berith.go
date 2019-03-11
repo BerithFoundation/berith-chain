@@ -693,7 +693,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		// It's not our turn explicitly to sign, delay it a bit
 		wiggle := time.Duration(len(signers.signersMap())/2+1) * wiggleTime
 		delay += time.Duration(rand.Int63n(int64(wiggle)))
-		delay += time.Duration(int64(c.config.Period))
+		//delay += time.Duration(int64(c.config.Period))
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
 	// Sign all the things!
@@ -775,7 +775,7 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 	signers := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
-	if number > 1 && bytes.Compare(target.Bytes(), header.Coinbase.Bytes()) != 0 {
+	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
 		//fmt.Println("BADSIGNER ==>> [", target.Hex(), ",", header.Coinbase.Hex(), "]")
 		//state.AddBalance(target, state.GetStakeBalance(target))
 		//state.SetStaking(target, big.NewInt(0))
