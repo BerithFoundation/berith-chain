@@ -19,7 +19,6 @@ package bsrr
 import (
 	"bytes"
 	"encoding/json"
-	"sort"
 
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -133,7 +132,11 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 
 	for _, header := range headers {
 		// Remove any votes on checkpoint blocks
-		number := header.Number.Uint64()
+		// if number%s.config.Epoch == 0 {
+		// 	snap.Votes = nil
+		// 	snap.Tally = make(map[common.Address]Tally)
+		// }
+		// Delete the oldest signer from the recent list to allow it signing again
 
 		// Resolve the authorization key and check against signers
 		signer, err := ecrecover(header, s.sigcache)
@@ -147,34 +150,7 @@ func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase
 
 		//[Berith] 투표내용을 블록넘버가 Epoch으로 나누어 떨어지는 경우에, 가장 많은 stakingList의 해쉬가 선택되고 singers를 로컬의 stakingList의
 		//스테이킹 총량순으로 Epoch개 만큼 선정하도록 수정
-		if (number+1)%s.config.Epoch == 0 {
 
-			target := chain.GetHeaderByNumber(header.Nonce.Uint64())
-
-			if target != nil {
-
-				stakingList, listErr := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
-
-				if listErr == nil && stakingList != nil {
-
-					signers := make(map[common.Address]struct{}, 0)
-
-					for i := 0; i < stakingList.Len() && uint64(i) < s.config.Epoch; i++ {
-						info, minerErr := stakingList.GetInfoWithIndex(i)
-
-						if minerErr != nil {
-							return nil, minerErr
-						}
-
-						signers[info.Address()] = struct{}{}
-					}
-
-					if len(signers) > 0 {
-						snap.Signers = signers
-					}
-				}
-			}
-		}
 	}
 
 	snap.Number += uint64(len(headers))
@@ -189,7 +165,7 @@ func (s *Snapshot) signers() []common.Address {
 	for sig := range s.Signers {
 		sigs = append(sigs, sig)
 	}
-	sort.Sort(signersAscending(sigs))
+	//sort.Sort(signersAscending(sigs))
 	return sigs
 }
 
@@ -199,5 +175,5 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	return (number % uint64(len(signers))) == uint64(offset)
+	return ((number % s.config.Epoch) % uint64(len(signers))) == uint64(offset)
 }
