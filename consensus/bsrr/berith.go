@@ -802,9 +802,13 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 			return err
 		}
 
-		//Staking 아닐시 Main -> Main, Reward -> Main
-		if (msg.Base() == types.Main && msg.Target() == types.Main) &&
-			(msg.Base() == types.Reward && msg.Target() == types.Main) &&
+		//Main -> Main (일반 TX)
+		if msg.Base() == types.Main && msg.Target() == types.Main{
+			continue
+		}
+
+		//Reward -> Main
+		if (msg.Base() == types.Reward && msg.Target() == types.Main) &&
 			bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
 			continue
 		}
@@ -835,8 +839,8 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 
 		list.SetInfo(input)
 	}
-	return nil
-	//return c.slashBadSigner(chain, header, list)
+
+	return c.slashBadSigner(chain, header, list)
 }
 
 type signers []common.Address
