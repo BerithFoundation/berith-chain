@@ -107,9 +107,9 @@ func (w *wizard) makeGenesis() {
 		// In the case of clique, configure the consensus parameters
 		genesis.Difficulty = big.NewInt(1)
 		genesis.Config.Bsrr = &params.BSRRConfig{
-			Period: 60,
+			Period: 30,
 			Epoch:  300,
-			Rewards:  new(big.Int).Mul(big.NewInt(50000000000), big.NewInt(1000000000000000000)),
+			Rewards:  big.NewInt(500),
 		}
 		fmt.Println()
 		fmt.Println("How many seconds should blocks take? (default = 15)")
