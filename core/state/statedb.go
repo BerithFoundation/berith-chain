@@ -368,7 +368,8 @@ func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 		Balance:common.Big0,
 		Root:emptyCode,
 		CodeHash: nil,
-		StakeBalance: nil}
+		StakeBalance: nil,
+		RewardBalance: nil}
 }
 
 
