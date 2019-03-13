@@ -23,7 +23,6 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus/misc"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
@@ -40,22 +39,20 @@ import (
 const (
 	checkpointInterval = 1024 // Number of blocks after which to save the vote snapshot to the database
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
+	inmemorySigners  =  128 * 3 // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
 var (
-	BlockReward = big.NewInt(5e+18)                                      // Block reward in wei for successfully mining a block
+	BlockReward = new(big.Int).Mul(big.NewInt(16), big.NewInt(1e+18))                                      // Block reward in wei for successfully mining a block
 	RewardBlock        = big.NewInt(500)
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
-
-	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
-	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 
@@ -231,7 +228,7 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 	//[Berith] 캐쉬 인스턴스 생성및 사이즈 지정
-	cache, _ := lru.NewARC(128)
+	cache, _ := lru.NewARC(inmemorySigners)
 
 	return &BSRR{
 		config:     conf,
@@ -368,83 +365,83 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 }
 
 // snapshot retrieves the authorization snapshot at a given point in time.
-func (c *BSRR) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
-	// Search for a snapshot in memory or on disk for checkpoints
-	var (
-		headers []*types.Header
-		snap    *Snapshot
-	)
-	for snap == nil {
-		// If an in-memory snapshot was found, use that
-		if s, ok := c.recents.Get(hash); ok {
-			snap = s.(*Snapshot)
-			break
-		}
-		// If an on-disk checkpoint snapshot can be found, use that
-		if number%checkpointInterval == 0 {
-			if s, err := loadSnapshot(c.config, c.signatures, c.db, hash); err == nil {
-				log.Trace("Loaded voting snapshot from disk", "number", number, "hash", hash)
-				snap = s
-				break
-			}
-		}
-		// If we're at an checkpoint block, make a snapshot if it's known
-		if number == 0 || (number%c.config.Epoch == 0 && chain.GetHeaderByNumber(number-1) == nil) {
-			checkpoint := chain.GetHeaderByNumber(number)
-			if checkpoint != nil {
-				hash := checkpoint.Hash()
-
-				signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
-				for i := 0; i < len(signers); i++ {
-					copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
-				}
-				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
-				if err := snap.store(c.db); err != nil {
-					return nil, err
-				}
-				log.Info("Stored checkpoint snapshot to disk", "number", number, "hash", hash)
-				break
-			}
-		}
-		// No snapshot for this header, gather the header and move backward
-		var header *types.Header
-		if len(parents) > 0 {
-			// If we have explicit parents, pick from there (enforced)
-			header = parents[len(parents)-1]
-			if header.Hash() != hash || header.Number.Uint64() != number {
-				return nil, consensus.ErrUnknownAncestor
-			}
-			parents = parents[:len(parents)-1]
-		} else {
-			// No explicit parents (or no more left), reach out to the database
-			header = chain.GetHeader(hash, number)
-			if header == nil {
-				return nil, consensus.ErrUnknownAncestor
-			}
-		}
-		headers = append(headers, header)
-		number, hash = number-1, header.ParentHash
-	}
-	// Previous snapshot found, apply any pending headers on top of it
-	for i := 0; i < len(headers)/2; i++ {
-		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
-	}
-
-	snap, err := snap.apply(chain, c.stakingDB, headers, c)
-	if err != nil {
-		return nil, err
-	}
-	c.recents.Add(snap.Hash, snap)
-
-	// If we've generated a new checkpoint snapshot, save to disk
-	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
-		if err = snap.store(c.db); err != nil {
-			return nil, err
-		}
-		log.Trace("Stored voting snapshot to disk", "number", snap.Number, "hash", snap.Hash)
-	}
-	return snap, err
-}
+//func (c *BSRR) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
+//	// Search for a snapshot in memory or on disk for checkpoints
+//	var (
+//		headers []*types.Header
+//		snap    *Snapshot
+//	)
+//	for snap == nil {
+//		// If an in-memory snapshot was found, use that
+//		if s, ok := c.recents.Get(hash); ok {
+//			snap = s.(*Snapshot)
+//			break
+//		}
+//		// If an on-disk checkpoint snapshot can be found, use that
+//		if number%checkpointInterval == 0 {
+//			if s, err := loadSnapshot(c.config, c.signatures, c.db, hash); err == nil {
+//				log.Trace("Loaded voting snapshot from disk", "number", number, "hash", hash)
+//				snap = s
+//				break
+//			}
+//		}
+//		// If we're at an checkpoint block, make a snapshot if it's known
+//		if number == 0 || (number%c.config.Epoch == 0 && chain.GetHeaderByNumber(number-1) == nil) {
+//			checkpoint := chain.GetHeaderByNumber(number)
+//			if checkpoint != nil {
+//				hash := checkpoint.Hash()
+//
+//				signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
+//				for i := 0; i < len(signers); i++ {
+//					copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
+//				}
+//				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
+//				if err := snap.store(c.db); err != nil {
+//					return nil, err
+//				}
+//				log.Info("Stored checkpoint snapshot to disk", "number", number, "hash", hash)
+//				break
+//			}
+//		}
+//		// No snapshot for this header, gather the header and move backward
+//		var header *types.Header
+//		if len(parents) > 0 {
+//			// If we have explicit parents, pick from there (enforced)
+//			header = parents[len(parents)-1]
+//			if header.Hash() != hash || header.Number.Uint64() != number {
+//				return nil, consensus.ErrUnknownAncestor
+//			}
+//			parents = parents[:len(parents)-1]
+//		} else {
+//			// No explicit parents (or no more left), reach out to the database
+//			header = chain.GetHeader(hash, number)
+//			if header == nil {
+//				return nil, consensus.ErrUnknownAncestor
+//			}
+//		}
+//		headers = append(headers, header)
+//		number, hash = number-1, header.ParentHash
+//	}
+//	// Previous snapshot found, apply any pending headers on top of it
+//	for i := 0; i < len(headers)/2; i++ {
+//		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
+//	}
+//
+//	snap, err := snap.apply(chain, c.stakingDB, headers, c)
+//	if err != nil {
+//		return nil, err
+//	}
+//	c.recents.Add(snap.Hash, snap)
+//
+//	// If we've generated a new checkpoint snapshot, save to disk
+//	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
+//		if err = snap.store(c.db); err != nil {
+//			return nil, err
+//		}
+//		log.Trace("Stored voting snapshot to disk", "number", snap.Number, "hash", snap.Hash)
+//	}
+//	return snap, err
+//}
 
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
@@ -691,7 +688,7 @@ func (c *BSRR) Close() error {
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	number := header.Number.Uint64()
-	if number < RewardBlock.Uint64(){
+	if number < config.Bsrr.Rewards.Uint64(){
 		return
 	}
 
