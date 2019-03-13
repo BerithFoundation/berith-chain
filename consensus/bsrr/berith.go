@@ -46,7 +46,7 @@ const (
 )
 
 var (
-	FrontierBlockReward = big.NewInt(5e+18)                                      // Block reward in wei for successfully mining a block
+	BlockReward = big.NewInt(5e+18)                                      // Block reward in wei for successfully mining a block
 	RewardBlock        = big.NewInt(500)
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
@@ -696,7 +696,7 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 	}
 
 	//[BERITH]갯수 제한 코드 필요
-	blockReward := FrontierBlockReward
+	blockReward := BlockReward
 
 	state.AddRewardBalance(header.Coinbase, blockReward)
 }
