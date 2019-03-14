@@ -15,6 +15,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"errors"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -558,24 +559,24 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	stakingList.Finalize()
 
-	// var result signers
-	// result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// fmt.Println("##################FINALIZE THE BLOCK#################")
-	// fmt.Println("NUMBER : ", header.Number.String())
-	// fmt.Println("SIGNERS : [")
-	// for _, signer := range result {
-	// 	fmt.Println("\t", signer.Hex())
-	// }
-	// fmt.Println("]")
-	// fmt.Println("COINBASE : ", header.Coinbase.Hex())
-	// fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
+	var result signers
+	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("##################FINALIZE THE BLOCK#################")
+	fmt.Println("NUMBER : ", header.Number.String())
+	fmt.Println("SIGNERS : [")
+	for _, signer := range result {
+		fmt.Println("\t", signer.Hex())
+	}
+	fmt.Println("]")
+	fmt.Println("COINBASE : ", header.Coinbase.Hex())
+	fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
 
-	// fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-	// fmt.Println("PARENT : ", header.ParentHash.Hex())
-	// fmt.Println("#####################################################")
+	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
+	fmt.Println("PARENT : ", header.ParentHash.Hex())
+	fmt.Println("#####################################################")
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 	// stakingList.Print()
@@ -668,6 +669,14 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
 	if signers[number] == c.signer {
+
+		fmt.Println("INTERN NODE")
+		fmt.Println("BLOCK CREATOR :: ", signers)
+		signer := signers[number]
+		fmt.Print("SIGNER :: ", signer)
+		fmt.Println("  NUMBER :: ", number)
+
+
 		return new(big.Int).Set(diffInTurn)
 	}
 	return new(big.Int).Set(diffNoTurn)
