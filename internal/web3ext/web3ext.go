@@ -115,18 +115,7 @@ web3._extend({
 const Bsrr_JS = `
 web3._extend({
 	property: 'bsrr',
-	methods: [
-		new web3._extend.Method({
-			name: 'getSnapshot',
-			call: 'bsrr_getSnapshot',
-			params: 1,
-			inputFormatter: [null]
-		}),
-		new web3._extend.Method({
-			name: 'getSnapshotAtHash',
-			call: 'bsrr_getSnapshotAtHash',
-			params: 1
-		}),
+	methods: [		
 		new web3._extend.Method({
 			name: 'getSigners',
 			call: 'bsrr_getSigners',
