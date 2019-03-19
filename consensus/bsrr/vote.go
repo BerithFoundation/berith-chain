@@ -85,11 +85,9 @@ func CalcR(votes *[]Vote, p *[]int) *[]int {
 	return &r
 }
 
-func GetSigners(seed int64, votes *[]Vote, r *[]int) *[]common.Address {
+func GetSigners(seed int64, votes *[]Vote, r *[]int, epoch uint64) *[]common.Address {
 	sigs := make([]common.Address, 0)
-
-
-	for i:=0; i<360; i++ {
+	for i:=0; uint64(i) < epoch; i++ {
 		rand.Seed(seed + int64(i))
 		seed := rand.Int63n(999999)
 		//seed := int64(876543)

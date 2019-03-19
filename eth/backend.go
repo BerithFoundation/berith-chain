@@ -137,9 +137,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New); stkErr != nil {
 		return nil, stkErr
 	}
-
 	engine := CreateConsensusEngine(ctx, chainConfig, &config.Ethash, config.MinerNotify, config.MinerNoverify, chainDb, stakingDB)
-
 	eth := &Ethereum{
 		config:         config,
 		chainDb:        chainDb,
@@ -155,6 +153,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 		stakingDB:      stakingDB,
 	}
+
+
 
 	log.Info("Initialising Ethereum protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 

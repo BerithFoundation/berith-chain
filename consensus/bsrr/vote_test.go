@@ -16,8 +16,6 @@ type VoteTest struct {
 	reward *big.Int //reward balance
 }
 
-
-
 func TestVoting(t *testing.T){
 
 	number := 100
@@ -25,7 +23,7 @@ func TestVoting(t *testing.T){
 	temps := make([]VoteTest, 0)
 
 	for i:=0; i<1360; i++ {
-		v := VoteTest{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000), big.NewInt(1), big.NewInt(100)}
+		v := VoteTest{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000000 + int64(i)), big.NewInt(1), big.NewInt(100)}
 		temps = append(temps, v)
 	}
 
@@ -53,7 +51,7 @@ func TestVoting(t *testing.T){
 
 		//p = append(p, int(temp))
 	}
-	//fmt.Println("P :: ", p)
+	fmt.Println("P :: ", p)
 
 	//R 계산
 	//r := make([]int, length)
@@ -84,7 +82,7 @@ func TestVoting(t *testing.T){
 
 
 	n := common.HexToAddress("0x2c21bf2f10eb55d538f1af154260025f605613283437d872f9ede4736b41a58d").Big().Int64()
-	fmt.Println(n)
+	//fmt.Println(n)
 
 	signers := make([]common.Address, 0)
 
@@ -103,10 +101,10 @@ func TestVoting(t *testing.T){
 	}
 
 
-	for _, sig := range signers {
-		fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-	}
-	fmt.Println("SIGNER :: ", signers)
+	//for _, sig := range signers {
+	//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
+	//}
+	//fmt.Println("SIGNER :: ", signers)
 
 
 
@@ -152,18 +150,20 @@ func TestVoting2(t *testing.T)  {
 	votes := make([]Vote, 0)
 
 	for i:=0; i<1360; i++ {
-		v := Vote{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000), big.NewInt(1), big.NewInt(100)}
+		v := Vote{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000000), big.NewInt(1), big.NewInt(100)}
 		votes = append(votes, v)
 	}
 
 	stotal := CalcS(&votes, number)
 	p := CalcP(&votes, stotal, number)
+	fmt.Println(*p)
 	r := CalcR(&votes, p)
 
 	n := common.HexToAddress("0x2c21bf2f10eb55d538f1af154260025f605613283437d872f9ede4736b41a58d").Big().Int64()
-	signers := GetSigners(n, &votes, r)
 
-	for _, sig := range *signers {
-		fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-	}
+	GetSigners(n, &votes, r, 20)
+
+	//for _, sig := range *signers {
+	//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
+	//}
 }
