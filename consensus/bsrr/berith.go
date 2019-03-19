@@ -12,6 +12,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"errors"
@@ -763,8 +764,10 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 
-
-	//list.Vote(chain, number, hash, c.config.Epoch)
+	header := chain.GetHeader(hash, number)
+	chainBlock := chain.(*core.BlockChain)
+	state, _ := chainBlock.StateAt(header.Root)
+	list.Vote(chain, state, number, hash, c.config.Epoch)
 	//list.Print()
 	return list, nil
 
@@ -879,7 +882,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	temp := make([]common.Address, 0)
-	for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
+	for i := uint64(0); i < uint64(list.Len()) && number % c.config.Epoch == 0; i++ {
 		var info staking.StakingInfo
 		info, err = list.GetInfoWithIndex(int(i))
 
