@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -107,8 +109,43 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, rlpVal)
 }
 
-func (list *StakingMap) Finalize() {
-	list.sort()
+func (list *StakingMap) Vote(chain consensus.ChainReader,stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64) {
+	kv := make(infoForSort, 0)
+	for _, v := range list.storage {
+		kv = append(kv, v)
+	}
+	sort.Sort(&kv)
+
+	sortedList := make([]common.Address, 0)
+
+	if number % epoch == 0 {
+		votes := make([]Vote, 0)
+		for _, info := range kv {
+			reward := stateDb.GetRewardBalance(info.Address())
+			v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
+			votes = append(votes, v)
+		}
+
+		if len(votes) > 0 {
+			stotal := CalcS(&votes, number)
+			p := CalcP(&votes, stotal, number)
+			r := CalcR(&votes, p)
+
+			//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
+			n := common.HexToAddress(hash.Hex()).Big().Int64()
+			sig := GetSigners(n, &votes, r, epoch)
+
+			for _, item := range *sig {
+				sortedList = append(sortedList, item)
+			}
+		}
+	} else {
+		for _, info := range kv {
+			sortedList = append(sortedList, info.Address())
+		}
+	}
+
+	list.sortedList = sortedList
 }
 
 type infoForSort []stkInfo
@@ -124,25 +161,6 @@ func (info infoForSort) Less(i, j int) bool {
 	return info[i].Value().Cmp(info[j].Value()) > 0
 }
 func (info infoForSort) Swap(i, j int) { info[i], info[j] = info[j], info[i] }
-
-func (list *StakingMap) sort() {
-	kv := make(infoForSort, 0)
-	for _, v := range list.storage {
-		kv = append(kv, v)
-	}
-	sort.Sort(&kv)
-
-	sortedList := make([]common.Address, 0)
-	for _, info := range kv {
-		//cnt := new(big.Int).Div(info.Value(), VoteRatio)
-		//for i := int64(0); cnt.Cmp(big.NewInt(i)) > 0; i++ {
-		//	sortedList = append(sortedList, info.Address())
-		//}
-		sortedList = append(sortedList, info.Address())
-	}
-
-	list.sortedList = sortedList
-}
 
 func (list *StakingMap) Copy() StakingList {
 	return &StakingMap{

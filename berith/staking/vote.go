@@ -1,4 +1,4 @@
-package bsrr
+package staking
 
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"

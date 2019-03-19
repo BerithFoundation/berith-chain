@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -16,7 +18,7 @@ type StakingList interface {
 	Decode(rlpData []byte) (StakingList, error)
 	Copy() StakingList
 	Len() int
-	Finalize()
+	Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64)
 	Print()
 }
 

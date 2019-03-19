@@ -12,7 +12,6 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"errors"
@@ -555,7 +554,8 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
-	stakingList.Finalize()
+
+	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -762,7 +762,9 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	if err != nil {
 		return nil, err
 	}
-	list.Finalize()
+
+
+	//list.Vote(chain, number, hash, c.config.Epoch)
 	//list.Print()
 	return list, nil
 
@@ -876,45 +878,16 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 		return signers, err
 	}
 
-	//[Berith] Get StateDb
-	chainblock := chain.(*core.BlockChain)
-	statedb, err := chainblock.StateAt(header.Root)
-
-	//temp := make([]common.Address, 0)
-	votes := make([]Vote, 0)
+	temp := make([]common.Address, 0)
 	for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
 		var info staking.StakingInfo
 		info, err = list.GetInfoWithIndex(int(i))
 
-		//temp = append(temp, info.Address())
-		//[Berith] Vote
-		if statedb != nil {
-			reward := statedb.GetRewardBalance(info.Address())
-			v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
-			votes = append(votes, v)
-		}
+		temp = append(temp, info.Address())
 	}
 
-	//if len(temp) > 0 {
-	//	return temp, nil
-	//}
-
-	if len(votes) > 0 {
-		stotal := CalcS(&votes, number)
-		p := CalcP(&votes, stotal, number)
-		r := CalcR(&votes, p)
-
-		epoch := c.config.Epoch
-		n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
-		sig := GetSigners(n, &votes, r, epoch)
-
-		//fmt.Println("SIGNERS : [")
-		//for _, sig := range *sig {
-		//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-		//}
-		//fmt.Println("]")
-
-		return  *sig, nil
+	if len(temp) > 0 {
+		return temp, nil
 	}
 
 	return signers, nil
