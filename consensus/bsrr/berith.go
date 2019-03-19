@@ -705,16 +705,16 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
-	number := header.Number.Uint64()
-	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	if err != nil {
-		return err
-	}
-	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
-
-	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
-		list.Delete(target)
-	}
+	//number := header.Number.Uint64()
+	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	//if err != nil {
+	//	return err
+	//}
+	//target := signers[(number%c.config.Epoch)%uint64(len(signers))]
+	//
+	//if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
+	//	list.Delete(target)
+	//}
 	return nil
 
 }
