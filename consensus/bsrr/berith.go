@@ -697,6 +697,10 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 	}
 
 	r := reward(number - config.Bsrr.Rewards.Uint64())
+	if r == 0 {
+		return
+	}
+
 	temp := r * 1e+10
 	blockReward := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 
