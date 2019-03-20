@@ -121,6 +121,11 @@ func (list *StakingMap) Vote(chain consensus.ChainReader,stateDb *state.StateDB,
 	if number % epoch == 0 {
 		votes := make([]Vote, 0)
 		for _, info := range kv {
+
+			if stateDb == nil {
+				break
+			}
+
 			reward := stateDb.GetRewardBalance(info.Address())
 			v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
 			votes = append(votes, v)
