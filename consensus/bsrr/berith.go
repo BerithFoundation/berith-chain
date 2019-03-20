@@ -882,7 +882,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	temp := make([]common.Address, 0)
-	for i := uint64(0); i < uint64(list.Len()) && number % c.config.Epoch == 0; i++ {
+	for i := uint64(0); i < uint64(list.Len()); i++ {
 		var info staking.StakingInfo
 		info, err = list.GetInfoWithIndex(int(i))
 
