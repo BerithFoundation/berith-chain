@@ -3,10 +3,12 @@ package staking
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"fmt"
+	"math"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"testing"
+	"time"
 )
 
 type VoteTest struct {
@@ -134,7 +136,7 @@ func TestVoting(t *testing.T){
 //ADV
 func fadvTest(number, snumber float64) float64 {
 
-	div := 1.2 * (10 ^ 6)
+	div := 1.2 * math.Pow(10, 6)
 
 	adv := (number - snumber) / div
 	if adv >= 1 {
@@ -166,4 +168,31 @@ func TestVoting2(t *testing.T)  {
 	//for _, sig := range *signers {
 	//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
 	//}
+}
+
+func TestReward(t *testing.T){
+	for i:=0; i<100000000; i+=10000 {
+		r := reward(uint64(i))
+
+		temp := r * 1e+10
+		re := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+		//re := big.NewInt(int64(temp))
+
+		fmt.Println(re)
+
+		time.Sleep(100)
+	}
+
+}
+
+func reward(number uint64) float64 {
+	up := 5.5 * 100 * math.Pow(10, 7.2)
+	down := float64(number) + math.Pow(10, 7.8)
+
+	y := up/down - 60.0
+
+	if y < 0 {
+		return float64(0)
+	}
+	return y
 }

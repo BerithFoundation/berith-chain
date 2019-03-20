@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -39,7 +40,6 @@ import (
 )
 
 const (
-	checkpointInterval = 1024 // Number of blocks after which to save the vote snapshot to the database
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySigners  =  128 * 3 // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
@@ -48,7 +48,6 @@ const (
 )
 
 var (
-	BlockReward = new(big.Int).Mul(big.NewInt(16), big.NewInt(1e+18))                                      // Block reward in wei for successfully mining a block
 	RewardBlock        = big.NewInt(500)
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
@@ -697,8 +696,9 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 		return
 	}
 
-	//[BERITH]갯수 제한 코드 필요
-	blockReward := BlockReward
+	r := reward(number - config.Bsrr.Rewards.Uint64())
+	temp := r * 1e+10
+	blockReward := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 
 	state.AddRewardBalance(header.Coinbase, blockReward)
 }
@@ -894,6 +894,18 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	return signers, nil
+}
+
+func reward(number uint64) float64 {
+	up := 5.5 * 100 * math.Pow(10, 7.2)
+	down := float64(number) + math.Pow(10, 7.8)
+
+	y := up/down - 60.0
+
+	if y < 0 {
+		return float64(0)
+	}
+	return y
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
