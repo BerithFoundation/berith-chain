@@ -2,6 +2,7 @@ package staking
 
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"math"
 	"math/big"
 	"math/rand"
 )
@@ -24,8 +25,8 @@ func (v *Vote) GetReward() float64 {
 }
 
 func (v *Vote) GetAdvantage(number, snumber float64) float64 {
-	div := 1.2 * (10 ^ 6)
-
+	//div := 1.2 * (10 ^ 6)
+	div := 1.2 * math.Pow(10, 6)
 	adv := (number - snumber) / div
 	if adv >= 1 {
 		return 1
