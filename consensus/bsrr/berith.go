@@ -12,6 +12,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"errors"
@@ -194,7 +195,6 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 type BSRR struct {
 	config *params.BSRRConfig // Consensus engine configuration parameters
 	db     ethdb.Database     // Database to store and retrieve snapshot checkpoints
-
 	//[BERITH] stakingDB clique 구조체에 추가
 	stakingDB staking.DataBase //stakingList를 저장하는 DB
 	cache     *lru.ARCCache    //stakingList를 저장하는 cache
@@ -246,7 +246,6 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
-
 	// Synchronize the engine.config and chainConfig.
 
 	return engine
@@ -496,7 +495,6 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
 func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error {
-
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	//header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -557,7 +555,8 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
-	stakingList.Finalize()
+
+	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -669,14 +668,11 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
 	if signers[number] == c.signer {
-
-		fmt.Println("INTERN NODE")
-		fmt.Println("BLOCK CREATOR :: ", signers)
-		signer := signers[number]
-		fmt.Print("SIGNER :: ", signer)
-		fmt.Println("  NUMBER :: ", number)
-
-
+		//fmt.Println("INTERN NODE")
+		//fmt.Println("BLOCK CREATOR :: ", signers)
+		//signer := signers[number]
+		//fmt.Print("SIGNER :: ", signer)
+		//fmt.Println("  NUMBER :: ", number)
 		return new(big.Int).Set(diffInTurn)
 	}
 	return new(big.Int).Set(diffNoTurn)
@@ -709,16 +705,16 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
-	number := header.Number.Uint64()
-	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	if err != nil {
-		return err
-	}
-	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
-
-	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
-		list.Delete(target)
-	}
+	//number := header.Number.Uint64()
+	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	//if err != nil {
+	//	return err
+	//}
+	//target := signers[(number%c.config.Epoch)%uint64(len(signers))]
+	//
+	//if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
+	//	list.Delete(target)
+	//}
 	return nil
 
 }
@@ -767,7 +763,11 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	if err != nil {
 		return nil, err
 	}
-	list.Finalize()
+
+	header := chain.GetHeader(hash, number)
+	chainBlock := chain.(*core.BlockChain)
+	state, _ := chainBlock.StateAt(header.Root)
+	list.Vote(chain, state, number, hash, c.config.Epoch)
 	//list.Print()
 	return list, nil
 
@@ -882,12 +882,11 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	temp := make([]common.Address, 0)
-	for i := uint64(0); i < uint64(list.Len()) && i < c.config.Epoch; i++ {
+	for i := uint64(0); i < uint64(list.Len()); i++ {
 		var info staking.StakingInfo
 		info, err = list.GetInfoWithIndex(int(i))
 
 		temp = append(temp, info.Address())
-
 	}
 
 	if len(temp) > 0 {
