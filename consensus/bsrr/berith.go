@@ -701,7 +701,10 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 		return
 	}
 
-	temp := r * 1e+10
+	//30초 기준 공식 이므로 Period 값에 맞게 고쳐야함.
+	d := 30.0 / float64(config.Bsrr.Period)
+	temp := r * 1e+10 / d
+
 	blockReward := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 
 	state.AddRewardBalance(header.Coinbase, blockReward)
@@ -902,7 +905,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 func reward(number uint64) float64 {
 	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := float64(number) + math.Pow(10, 7.8)
+	down := float64(number) + math.Pow(10, 7.6)
 
 	y := up/down - 60.0
 

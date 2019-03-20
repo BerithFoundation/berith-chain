@@ -171,10 +171,13 @@ func TestVoting2(t *testing.T)  {
 }
 
 func TestReward(t *testing.T){
+	period := 10
 	for i:=0; i<100000000; i+=10000 {
 		r := reward(uint64(i))
 
-		temp := r * 1e+10
+		d := 30.0 / float64(period)
+		temp := r * 1e+10 / d
+
 		re := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 		//re := big.NewInt(int64(temp))
 
@@ -187,7 +190,7 @@ func TestReward(t *testing.T){
 
 func reward(number uint64) float64 {
 	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := float64(number) + math.Pow(10, 7.8)
+	down := float64(number) + math.Pow(10, 7.6)
 
 	y := up/down - 60.0
 
