@@ -555,7 +555,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
-	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch)
+	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch, c.config.Period)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -696,13 +696,18 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 		return
 	}
 
-	r := reward(number - config.Bsrr.Rewards.Uint64())
+	//30초 기준 공식 이므로 Period 값에 맞게 고쳐야함.
+	d := 30.0 / float64(config.Bsrr.Period)
+
+	blockNumber := number - config.Bsrr.Rewards.Uint64()
+	x := float64(blockNumber) / d
+
+	r := reward(x)
 	if r == 0 {
 		return
 	}
 
-	//30초 기준 공식 이므로 Period 값에 맞게 고쳐야함.
-	d := 30.0 / float64(config.Bsrr.Period)
+
 	temp := r * 1e+10 / d
 
 	blockReward := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
@@ -774,7 +779,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	header := chain.GetHeader(hash, number)
 	chainBlock := chain.(*core.BlockChain)
 	state, _ := chainBlock.StateAt(header.Root)
-	list.Vote(chain, state, number, hash, c.config.Epoch)
+	list.Vote(chain, state, number, hash, c.config.Epoch, c.config.Period)
 	//list.Print()
 	return list, nil
 
@@ -903,9 +908,9 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	return signers, nil
 }
 
-func reward(number uint64) float64 {
+func reward(number float64) float64 {
 	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := float64(number) + math.Pow(10, 7.6)
+	down := number + math.Pow(10, 7.6)
 
 	y := up/down - 60.0
 

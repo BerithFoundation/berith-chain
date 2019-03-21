@@ -18,7 +18,7 @@ type StakingList interface {
 	Decode(rlpData []byte) (StakingList, error)
 	Copy() StakingList
 	Len() int
-	Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64)
+	Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64, period uint64)
 	Print()
 }
 

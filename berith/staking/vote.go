@@ -24,9 +24,11 @@ func (v *Vote) GetReward() float64 {
 	return float64(v.reward.Uint64())
 }
 
-func (v *Vote) GetAdvantage(number, snumber float64) float64 {
+func (v *Vote) GetAdvantage(number, snumber float64, perioid uint64) float64 {
 	//div := 1.2 * (10 ^ 6)
-	div := 1.2 * math.Pow(10, 6)
+	p := float64(30) / float64(perioid)
+	y := 1.2 * float64(p)
+	div := y * math.Pow(10, 6)
 	adv := (number - snumber) / div
 	if adv >= 1 {
 		return 1
@@ -43,12 +45,12 @@ func (v *Vote) GetBlockNumber() float64 {
 
 
 //S구하기
-func CalcS(votes *[]Vote, number uint64) float64 {
+func CalcS(votes *[]Vote, number, perioid uint64) float64 {
 	var stotal float64 = 0
 	for _, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber())
+		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
 		s := stake + (reward * 0.5) * (1 + adv)
 		stotal += s
 	}
@@ -56,13 +58,13 @@ func CalcS(votes *[]Vote, number uint64) float64 {
 }
 
 //P구하기
-func CalcP(votes *[]Vote, stotal float64, number uint64) *[]int {
+func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 	length := len(*votes)
 	p := make([]int, length)
 	for i, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber())
+		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
 		s := stake + (reward * 0.5) * (1 + adv)
 		temp:= s/ stotal * 1000000
 		if temp == 1000000 {

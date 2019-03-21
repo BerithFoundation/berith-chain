@@ -148,6 +148,7 @@ func fadvTest(number, snumber float64) float64 {
 
 func TestVoting2(t *testing.T)  {
 	number := uint64(100)
+	period := uint64(10)
 
 	votes := make([]Vote, 0)
 
@@ -156,26 +157,31 @@ func TestVoting2(t *testing.T)  {
 		votes = append(votes, v)
 	}
 
-	stotal := CalcS(&votes, number)
-	p := CalcP(&votes, stotal, number)
+	stotal := CalcS(&votes, number, period)
+	p := CalcP(&votes, stotal, number, period)
 	fmt.Println(*p)
 	r := CalcR(&votes, p)
 
 	n := common.HexToAddress("0x2c21bf2f10eb55d538f1af154260025f605613283437d872f9ede4736b41a58d").Big().Int64()
 
-	GetSigners(n, &votes, r, 20)
+	signers := GetSigners(n, &votes, r, 20)
 
-	//for _, sig := range *signers {
-	//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-	//}
+	for _, sig := range *signers {
+		fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
+	}
 }
 
 func TestReward(t *testing.T){
 	period := 10
-	for i:=0; i<100000000; i+=10000 {
-		r := reward(uint64(i))
+	for i:=0; i<315000000; i+=100000 {
 
 		d := 30.0 / float64(period)
+
+		blockNumber := i - period
+		x := float64(blockNumber) / d
+
+		r := reward(x)
+
 		temp := r * 1e+10 / d
 
 		re := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
@@ -188,9 +194,10 @@ func TestReward(t *testing.T){
 
 }
 
-func reward(number uint64) float64 {
+
+func reward(number float64) float64 {
 	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := float64(number) + math.Pow(10, 7.6)
+	down := number + math.Pow(10, 7.6)
 
 	y := up/down - 60.0
 
