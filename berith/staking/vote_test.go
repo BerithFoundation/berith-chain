@@ -2,6 +2,7 @@ package staking
 
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"crypto/sha256"
 	"fmt"
 	"math"
 	"math/big"
@@ -205,4 +206,27 @@ func reward(number float64) float64 {
 		return float64(0)
 	}
 	return y
+}
+
+
+func TestSha256(t *testing.T){
+	seed := int64(100)
+
+	for i:=16; i<20; i++{
+		a := []byte {byte(seed + int64(i))}
+		//sum := sha256.Sum256(a)
+		hash := sha256.New()
+		hash.Write(a)
+		md := hash.Sum(nil)
+
+		h := common.BytesToHash(md)
+		//mdStr := hex.EncodeToString(md)
+		n := common.HexToAddress(h.Hex()).Big().Int64()
+
+
+
+
+		fmt.Println(n)
+	}
+
 }

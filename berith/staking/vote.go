@@ -2,6 +2,7 @@ package staking
 
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"crypto/sha256"
 	"math"
 	"math/big"
 	"math/rand"
@@ -91,7 +92,21 @@ func CalcR(votes *[]Vote, p *[]int) *[]int {
 func GetSigners(seed int64, votes *[]Vote, r *[]int, epoch uint64) *[]common.Address {
 	sigs := make([]common.Address, 0)
 	for i:=0; uint64(i) < epoch; i++ {
-		rand.Seed(seed + int64(i))
+		if i == 0 {
+			rand.Seed(seed + int64(i))
+		} else {
+			a := []byte {byte(seed + int64(i))}
+			//sum := sha256.Sum256(a)
+			hash := sha256.New()
+			hash.Write(a)
+			md := hash.Sum(nil)
+
+			h := common.BytesToHash(md)
+			//mdStr := hex.EncodeToString(md)
+			newSeed := common.HexToAddress(h.Hex()).Big().Int64()
+			rand.Seed(newSeed)
+		}
+
 		seed := rand.Int63n(999999)
 		//seed := int64(876543)
 		//fmt.Println("SEED", seed)
