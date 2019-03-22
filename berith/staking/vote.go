@@ -76,7 +76,7 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 
 		fmt.Println("******************************LIST & P*********************************")
 		fmt.Print("[SIG] : ", vote.address.Hex())
-		fmt.Print("\t [P] : ", p[i])
+		fmt.Println("\t [P] : ", p[i])
 		fmt.Println("***********************************************************************")
 	}
 
