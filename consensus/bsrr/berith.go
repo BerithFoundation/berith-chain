@@ -724,6 +724,10 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 	}
 
 	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
+		fmt.Println(c.signer)
+		if !bytes.Equal(c.signer.Bytes(), header.Coinbase.Bytes()) {
+			fmt.Println("SLASH ==>> ", header.Coinbase.Hex(), target.Hex())
+		}
 		if state != nil {
 			state.AddBalance(target, state.GetStakeBalance(target))
 			state.SetStaking(target, big.NewInt(0))
