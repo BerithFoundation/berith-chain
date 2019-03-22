@@ -140,7 +140,7 @@ func (list *StakingMap) Vote(chain consensus.ChainReader,stateDb *state.StateDB,
 			n := common.HexToAddress(hash.Hex()).Big().Int64()
 			sig := GetSigners(n, &votes, r, epoch)
 
-			for i, item := range *sig {
+			for _, item := range *sig {
 				sortedList = append(sortedList, item)
 			}
 		}
