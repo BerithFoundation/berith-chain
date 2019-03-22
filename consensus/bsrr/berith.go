@@ -763,7 +763,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			list, err = c.stakingDB.GetStakingList(hash.Hex())
 
 			if err == nil {
-				fmt.Println("########LISTFROMDB#########")
+				fmt.Println("########LISTFROMDB[", number, "]#########")
 				break
 			}
 
