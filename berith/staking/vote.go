@@ -52,7 +52,7 @@ func CalcS(votes *[]Vote, number, perioid uint64) float64 {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
 		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
-		s := stake + (reward * 0.5) * (1 + adv)
+		s := (stake + (reward * 0.5)) * (1 + adv)
 		stotal += s
 	}
 	return stotal
@@ -66,7 +66,7 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
 		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
-		s := stake + (reward * 0.5) * (1 + adv)
+		s := (stake + (reward * 0.5)) * (1 + adv)
 		temp:= s/ stotal * 1000000
 		if temp == 1000000 {
 			temp = 999999
