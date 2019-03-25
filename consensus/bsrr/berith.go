@@ -673,8 +673,8 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 		fmt.Println("\t", val.Hex())
 	}
 	fmt.Println("]")
-	fmt.Println("PARENT : ", parent.ParentHash.Hex())
-	fmt.Println("BLOCK NUMBER : ", parent.Number.String())
+	fmt.Println("PARENT : ", parent.Hash().Hex())
+	fmt.Println("PARENT NUMBER : ", parent.Number.String())
 	fmt.Println("NUMBER : ", number)
 
 	if signers[number] == c.signer {
