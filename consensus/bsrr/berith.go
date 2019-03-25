@@ -557,19 +557,19 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch)
 
-	// var result signers
-	// result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// fmt.Println("##################FINALIZE THE BLOCK#################")
-	// fmt.Println("NUMBER : ", header.Number.String())
-	// fmt.Println("SIGNERS : [")
-	// for _, signer := range result {
-	// 	fmt.Println("\t", signer.Hex())
-	// }
-	// fmt.Println("]")
-	// fmt.Println("COINBASE : ", header.Coinbase.Hex())
+	var result signers
+	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("##################FINALIZE THE BLOCK#################")
+	fmt.Println("NUMBER : ", header.Number.String())
+	fmt.Println("SIGNERS : [")
+	for _, signer := range result {
+		fmt.Println("\t", signer.Hex())
+	}
+	fmt.Println("]")
+	fmt.Println("COINBASE : ", header.Coinbase.Hex())
 	// fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
 
 	// fmt.Println("DIFFICULTY : ", header.Difficulty.String())
@@ -613,7 +613,6 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
-	fmt.Println("SEAL#616", header.Number.Uint64()-1)
 	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
@@ -661,7 +660,6 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
-	fmt.Println("CalcDifficulty#664", parent.Number.String())
 	signers, err := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
 	if err != nil {
 		return new(big.Int).Set(diffNoTurn)
@@ -715,7 +713,6 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
 	number := header.Number.Uint64()
-	fmt.Println("slashBadSigner#718", header.Number.Uint64()-1)
 	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
@@ -932,14 +929,6 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	if len(temp) > 0 {
 		return temp, nil
 	}
-
-	fmt.Println("###########SIGNERS############")
-	fmt.Println("NUMBER", target.Number.String())
-	fmt.Println("SIGNERS : {")
-	for _, sn := range signers {
-		fmt.Println("\t", sn.Hex())
-	}
-	fmt.Println("}")
 
 	return signers, nil
 }
