@@ -570,11 +570,10 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 	fmt.Println("]")
 	fmt.Println("COINBASE : ", header.Coinbase.Hex())
-	// fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
+	fmt.Println("TARGET : ", result[(header.Number.Uint64()%c.config.Epoch)%uint64(len(result))].Hex())
 
-	// fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-	// fmt.Println("PARENT : ", header.ParentHash.Hex())
-	// fmt.Println("#####################################################")
+	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
+	fmt.Println("PARENT : ", header.ParentHash.Hex())
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 	// stakingList.Print()
