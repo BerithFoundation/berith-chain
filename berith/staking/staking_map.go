@@ -1,8 +1,6 @@
 package staking
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/consensus"
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -11,10 +9,12 @@ import (
 	"math/big"
 	"sort"
 
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
+	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
-
 
 //var (
 //	VoteRatio = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(1))
@@ -109,7 +109,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, rlpVal)
 }
 
-func (list *StakingMap) Vote(chain consensus.ChainReader,stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64) {
+func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64) {
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
 		kv = append(kv, v)
@@ -118,35 +118,29 @@ func (list *StakingMap) Vote(chain consensus.ChainReader,stateDb *state.StateDB,
 
 	sortedList := make([]common.Address, 0)
 
-	if number % epoch == 0 {
-		votes := make([]Vote, 0)
-		for _, info := range kv {
+	votes := make([]Vote, 0)
+	for _, info := range kv {
 
-			if stateDb == nil {
-				break
-			}
-
-			reward := stateDb.GetRewardBalance(info.Address())
-			v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
-			votes = append(votes, v)
+		if stateDb == nil {
+			break
 		}
 
-		if len(votes) > 0 {
-			stotal := CalcS(&votes, number)
-			p := CalcP(&votes, stotal, number)
-			r := CalcR(&votes, p)
+		reward := stateDb.GetRewardBalance(info.Address())
+		v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
+		votes = append(votes, v)
+	}
 
-			//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
-			n := common.HexToAddress(hash.Hex()).Big().Int64()
-			sig := GetSigners(n, &votes, r, epoch)
+	if len(votes) > 0 {
+		stotal := CalcS(&votes, number)
+		p := CalcP(&votes, stotal, number)
+		r := CalcR(&votes, p)
 
-			for _, item := range *sig {
-				sortedList = append(sortedList, item)
-			}
-		}
-	} else {
-		for _, info := range kv {
-			sortedList = append(sortedList, info.Address())
+		//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
+		n := common.HexToAddress(hash.Hex()).Big().Int64()
+		sig := GetSigners(n, &votes, r, epoch)
+
+		for _, item := range *sig {
+			sortedList = append(sortedList, item)
 		}
 	}
 
