@@ -667,12 +667,13 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
 	fmt.Println("##############CALC_DIFFICULTY##############")
-	fmt.Println("C.SIGNER : ", c.signer)
+	fmt.Println("C.SIGNER : ", c.signer.Hex())
 	fmt.Println("SIGNERS : [")
 	for _, val := range signers {
-		fmt.Println("\t", val)
+		fmt.Println("\t", val.Hex())
 	}
 	fmt.Println("]")
+	fmt.Println("BLOCK NUMBER : ", parent.Number.String())
 	fmt.Println("NUMBER : ", number)
 
 	if signers[number] == c.signer {
