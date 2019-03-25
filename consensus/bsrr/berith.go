@@ -808,6 +808,10 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	header := chain.GetHeader(hash, number)
 	chainBlock := chain.(*core.BlockChain)
 	state, _ := chainBlock.StateAt(header.Root)
+
+	fmt.Println("#########GETSTAKINLIST##########")
+	fmt.Println("NUMBER : ", number)
+	fmt.Println("HASH : ", hash.Hex())
 	list.Vote(chain, state, number, hash, c.config.Epoch)
 	if number%c.config.Epoch == 0 {
 		err := c.stakingDB.Commit(hash.Hex(), list)

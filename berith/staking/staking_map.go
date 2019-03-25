@@ -118,6 +118,10 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB
 
 	sortedList := make([]common.Address, 0)
 
+	fmt.Println("################VOTE#################")
+	fmt.Println("NUMBER : ", number)
+	fmt.Println("HASH : ", hash.Hex())
+
 	votes := make([]Vote, 0)
 	for _, info := range kv {
 
