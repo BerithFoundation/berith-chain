@@ -348,6 +348,11 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			commit(false, commitInterruptNewHead)
 
 		case head := <-w.chainHeadCh:
+			fmt.Println("#################INSERT_CHAIN##############")
+			fmt.Println("NUMBER : ", head.Block.Number().String())
+			fmt.Println("COINBASE : ", head.Block.Coinbase().Hex())
+			fmt.Println("HASH : ", head.Block.Hash().Hex())
+			fmt.Println("CURRENTBLOCK : ", w.chain.CurrentHeader().Hash().Hex())
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
