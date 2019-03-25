@@ -513,7 +513,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	header.Difficulty = c.CalcDifficulty(chain, uint64(0), parent)
 
 	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 nonce값을 현재 블록의 번호로 변경한다.
-	if number%c.config.Epoch == 0 {
+	if (number+1)%c.config.Epoch == 0 {
 		header.Nonce = types.EncodeNonce(number)
 	}
 
