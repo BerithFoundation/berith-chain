@@ -514,7 +514,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 
 	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 nonce값을 현재 블록의 번호로 변경한다.
 	if number%c.config.Epoch == 0 {
-		header.Nonce = types.EncodeNonce(number)
+		header.Nonce = types.EncodeNonce(number + 1)
 	}
 
 	// Ensure the extra data has all it's components
@@ -661,6 +661,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 	signers, err := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
 	if err != nil {
+		fmt.Println(err)
 		return new(big.Int).Set(diffNoTurn)
 	}
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
