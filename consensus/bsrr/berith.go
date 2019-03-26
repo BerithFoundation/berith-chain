@@ -661,21 +661,9 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 	signers, err := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
 	if err != nil {
-		fmt.Println(err)
 		return new(big.Int).Set(diffNoTurn)
 	}
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
-
-	fmt.Println("##############CALC_DIFFICULTY##############")
-	fmt.Println("C.SIGNER : ", c.signer.Hex())
-	fmt.Println("SIGNERS : [")
-	for _, val := range signers {
-		fmt.Println("\t", val.Hex())
-	}
-	fmt.Println("]")
-	fmt.Println("PARENT : ", parent.Hash().Hex())
-	fmt.Println("PARENT NUMBER : ", parent.Number.String())
-	fmt.Println("NUMBER : ", number)
 
 	if signers[number] == c.signer {
 		//fmt.Println("INTERN NODE")
@@ -736,9 +724,6 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 
 	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
 
-		if !bytes.Equal(c.signer.Bytes(), header.Coinbase.Bytes()) {
-			fmt.Println("SLASH ==>> ", header.Coinbase.Hex(), target.Hex())
-		}
 		if state != nil {
 			state.AddBalance(target, state.GetStakeBalance(target))
 			state.SetStaking(target, big.NewInt(0))
@@ -812,9 +797,6 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	chainBlock := chain.(*core.BlockChain)
 	state, _ := chainBlock.StateAt(header.Root)
 
-	fmt.Println("#########GETSTAKINLIST##########")
-	fmt.Println("NUMBER : ", number)
-	fmt.Println("HASH : ", hash.Hex())
 	list.Vote(chain, state, number, hash, c.config.Epoch)
 	if number%c.config.Epoch == 0 {
 		err := c.stakingDB.Commit(hash.Hex(), list)
