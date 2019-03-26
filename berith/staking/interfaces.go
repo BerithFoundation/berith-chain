@@ -1,9 +1,10 @@
 package staking
 
 import (
+	"math/big"
+
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 )

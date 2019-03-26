@@ -12,8 +12,6 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/core"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 	"bytes"
 	"errors"
 	"fmt"
@@ -22,6 +20,9 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+
+	"bitbucket.org/ibizsoftware/berith-chain/core"
+	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
@@ -36,19 +37,19 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 const (
-	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
-	inmemorySigners  =  128 * 3 // Number of recent vote snapshots to keep in memory
-	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
+	inmemorySnapshots  = 128     // Number of recent vote snapshots to keep in memory
+	inmemorySigners    = 128 * 3 // Number of recent vote snapshots to keep in memory
+	inmemorySignatures = 4096    // Number of recent block signatures to keep in memory
 
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
 var (
-	RewardBlock        = big.NewInt(500)
+	RewardBlock = big.NewInt(500)
 
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -240,7 +241,6 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	}
 
 }
-
 
 func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
 	engine := New(config, db)
@@ -550,12 +550,12 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
-	err = c.setStakingListWithTxs(chain, stakingList, txs, header)
+	err = c.setStakingListWithTxs(state, chain, stakingList, txs, header)
 	if err != nil {
 		return nil, err
 	}
 
-	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch, c.config.Period)
+	stakingList.Vote(chain, state, header.Number.Uint64(), header.Hash(), c.config.Epoch)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -574,7 +574,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
 	fmt.Println("PARENT : ", header.ParentHash.Hex())
-	fmt.Println("#####################################################")
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 	// stakingList.Print()
@@ -692,7 +691,7 @@ func (c *BSRR) Close() error {
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	number := header.Number.Uint64()
-	if number < config.Bsrr.Rewards.Uint64(){
+	if number < config.Bsrr.Rewards.Uint64() {
 		return
 	}
 
@@ -716,17 +715,26 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
-func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList) error {
-	//number := header.Number.Uint64()
-	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	//if err != nil {
-	//	return err
-	//}
-	//target := signers[(number%c.config.Epoch)%uint64(len(signers))]
-	//
-	//if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
-	//	list.Delete(target)
-	//}
+func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
+	number := header.Number.Uint64()
+	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	if err != nil {
+		return err
+	}
+	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
+
+	if err != nil {
+		return err
+	}
+
+	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
+
+		if state != nil {
+			state.AddBalance(target, state.GetStakeBalance(target))
+			state.SetStaking(target, big.NewInt(0))
+		}
+		list.Delete(target)
+	}
 	return nil
 
 }
@@ -737,6 +745,9 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		list   staking.StakingList
 		blocks []*types.Block
 	)
+
+	prevNum := number
+	prevHash := hash
 
 	for list == nil {
 		if val, ok := c.cache.Get(hash); ok {
@@ -750,19 +761,30 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			break
 		}
 
-		if number == 0 {
+		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
 			break
 		}
 
-		block := chain.GetBlock(hash, number)
+		if prevNum%c.config.Epoch == 0 {
+			var err error
+			list, err = c.stakingDB.GetStakingList(prevHash.Hex())
+
+			if err == nil {
+				break
+			}
+
+			list = nil
+		}
+
+		block := chain.GetBlock(prevHash, prevNum)
 		if block == nil {
 			return nil, errors.New("unknown anccesstor")
 		}
 
 		blocks = append(blocks, block)
-		number--
-		hash = block.ParentHash()
+		prevNum--
+		prevHash = block.ParentHash()
 	}
 
 	for i := 0; i < len(blocks)/2; i++ {
@@ -779,7 +801,14 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	header := chain.GetHeader(hash, number)
 	chainBlock := chain.(*core.BlockChain)
 	state, _ := chainBlock.StateAt(header.Root)
-	list.Vote(chain, state, number, hash, c.config.Epoch, c.config.Period)
+
+	list.Vote(chain, state, number, hash, c.config.Epoch)
+	if number%c.config.Epoch == 0 {
+		err := c.stakingDB.Commit(hash.Hex(), list)
+		if err != nil {
+			return nil, err
+		}
+	}
 	//list.Print()
 	return list, nil
 
@@ -792,7 +821,8 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 	}
 
 	for _, block := range blocks {
-		c.setStakingListWithTxs(chain, stakingList, block.Transactions(), block.Header())
+		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
+		c.slashBadSigner(chain, block.Header(), stakingList, nil)
 	}
 
 	bytes, err := stakingList.Encode()
@@ -815,7 +845,7 @@ func (info stakingInfo) Value() *big.Int         { return info.value }
 func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
 
 //[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
+func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
 	number := header.Number
 	for _, tx := range txs {
 		msg, err := tx.AsMessage(types.MakeSigner(chain.Config(), number))
@@ -824,7 +854,7 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 		}
 
 		//Main -> Main (일반 TX)
-		if msg.Base() == types.Main && msg.Target() == types.Main{
+		if msg.Base() == types.Main && msg.Target() == types.Main {
 			continue
 		}
 
@@ -861,7 +891,7 @@ func (c *BSRR) setStakingListWithTxs(chain consensus.ChainReader, list staking.S
 		list.SetInfo(input)
 	}
 
-	return c.slashBadSigner(chain, header, list)
+	return c.slashBadSigner(chain, header, list, state)
 }
 
 type signers []common.Address
