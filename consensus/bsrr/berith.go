@@ -555,7 +555,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
-	stakingList.Vote(chain, state, header.Number.Uint64()-1, header.ParentHash, c.config.Epoch)
+	stakingList.Vote(chain, state, header.Number.Uint64(), header.Hash(), c.config.Epoch)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -756,6 +756,9 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		blocks []*types.Block
 	)
 
+	prevNum := number
+	prevHash := hash
+
 	for list == nil {
 		if val, ok := c.cache.Get(hash); ok {
 			bytes := val.([]byte)
@@ -768,14 +771,14 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			break
 		}
 
-		if number == 0 {
+		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
 			break
 		}
 
-		if number%c.config.Epoch == 0 {
+		if prevNum%c.config.Epoch == 0 {
 			var err error
-			list, err = c.stakingDB.GetStakingList(hash.Hex())
+			list, err = c.stakingDB.GetStakingList(prevHash.Hex())
 
 			if err == nil {
 				break
@@ -784,14 +787,14 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			list = nil
 		}
 
-		block := chain.GetBlock(hash, number)
+		block := chain.GetBlock(prevHash, prevNum)
 		if block == nil {
 			return nil, errors.New("unknown anccesstor")
 		}
 
 		blocks = append(blocks, block)
-		number--
-		hash = block.ParentHash()
+		prevNum--
+		prevHash = block.ParentHash()
 	}
 
 	for i := 0; i < len(blocks)/2; i++ {
