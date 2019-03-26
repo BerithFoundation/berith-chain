@@ -3,6 +3,7 @@ package staking
 import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"crypto/sha256"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -72,6 +73,11 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 			temp = 999999
 		}
 		p[i] = int(temp)
+
+		fmt.Println("******************************LIST & P*********************************")
+		fmt.Print("[SIG] : ", vote.address.Hex())
+		fmt.Println("\t [P] : ", p[i])
+		fmt.Println("***********************************************************************")
 	}
 
 	return &p
