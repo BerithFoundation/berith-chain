@@ -172,10 +172,10 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
-	if s.miner.Mining() {
-		log.Info("Stop the mining job, Before conduct staking balance.")
-		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
-	}
+	//if s.miner.Mining() {
+	//	log.Info("Stop the mining job, Before conduct staking balance.")
+	//	return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
+	//}
 
 	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
 		log.Info("Couldn't stake a zero(0) balance.")
@@ -200,10 +200,10 @@ type StopStakingTxArgs struct {
 
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) StopStaking(ctx context.Context, address common.Address) (common.Hash, error) {
-	if s.miner.Mining() {
-		log.Info("Stop the mining job, Before conduct staking balance.")
-		return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
-	}
+	//if s.miner.Mining() {
+	//	log.Info("Stop the mining job, Before conduct staking balance.")
+	//	return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
+	//}
 
 
 

@@ -555,7 +555,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
-	stakingList.Vote(chain, state, header.Number.Uint64(), header.Hash(), c.config.Epoch)
+	stakingList.Vote(chain, state, header.Number.Uint64(), header.Hash(), c.config.Epoch, c.config.Period)
 
 	var result signers
 	result, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
@@ -802,7 +802,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	chainBlock := chain.(*core.BlockChain)
 	state, _ := chainBlock.StateAt(header.Root)
 
-	list.Vote(chain, state, number, hash, c.config.Epoch)
+	list.Vote(chain, state, number, hash, c.config.Epoch, c.config.Period)
 	if number%c.config.Epoch == 0 {
 		err := c.stakingDB.Commit(hash.Hex(), list)
 		if err != nil {
