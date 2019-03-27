@@ -473,7 +473,7 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	fmt.Println("HEADER NUMBER :: ", number)
 
 	chainBlock := chain.(*core.BlockChain)
-	block := chainBlock.GetBlock(header.Hash(), number.Uint64())
+	block := chainBlock.GetBlock(header.ParentHash, number.Uint64())
 	if block == nil {
 		return errors.New("block Error")
 	}
