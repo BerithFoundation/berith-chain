@@ -130,6 +130,9 @@ var (
 	// errRecentlySigned is returned if a header is signed by an authorized entity
 	// that already signed a header recently, thus is temporarily not allowed to.
 	errRecentlySigned = errors.New("recently signed")
+
+
+	errStakeValueError = errors.New("stake value Failure")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -463,10 +466,27 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // from.
 func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
-	number := header.Number.Uint64()
-	if number == 0 {
+	number := header.Number
+	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
+
+
+	chainBlock := chain.(*core.BlockChain)
+	block := chainBlock.GetBlock(header.Hash(), number.Uint64())
+
+	fmt.Println("HEADER NUMBER :: ", number)
+	fmt.Println("BLOCK NUMBER :: ", block.Number())
+
+	txs := block.Transactions()
+	for _, tx := range txs {
+		if tx.Base() == types.Main && tx.Target() == types.Stake {
+			if tx.Value().Cmp(c.config.StakeMinimum) == -1 {
+				return errStakeValueError
+			}
+		}
+	}
+
 
 	//signers := c.getSigners(chain, header)
 
