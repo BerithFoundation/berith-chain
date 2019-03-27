@@ -54,18 +54,28 @@ var DefaultConfig = Config{
 // persistence requirements.
 func DefaultDataDir() string {
 	// Try to place the data folder in the user's home dir
-	home := homeDir()
-	if home != "" {
+	dir := currentDir()
+	if dir != "" {
 		if runtime.GOOS == "darwin" {
-			return filepath.Join(home, "Library", "Ethereum")
+			return filepath.Join(dir, "Berith")
 		} else if runtime.GOOS == "windows" {
-			return filepath.Join(home, "AppData", "Roaming", "Ethereum")
+			return filepath.Join(dir, "Berith")
 		} else {
-			return filepath.Join(home, ".ethereum")
+			return filepath.Join(dir, ".clef")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later
 	return ""
+}
+
+
+func currentDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return homeDir()
+	}
+
+	return dir
 }
 
 func homeDir() string {

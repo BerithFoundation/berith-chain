@@ -509,18 +509,28 @@ func splitAndTrim(input string) []string {
 // persistence requirements.
 func DefaultConfigDir() string {
 	// Try to place the data folder in the user's home dir
-	home := homeDir()
-	if home != "" {
+	dir := currentDir()
+	if dir != "" {
 		if runtime.GOOS == "darwin" {
-			return filepath.Join(home, "Library", "Signer")
+			return filepath.Join(dir, "Berith")
 		} else if runtime.GOOS == "windows" {
-			return filepath.Join(home, "AppData", "Roaming", "Signer")
+			return filepath.Join(dir, "Berith")
 		} else {
-			return filepath.Join(home, ".clef")
+			return filepath.Join(dir, ".clef")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later
 	return ""
+}
+
+
+func currentDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return homeDir()
+	}
+
+	return dir
 }
 
 func homeDir() string {
@@ -532,6 +542,7 @@ func homeDir() string {
 	}
 	return ""
 }
+
 func readMasterKey(ctx *cli.Context, ui core.SignerUI) ([]byte, error) {
 	var (
 		file      string
