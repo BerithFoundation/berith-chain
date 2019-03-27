@@ -470,26 +470,6 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-	fmt.Println("HEADER NUMBER :: ", number)
-
-	chainBlock := chain.(*core.BlockChain)
-	block := chainBlock.GetBlock(header.ParentHash, number.Uint64())
-	if block == nil {
-		return errors.New("block Error")
-	}
-
-	fmt.Println("BLOCK NUMBER :: ", block.Number())
-
-	txs := block.Transactions()
-	for _, tx := range txs {
-		if tx.Base() == types.Main && tx.Target() == types.Stake {
-			if tx.Value().Cmp(c.config.StakeMinimum) == -1 {
-				return errStakeValueError
-			}
-		}
-	}
-
-
 	//signers := c.getSigners(chain, header)
 
 	// Resolve the authorization key and check against signers
@@ -565,6 +545,18 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+	//블록 만들기 전에 검증
+	number := header.Number
+	fmt.Println("HEADER NUMBER :: ", number)
+	for _, tx := range txs {
+		if tx.Base() == types.Main && tx.Target() == types.Stake {
+			if tx.Value().Cmp(c.config.StakeMinimum) == -1 {
+				return nil, errStakeValueError
+			}
+		}
+	}
+
+
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
 	accumulateRewards(chain.Config(), state, header, uncles)
 	//[Berith] stakingList 처리 로직 추가
