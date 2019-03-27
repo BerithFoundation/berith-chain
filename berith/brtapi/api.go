@@ -177,10 +177,11 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
-
-	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
-		log.Info("Couldn't stake a zero(0) balance.")
-		return 	common.Hash{}, errors.New("staking balance failed : 0 balance can't be staking")
+	config := s.backend.ChainConfig()
+	if args.Value.ToInt().Cmp(config.Bsrr.StakeLowest) <= -1 {
+		minimum := new(big.Int).Div(config.Bsrr.StakeLowest, big.NewInt(1e+18))
+		log.Info("The minimum number of stakes is ", minimum)
+		return 	common.Hash{}, errors.New("staking balance failed")
 	}
 
 	// Look up the wallet containing the requested signer
