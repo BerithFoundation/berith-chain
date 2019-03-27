@@ -76,6 +76,8 @@ var (
 	// than some meaningful limit a user might use. This is not a consensus error
 	// making the transaction invalid, rather a DOS protection.
 	ErrOversizedData = errors.New("oversized data")
+
+	ErrStakingBalance = errors.New("staking balance failed")
 )
 
 var (
@@ -605,6 +607,15 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if tx.Gas() < intrGas {
 		return ErrIntrinsicGas
 	}
+
+	//[BERITH]
+	minimum := pool.chainconfig.Bsrr.StakeMinimum
+	if tx.Base() == types.Main && tx.Target() == types.Stake {
+		if tx.Value().Cmp(minimum) == -1 {
+			return ErrStakingBalance
+		}
+	}
+
 	return nil
 }
 
