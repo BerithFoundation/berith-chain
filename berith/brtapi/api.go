@@ -198,10 +198,6 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	return s.sendTransaction(ctx, *sendTx)
 }
 
-type StopStakingTxArgs struct {
-	From     common.Address  `json:"from"`
-}
-
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 	// Look up the wallet containing the requested signer
