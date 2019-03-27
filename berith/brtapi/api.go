@@ -131,6 +131,8 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 type WalletTxArgs struct {
 	From     common.Address  `json:"from"`
 	Value    *hexutil.Big    `json:"value"`
+	Gas      *hexutil.Uint64 `json:"gas"`
+	GasPrice *hexutil.Big    `json:"gasPrice"`
 }
 
 func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
@@ -151,6 +153,8 @@ func (s *PrivateBerithAPI) RewardToStake(ctx context.Context, args WalletTxArgs)
 	sendTx.Value = args.Value
 	sendTx.base = types.Reward
 	sendTx.target = types.Stake
+	sendTx.Gas = args.Gas
+	sendTx.GasPrice = args.GasPrice
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -165,6 +169,8 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 	sendTx.Value = args.Value
 	sendTx.base = types.Reward
 	sendTx.target = types.Main
+	sendTx.Gas = args.Gas
+	sendTx.GasPrice = args.GasPrice
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -172,14 +178,9 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
-	//if s.miner.Mining() {
-	//	log.Info("Stop the mining job, Before conduct staking balance.")
-	//	return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
-	//}
-
 	if args.Value.ToInt().Cmp(big.NewInt(0)) <= 0 {
 		log.Info("Couldn't stake a zero(0) balance.")
-		return 	common.Hash{}, errors.New("stkaing balance failed : 0 balance can't be staking")
+		return 	common.Hash{}, errors.New("staking balance failed : 0 balance can't be staking")
 	}
 
 	// Look up the wallet containing the requested signer
@@ -190,6 +191,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	sendTx.Value = args.Value
 	sendTx.base = types.Main
 	sendTx.target = types.Stake
+	sendTx.Gas = args.Gas
+	sendTx.GasPrice = args.GasPrice
 	
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -199,22 +202,17 @@ type StopStakingTxArgs struct {
 }
 
 // SendStaking creates a transaction for user staking
-func (s *PrivateBerithAPI) StopStaking(ctx context.Context, address common.Address) (common.Hash, error) {
-	//if s.miner.Mining() {
-	//	log.Info("Stop the mining job, Before conduct staking balance.")
-	//	return 	common.Hash{}, errors.New("stkaing balance failed : need to stop mining")
-	//}
-
-
-
+func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
 
-	sendTx.From = address
-	sendTx.To = &address
+	sendTx.From = args.From
+	sendTx.To = &args.From
 	sendTx.Value = new(hexutil.Big)
 	sendTx.base = types.Stake
 	sendTx.target = types.Main
+	sendTx.Gas = args.Gas
+	sendTx.GasPrice = args.GasPrice
 
 	return s.sendTransaction(ctx, *sendTx)
 }
