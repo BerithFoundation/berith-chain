@@ -169,6 +169,7 @@ type BSRRConfig struct {
 	Period uint64 `json:"period"`
 	Epoch  uint64 `json:"epoch"`
 	Rewards *big.Int `json:"rewards"`
+	StakeMinimum *big.Int `json:"stakeminimum"`
 }
 
 func (b *BSRRConfig) String() string {

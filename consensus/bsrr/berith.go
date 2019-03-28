@@ -130,6 +130,9 @@ var (
 	// errRecentlySigned is returned if a header is signed by an authorized entity
 	// that already signed a header recently, thus is temporarily not allowed to.
 	errRecentlySigned = errors.New("recently signed")
+
+
+	errStakeValueError = errors.New("stake value Failure")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -463,11 +466,10 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // from.
 func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
-	number := header.Number.Uint64()
-	if number == 0 {
+	number := header.Number
+	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-
 	//signers := c.getSigners(chain, header)
 
 	// Resolve the authorization key and check against signers
