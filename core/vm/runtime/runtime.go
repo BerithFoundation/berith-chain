@@ -17,6 +17,7 @@
 package runtime
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"math"
 	"math/big"
 	"time"
@@ -165,6 +166,8 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 		input,
 		cfg.GasLimit,
 		cfg.Value,
+		types.Main,
+		types.Main,
 	)
 
 	return ret, leftOverGas, err
