@@ -940,6 +940,38 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	return signers, nil
 }
 
+func (c *BSRR)roundJoinRatio(chain consensus.ChainReader, number uint64, hash common.Hash, address common.Address) (map[common.Address]int, error) {
+	checkpoint := chain.GetHeaderByNumber(0)
+	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
+	for i := 0; i < len(signers); i++ {
+		copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
+	}
+	header := chain.GetHeader(hash, number)
+	if header == nil {
+		return nil, errors.New("unknown header")
+	}
+	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
+	if target == nil {
+		return nil, errors.New("unknown ancestor")
+	}
+	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	users := list.GetRoundJoinRatio()
+	if users == nil {
+		return nil, errors.New("not reward ratio")
+	}
+
+
+	rs := make(map[common.Address]int, 1)
+
+	p := (*users)[address]
+	rs[address] = (p + 1) /10000
+	return rs, nil
+}
+
 func reward(number float64) float64 {
 	up := 5.5 * 100 * math.Pow(10, 7.2)
 	down := number + math.Pow(10, 7.6)

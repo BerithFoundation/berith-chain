@@ -24,6 +24,7 @@ import (
 type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
+	users      *map[common.Address]int
 }
 type stkInfo struct {
 	StkAddress     common.Address `json:"address"`
@@ -132,8 +133,10 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB
 
 	if len(votes) > 0 {
 		stotal := CalcS(&votes, number, perioid)
-		p := CalcP(&votes, stotal, number, perioid)
-		r := CalcR(&votes, p)
+		//p := CalcP2(&votes, stotal, number, perioid)
+		//r := CalcR2(&votes, p)
+		list.users = CalcP2(&votes, stotal, number, perioid)
+		r := CalcR2(&votes, list.users)
 
 		//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
 		n := common.HexToAddress(hash.Hex()).Big().Int64()
@@ -146,6 +149,11 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB
 
 	list.sortedList = sortedList
 }
+
+func (list *StakingMap) GetRoundJoinRatio() *map[common.Address]int {
+	return list.users
+}
+
 
 type infoForSort []stkInfo
 
