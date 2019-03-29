@@ -21,6 +21,7 @@ type StakingList interface {
 	Len() int
 	Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64, period uint64)
 	Print()
+	GetRoundJoinRatio() *map[common.Address]int
 }
 
 type StakingInfo interface {

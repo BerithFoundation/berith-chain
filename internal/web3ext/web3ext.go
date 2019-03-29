@@ -137,6 +137,12 @@ web3._extend({
 			call: 'bsrr_discard',
 			params: 1
 		}),
+		new web3._extend.Method({
+			name: 'getRoundJoinRatio',
+			call: 'bsrr_getRoundJoinRatio',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
 	],
 	properties: [
 		new web3._extend.Property({

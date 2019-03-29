@@ -78,6 +78,27 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 	return signers, nil
 }
 
+func (api *API) GetRoundJoinRatio(address common.Address, number *rpc.BlockNumber) (map[common.Address]int, error) {
+	// Retrieve the requested block number (or current if none requested)
+	var header *types.Header
+	if number == nil || *number == rpc.LatestBlockNumber {
+		header = api.chain.CurrentHeader()
+	} else {
+		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	}
+	// Ensure we have an actually valid block and return the signers from its snapshot
+	if header == nil {
+		return nil, errUnknownBlock
+	}
+
+	user, err := api.bsrr.roundJoinRatio(api.chain, header.Number.Uint64(), header.Hash(), address)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 // GetSignersAtHash retrieves the list of authorized signers at the specified block.
 func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 	header := api.chain.GetHeaderByHash(hash)
