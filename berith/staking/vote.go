@@ -63,6 +63,7 @@ func CalcS(votes *[]Vote, number, perioid uint64) float64 {
 func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 	length := len(*votes)
 	p := make([]int, length)
+
 	for i, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
@@ -73,7 +74,6 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 			temp = 999999
 		}
 		p[i] = int(temp)
-
 		fmt.Println("******************************LIST & P*********************************")
 		fmt.Print("[SIG] : ", vote.address.Hex())
 		fmt.Println("\t [P] : ", p[i])
@@ -81,6 +81,46 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 	}
 
 	return &p
+}
+
+
+func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.Address]int {
+	length := len(*votes)
+
+	p := make(map[common.Address]int, length)
+
+	fmt.Println("******************************LIST & P*********************************")
+	for _, vote := range *votes {
+		stake := vote.GetStake()
+		reward := vote.GetReward()
+		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
+		s := (stake + (reward * 0.5)) * (1 + adv)
+		temp:= s/ stotal * 1000000
+		if temp == 1000000 {
+			temp = 999999
+		}
+		p[vote.address] = int(temp)
+		fmt.Print("[SIG] : ", vote.address.Hex())
+		fmt.Println("\t [P] : ", p[vote.address])
+	}
+
+	fmt.Println("***********************************************************************")
+
+	return &p
+}
+
+
+func CalcR2(votes *[]Vote, p *map[common.Address]int) *[]int {
+	length := len(*votes)
+	r := make([]int, 0)
+	for i:=0; i<length; i++{
+		r = append(r, 0)
+		for j:=0; j<=i; j++ {
+			addr := (*votes)[j].address
+			r[i] += (*p)[addr]
+		}
+	}
+	return &r
 }
 
 func CalcR(votes *[]Vote, p *[]int) *[]int {
