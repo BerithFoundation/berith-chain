@@ -30,11 +30,13 @@ type stkInfo struct {
 	StkAddress     common.Address `json:"address"`
 	StkValue       *big.Int       `json:"value"`
 	StkBlockNumber *big.Int       `json:"blocknumber"`
+	StkReward      *big.Int       `json:"reward"`
 }
 
 func (s stkInfo) Address() common.Address { return s.StkAddress }
 func (s stkInfo) Value() *big.Int         { return s.StkValue }
 func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
+func (s stkInfo) Reward() *big.Int        { return s.StkReward }
 
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
@@ -58,12 +60,14 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 			StkAddress:     address,
 			StkValue:       big.NewInt(0),
 			StkBlockNumber: big.NewInt(0),
+			StkReward:      big.NewInt(0),
 		}, nil
 	}
 	return &stkInfo{
 		StkAddress:     address,
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
+		StkReward:      info.Reward(),
 	}, nil
 }
 
@@ -78,6 +82,7 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 		StkAddress:     info.Address(),
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
+		StkReward:      info.Reward(),
 	}
 	return nil
 }
@@ -94,7 +99,7 @@ func (list *StakingMap) Delete(address common.Address) error {
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
 	for k, v := range list.storage {
-		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "]")
+		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
 	}
 	fmt.Println("==== sortedList ====")
 	for _, v := range list.sortedList {
@@ -153,7 +158,6 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB
 func (list *StakingMap) GetRoundJoinRatio() *map[common.Address]int {
 	return list.users
 }
-
 
 type infoForSort []stkInfo
 

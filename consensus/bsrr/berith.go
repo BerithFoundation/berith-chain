@@ -131,7 +131,6 @@ var (
 	// that already signed a header recently, thus is temporarily not allowed to.
 	errRecentlySigned = errors.New("recently signed")
 
-
 	errStakeValueError = errors.New("stake value Failure")
 )
 
@@ -546,7 +545,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
-	accumulateRewards(chain.Config(), state, header, uncles)
+	accumulateRewards(chain.Config(), state, header)
 	//[Berith] stakingList 처리 로직 추가
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
@@ -576,6 +575,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
 	fmt.Println("PARENT : ", header.ParentHash.Hex())
+	stakingList.Print()
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 	// stakingList.Print()
@@ -688,13 +688,10 @@ func (c *BSRR) Close() error {
 	return nil
 }
 
-// AccumulateRewards credits the coinbase of the given block with the mining
-// reward. The total reward consists of the static block reward and rewards for
-// included uncles. The coinbase of each uncle block is also rewarded.
-func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	number := header.Number.Uint64()
 	if number < config.Bsrr.Rewards.Uint64() {
-		return
+		return big.NewInt(0)
 	}
 
 	//30초 기준 공식 이므로 Period 값에 맞게 고쳐야함.
@@ -705,15 +702,21 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	r := reward(x)
 	if r == 0 {
-		return
+		return big.NewInt(0)
 	}
-
 
 	temp := r * 1e+10 / d
 
-	blockReward := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 
-	state.AddRewardBalance(header.Coinbase, blockReward)
+}
+
+// AccumulateRewards credits the coinbase of the given block with the mining
+// reward. The total reward consists of the static block reward and rewards for
+// included uncles. The coinbase of each uncle block is also rewarded.
+func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header) {
+
+	state.AddRewardBalance(header.Coinbase, getReward(config, header))
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
@@ -840,11 +843,13 @@ type stakingInfo struct {
 	address     common.Address
 	value       *big.Int
 	blockNumber *big.Int
+	reward      *big.Int
 }
 
 func (info stakingInfo) Address() common.Address { return info.address }
 func (info stakingInfo) Value() *big.Int         { return info.value }
 func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
+func (info stakingInfo) Reward() *big.Int        { return info.reward }
 
 //[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
 func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
@@ -888,6 +893,25 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			address:     msg.From(),
 			value:       new(big.Int).Add(info.Value(), value),
 			blockNumber: blockNumber,
+			reward:      info.Reward(),
+		}
+
+		list.SetInfo(input)
+	}
+
+	info, err := list.GetInfo(header.Coinbase)
+
+	if err != nil {
+		return err
+	}
+
+	if info.Value().Cmp(big.NewInt(0)) > 0 {
+
+		input := stakingInfo{
+			address:     info.Address(),
+			value:       info.Value(),
+			blockNumber: info.BlockNumber(),
+			reward:      new(big.Int).Add(info.Reward(), getReward(chain.Config(), header)),
 		}
 
 		list.SetInfo(input)
@@ -940,7 +964,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	return signers, nil
 }
 
-func (c *BSRR)roundJoinRatio(chain consensus.ChainReader, number uint64, hash common.Hash, address common.Address) (map[common.Address]int, error) {
+func (c *BSRR) roundJoinRatio(chain consensus.ChainReader, number uint64, hash common.Hash, address common.Address) (map[common.Address]int, error) {
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
 	for i := 0; i < len(signers); i++ {
@@ -964,11 +988,10 @@ func (c *BSRR)roundJoinRatio(chain consensus.ChainReader, number uint64, hash co
 		return nil, errors.New("not reward ratio")
 	}
 
-
 	rs := make(map[common.Address]int, 1)
 
 	p := (*users)[address]
-	rs[address] = (p + 1) /10000
+	rs[address] = (p + 1) / 10000
 	return rs, nil
 }
 
