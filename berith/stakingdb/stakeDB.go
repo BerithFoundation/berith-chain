@@ -5,6 +5,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 )
 
 type StakingDB struct {
@@ -19,6 +20,10 @@ type decodeFunc func(val []byte) (staking.StakingList, error)
 type encodeFunc func(list staking.StakingList) ([]byte, error)
 
 type createFunc func() staking.StakingList
+
+func (s *StakingDB) Iterator() iterator.Iterator {
+	return s.stakeDB.NewIterator()
+}
 
 /**
 DB Create
