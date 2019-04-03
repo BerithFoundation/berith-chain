@@ -9,10 +9,8 @@ import (
 	"math/big"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/consensus"
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-
 	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
@@ -115,7 +113,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, rlpVal)
 }
 
-func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64, perioid uint64) {
+func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash common.Hash, epoch uint64, perioid uint64) {
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
 		kv = append(kv, v)
@@ -127,11 +125,11 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB
 	votes := make([]Vote, 0)
 	for _, info := range kv {
 
-		if stateDb == nil {
-			break
+		reward := info.StkReward
+		if reward == nil {
+			reward = big.NewInt(0)
 		}
 
-		reward := stateDb.GetRewardBalance(info.Address())
 		v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
 		votes = append(votes, v)
 	}
