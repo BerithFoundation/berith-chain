@@ -28,6 +28,7 @@ type StakingInfo interface {
 	Address() common.Address
 	Value() *big.Int
 	BlockNumber() *big.Int
+	Reward() *big.Int
 }
 
 type DataBase interface {
