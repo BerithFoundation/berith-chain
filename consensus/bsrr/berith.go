@@ -664,7 +664,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		// It's not our turn explicitly to sign, delay it a bit
 		wiggle := time.Duration(len(signers.signersMap())/2+1) * wiggleTime
 		delay += time.Duration(rand.Int63n(int64(wiggle)))
-		delay += time.Duration(int64(c.config.Period))
+		delay += time.Duration(int64(c.config.Period)) * time.Second
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
 	// Sign all the things!
