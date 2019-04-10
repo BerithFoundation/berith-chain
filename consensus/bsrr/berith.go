@@ -734,6 +734,16 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 
 	miners := list.GetMiners()
 
+	fmt.Println("####### SINGER MAP #########")
+	for k, v := range signerMap {
+		fmt.Println("[", k, ",", v, "]")
+	}
+
+	fmt.Println("####### MINERS #########")
+	for k, v := range miners {
+		fmt.Println("[", k, ",", v, "]")
+	}
+
 	for k, _ := range signerMap {
 		_, ok := miners[k]
 		if !ok {

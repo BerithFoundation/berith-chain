@@ -118,6 +118,10 @@ func (list *StakingMap) Print() {
 	for _, v := range list.sortedList {
 		fmt.Println(v.Hex())
 	}
+	fmt.Println("====== MINERS ======")
+	for k, v := range list.miners {
+		fmt.Println("[", k, ",", v, "]")
+	}
 }
 
 //EncodeRLP is function to encode
