@@ -110,7 +110,7 @@ func (w *wizard) makeGenesis() {
 			Period:       30,
 			Epoch:        300,
 			Rewards:      big.NewInt(500),
-			StakeMinimum: big.NewInt(50000000000),
+			StakeMinimum: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
 		}
 		fmt.Println()
 		fmt.Println("How many seconds should blocks take? (default = 15)")
