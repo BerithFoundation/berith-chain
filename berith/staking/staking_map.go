@@ -123,7 +123,7 @@ func (list *StakingMap) Print() {
 //EncodeRLP is function to encode
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
-	var byteArr [][]byte
+	var byteArr [2][]byte
 
 	byteArr[0], _ = json.Marshal(list.storage)
 	byteArr[1], _ = json.Marshal(list.miners)
@@ -212,7 +212,7 @@ func Encode(stakingList StakingList) ([]byte, error) {
 }
 
 func Decode(rlpData []byte) (StakingList, error) {
-	var byteArr [][]byte
+	var byteArr [2][]byte
 	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
 		return nil, err
 	}
