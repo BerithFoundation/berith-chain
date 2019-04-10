@@ -120,7 +120,7 @@ func (list *StakingMap) Print() {
 	}
 	fmt.Println("====== MINERS ======")
 	for k, v := range list.miners {
-		fmt.Println("[", k, ",", v, "]")
+		fmt.Println("[", k.Hex(), ",", v, "]")
 	}
 }
 
