@@ -48,8 +48,9 @@ const (
 
 var (
 	RewardBlock = big.NewInt(500)
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
 
-	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
+	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
@@ -224,6 +225,14 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 		}
 	} else {
 		conf.Rewards = RewardBlock
+	}
+
+	if conf.StakeMinimum != nil {
+		if conf.StakeMinimum.Cmp(big.NewInt(0)) == 0 {
+			conf.StakeMinimum = StakeMinimum
+		}
+	} else {
+		conf.StakeMinimum = StakeMinimum
 	}
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
