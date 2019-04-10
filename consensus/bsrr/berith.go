@@ -726,7 +726,7 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 		return err
 	}
 
-	var signerMap map[common.Address]bool
+	signerMap := make(map[common.Address]bool)
 
 	for _, val := range signers {
 		signerMap[val] = true
