@@ -738,7 +738,16 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 			state.AddBalance(target, state.GetStakeBalance(target))
 			state.SetStaking(target, big.NewInt(0))
 		}
-		list.Delete(target)
+		info, err := list.GetInfo(target)
+		if err != nil {
+			return err
+		}
+		list.SetInfo(&stakingInfo{
+			address:     info.Address(),
+			value:       big.NewInt(0),
+			blockNumber: info.BlockNumber(),
+			reward:      info.Reward(),
+		})
 	}
 	return nil
 

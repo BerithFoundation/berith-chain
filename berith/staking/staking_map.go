@@ -74,7 +74,7 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 //SetInfo is function to set "staking info"
 func (list *StakingMap) SetInfo(info StakingInfo) error {
 
-	if info.Value().Cmp(big.NewInt(0)) < 1 {
+	if info.Value().Cmp(big.NewInt(0)) < 1 && info.Reward().Cmp(big.NewInt(0)) < 1 {
 		delete(list.storage, info.Address())
 	}
 
@@ -118,7 +118,9 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64, perioid uint64) {
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
-		kv = append(kv, v)
+		if v.Value().Cmp(big.NewInt(0)) > 0 {
+			kv = append(kv, v)
+		}
 	}
 	sort.Sort(&kv)
 
