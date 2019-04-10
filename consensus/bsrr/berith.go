@@ -853,7 +853,6 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
-		c.slashBadSigner(chain, block.Header(), stakingList, nil)
 	}
 
 	bytes, err := stakingList.Encode()
