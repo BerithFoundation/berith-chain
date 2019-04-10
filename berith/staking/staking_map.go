@@ -25,6 +25,7 @@ type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
 	users      *map[common.Address]int
+	miners     map[common.Address]bool
 }
 type stkInfo struct {
 	StkAddress     common.Address `json:"address"`
@@ -40,6 +41,18 @@ func (s stkInfo) Reward() *big.Int        { return s.StkReward }
 
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
+}
+
+func (list *StakingMap) SetMiner(address common.Address) {
+	list.miners[address] = true
+}
+
+func (list *StakingMap) InitMiner() {
+	list.miners = make(map[common.Address]bool)
+}
+
+func (list *StakingMap) GetMiners() map[common.Address]bool {
+	return list.miners
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
@@ -110,9 +123,12 @@ func (list *StakingMap) Print() {
 //EncodeRLP is function to encode
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
-	rlpVal, _ := json.Marshal(list.storage)
+	var byteArr [][]byte
+
+	byteArr[0], _ = json.Marshal(list.storage)
+	byteArr[1], _ = json.Marshal(list.miners)
 	//rlpVal[1], _ = json.Marshal(list.sortedList)
-	return rlp.Encode(w, rlpVal)
+	return rlp.Encode(w, byteArr)
 }
 
 func (list *StakingMap) Vote(chain consensus.ChainReader, stateDb *state.StateDB, number uint64, hash common.Hash, epoch uint64, perioid uint64) {
@@ -179,6 +195,7 @@ func (list *StakingMap) Copy() StakingList {
 	return &StakingMap{
 		storage:    list.storage,
 		sortedList: list.sortedList,
+		miners:     list.miners,
 	}
 }
 
@@ -195,16 +212,21 @@ func Encode(stakingList StakingList) ([]byte, error) {
 }
 
 func Decode(rlpData []byte) (StakingList, error) {
-	var btValue []byte
-	if err := rlp.DecodeBytes(rlpData, &btValue); err != nil {
+	var byteArr [][]byte
+	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
 		return nil, err
 	}
 
 	result := &StakingMap{
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
+		miners:     make(map[common.Address]bool),
 	}
-	if err := json.Unmarshal(btValue, &result.storage); err != nil {
+	if err := json.Unmarshal(byteArr[0], &result.storage); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(byteArr[1], &result.miners); err != nil {
 		return nil, err
 	}
 
@@ -217,5 +239,6 @@ func New() StakingList {
 	return &StakingMap{
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
+		miners:     make(map[common.Address]bool),
 	}
 }

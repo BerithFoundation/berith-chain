@@ -721,34 +721,41 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
-	number := header.Number.Uint64()
 	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
 	}
-	target := signers[(number%c.config.Epoch)%uint64(len(signers))]
 
-	if err != nil {
-		return err
+	var signerMap map[common.Address]bool
+
+	for _, val := range signers {
+		signerMap[val] = true
 	}
 
-	if number > 1 && !bytes.Equal(target.Bytes(), header.Coinbase.Bytes()) {
+	miners := list.GetMiners()
 
-		if state != nil {
-			state.AddBalance(target, state.GetStakeBalance(target))
-			state.SetStaking(target, big.NewInt(0))
+	for k, _ := range signerMap {
+		_, ok := miners[k]
+		if !ok {
+			if state != nil {
+				state.AddBalance(k, state.GetStakeBalance(k))
+				state.SetStaking(k, big.NewInt(0))
+			}
+			info, err := list.GetInfo(k)
+			if err != nil {
+				return err
+			}
+			list.SetInfo(&stakingInfo{
+				address:     info.Address(),
+				value:       big.NewInt(0),
+				blockNumber: info.BlockNumber(),
+				reward:      info.Reward(),
+			})
 		}
-		info, err := list.GetInfo(target)
-		if err != nil {
-			return err
-		}
-		list.SetInfo(&stakingInfo{
-			address:     info.Address(),
-			value:       big.NewInt(0),
-			blockNumber: info.BlockNumber(),
-			reward:      info.Reward(),
-		})
 	}
+
+	list.InitMiner()
+
 	return nil
 
 }
@@ -926,7 +933,11 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		list.SetInfo(input)
 	}
 
-	return c.slashBadSigner(chain, header, list, state)
+	list.SetMiner(header.Coinbase)
+	if header.Number.Uint64()%c.config.Epoch == 0 {
+		return c.slashBadSigner(chain, header, list, state)
+	}
+	return nil
 }
 
 type signers []common.Address
