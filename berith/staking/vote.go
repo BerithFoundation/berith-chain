@@ -1,22 +1,20 @@
 package staking
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
-)
 
+	"bitbucket.org/ibizsoftware/berith-chain/common"
+)
 
 type Vote struct {
 	address common.Address //address
-	stake *big.Int	//stake balance
-	block *big.Int //block number
-	reward *big.Int //reward balance
+	stake   *big.Int       //stake balance
+	block   *big.Int       //block number
+	reward  *big.Int       //reward balance
 }
-
 
 func (v *Vote) GetStake() float64 {
 	return float64(v.stake.Uint64())
@@ -45,7 +43,6 @@ func (v *Vote) GetBlockNumber() float64 {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-
 //S구하기
 func CalcS(votes *[]Vote, number, perioid uint64) float64 {
 	var stotal float64 = 0
@@ -69,53 +66,51 @@ func CalcP(votes *[]Vote, stotal float64, number, perioid uint64) *[]int {
 		reward := vote.GetReward()
 		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
 		s := (stake + (reward * 0.5)) * (1 + adv)
-		temp:= s/ stotal * 1000000
+		temp := s / stotal * 1000000
 		if temp == 1000000 {
 			temp = 999999
 		}
 		p[i] = int(temp)
-		fmt.Println("******************************LIST & P*********************************")
-		fmt.Print("[SIG] : ", vote.address.Hex())
-		fmt.Println("\t [P] : ", p[i])
-		fmt.Println("***********************************************************************")
+		// fmt.Println("******************************LIST & P*********************************")
+		// fmt.Print("[SIG] : ", vote.address.Hex())
+		// fmt.Println("\t [P] : ", p[i])
+		// fmt.Println("***********************************************************************")
 	}
 
 	return &p
 }
-
 
 func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.Address]int {
 	length := len(*votes)
 
 	p := make(map[common.Address]int, length)
 
-	fmt.Println("******************************LIST & P*********************************")
+	// fmt.Println("******************************LIST & P*********************************")
 	for _, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
 		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
 		s := (stake + (reward * 0.5)) * (1 + adv)
-		temp:= s/ stotal * 1000000
+		temp := s / stotal * 1000000
 		if temp == 1000000 {
 			temp = 999999
 		}
 		p[vote.address] = int(temp)
-		fmt.Print("[SIG] : ", vote.address.Hex())
-		fmt.Println("\t [P] : ", p[vote.address])
+		// fmt.Print("[SIG] : ", vote.address.Hex())
+		// fmt.Println("\t [P] : ", p[vote.address])
 	}
 
-	fmt.Println("***********************************************************************")
+	// fmt.Println("***********************************************************************")
 
 	return &p
 }
 
-
 func CalcR2(votes *[]Vote, p *map[common.Address]int) *[]int {
 	length := len(*votes)
 	r := make([]int, 0)
-	for i:=0; i<length; i++{
+	for i := 0; i < length; i++ {
 		r = append(r, 0)
-		for j:=0; j<=i; j++ {
+		for j := 0; j <= i; j++ {
 			addr := (*votes)[j].address
 			r[i] += (*p)[addr]
 		}
@@ -126,9 +121,9 @@ func CalcR2(votes *[]Vote, p *map[common.Address]int) *[]int {
 func CalcR(votes *[]Vote, p *[]int) *[]int {
 	length := len(*votes)
 	r := make([]int, 0)
-	for i:=0; i<length; i++{
+	for i := 0; i < length; i++ {
 		r = append(r, 0)
-		for j:=0; j<=i; j++ {
+		for j := 0; j <= i; j++ {
 			r[i] += (*p)[j]
 		}
 	}
@@ -137,11 +132,11 @@ func CalcR(votes *[]Vote, p *[]int) *[]int {
 
 func GetSigners(seed int64, votes *[]Vote, r *[]int, epoch uint64) *[]common.Address {
 	sigs := make([]common.Address, 0)
-	for i:=0; uint64(i) < epoch; i++ {
+	for i := 0; uint64(i) < epoch; i++ {
 		if i == 0 {
 			rand.Seed(seed + int64(i))
 		} else {
-			a := []byte {byte(seed + int64(i))}
+			a := []byte{byte(seed + int64(i))}
 			//sum := sha256.Sum256(a)
 			hash := sha256.New()
 			hash.Write(a)
