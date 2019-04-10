@@ -3,7 +3,7 @@ package stakingdb
 import (
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 )

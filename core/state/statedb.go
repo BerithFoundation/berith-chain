@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"

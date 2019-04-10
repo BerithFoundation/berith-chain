@@ -30,8 +30,8 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/fdlimit"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"

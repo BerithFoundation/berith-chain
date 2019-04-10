@@ -25,13 +25,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
 
 	"bitbucket.org/ibizsoftware/berith-chain/consensus/bsrr"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/brtapi"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/brtapi"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"

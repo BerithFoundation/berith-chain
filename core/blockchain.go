@@ -27,7 +27,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
 	"bitbucket.org/ibizsoftware/berith-chain/common/prque"

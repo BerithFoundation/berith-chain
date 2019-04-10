@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 )
 
