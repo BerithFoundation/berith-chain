@@ -77,7 +77,7 @@ func GetAPIs(apiBackend Backend) []rpc.API {
 		{
 			Namespace: "berith",
 			Version:   "1.0",
-			Service:   NewPublicEthereumAPI(apiBackend),
+			Service:   NewPublicBerithAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "berith",

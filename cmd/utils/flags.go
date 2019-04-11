@@ -573,7 +573,7 @@ var (
 	MetricsInfluxDBDatabaseFlag = cli.StringFlag{
 		Name:  "metrics.influxdb.database",
 		Usage: "InfluxDB database name to push reported metrics to",
-		Value: "geth",
+		Value: "berith",
 	}
 	MetricsInfluxDBUsernameFlag = cli.StringFlag{
 		Name:  "metrics.influxdb.username",
@@ -828,7 +828,7 @@ func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error
 	log.Warn("-------------------------------------------------------------------")
 	log.Warn("Referring to accounts by order in the keystore folder is dangerous!")
 	log.Warn("This functionality is deprecated and will be removed in the future!")
-	log.Warn("Please use explicit addresses! (can search via `geth account list`)")
+	log.Warn("Please use explicit addresses! (can search via `berith account list`)")
 	log.Warn("-------------------------------------------------------------------")
 
 	accs := ks.Accounts()
@@ -908,7 +908,7 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 	if lightClient {
 		ethPeers = 0
 	}
-	log.Info("Maximum peer count", "ETH", ethPeers, "LES", lightPeers, "total", cfg.MaxPeers)
+	log.Info("Maximum peer count", "BER", ethPeers, "total", cfg.MaxPeers)
 
 	if ctx.GlobalIsSet(MaxPendingPeersFlag.Name) {
 		cfg.MaxPendingPeers = ctx.GlobalInt(MaxPendingPeersFlag.Name)
@@ -1246,8 +1246,7 @@ func SetDashboardConfig(ctx *cli.Context, cfg *dashboard.Config) {
 	cfg.Refresh = ctx.GlobalDuration(DashboardRefreshFlag.Name)
 }
 
-// RegisterEthService adds an Ethereum client to the stack.
-func RegisterEthService(stack *node.Node, cfg *berith.Config) {
+func RegisterBerithService(stack *node.Node, cfg *berith.Config) {
 	var err error
 	if cfg.SyncMode == downloader.LightSync {
 		err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
@@ -1264,7 +1263,7 @@ func RegisterEthService(stack *node.Node, cfg *berith.Config) {
 		})
 	}
 	if err != nil {
-		Fatalf("Failed to register the Ethereum service: %v", err)
+		Fatalf("Failed to register the Berith service: %v", err)
 	}
 }
 
@@ -1289,7 +1288,7 @@ func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
 func RegisterEthStatsService(stack *node.Node, url string) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		// Retrieve both berith and les services
-		var ethServ *berith.Ethereum
+		var ethServ *berith.Berith
 		ctx.Service(&ethServ)
 
 		var lesServ *les.LightEthereum
@@ -1315,7 +1314,7 @@ func SetupMetrics(ctx *cli.Context) {
 
 		if enableExport {
 			log.Info("Enabling metrics export to InfluxDB")
-			go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "geth.", map[string]string{
+			go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "berith.", map[string]string{
 				"host": hosttag,
 			})
 		}
@@ -1411,11 +1410,11 @@ func MakeConsolePreloads(ctx *cli.Context) []string {
 // This is a temporary function used for migrating old command/flags to the
 // new format.
 //
-// e.g. geth account new --keystore /tmp/mykeystore --lightkdf
+// e.g. berith account new --keystore /tmp/mykeystore --lightkdf
 //
 // is equivalent after calling this method with:
 //
-// geth --keystore /tmp/mykeystore --lightkdf account new
+// berith --keystore /tmp/mykeystore --lightkdf account new
 //
 // This allows the use of the existing configuration functionality.
 // When all flags are migrated this function can be removed and the existing

@@ -75,15 +75,15 @@ type ethstatsConfig struct {
 	URL string `toml:",omitempty"`
 }
 
-type gethConfig struct {
-	Eth       berith.Config
+type berConfig struct {
+	Ber       berith.Config
 	Shh       whisper.Config
 	Node      node.Config
 	Ethstats  ethstatsConfig
 	Dashboard dashboard.Config
 }
 
-func loadConfig(file string, cfg *gethConfig) error {
+func loadConfig(file string, cfg *berConfig) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -104,14 +104,14 @@ func defaultNodeConfig() node.Config {
 	cfg.Version = params.VersionWithCommit(gitCommit)
 	cfg.HTTPModules = append(cfg.HTTPModules, "berith", "shh")
 	cfg.WSModules = append(cfg.WSModules, "berith", "shh")
-	cfg.IPCPath = "geth.ipc"
+	cfg.IPCPath = "ber.ipc"
 	return cfg
 }
 
-func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
+func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	// Load defaults.
-	cfg := gethConfig{
-		Eth:       berith.DefaultConfig,
+	cfg := berConfig{
+		Ber:       berith.DefaultConfig,
 		Shh:       whisper.DefaultConfig,
 		Node:      defaultNodeConfig(),
 		Dashboard: dashboard.DefaultConfig,
@@ -130,7 +130,7 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	if err != nil {
 		utils.Fatalf("Failed to create the protocol stack: %v", err)
 	}
-	utils.SetEthConfig(ctx, stack, &cfg.Eth)
+	utils.SetEthConfig(ctx, stack, &cfg.Ber)
 	if ctx.GlobalIsSet(utils.EthStatsURLFlag.Name) {
 		cfg.Ethstats.URL = ctx.GlobalString(utils.EthStatsURLFlag.Name)
 	}
@@ -154,9 +154,9 @@ func enableWhisper(ctx *cli.Context) bool {
 func makeFullNode(ctx *cli.Context) *node.Node {
 	stack, cfg := makeConfigNode(ctx)
 	if ctx.GlobalIsSet(utils.ConstantinopleOverrideFlag.Name) {
-		cfg.Eth.ConstantinopleOverride = new(big.Int).SetUint64(ctx.GlobalUint64(utils.ConstantinopleOverrideFlag.Name))
+		cfg.Ber.ConstantinopleOverride = new(big.Int).SetUint64(ctx.GlobalUint64(utils.ConstantinopleOverrideFlag.Name))
 	}
-	utils.RegisterEthService(stack, &cfg.Eth)
+	utils.RegisterBerithService(stack, &cfg.Ber)
 
 	if ctx.GlobalBool(utils.DashboardEnabledFlag.Name) {
 		utils.RegisterDashboardService(stack, &cfg.Dashboard, gitCommit)
@@ -189,8 +189,8 @@ func dumpConfig(ctx *cli.Context) error {
 	_, cfg := makeConfigNode(ctx)
 	comment := ""
 
-	if cfg.Eth.Genesis != nil {
-		cfg.Eth.Genesis = nil
+	if cfg.Ber.Genesis != nil {
+		cfg.Ber.Genesis = nil
 		comment += "# Note: this config doesn't contain the genesis block.\n\n"
 	}
 

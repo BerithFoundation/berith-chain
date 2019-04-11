@@ -49,7 +49,7 @@ const (
 
 // startBloomHandlers starts a batch of goroutines to accept bloom bit database
 // retrievals from possibly a range of filters and serving the data to satisfy.
-func (eth *Ethereum) startBloomHandlers(sectionSize uint64) {
+func (eth *Berith) startBloomHandlers(sectionSize uint64) {
 	for i := 0; i < bloomServiceThreads; i++ {
 		go func() {
 			for {

@@ -22,7 +22,7 @@ import (
 	"sort"
 
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	gethmetrics "bitbucket.org/ibizsoftware/berith-chain/metrics"
+	berithmetrics "bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics/influxdb"
 	swarmmetrics "bitbucket.org/ibizsoftware/berith-chain/swarm/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/swarm/tracing"
@@ -171,7 +171,7 @@ func main() {
 }
 
 func emitMetrics(ctx *cli.Context) error {
-	if gethmetrics.Enabled {
+	if berithmetrics.Enabled {
 		var (
 			endpoint = ctx.GlobalString(swarmmetrics.MetricsInfluxDBEndpointFlag.Name)
 			database = ctx.GlobalString(swarmmetrics.MetricsInfluxDBDatabaseFlag.Name)
@@ -179,7 +179,7 @@ func emitMetrics(ctx *cli.Context) error {
 			password = ctx.GlobalString(swarmmetrics.MetricsInfluxDBPasswordFlag.Name)
 			hosttag  = ctx.GlobalString(swarmmetrics.MetricsInfluxDBHostTagFlag.Name)
 		)
-		return influxdb.InfluxDBWithTagsOnce(gethmetrics.DefaultRegistry, endpoint, database, username, password, "swarm-smoke.", map[string]string{
+		return influxdb.InfluxDBWithTagsOnce(berithmetrics.DefaultRegistry, endpoint, database, username, password, "swarm-smoke.", map[string]string{
 			"host":     hosttag,
 			"version":  gitCommit,
 			"filesize": fmt.Sprintf("%v", filesize),

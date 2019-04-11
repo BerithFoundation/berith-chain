@@ -556,7 +556,7 @@ func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, da
 //
 // This gives context to the signed message and prevents signing of transactions.
 func SignHash(data []byte) ([]byte, string) {
-	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	msg := fmt.Sprintf("\x19Berith Signed Message:\n%d%s", len(data), data)
 	return crypto.Keccak256([]byte(msg)), msg
 }
 

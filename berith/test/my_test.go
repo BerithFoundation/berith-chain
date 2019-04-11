@@ -24,7 +24,7 @@ func (stk StakingInfo) Reward() *big.Int        { return stk.reward }
 
 func Test1(t *testing.T) {
 	db := new(stakingdb.StakingDB)
-	db.CreateDB("/Users/swk/clique/geth/stakingDB", staking.Decode, staking.Encode, staking.New)
+	db.CreateDB("/Users/swk/clique/berith/stakingDB", staking.Decode, staking.Encode, staking.New)
 
 	iter := db.Iterator()
 

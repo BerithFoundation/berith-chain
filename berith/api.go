@@ -46,32 +46,32 @@ import (
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related
 // information.
-type PublicEthereumAPI struct {
-	e *Ethereum
+type PublicBerithAPI struct {
+	e *Berith
 }
 
 // NewPublicEthereumAPI creates a new Ethereum protocol API for full nodes.
-func NewPublicEthereumAPI(e *Ethereum) *PublicEthereumAPI {
-	return &PublicEthereumAPI{e}
+func NewPublicBerithAPI(e *Berith) *PublicBerithAPI {
+	return &PublicBerithAPI{e}
 }
 
 // Etherbase is the address that mining rewards will be send to
-func (api *PublicEthereumAPI) Etherbase() (common.Address, error) {
+func (api *PublicBerithAPI) Berithbase() (common.Address, error) {
 	return api.e.Etherbase()
 }
 
 // Coinbase is the address that mining rewards will be send to (alias for Etherbase)
-func (api *PublicEthereumAPI) Coinbase() (common.Address, error) {
-	return api.Etherbase()
+func (api *PublicBerithAPI) Coinbase() (common.Address, error) {
+	return api.Berithbase()
 }
 
 // Hashrate returns the POW hashrate
-func (api *PublicEthereumAPI) Hashrate() hexutil.Uint64 {
+func (api *PublicBerithAPI) Hashrate() hexutil.Uint64 {
 	return hexutil.Uint64(api.e.Miner().HashRate())
 }
 
 // ChainId is the EIP-155 replay-protection chain id for the current ethereum chain config.
-func (api *PublicEthereumAPI) ChainId() hexutil.Uint64 {
+func (api *PublicBerithAPI) ChainId() hexutil.Uint64 {
 	chainID := new(big.Int)
 	if config := api.e.chainConfig; config.IsEIP155(api.e.blockchain.CurrentBlock().Number()) {
 		chainID = config.ChainID
@@ -82,11 +82,11 @@ func (api *PublicEthereumAPI) ChainId() hexutil.Uint64 {
 // PublicMinerAPI provides an API to control the miner.
 // It offers only methods that operate on data that pose no security risk when it is publicly accessible.
 type PublicMinerAPI struct {
-	e *Ethereum
+	e *Berith
 }
 
 // NewPublicMinerAPI create a new PublicMinerAPI instance.
-func NewPublicMinerAPI(e *Ethereum) *PublicMinerAPI {
+func NewPublicMinerAPI(e *Berith) *PublicMinerAPI {
 	return &PublicMinerAPI{e}
 }
 
@@ -98,11 +98,11 @@ func (api *PublicMinerAPI) Mining() bool {
 // PrivateMinerAPI provides private RPC methods to control the miner.
 // These methods can be abused by external users and must be considered insecure for use by untrusted users.
 type PrivateMinerAPI struct {
-	e *Ethereum
+	e *Berith
 }
 
 // NewPrivateMinerAPI create a new RPC service which controls the miner of this node.
-func NewPrivateMinerAPI(e *Ethereum) *PrivateMinerAPI {
+func NewPrivateMinerAPI(e *Berith) *PrivateMinerAPI {
 	return &PrivateMinerAPI{e: e}
 }
 
@@ -180,12 +180,12 @@ func (api *PrivateMinerAPI) GetHashrate() uint64 {
 // PrivateAdminAPI is the collection of Ethereum full node-related APIs
 // exposed over the private admin endpoint.
 type PrivateAdminAPI struct {
-	eth *Ethereum
+	eth *Berith
 }
 
 // NewPrivateAdminAPI creates a new API definition for the full node private
 // admin methods of the Ethereum service.
-func NewPrivateAdminAPI(eth *Ethereum) *PrivateAdminAPI {
+func NewPrivateAdminAPI(eth *Berith) *PrivateAdminAPI {
 	return &PrivateAdminAPI{eth: eth}
 }
 
@@ -273,12 +273,12 @@ func (api *PrivateAdminAPI) ImportChain(file string) (bool, error) {
 // PublicDebugAPI is the collection of Ethereum full node APIs exposed
 // over the public debugging endpoint.
 type PublicDebugAPI struct {
-	eth *Ethereum
+	eth *Berith
 }
 
 // NewPublicDebugAPI creates a new API definition for the full node-
 // related public debug methods of the Ethereum service.
-func NewPublicDebugAPI(eth *Ethereum) *PublicDebugAPI {
+func NewPublicDebugAPI(eth *Berith) *PublicDebugAPI {
 	return &PublicDebugAPI{eth: eth}
 }
 
@@ -311,12 +311,12 @@ func (api *PublicDebugAPI) DumpBlock(blockNr rpc.BlockNumber) (state.Dump, error
 // the private debugging endpoint.
 type PrivateDebugAPI struct {
 	config *params.ChainConfig
-	eth    *Ethereum
+	eth    *Berith
 }
 
 // NewPrivateDebugAPI creates a new API definition for the full node-related
 // private debug methods of the Ethereum service.
-func NewPrivateDebugAPI(config *params.ChainConfig, eth *Ethereum) *PrivateDebugAPI {
+func NewPrivateDebugAPI(config *params.ChainConfig, eth *Berith) *PrivateDebugAPI {
 	return &PrivateDebugAPI{config: config, eth: eth}
 }
 

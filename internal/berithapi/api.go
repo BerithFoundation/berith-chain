@@ -51,23 +51,23 @@ const (
 
 // PublicEthereumAPI provides an API to access Ethereum related information.
 // It offers only methods that operate on public data that is freely available to anyone.
-type PublicEthereumAPI struct {
+type PublicBerithAPI struct {
 	b Backend
 }
 
-// NewPublicEthereumAPI creates a new Ethereum protocol API.
-func NewPublicEthereumAPI(b Backend) *PublicEthereumAPI {
-	return &PublicEthereumAPI{b}
+
+func NewPublicBerithAPI(b Backend) *PublicBerithAPI {
+	return &PublicBerithAPI{b}
 }
 
 // GasPrice returns a suggestion for a gas price.
-func (s *PublicEthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
+func (s *PublicBerithAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	price, err := s.b.SuggestPrice(ctx)
 	return (*hexutil.Big)(price), err
 }
 
 // ProtocolVersion returns the current Ethereum protocol version this node supports
-func (s *PublicEthereumAPI) ProtocolVersion() hexutil.Uint {
+func (s *PublicBerithAPI) ProtocolVersion() hexutil.Uint {
 	return hexutil.Uint(s.b.ProtocolVersion())
 }
 
@@ -78,7 +78,7 @@ func (s *PublicEthereumAPI) ProtocolVersion() hexutil.Uint {
 // - highestBlock:  block number of the highest block header this node has received from peers
 // - pulledStates:  number of state entries processed until now
 // - knownStates:   number of known state entries that still need to be pulled
-func (s *PublicEthereumAPI) Syncing() (interface{}, error) {
+func (s *PublicBerithAPI) Syncing() (interface{}, error) {
 	progress := s.b.Downloader().Progress()
 
 	// Return not syncing if the synchronisation already completed
@@ -416,7 +416,7 @@ func (s *PrivateAccountAPI) SignTransaction(ctx context.Context, args SendTxArgs
 //
 // This gives context to the signed message and prevents signing of transactions.
 func signHash(data []byte) []byte {
-	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	msg := fmt.Sprintf("\x19Berith Signed Message:\n%d%s", len(data), data)
 	return crypto.Keccak256([]byte(msg))
 }
 
@@ -462,7 +462,7 @@ func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Byt
 		return common.Address{}, fmt.Errorf("signature must be 65 bytes long")
 	}
 	if sig[64] != 27 && sig[64] != 28 {
-		return common.Address{}, fmt.Errorf("invalid Ethereum signature (V is not 27 or 28)")
+		return common.Address{}, fmt.Errorf("invalid Berith signature (V is not 27 or 28)")
 	}
 	sig[64] -= 27 // Transform yellow paper V from 27/28 to 0/1
 

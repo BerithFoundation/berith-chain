@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// geth is the official command-line client for Ethereum.
+// berith is the official command-line client for Ethereum.
 package main
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"fmt"
 	"math"
 	"os"
@@ -29,27 +30,26 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
 	"bitbucket.org/ibizsoftware/berith-chain/console"
-	"bitbucket.org/ibizsoftware/berith-chain/berith"
-	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
 	"github.com/elastic/gosigar"
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 const (
-	clientIdentifier = "geth" // Client identifier to advertise over the network
+	clientIdentifier = "berith" // Client identifier to advertise over the network
 )
 
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
 	// The app that holds all commands and flags.
-	app = utils.NewApp(gitCommit, "the go-ethereum command line interface")
+	app = utils.NewApp(gitCommit, "the berith command line interface")
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
 		utils.IdentityFlag,
@@ -164,9 +164,9 @@ var (
 
 func init() {
 	// Initialize the CLI app and start Geth
-	app.Action = geth
+	app.Action = ber
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2013-2018 The go-ethereum Authors"
+	app.Copyright = "Copyright 2018-2019 The Berith Authors"
 	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		initCommand,
@@ -246,10 +246,10 @@ func main() {
 	}
 }
 
-// geth is the main entry point into the system if no special subcommand is ran.
+// berith is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
-func geth(ctx *cli.Context) error {
+func ber(ctx *cli.Context) error {
 	if args := ctx.Args(); len(args) > 0 {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
@@ -325,9 +325,9 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		if ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
 			utils.Fatalf("Light clients do not support mining")
 		}
-		var ethereum *berith.Ethereum
+		var ethereum *berith.Berith
 		if err := stack.Service(&ethereum); err != nil {
-			utils.Fatalf("Ethereum service not running: %v", err)
+			utils.Fatalf("Berith service not running: %v", err)
 		}
 		// Set the gas price to the limits from the CLI and start mining
 		gasprice := utils.GlobalBig(ctx, utils.MinerLegacyGasPriceFlag.Name)
