@@ -18,6 +18,7 @@
 package utils
 
 import (
+	"bitbucket.org/ibizsoftware/berith-chain/consensus/bsrr"
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
@@ -30,23 +31,21 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithstats"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/fdlimit"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus/clique"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus/ethash"
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/dashboard"
-	"bitbucket.org/ibizsoftware/berith-chain/berith"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/berithstats"
 	"bitbucket.org/ibizsoftware/berith-chain/les"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
@@ -59,7 +58,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/p2p/netutil"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	whisper "bitbucket.org/ibizsoftware/berith-chain/whisper/whisperv6"
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -1413,21 +1412,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		Fatalf("%v", err)
 	}
 	var engine consensus.Engine
-	if config.Clique != nil {
-		engine = clique.New(config.Clique, chainDb)
-	} else {
-		engine = ethash.NewFaker()
-		if !ctx.GlobalBool(FakePoWFlag.Name) {
-			engine = ethash.New(ethash.Config{
-				CacheDir:       stack.ResolvePath(berith.DefaultConfig.Ethash.CacheDir),
-				CachesInMem:    berith.DefaultConfig.Ethash.CachesInMem,
-				CachesOnDisk:   berith.DefaultConfig.Ethash.CachesOnDisk,
-				DatasetDir:     stack.ResolvePath(berith.DefaultConfig.Ethash.DatasetDir),
-				DatasetsInMem:  berith.DefaultConfig.Ethash.DatasetsInMem,
-				DatasetsOnDisk: berith.DefaultConfig.Ethash.DatasetsOnDisk,
-			}, nil, false)
-		}
-	}
+	engine = bsrr.New(config.Bsrr, chainDb)
 	if gcmode := ctx.GlobalString(GCModeFlag.Name); gcmode != "full" && gcmode != "archive" {
 		Fatalf("--%s must be either 'full' or 'archive'", GCModeFlag.Name)
 	}
