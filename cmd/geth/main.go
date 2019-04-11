@@ -65,12 +65,6 @@ var (
 		utils.DashboardAddrFlag,
 		utils.DashboardPortFlag,
 		utils.DashboardRefreshFlag,
-		utils.EthashCacheDirFlag,
-		utils.EthashCachesInMemoryFlag,
-		utils.EthashCachesOnDiskFlag,
-		utils.EthashDatasetDirFlag,
-		utils.EthashDatasetsInMemoryFlag,
-		utils.EthashDatasetsOnDiskFlag,
 		utils.TxPoolLocalsFlag,
 		utils.TxPoolNoLocalsFlag,
 		utils.TxPoolJournalFlag,
@@ -192,12 +186,7 @@ func init() {
 		consoleCommand,
 		attachCommand,
 		javascriptCommand,
-		// See misccmd.go:
-		makecacheCommand,
-		makedagCommand,
-		versionCommand,
 		bugCommand,
-		licenseCommand,
 		// See config.go
 		dumpConfigCommand,
 	}

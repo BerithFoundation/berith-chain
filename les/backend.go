@@ -111,7 +111,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightEthereum, error
 		peers:          peers,
 		reqDist:        newRequestDistributor(peers, quitSync),
 		accountManager: ctx.AccountManager,
-		engine:         berith.CreateConsensusEngine(ctx, chainConfig, &config.Ethash, nil, false, chainDb, stakingDB),
+		engine:         berith.CreateConsensusEngine(chainConfig, chainDb, stakingDB),
 		shutdownChan:   make(chan bool),
 		networkId:      config.NetworkId,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),

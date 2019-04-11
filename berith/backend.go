@@ -35,7 +35,6 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus/ethash"
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/bloombits"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
@@ -136,7 +135,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New); stkErr != nil {
 		return nil, stkErr
 	}
-	engine := CreateConsensusEngine(ctx, chainConfig, &config.Ethash, config.MinerNotify, config.MinerNoverify, chainDb, stakingDB)
+	engine := CreateConsensusEngine(chainConfig, chainDb, stakingDB)
 	eth := &Ethereum{
 		config:         config,
 		chainDb:        chainDb,
@@ -236,7 +235,7 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (berithdb.D
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Ethereum service
-func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
+func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
 	return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
 }
 

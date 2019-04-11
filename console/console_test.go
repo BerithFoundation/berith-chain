@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus/ethash"
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/jsre"
@@ -98,9 +97,6 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 	ethConf := &berith.Config{
 		Genesis:   core.DeveloperGenesisBlock(15, common.Address{}),
 		Etherbase: common.HexToAddress(testAddress),
-		Ethash: ethash.Config{
-			PowMode: ethash.ModeTest,
-		},
 	}
 	if confOverride != nil {
 		confOverride(ethConf)
