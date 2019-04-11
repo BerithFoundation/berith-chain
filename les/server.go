@@ -27,7 +27,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"bitbucket.org/ibizsoftware/berith-chain/les/flowcontrol"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
@@ -49,7 +49,7 @@ type LesServer struct {
 	quitSync    chan struct{}
 }
 
-func NewLesServer(eth *eth.Ethereum, config *eth.Config) (*LesServer, error) {
+func NewLesServer(eth *berith.Ethereum, config *berith.Config) (*LesServer, error) {
 	quitSync := make(chan struct{})
 	pm, err := NewProtocolManager(eth.BlockChain().Config(), light.DefaultServerIndexerConfig, false, config.NetworkId, eth.EventMux(), eth.Engine(), newPeerSet(), eth.BlockChain(), eth.TxPool(), eth.ChainDb(), nil, nil, nil, quitSync, new(sync.WaitGroup))
 	if err != nil {

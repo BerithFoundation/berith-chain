@@ -22,7 +22,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
@@ -32,7 +32,7 @@ import (
 
 // lesCommons contains fields needed by both server and client.
 type lesCommons struct {
-	config                       *eth.Config
+	config                       *berith.Config
 	iConfig                      *light.IndexerConfig
 	chainDb                      ethdb.Database
 	protocolManager              *ProtocolManager

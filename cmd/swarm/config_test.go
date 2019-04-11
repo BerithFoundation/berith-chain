@@ -518,19 +518,19 @@ func TestConfigValidate(t *testing.T) {
 		},
 		{
 			cfg: &api.Config{EnsAPIs: []string{
-				"eth:314159265dD8dbb310642f98f50C066173C1259b@http://127.0.0.1:1234",
+				"berith:314159265dD8dbb310642f98f50C066173C1259b@http://127.0.0.1:1234",
 			}},
 		},
 		{
 			cfg: &api.Config{EnsAPIs: []string{
-				"eth:314159265dD8dbb310642f98f50C066173C1259b@ws://127.0.0.1:12344",
+				"berith:314159265dD8dbb310642f98f50C066173C1259b@ws://127.0.0.1:12344",
 			}},
 		},
 		{
 			cfg: &api.Config{EnsAPIs: []string{
-				"eth:",
+				"berith:",
 			}},
-			err: "invalid format [tld:][contract-addr@]url for ENS API endpoint configuration \"eth:\": missing url",
+			err: "invalid format [tld:][contract-addr@]url for ENS API endpoint configuration \"berith:\": missing url",
 		},
 		{
 			cfg: &api.Config{EnsAPIs: []string{

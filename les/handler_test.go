@@ -29,7 +29,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"

@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
@@ -33,10 +33,10 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/bloombits"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/filters"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/gasprice"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/filters"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
@@ -80,8 +80,8 @@ type LightEthereum struct {
 	wg sync.WaitGroup
 }
 
-func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
-	chainDb, err := eth.CreateDB(ctx, config, "lightchaindata")
+func New(ctx *node.ServiceContext, config *berith.Config) (*LightEthereum, error) {
+	chainDb, err := berith.CreateDB(ctx, config, "lightchaindata")
 	if err != nil {
 		return nil, err
 	}
@@ -111,11 +111,11 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 		peers:          peers,
 		reqDist:        newRequestDistributor(peers, quitSync),
 		accountManager: ctx.AccountManager,
-		engine:         eth.CreateConsensusEngine(ctx, chainConfig, &config.Ethash, nil, false, chainDb, stakingDB),
+		engine:         berith.CreateConsensusEngine(ctx, chainConfig, &config.Ethash, nil, false, chainDb, stakingDB),
 		shutdownChan:   make(chan bool),
 		networkId:      config.NetworkId,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
-		bloomIndexer:   eth.NewBloomIndexer(chainDb, params.BloomBitsBlocksClient, params.HelperTrieConfirmations),
+		bloomIndexer:   berith.NewBloomIndexer(chainDb, params.BloomBitsBlocksClient, params.HelperTrieConfirmations),
 	}
 
 	leth.relay = NewLesTxRelay(peers, leth.reqDist)
@@ -197,17 +197,17 @@ func (s *LightDummyAPI) Mining() bool {
 func (s *LightEthereum) APIs() []rpc.API {
 	return append(ethapi.GetAPIs(s.ApiBackend), []rpc.API{
 		{
-			Namespace: "eth",
+			Namespace: "berith",
 			Version:   "1.0",
 			Service:   &LightDummyAPI{},
 			Public:    true,
 		}, {
-			Namespace: "eth",
+			Namespace: "berith",
 			Version:   "1.0",
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
 		}, {
-			Namespace: "eth",
+			Namespace: "berith",
 			Version:   "1.0",
 			Service:   filters.NewPublicFilterAPI(s.ApiBackend, true),
 			Public:    true,

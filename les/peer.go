@@ -26,7 +26,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/les/flowcontrol"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
@@ -98,8 +98,8 @@ func (p *peer) queueSend(f func()) {
 }
 
 // Info gathers and returns a collection of metadata known about a peer.
-func (p *peer) Info() *eth.PeerInfo {
-	return &eth.PeerInfo{
+func (p *peer) Info() *berith.PeerInfo {
+	return &berith.PeerInfo{
 		Version:    p.version,
 		Difficulty: p.Td(),
 		Head:       fmt.Sprintf("%x", p.Head()),

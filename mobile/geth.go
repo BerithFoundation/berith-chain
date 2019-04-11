@@ -25,8 +25,8 @@ import (
 	"path/filepath"
 
 	"bitbucket.org/ibizsoftware/berith-chain/core"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
 	"bitbucket.org/ibizsoftware/berith-chain/ethstats"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
@@ -155,7 +155,7 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	}
 	// Register the Ethereum protocol if requested
 	if config.EthereumEnabled {
-		ethConf := eth.DefaultConfig
+		ethConf := berith.DefaultConfig
 		ethConf.Genesis = genesis
 		ethConf.SyncMode = downloader.LightSync
 		ethConf.NetworkId = uint64(config.EthereumNetworkID)

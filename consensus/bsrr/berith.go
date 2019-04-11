@@ -23,7 +23,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus/misc"

@@ -35,8 +35,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
-	"bitbucket.org/ibizsoftware/berith-chain/eth/downloader"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
@@ -92,7 +92,7 @@ func main() {
 	time.Sleep(3 * time.Second)
 
 	for _, node := range nodes {
-		var ethereum *eth.Ethereum
+		var ethereum *berith.Ethereum
 		if err := node.Service(&ethereum); err != nil {
 			panic(err)
 		}
@@ -108,7 +108,7 @@ func main() {
 		index := rand.Intn(len(faucets))
 
 		// Fetch the accessor for the relevant signer
-		var ethereum *eth.Ethereum
+		var ethereum *berith.Ethereum
 		if err := nodes[index%len(nodes)].Service(&ethereum); err != nil {
 			panic(err)
 		}
@@ -170,15 +170,15 @@ func makeMiner(genesis *core.Genesis) (*node.Node, error) {
 		return nil, err
 	}
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-		return eth.New(ctx, &eth.Config{
+		return berith.New(ctx, &berith.Config{
 			Genesis:         genesis,
 			NetworkId:       genesis.Config.ChainID.Uint64(),
 			SyncMode:        downloader.FullSync,
 			DatabaseCache:   256,
 			DatabaseHandles: 256,
 			TxPool:          core.DefaultTxPoolConfig,
-			GPO:             eth.DefaultConfig.GPO,
-			Ethash:          eth.DefaultConfig.Ethash,
+			GPO:             berith.DefaultConfig.GPO,
+			Ethash:          berith.DefaultConfig.Ethash,
 			MinerGasFloor:   genesis.GasLimit * 9 / 10,
 			MinerGasCeil:    genesis.GasLimit * 11 / 10,
 			MinerGasPrice:   big.NewInt(1),

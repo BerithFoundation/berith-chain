@@ -30,7 +30,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
 	"bitbucket.org/ibizsoftware/berith-chain/dashboard"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	whisper "bitbucket.org/ibizsoftware/berith-chain/whisper/whisperv6"
@@ -76,7 +76,7 @@ type ethstatsConfig struct {
 }
 
 type gethConfig struct {
-	Eth       eth.Config
+	Eth       berith.Config
 	Shh       whisper.Config
 	Node      node.Config
 	Ethstats  ethstatsConfig
@@ -102,8 +102,8 @@ func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
 	cfg.Version = params.VersionWithCommit(gitCommit)
-	cfg.HTTPModules = append(cfg.HTTPModules, "eth", "shh")
-	cfg.WSModules = append(cfg.WSModules, "eth", "shh")
+	cfg.HTTPModules = append(cfg.HTTPModules, "berith", "shh")
+	cfg.WSModules = append(cfg.WSModules, "berith", "shh")
 	cfg.IPCPath = "geth.ipc"
 	return cfg
 }
@@ -111,7 +111,7 @@ func defaultNodeConfig() node.Config {
 func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	// Load defaults.
 	cfg := gethConfig{
-		Eth:       eth.DefaultConfig,
+		Eth:       berith.DefaultConfig,
 		Shh:       whisper.DefaultConfig,
 		Node:      defaultNodeConfig(),
 		Dashboard: dashboard.DefaultConfig,

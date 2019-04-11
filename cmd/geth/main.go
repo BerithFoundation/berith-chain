@@ -31,7 +31,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
 	"bitbucket.org/ibizsoftware/berith-chain/console"
-	"bitbucket.org/ibizsoftware/berith-chain/eth"
+	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
@@ -336,7 +336,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		if ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
 			utils.Fatalf("Light clients do not support mining")
 		}
-		var ethereum *eth.Ethereum
+		var ethereum *berith.Ethereum
 		if err := stack.Service(&ethereum); err != nil {
 			utils.Fatalf("Ethereum service not running: %v", err)
 		}

@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"bitbucket.org/ibizsoftware/berith-chain/eth/staking"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"

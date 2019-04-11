@@ -24,7 +24,7 @@ var Modules = map[string]string{
 	"bsrr":     Bsrr_JS,
 	"ethash":     Ethash_JS,
 	"debug":      Debug_JS,
-	"eth":        Eth_JS,
+	"berith":     BERITH_JS,
 	"miner":      Miner_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
@@ -32,7 +32,6 @@ var Modules = map[string]string{
 	"shh":        Shh_JS,
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
-	"berith":     BERITH_JS,
 }
 
 const Chequebook_JS = `
@@ -490,63 +489,107 @@ web3._extend({
 });
 `
 
-const Eth_JS = `
+const BERITH_JS = `
 web3._extend({
-	property: 'eth',
+	property: 'berith',
 	methods: [
 		new web3._extend.Method({
 			name: 'chainId',
-			call: 'eth_chainId',
+			call: 'berith_chainId',
 			params: 0
 		}),
 		new web3._extend.Method({
 			name: 'sign',
-			call: 'eth_sign',
+			call: 'berith_sign',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
 		}),
 		new web3._extend.Method({
 			name: 'resend',
-			call: 'eth_resend',
+			call: 'berith_resend',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter, web3._extend.utils.fromDecimal, web3._extend.utils.fromDecimal]
 		}),
 		new web3._extend.Method({
 			name: 'signTransaction',
-			call: 'eth_signTransaction',
+			call: 'berith_signTransaction',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'submitTransaction',
-			call: 'eth_submitTransaction',
+			call: 'berith_submitTransaction',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'getRawTransaction',
-			call: 'eth_getRawTransactionByHash',
+			call: 'berith_getRawTransactionByHash',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'getRawTransactionFromBlock',
 			call: function(args) {
-				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'eth_getRawTransactionByBlockHashAndIndex' : 'eth_getRawTransactionByBlockNumberAndIndex';
+				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'berith_getRawTransactionByBlockHashAndIndex' : 'berith_getRawTransactionByBlockNumberAndIndex';
 			},
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
 		}),
 		new web3._extend.Method({
 			name: 'getProof',
-			call: 'eth_getProof',
+			call: 'berith_getProof',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'stake',
+			call: 'berith_stake',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'stopStaking',
+			call: 'berith_stopStaking',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getStakeBalance',
+			call: 'berith_getStakeBalance',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
+		new web3._extend.Method({
+			name: 'getAccountInfo',
+			call: 'berith_getAccountInfo',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],        	
+		}),
+		new web3._extend.Method({
+			name: 'rewardToStake',
+			call: 'berith_rewardToStake',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'rewardToBalance',
+			call: 'berith_rewardToBalance',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRewardBalance',
+			call: 'berith_getRewardBalance',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
 		}),
 	],
 	properties: [
 		new web3._extend.Property({
 			name: 'pendingTransactions',
-			getter: 'eth_pendingTransactions',
+			getter: 'berith_pendingTransactions',
 			outputFormatter: function(txs) {
 				var formatted = [];
 				for (var i = 0; i < txs.length; i++) {
@@ -748,56 +791,5 @@ web3._extend({
 });
 `
 
-const BERITH_JS = `
-web3._extend({
-	property: 'berith',
-	methods:
-	[
-		new web3._extend.Method({
-			name: 'stake',
-			call: 'berith_stake',
-			params: 1,
-			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
-		}),
-		new web3._extend.Method({
-			name: 'stopStaking',
-			call: 'berith_stopStaking',
-			params: 1,
-			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
-		}),
-		new web3._extend.Method({
-			name: 'getStakeBalance',
-			call: 'berith_getStakeBalance',
-        	params: 2,
-        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
-        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
-		}),
-		new web3._extend.Method({
-			name: 'getAccountInfo',
-			call: 'berith_getAccountInfo',
-        	params: 2,
-        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],        	
-		}),
-		new web3._extend.Method({
-			name: 'rewardToStake',
-			call: 'berith_rewardToStake',
-			params: 1,
-			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
-		}),
-		new web3._extend.Method({
-			name: 'rewardToBalance',
-			call: 'berith_rewardToBalance',
-			params: 1,
-			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
-		}),
-		new web3._extend.Method({
-			name: 'getRewardBalance',
-			call: 'berith_getRewardBalance',
-        	params: 2,
-        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
-        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
-		}),
-	]
-});
-`
+
 

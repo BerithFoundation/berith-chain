@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/eth/stake"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 )

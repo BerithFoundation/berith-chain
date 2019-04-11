@@ -257,17 +257,17 @@ func TestParseEnsAPIAddress(t *testing.T) {
 		},
 		{
 			description: "HTTP endpoint, TLD and contract address",
-			value:       "eth:314159265dD8dbb310642f98f50C066173C1259b@http://127.0.0.1:1234",
+			value:       "berith:314159265dD8dbb310642f98f50C066173C1259b@http://127.0.0.1:1234",
 			endpoint:    "http://127.0.0.1:1234",
 			addr:        common.HexToAddress("314159265dD8dbb310642f98f50C066173C1259b"),
-			tld:         "eth",
+			tld:         "berith",
 		},
 		{
 			description: "WS endpoint, TLD and contract address",
-			value:       "eth:314159265dD8dbb310642f98f50C066173C1259b@ws://127.0.0.1:1234",
+			value:       "berith:314159265dD8dbb310642f98f50C066173C1259b@ws://127.0.0.1:1234",
 			endpoint:    "ws://127.0.0.1:1234",
 			addr:        common.HexToAddress("314159265dD8dbb310642f98f50C066173C1259b"),
-			tld:         "eth",
+			tld:         "berith",
 		},
 	} {
 		t.Run(x.description, func(t *testing.T) {

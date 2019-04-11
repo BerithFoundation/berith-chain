@@ -27,7 +27,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/eth/stakingdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
 	"bitbucket.org/ibizsoftware/berith-chain/common/prque"
@@ -656,7 +656,7 @@ func (bc *BlockChain) GetReceiptsByHash(hash common.Hash) types.Receipts {
 }
 
 // GetBlocksFromHash returns the block corresponding to hash and up to n-1 ancestors.
-// [deprecated by eth/62]
+// [deprecated by berith/62]
 func (bc *BlockChain) GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block) {
 	number := bc.hc.GetBlockNumber(hash)
 	if number == nil {
