@@ -20,7 +20,7 @@ import (
 	"container/list"
 
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 )
 
@@ -29,7 +29,7 @@ type TestManager struct {
 	// stateManager *StateManager
 	eventMux *event.TypeMux
 
-	db         ethdb.Database
+	db         berithdb.Database
 	txPool     *TxPool
 	blockChain *BlockChain
 	Blocks     []*types.Block
@@ -71,14 +71,14 @@ func (tm *TestManager) EventMux() *event.TypeMux {
 // 	return nil
 // }
 
-func (tm *TestManager) Db() ethdb.Database {
+func (tm *TestManager) Db() berithdb.Database {
 	return tm.db
 }
 
 func NewTestManager() *TestManager {
 	testManager := &TestManager{}
 	testManager.eventMux = new(event.TypeMux)
-	testManager.db = ethdb.NewMemDatabase()
+	testManager.db = berithdb.NewMemDatabase()
 	// testManager.txPool = NewTxPool(testManager)
 	// testManager.blockChain = NewBlockChain(testManager)
 	// testManager.stateManager = NewStateManager(testManager)

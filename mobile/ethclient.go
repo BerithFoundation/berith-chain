@@ -22,17 +22,17 @@ import (
 	"math/big"
 
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.
 type EthereumClient struct {
-	client *ethclient.Client
+	client *berithclient.Client
 }
 
 // NewEthereumClient connects a client to the given URL.
 func NewEthereumClient(rawurl string) (client *EthereumClient, _ error) {
-	rawClient, err := ethclient.Dial(rawurl)
+	rawClient, err := berithclient.Dial(rawurl)
 	return &EthereumClient{rawClient}, err
 }
 

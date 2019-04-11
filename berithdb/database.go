@@ -16,7 +16,7 @@
 
 // +build !js
 
-package ethdb
+package berithdb
 
 import (
 	"fmt"

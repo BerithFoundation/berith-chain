@@ -31,7 +31,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
@@ -195,7 +195,7 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 
 type BSRR struct {
 	config *params.BSRRConfig // Consensus engine configuration parameters
-	db     ethdb.Database     // Database to store and retrieve snapshot checkpoints
+	db     berithdb.Database  // Database to store and retrieve snapshot checkpoints
 	//[BERITH] stakingDB clique 구조체에 추가
 	stakingDB staking.DataBase //stakingList를 저장하는 DB
 	cache     *lru.ARCCache    //stakingList를 저장하는 cache
@@ -213,7 +213,7 @@ type BSRR struct {
 	fakeDiff bool // Skip difficulty verifications
 }
 
-func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
+func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	conf := config
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
@@ -251,7 +251,7 @@ func New(config *params.BSRRConfig, db ethdb.Database) *BSRR {
 
 }
 
-func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db ethdb.Database) *BSRR {
+func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
 	// Synchronize the engine.config and chainConfig.

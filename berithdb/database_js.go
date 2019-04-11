@@ -16,13 +16,13 @@
 
 // +build js
 
-package ethdb
+package berithdb
 
 import (
 	"errors"
 )
 
-var errNotSupported = errors.New("ethdb: not supported")
+var errNotSupported = errors.New("berithdb: not supported")
 
 type LDBDatabase struct {
 }

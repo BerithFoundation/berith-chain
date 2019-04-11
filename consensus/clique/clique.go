@@ -34,7 +34,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
@@ -201,7 +201,7 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 // Ethereum testnet following the Ropsten attacks.
 type Clique struct {
 	config *params.CliqueConfig // Consensus engine configuration parameters
-	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
+	db     berithdb.Database    // Database to store and retrieve snapshot checkpoints
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
@@ -218,7 +218,7 @@ type Clique struct {
 
 // New creates a Clique proof-of-authority consensus engine with the initial
 // signers set to the ones provided by the user.
-func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
+func New(config *params.CliqueConfig, db berithdb.Database) *Clique {
 	// Set any missing consensus parameters to their defaults
 	conf := *config
 	if conf.Epoch == 0 {

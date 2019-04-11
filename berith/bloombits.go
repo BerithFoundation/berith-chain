@@ -26,7 +26,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/bloombits"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 )
 
 const (
@@ -89,7 +89,7 @@ const (
 // for the Ethereum header bloom filters, permitting blazing fast filtering.
 type BloomIndexer struct {
 	size    uint64               // section size to generate bloombits for
-	db      ethdb.Database       // database instance to write index data and metadata into
+	db      berithdb.Database    // database instance to write index data and metadata into
 	gen     *bloombits.Generator // generator to rotate the bloom bits crating the bloom index
 	section uint64               // Section is the section number being processed currently
 	head    common.Hash          // Head is the hash of the last header processed
@@ -97,12 +97,12 @@ type BloomIndexer struct {
 
 // NewBloomIndexer returns a chain indexer that generates bloom bits data for the
 // canonical chain for fast logs filtering.
-func NewBloomIndexer(db ethdb.Database, size, confirms uint64) *core.ChainIndexer {
+func NewBloomIndexer(db berithdb.Database, size, confirms uint64) *core.ChainIndexer {
 	backend := &BloomIndexer{
 		db:   db,
 		size: size,
 	}
-	table := ethdb.NewTable(db, string(rawdb.BloomBitsIndexPrefix))
+	table := berithdb.NewTable(db, string(rawdb.BloomBitsIndexPrefix))
 
 	return core.NewChainIndexer(db, table, backend, size, confirms, bloomThrottling, "bloombits")
 }

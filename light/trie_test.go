@@ -27,15 +27,15 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
 )
 
 func TestNodeIterator(t *testing.T) {
 	var (
-		fulldb  = ethdb.NewMemDatabase()
-		lightdb = ethdb.NewMemDatabase()
+		fulldb  = berithdb.NewMemDatabase()
+		lightdb = berithdb.NewMemDatabase()
 		gspec   = core.Genesis{Alloc: core.GenesisAlloc{testBankAddress: {Balance: testBankFunds}}}
 		genesis = gspec.MustCommit(fulldb)
 	)

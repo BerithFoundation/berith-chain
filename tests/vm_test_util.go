@@ -29,7 +29,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
@@ -79,7 +79,7 @@ type vmExecMarshaling struct {
 }
 
 func (t *VMTest) Run(vmconfig vm.Config) error {
-	statedb := MakePreState(ethdb.NewMemDatabase(), t.json.Pre)
+	statedb := MakePreState(berithdb.NewMemDatabase(), t.json.Pre)
 	ret, gasRemaining, err := t.exec(statedb, vmconfig)
 
 	if t.json.GasRemaining == nil {

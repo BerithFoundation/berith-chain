@@ -32,7 +32,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -367,7 +367,7 @@ func testGetNodeData(t *testing.T, protocol int) {
 			t.Errorf("data hash mismatch: have %x, want %x", hash, want)
 		}
 	}
-	statedb := ethdb.NewMemDatabase()
+	statedb := berithdb.NewMemDatabase()
 	for i := 0; i < len(data); i++ {
 		statedb.Put(hashes[i].Bytes(), data[i])
 	}
@@ -469,7 +469,7 @@ func testDAOChallenge(t *testing.T, localForked, remoteForked bool, timeout bool
 	var (
 		evmux   = new(event.TypeMux)
 		pow     = ethash.NewFaker()
-		db      = ethdb.NewMemDatabase()
+		db      = berithdb.NewMemDatabase()
 		config  = &params.ChainConfig{DAOForkBlock: big.NewInt(1), DAOForkSupport: localForked}
 		gspec   = &core.Genesis{Config: config}
 		genesis = gspec.MustCommit(db)
@@ -550,7 +550,7 @@ func testBroadcastBlock(t *testing.T, totalPeers, broadcastExpected int) {
 	var (
 		evmux   = new(event.TypeMux)
 		pow     = ethash.NewFaker()
-		db      = ethdb.NewMemDatabase()
+		db      = berithdb.NewMemDatabase()
 		config  = &params.ChainConfig{}
 		gspec   = &core.Genesis{Config: config}
 		genesis = gspec.MustCommit(db)

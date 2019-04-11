@@ -33,7 +33,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
 
@@ -49,7 +49,7 @@ func (ui *HeadlessUI) OnInputRequired(info UserInputRequest) (UserInputResponse,
 func (ui *HeadlessUI) OnSignerStartup(info StartupInfo) {
 }
 
-func (ui *HeadlessUI) OnApprovedTx(tx ethapi.SignTransactionResult) {
+func (ui *HeadlessUI) OnApprovedTx(tx berithapi.SignTransactionResult) {
 	fmt.Printf("OnApproved()\n")
 }
 
@@ -305,7 +305,7 @@ func mkTestTx(from common.MixedcaseAddress) SendTxArgs {
 func TestSignTx(t *testing.T) {
 	var (
 		list      []common.Address
-		res, res2 *ethapi.SignTransactionResult
+		res, res2 *berithapi.SignTransactionResult
 		err       error
 	)
 

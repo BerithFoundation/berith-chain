@@ -31,7 +31,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/tests"
 )
@@ -159,7 +159,7 @@ func TestCallTracer(t *testing.T) {
 				GasLimit:    uint64(test.Context.GasLimit),
 				GasPrice:    tx.GasPrice(),
 			}
-			statedb := tests.MakePreState(ethdb.NewMemDatabase(), test.Genesis.Alloc)
+			statedb := tests.MakePreState(berithdb.NewMemDatabase(), test.Genesis.Alloc)
 
 			// Create the tracer, the EVM environment and run it
 			tracer, err := New("callTracer")

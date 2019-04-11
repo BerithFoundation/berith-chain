@@ -45,9 +45,9 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/filters"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/miner"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
@@ -79,7 +79,7 @@ type Ethereum struct {
 	lesServer       LesServer
 
 	// DB interfaces
-	chainDb ethdb.Database // Block chain database
+	chainDb berithdb.Database // Block chain database
 
 	eventMux       *event.TypeMux
 	engine         consensus.Engine
@@ -95,7 +95,7 @@ type Ethereum struct {
 	etherbase common.Address
 
 	networkID     uint64
-	netRPCService *ethapi.PublicNetAPI
+	netRPCService *berithapi.PublicNetAPI
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 
@@ -225,19 +225,19 @@ func makeExtraData(extra []byte) []byte {
 }
 
 // CreateDB creates the chain database.
-func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Database, error) {
+func CreateDB(ctx *node.ServiceContext, config *Config, name string) (berithdb.Database, error) {
 	db, err := ctx.OpenDatabase(name, config.DatabaseCache, config.DatabaseHandles)
 	if err != nil {
 		return nil, err
 	}
-	if db, ok := db.(*ethdb.LDBDatabase); ok {
+	if db, ok := db.(*berithdb.LDBDatabase); ok {
 		db.Meter("berith/db/chaindata/")
 	}
 	return db, nil
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Ethereum service
-func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db ethdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
+func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
 	// If proof-of-authority is requested, set it up
 	if chainConfig.Bsrr != nil {
 		return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
@@ -273,7 +273,7 @@ func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainCo
 // APIs return the collection of RPC services the ethereum package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (s *Ethereum) APIs() []rpc.API {
-	apis := ethapi.GetAPIs(s.APIBackend)
+	apis := berithapi.GetAPIs(s.APIBackend)
 	apis = append(apis, brtapi.GetAPIs(s.APIBackend, s.miner)...)
 	// Append any APIs exposed explicitly by the consensus engine
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
@@ -495,7 +495,7 @@ func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *Ethereum) TxPool() *core.TxPool               { return s.txPool }
 func (s *Ethereum) EventMux() *event.TypeMux           { return s.eventMux }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }
-func (s *Ethereum) ChainDb() ethdb.Database            { return s.chainDb }
+func (s *Ethereum) ChainDb() berithdb.Database         { return s.chainDb }
 func (s *Ethereum) IsListening() bool                  { return true } // Always listening
 func (s *Ethereum) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
 func (s *Ethereum) NetVersion() uint64                 { return s.networkID }
@@ -517,7 +517,7 @@ func (s *Ethereum) Start(srvr *p2p.Server) error {
 	s.startBloomHandlers(params.BloomBitsBlocks)
 
 	// Start the RPC service
-	s.netRPCService = ethapi.NewPublicNetAPI(srvr, s.NetVersion())
+	s.netRPCService = berithapi.NewPublicNetAPI(srvr, s.NetVersion())
 
 	// Figure out a max peers count based on the server limits
 	maxPeers := srvr.MaxPeers

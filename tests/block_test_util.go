@@ -33,7 +33,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
@@ -101,7 +101,7 @@ func (t *BlockTest) Run() error {
 	}
 
 	// import pre accounts & construct test genesis block & state root
-	db := ethdb.NewMemDatabase()
+	db := berithdb.NewMemDatabase()
 	gblock, err := t.genesis(config).Commit(db)
 	if err != nil {
 		return err

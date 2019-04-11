@@ -48,8 +48,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
-	"bitbucket.org/ibizsoftware/berith-chain/ethstats"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
+	"bitbucket.org/ibizsoftware/berith-chain/berithstats"
 	"bitbucket.org/ibizsoftware/berith-chain/les"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
@@ -67,7 +67,7 @@ var (
 	ethPortFlag = flag.Int("ethport", 30303, "Listener port for the devp2p connection")
 	bootFlag    = flag.String("bootnodes", "", "Comma separated bootnode enode URLs to seed with")
 	netFlag     = flag.Uint64("network", 0, "Network ID to use for the Ethereum protocol")
-	statsFlag   = flag.String("ethstats", "", "Ethstats network monitoring auth string")
+	statsFlag   = flag.String("berithstats", "", "Ethstats network monitoring auth string")
 
 	netnameFlag = flag.String("faucet.name", "", "Network name to assign to the faucet")
 	payoutFlag  = flag.Int("faucet.amount", 1, "Number of Ethers to pay out per user request")
@@ -192,10 +192,10 @@ type request struct {
 
 // faucet represents a crypto faucet backed by an Ethereum light client.
 type faucet struct {
-	config *params.ChainConfig // Chain configurations for signing
-	stack  *node.Node          // Ethereum protocol stack
-	client *ethclient.Client   // Client connection to the Ethereum chain
-	index  []byte              // Index page to serve up on the web
+	config *params.ChainConfig  // Chain configurations for signing
+	stack  *node.Node           // Ethereum protocol stack
+	client *berithclient.Client // Client connection to the Ethereum chain
+	index  []byte               // Index page to serve up on the web
 
 	keystore *keystore.KeyStore // Keystore containing the single signer
 	account  accounts.Account   // Account funding user faucet requests
@@ -240,12 +240,12 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*discv5.Node, network u
 	}); err != nil {
 		return nil, err
 	}
-	// Assemble the ethstats monitoring and reporting service'
+	// Assemble the berithstats monitoring and reporting service'
 	if stats != "" {
 		if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 			var serv *les.LightEthereum
 			ctx.Service(&serv)
-			return ethstats.New(stats, nil, serv)
+			return berithstats.New(stats, nil, serv)
 		}); err != nil {
 			return nil, err
 		}
@@ -266,7 +266,7 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*discv5.Node, network u
 		stack.Stop()
 		return nil, err
 	}
-	client := ethclient.NewClient(api)
+	client := berithclient.NewClient(api)
 
 	return &faucet{
 		config:   genesis.Config,

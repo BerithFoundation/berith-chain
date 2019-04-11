@@ -23,7 +23,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 )
 
 // FakePeer is a mock downloader peer that operates on a local database instance
@@ -31,13 +31,13 @@ import (
 // sync commands from an existing local database.
 type FakePeer struct {
 	id string
-	db ethdb.Database
+	db berithdb.Database
 	hc *core.HeaderChain
 	dl *Downloader
 }
 
 // NewFakePeer creates a new mock downloader peer with the given data sources.
-func NewFakePeer(id string, db ethdb.Database, hc *core.HeaderChain, dl *Downloader) *FakePeer {
+func NewFakePeer(id string, db berithdb.Database, hc *core.HeaderChain, dl *Downloader) *FakePeer {
 	return &FakePeer{id: id, db: db, hc: hc, dl: dl}
 }
 

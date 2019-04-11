@@ -25,13 +25,13 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/bloombits"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
 
 type Backend interface {
-	ChainDb() ethdb.Database
+	ChainDb() berithdb.Database
 	EventMux() *event.TypeMux
 	HeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (*types.Header, error)
 	HeaderByHash(ctx context.Context, blockHash common.Hash) (*types.Header, error)
@@ -51,7 +51,7 @@ type Backend interface {
 type Filter struct {
 	backend Backend
 
-	db        ethdb.Database
+	db        berithdb.Database
 	addresses []common.Address
 	topics    [][]common.Hash
 

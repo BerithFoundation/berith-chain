@@ -33,7 +33,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
@@ -56,11 +56,11 @@ var (
 type testOdr struct {
 	OdrBackend
 	indexerConfig *IndexerConfig
-	sdb, ldb      ethdb.Database
+	sdb, ldb      berithdb.Database
 	disable       bool
 }
 
-func (odr *testOdr) Database() ethdb.Database {
+func (odr *testOdr) Database() berithdb.Database {
 	return odr.ldb
 }
 
@@ -97,11 +97,11 @@ func (odr *testOdr) IndexerConfig() *IndexerConfig {
 	return odr.indexerConfig
 }
 
-type odrTestFn func(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error)
+type odrTestFn func(ctx context.Context, db berithdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error)
 
 func TestOdrGetBlockLes1(t *testing.T) { testChainOdr(t, 1, odrGetBlock) }
 
-func odrGetBlock(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrGetBlock(ctx context.Context, db berithdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	var block *types.Block
 	if bc != nil {
 		block = bc.GetBlockByHash(bhash)
@@ -117,7 +117,7 @@ func odrGetBlock(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc
 
 func TestOdrGetReceiptsLes1(t *testing.T) { testChainOdr(t, 1, odrGetReceipts) }
 
-func odrGetReceipts(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrGetReceipts(ctx context.Context, db berithdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	var receipts types.Receipts
 	if bc != nil {
 		number := rawdb.ReadHeaderNumber(db, bhash)
@@ -139,7 +139,7 @@ func odrGetReceipts(ctx context.Context, db ethdb.Database, bc *core.BlockChain,
 
 func TestOdrAccountsLes1(t *testing.T) { testChainOdr(t, 1, odrAccounts) }
 
-func odrAccounts(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrAccounts(ctx context.Context, db berithdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	dummyAddr := common.HexToAddress("1234567812345678123456781234567812345678")
 	acc := []common.Address{testBankAddress, acc1Addr, acc2Addr, dummyAddr}
 
@@ -169,7 +169,7 @@ type callmsg struct {
 
 func (callmsg) CheckNonce() bool { return false }
 
-func odrContractCall(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrContractCall(ctx context.Context, db berithdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	data := common.Hex2Bytes("60CD26850000000000000000000000000000000000000000000000000000000000000000")
 	config := params.TestChainConfig
 
@@ -250,8 +250,8 @@ func testChainGen(i int, block *core.BlockGen) {
 
 func testChainOdr(t *testing.T, protocol int, fn odrTestFn) {
 	var (
-		sdb     = ethdb.NewMemDatabase()
-		ldb     = ethdb.NewMemDatabase()
+		sdb     = berithdb.NewMemDatabase()
+		ldb     = berithdb.NewMemDatabase()
 		gspec   = core.Genesis{Alloc: core.GenesisAlloc{testBankAddress: {Balance: testBankFunds}}}
 		genesis = gspec.MustCommit(sdb)
 	)

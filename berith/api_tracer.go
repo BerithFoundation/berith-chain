@@ -36,7 +36,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/tracers"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
@@ -753,11 +753,11 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 	// Depending on the tracer type, format and return the output
 	switch tracer := tracer.(type) {
 	case *vm.StructLogger:
-		return &ethapi.ExecutionResult{
+		return &berithapi.ExecutionResult{
 			Gas:         gas,
 			Failed:      failed,
 			ReturnValue: fmt.Sprintf("%x", ret),
-			StructLogs:  ethapi.FormatLogs(tracer.StructLogs()),
+			StructLogs:  berithapi.FormatLogs(tracer.StructLogs()),
 		}, nil
 
 	case *tracers.Tracer:

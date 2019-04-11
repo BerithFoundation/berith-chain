@@ -45,8 +45,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
-	"bitbucket.org/ibizsoftware/berith-chain/ethstats"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithstats"
 	"bitbucket.org/ibizsoftware/berith-chain/les"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
@@ -411,8 +411,8 @@ var (
 	}
 	// Logging and debug settings
 	EthStatsURLFlag = cli.StringFlag{
-		Name:  "ethstats",
-		Usage: "Reporting URL of a ethstats service (nodename:secret@host:port)",
+		Name:  "berithstats",
+		Usage: "Reporting URL of a berithstats service (nodename:secret@host:port)",
 	}
 	FakePoWFlag = cli.BoolFlag{
 		Name:  "fakepow",
@@ -1347,7 +1347,7 @@ func RegisterEthStatsService(stack *node.Node, url string) {
 		var lesServ *les.LightEthereum
 		ctx.Service(&lesServ)
 
-		return ethstats.New(url, ethServ, lesServ)
+		return berithstats.New(url, ethServ, lesServ)
 	}); err != nil {
 		Fatalf("Failed to register the Ethereum Stats service: %v", err)
 	}
@@ -1375,7 +1375,7 @@ func SetupMetrics(ctx *cli.Context) {
 }
 
 // MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
-func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
+func MakeChainDatabase(ctx *cli.Context, stack *node.Node) berithdb.Database {
 	var (
 		cache   = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheDatabaseFlag.Name) / 100
 		handles = makeDatabaseHandles()
@@ -1405,7 +1405,7 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb ethdb.Database) {
+func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb berithdb.Database) {
 	var err error
 	chainDb = MakeChainDatabase(ctx, stack)
 	config, _, err := core.SetupGenesisBlock(chainDb, MakeGenesis(ctx))

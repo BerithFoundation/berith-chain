@@ -28,7 +28,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
@@ -81,8 +81,8 @@ func TestTxPool(t *testing.T) {
 	}
 
 	var (
-		sdb     = ethdb.NewMemDatabase()
-		ldb     = ethdb.NewMemDatabase()
+		sdb     = berithdb.NewMemDatabase()
+		ldb     = berithdb.NewMemDatabase()
 		gspec   = core.Genesis{Alloc: core.GenesisAlloc{testBankAddress: {Balance: testBankFunds}}}
 		genesis = gspec.MustCommit(sdb)
 	)

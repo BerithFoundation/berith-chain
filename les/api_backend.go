@@ -31,7 +31,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -175,7 +175,7 @@ func (b *LesApiBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 	return b.gpo.SuggestPrice(ctx)
 }
 
-func (b *LesApiBackend) ChainDb() ethdb.Database {
+func (b *LesApiBackend) ChainDb() berithdb.Database {
 	return b.eth.chainDb
 }
 

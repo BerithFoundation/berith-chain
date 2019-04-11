@@ -32,7 +32,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
@@ -238,7 +238,7 @@ func ExportAppendChain(blockchain *core.BlockChain, fn string, first uint64, las
 }
 
 // ImportPreimages imports a batch of exported hash preimages into the database.
-func ImportPreimages(db *ethdb.LDBDatabase, fn string) error {
+func ImportPreimages(db *berithdb.LDBDatabase, fn string) error {
 	log.Info("Importing preimages", "file", fn)
 
 	// Open the file handle and potentially unwrap the gzip stream
@@ -285,7 +285,7 @@ func ImportPreimages(db *ethdb.LDBDatabase, fn string) error {
 
 // ExportPreimages exports all known hash preimages into the specified file,
 // truncating any data already present in the file.
-func ExportPreimages(db *ethdb.LDBDatabase, fn string) error {
+func ExportPreimages(db *berithdb.LDBDatabase, fn string) error {
 	log.Info("Exporting preimages", "file", fn)
 
 	// Open the file handle and potentially wrap with a gzip stream

@@ -24,7 +24,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/consensus"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -64,7 +64,7 @@ func newSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, number uint6
 }
 
 // loadSnapshot loads an existing snapshot from the database.
-func loadSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, db ethdb.Database, hash common.Hash) (*Snapshot, error) {
+func loadSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, db berithdb.Database, hash common.Hash) (*Snapshot, error) {
 	blob, err := db.Get(append([]byte("bsrr-"), hash[:]...))
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func loadSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, db ethdb.Da
 }
 
 // store inserts the snapshot into the database.
-func (s *Snapshot) store(db ethdb.Database) error {
+func (s *Snapshot) store(db berithdb.Database) error {
 	blob, err := json.Marshal(s)
 	if err != nil {
 		return err

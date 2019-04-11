@@ -27,8 +27,8 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
-	"bitbucket.org/ibizsoftware/berith-chain/ethstats"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
+	"bitbucket.org/ibizsoftware/berith-chain/berithstats"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
 	"bitbucket.org/ibizsoftware/berith-chain/les"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
@@ -171,7 +171,7 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 				var lesServ *les.LightEthereum
 				ctx.Service(&lesServ)
 
-				return ethstats.New(config.EthereumNetStats, nil, lesServ)
+				return berithstats.New(config.EthereumNetStats, nil, lesServ)
 			}); err != nil {
 				return nil, fmt.Errorf("netstats init: %v", err)
 			}
@@ -205,7 +205,7 @@ func (n *Node) GetEthereumClient() (client *EthereumClient, _ error) {
 	if err != nil {
 		return nil, err
 	}
-	return &EthereumClient{ethclient.NewClient(rpc)}, nil
+	return &EthereumClient{berithclient.NewClient(rpc)}, nil
 }
 
 // GetNodeInfo gathers and returns a collection of metadata known about the host.

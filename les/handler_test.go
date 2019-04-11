@@ -30,7 +30,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/light"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -405,7 +405,7 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 	switch protocol {
 	case 1:
 		root := light.GetChtRoot(server.db, 0, bc.GetHeaderByNumber(frequency-1).Hash())
-		trie, _ := trie.New(root, trie.NewDatabase(ethdb.NewTable(server.db, light.ChtTablePrefix)))
+		trie, _ := trie.New(root, trie.NewDatabase(berithdb.NewTable(server.db, light.ChtTablePrefix)))
 
 		var proof light.NodeList
 		trie.Prove(key, 0, &proof)
@@ -413,7 +413,7 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 
 	case 2:
 		root := light.GetChtRoot(server.db, (frequency/config.ChtSize)-1, bc.GetHeaderByNumber(frequency-1).Hash())
-		trie, _ := trie.New(root, trie.NewDatabase(ethdb.NewTable(server.db, light.ChtTablePrefix)))
+		trie, _ := trie.New(root, trie.NewDatabase(berithdb.NewTable(server.db, light.ChtTablePrefix)))
 		trie.Prove(key, 0, &proofsV2.Proofs)
 	}
 	// Assemble the requests for the different protocols
@@ -480,7 +480,7 @@ func TestGetBloombitsProofs(t *testing.T) {
 		var proofs HelperTrieResps
 
 		root := light.GetBloomTrieRoot(server.db, 0, bc.GetHeaderByNumber(config.BloomTrieSize-1).Hash())
-		trie, _ := trie.New(root, trie.NewDatabase(ethdb.NewTable(server.db, light.BloomTrieTablePrefix)))
+		trie, _ := trie.New(root, trie.NewDatabase(berithdb.NewTable(server.db, light.BloomTrieTablePrefix)))
 		trie.Prove(key, 0, &proofs.Proofs)
 
 		// Send the proof request and verify the response
@@ -493,7 +493,7 @@ func TestGetBloombitsProofs(t *testing.T) {
 }
 
 func TestTransactionStatusLes2(t *testing.T) {
-	db := ethdb.NewMemDatabase()
+	db := berithdb.NewMemDatabase()
 	pm := newTestProtocolManagerMust(t, false, 0, nil, nil, nil, db)
 	chain := pm.blockchain.(*core.BlockChain)
 	config := core.DefaultTxPoolConfig

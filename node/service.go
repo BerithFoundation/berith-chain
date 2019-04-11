@@ -20,7 +20,7 @@ import (
 	"reflect"
 
 	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
@@ -39,11 +39,11 @@ type ServiceContext struct {
 // OpenDatabase opens an existing database with the given name (or creates one
 // if no previous can be found) from within the node's data directory. If the
 // node is an ephemeral one, a memory database is returned.
-func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (ethdb.Database, error) {
+func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (berithdb.Database, error) {
 	if ctx.config.DataDir == "" {
-		return ethdb.NewMemDatabase(), nil
+		return berithdb.NewMemDatabase(), nil
 	}
-	db, err := ethdb.NewLDBDatabase(ctx.config.ResolvePath(name), cache, handles)
+	db, err := berithdb.NewLDBDatabase(ctx.config.ResolvePath(name), cache, handles)
 	if err != nil {
 		return nil, err
 	}

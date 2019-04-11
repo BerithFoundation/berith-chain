@@ -29,7 +29,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
@@ -55,7 +55,7 @@ type PublicFilterAPI struct {
 	backend   Backend
 	mux       *event.TypeMux
 	quit      chan struct{}
-	chainDb   ethdb.Database
+	chainDb   berithdb.Database
 	events    *EventSystem
 	filtersMu sync.Mutex
 	filters   map[rpc.ID]*filter

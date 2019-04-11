@@ -23,12 +23,12 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	checker "gopkg.in/check.v1"
 )
 
 type StateSuite struct {
-	db    *ethdb.MemDatabase
+	db    *berithdb.MemDatabase
 	state *StateDB
 }
 
@@ -87,7 +87,7 @@ func (s *StateSuite) TestDump(c *checker.C) {
 }
 
 func (s *StateSuite) SetUpTest(c *checker.C) {
-	s.db = ethdb.NewMemDatabase()
+	s.db = berithdb.NewMemDatabase()
 	s.state, _ = New(common.Hash{}, NewDatabase(s.db))
 }
 
@@ -141,7 +141,7 @@ func (s *StateSuite) TestSnapshotEmpty(c *checker.C) {
 // use testing instead of checker because checker does not support
 // printing/logging in tests (-check.vv does not work)
 func TestSnapshot2(t *testing.T) {
-	state, _ := New(common.Hash{}, NewDatabase(ethdb.NewMemDatabase()))
+	state, _ := New(common.Hash{}, NewDatabase(berithdb.NewMemDatabase()))
 
 	stateobjaddr0 := toAddr([]byte("so0"))
 	stateobjaddr1 := toAddr([]byte("so1"))

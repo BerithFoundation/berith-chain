@@ -32,7 +32,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
 	"bitbucket.org/ibizsoftware/berith-chain/console"
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
-	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
 	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
@@ -299,7 +299,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		if err != nil {
 			utils.Fatalf("Failed to attach to self: %v", err)
 		}
-		stateReader := ethclient.NewClient(rpcClient)
+		stateReader := berithclient.NewClient(rpcClient)
 
 		// Open any wallets already attached
 		for _, wallet := range stack.AccountManager().Wallets() {

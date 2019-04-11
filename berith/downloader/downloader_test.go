@@ -29,7 +29,7 @@ import (
 	ethereum "bitbucket.org/ibizsoftware/berith-chain"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
 )
@@ -45,9 +45,9 @@ func init() {
 type downloadTester struct {
 	downloader *Downloader
 
-	genesis *types.Block   // Genesis blocks used by the tester and peers
-	stateDb ethdb.Database // Database used by the tester for syncing from peers
-	peerDb  ethdb.Database // Database of the peers containing all data
+	genesis *types.Block      // Genesis blocks used by the tester and peers
+	stateDb berithdb.Database // Database used by the tester for syncing from peers
+	peerDb  berithdb.Database // Database of the peers containing all data
 	peers   map[string]*downloadTesterPeer
 
 	ownHashes   []common.Hash                  // Hash chain belonging to the tester
@@ -71,7 +71,7 @@ func newTester() *downloadTester {
 		ownReceipts: map[common.Hash]types.Receipts{testGenesis.Hash(): nil},
 		ownChainTd:  map[common.Hash]*big.Int{testGenesis.Hash(): testGenesis.Difficulty()},
 	}
-	tester.stateDb = ethdb.NewMemDatabase()
+	tester.stateDb = berithdb.NewMemDatabase()
 	tester.stateDb.Put(testGenesis.Root().Bytes(), []byte{0x00})
 	tester.downloader = New(FullSync, tester.stateDb, new(event.TypeMux), tester, nil, tester.dropPeer)
 	return tester

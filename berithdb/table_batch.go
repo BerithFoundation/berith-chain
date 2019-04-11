@@ -14,12 +14,38 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// +build js
+package berithdb
 
-package ethdb_test
+type tableBatch struct {
+	batch  Batch
+	prefix string
+}
 
-import (
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
-)
+// NewTableBatch returns a Batch object which prefixes all keys with a given string.
+func NewTableBatch(db Database, prefix string) Batch {
+	return &tableBatch{db.NewBatch(), prefix}
+}
 
-var _ ethdb.Database = &ethdb.LDBDatabase{}
+func (dt *table) NewBatch() Batch {
+	return &tableBatch{dt.db.NewBatch(), dt.prefix}
+}
+
+func (tb *tableBatch) Put(key, value []byte) error {
+	return tb.batch.Put(append([]byte(tb.prefix), key...), value)
+}
+
+func (tb *tableBatch) Delete(key []byte) error {
+	return tb.batch.Delete(append([]byte(tb.prefix), key...))
+}
+
+func (tb *tableBatch) Write() error {
+	return tb.batch.Write()
+}
+
+func (tb *tableBatch) ValueSize() int {
+	return tb.batch.ValueSize()
+}
+
+func (tb *tableBatch) Reset() {
+	tb.batch.Reset()
+}

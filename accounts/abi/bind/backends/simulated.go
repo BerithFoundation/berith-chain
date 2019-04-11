@@ -36,7 +36,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/filters"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
@@ -51,8 +51,8 @@ var errGasEstimationFailed = errors.New("gas required exceeds allowance or alway
 // SimulatedBackend implements bind.ContractBackend, simulating a blockchain in
 // the background. Its main purpose is to allow easily testing contract bindings.
 type SimulatedBackend struct {
-	database   ethdb.Database   // In memory database to store our testing data
-	blockchain *core.BlockChain // Ethereum blockchain to handle the consensus
+	database   berithdb.Database // In memory database to store our testing data
+	blockchain *core.BlockChain  // Ethereum blockchain to handle the consensus
 
 	mu           sync.Mutex
 	pendingBlock *types.Block   // Currently pending block that will be imported on request
@@ -66,7 +66,7 @@ type SimulatedBackend struct {
 // NewSimulatedBackend creates a new binding backend using a simulated blockchain
 // for testing purposes.
 func NewSimulatedBackend(alloc core.GenesisAlloc, gasLimit uint64) *SimulatedBackend {
-	database := ethdb.NewMemDatabase()
+	database := berithdb.NewMemDatabase()
 	genesis := core.Genesis{Config: params.AllEthashProtocolChanges, GasLimit: gasLimit, Alloc: alloc}
 	genesis.MustCommit(database)
 	blockchain, _ := core.NewBlockChain(database, nil, genesis.Config, ethash.NewFaker(), vm.Config{}, nil)
@@ -422,12 +422,12 @@ func (m callmsg) Data() []byte         { return m.CallMsg.Data }
 // filterBackend implements filters.Backend to support filtering for logs without
 // taking bloom-bits acceleration structures into account.
 type filterBackend struct {
-	db ethdb.Database
+	db berithdb.Database
 	bc *core.BlockChain
 }
 
-func (fb *filterBackend) ChainDb() ethdb.Database  { return fb.db }
-func (fb *filterBackend) EventMux() *event.TypeMux { panic("not supported") }
+func (fb *filterBackend) ChainDb() berithdb.Database { return fb.db }
+func (fb *filterBackend) EventMux() *event.TypeMux   { panic("not supported") }
 
 func (fb *filterBackend) HeaderByNumber(ctx context.Context, block rpc.BlockNumber) (*types.Header, error) {
 	if block == rpc.LatestBlockNumber {

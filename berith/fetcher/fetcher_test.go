@@ -29,12 +29,12 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
 var (
-	testdb       = ethdb.NewMemDatabase()
+	testdb       = berithdb.NewMemDatabase()
 	testKey, _   = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 	testAddress  = crypto.PubkeyToAddress(testKey.PublicKey)
 	genesis      = core.GenesisBlockForTesting(testdb, testAddress, big.NewInt(1000000000))

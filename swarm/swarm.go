@@ -33,7 +33,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/contracts/chequebook"
 	"bitbucket.org/ibizsoftware/berith-chain/contracts/ens"
-	"bitbucket.org/ibizsoftware/berith-chain/ethclient"
+	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p"
 	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
@@ -114,7 +114,7 @@ func NewSwarm(config *api.Config, mockStore *mock.NodeStore) (self *Swarm, err e
 	var backend chequebook.Backend
 	if config.SwapAPI != "" && config.SwapEnabled {
 		log.Info("connecting to SWAP API", "url", config.SwapAPI)
-		backend, err = ethclient.Dial(config.SwapAPI)
+		backend, err = berithclient.Dial(config.SwapAPI)
 		if err != nil {
 			return nil, fmt.Errorf("error connecting to SWAP API %s: %s", config.SwapAPI, err)
 		}
@@ -277,7 +277,7 @@ func parseEnsAPIAddress(s string) (tld, endpoint string, addr common.Address) {
 // ensClient provides functionality for api.ResolveValidator
 type ensClient struct {
 	*ens.ENS
-	*ethclient.Client
+	*berithclient.Client
 }
 
 // newEnsClient creates a new ENS client for that is a consumer of
@@ -289,7 +289,7 @@ func newEnsClient(endpoint string, addr common.Address, config *api.Config, priv
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to ENS API %s: %s", endpoint, err)
 	}
-	ethClient := ethclient.NewClient(client)
+	ethClient := berithclient.NewClient(client)
 
 	ensRoot := config.EnsRoot
 	if addr != (common.Address{}) {
@@ -326,7 +326,7 @@ func detectEnsAddr(client *rpc.Client) (common.Address, error) {
 		return common.Address{}, err
 	}
 
-	block, err := ethclient.NewClient(client).BlockByNumber(ctx, big.NewInt(0))
+	block, err := berithclient.NewClient(client).BlockByNumber(ctx, big.NewInt(0))
 	if err != nil {
 		return common.Address{}, err
 	}

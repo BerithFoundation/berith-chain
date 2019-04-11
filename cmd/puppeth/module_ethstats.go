@@ -28,22 +28,22 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
-// ethstatsDockerfile is the Dockerfile required to build an ethstats backend
+// ethstatsDockerfile is the Dockerfile required to build an berithstats backend
 // and associated monitoring site.
 var ethstatsDockerfile = `
-FROM puppeth/ethstats:latest
+FROM puppeth/berithstats:latest
 
 RUN echo 'module.exports = {trusted: [{{.Trusted}}], banned: [{{.Banned}}], reserved: ["yournode"]};' > lib/utils/config.js
 `
 
 // ethstatsComposefile is the docker-compose.yml file required to deploy and
-// maintain an ethstats monitoring site.
+// maintain an berithstats monitoring site.
 var ethstatsComposefile = `
 version: '2'
 services:
-  ethstats:
+  berithstats:
     build: .
-    image: {{.Network}}/ethstats
+    image: {{.Network}}/berithstats
     container_name: {{.Network}}_ethstats_1{{if not .VHost}}
     ports:
       - "{{.Port}}:3000"{{end}}
@@ -59,7 +59,7 @@ services:
     restart: always
 `
 
-// deployEthstats deploys a new ethstats container to a remote machine via SSH,
+// deployEthstats deploys a new berithstats container to a remote machine via SSH,
 // docker and docker-compose. If an instance with the specified network name
 // already exists there, it will be overwritten!
 func deployEthstats(client *sshClient, network string, port int, secret string, vhost string, trusted []string, banned []string, nocache bool) ([]byte, error) {
@@ -99,14 +99,14 @@ func deployEthstats(client *sshClient, network string, port int, secret string, 
 	}
 	defer client.Run("rm -rf " + workdir)
 
-	// Build and deploy the ethstats service
+	// Build and deploy the berithstats service
 	if nocache {
 		return nil, client.Stream(fmt.Sprintf("cd %s && docker-compose -p %s build --pull --no-cache && docker-compose -p %s up -d --force-recreate --timeout 60", workdir, network, network))
 	}
 	return nil, client.Stream(fmt.Sprintf("cd %s && docker-compose -p %s up -d --build --force-recreate --timeout 60", workdir, network))
 }
 
-// ethstatsInfos is returned from an ethstats status check to allow reporting
+// ethstatsInfos is returned from an berithstats status check to allow reporting
 // various configuration parameters.
 type ethstatsInfos struct {
 	host   string
@@ -127,10 +127,10 @@ func (info *ethstatsInfos) Report() map[string]string {
 	}
 }
 
-// checkEthstats does a health-check against an ethstats server to verify whether
+// checkEthstats does a health-check against an berithstats server to verify whether
 // it's running, and if yes, gathering a collection of useful infos about it.
 func checkEthstats(client *sshClient, network string) (*ethstatsInfos, error) {
-	// Inspect a possible ethstats container on the host
+	// Inspect a possible berithstats container on the host
 	infos, err := inspectContainer(client, fmt.Sprintf("%s_ethstats_1", network))
 	if err != nil {
 		return nil, err

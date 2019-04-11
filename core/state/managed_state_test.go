@@ -20,13 +20,13 @@ import (
 	"testing"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 )
 
 var addr = common.BytesToAddress([]byte("test"))
 
 func create() (*ManagedState, *account) {
-	statedb, _ := New(common.Hash{}, NewDatabase(ethdb.NewMemDatabase()))
+	statedb, _ := New(common.Hash{}, NewDatabase(berithdb.NewMemDatabase()))
 	ms := ManageState(statedb)
 	ms.StateDB.SetNonce(addr, 100)
 	ms.accounts[addr] = newAccount(ms.StateDB.getStateObject(addr))

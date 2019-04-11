@@ -25,7 +25,7 @@ import (
 
 	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
 	"bitbucket.org/ibizsoftware/berith-chain/common/prque"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
@@ -44,7 +44,7 @@ import (
 // value for the client. Currently the LES protocol manager uses IP addresses
 // (without port address) to identify clients.
 type freeClientPool struct {
-	db     ethdb.Database
+	db     berithdb.Database
 	lock   sync.Mutex
 	clock  mclock.Clock
 	closed bool
@@ -64,7 +64,7 @@ const (
 )
 
 // newFreeClientPool creates a new free client pool
-func newFreeClientPool(db ethdb.Database, connectedLimit, totalLimit int, clock mclock.Clock) *freeClientPool {
+func newFreeClientPool(db berithdb.Database, connectedLimit, totalLimit int, clock mclock.Clock) *freeClientPool {
 	pool := &freeClientPool{
 		db:             db,
 		clock:          clock,

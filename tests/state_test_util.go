@@ -32,7 +32,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 )
@@ -126,7 +126,7 @@ func (t *StateTest) Run(subtest StateSubtest, vmconfig vm.Config) (*state.StateD
 		return nil, UnsupportedForkError{subtest.Fork}
 	}
 	block := t.genesis(config).ToBlock(nil)
-	statedb := MakePreState(ethdb.NewMemDatabase(), t.json.Pre)
+	statedb := MakePreState(berithdb.NewMemDatabase(), t.json.Pre)
 
 	post := t.json.Post[subtest.Fork][subtest.Index]
 	msg, err := t.json.Tx.toMessage(post)
@@ -168,7 +168,7 @@ func (t *StateTest) gasLimit(subtest StateSubtest) uint64 {
 	return t.json.Tx.GasLimit[t.json.Post[subtest.Fork][subtest.Index].Indexes.Gas]
 }
 
-func MakePreState(db ethdb.Database, accounts core.GenesisAlloc) *state.StateDB {
+func MakePreState(db berithdb.Database, accounts core.GenesisAlloc) *state.StateDB {
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 	for addr, a := range accounts {

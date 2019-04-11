@@ -27,7 +27,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
@@ -400,7 +400,7 @@ func TestClique(t *testing.T) {
 			copy(genesis.ExtraData[extraVanity+j*common.AddressLength:], signer[:])
 		}
 		// Create a pristine blockchain with the genesis injected
-		db := ethdb.NewMemDatabase()
+		db := berithdb.NewMemDatabase()
 		genesis.Commit(db)
 
 		// Assemble a chain of headers from the cast votes

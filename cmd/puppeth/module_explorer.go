@@ -32,18 +32,18 @@ import (
 var explorerDockerfile = `
 FROM puppeth/explorer:latest
 
-ADD ethstats.json /ethstats.json
+ADD berithstats.json /berithstats.json
 ADD chain.json /chain.json
 
 RUN \
-  echo '(cd ../berith-net-intelligence-api && pm2 start /ethstats.json)' >  explorer.sh && \
+  echo '(cd ../berith-net-intelligence-api && pm2 start /berithstats.json)' >  explorer.sh && \
 	echo '(cd ../etherchain-light && npm start &)'                      >> explorer.sh && \
 	echo 'exec /parity/parity --chain=/chain.json --port={{.NodePort}} --tracing=on --fat-db=on --pruning=archive' >> explorer.sh
 
 ENTRYPOINT ["/bin/sh", "explorer.sh"]
 `
 
-// explorerEthstats is the configuration file for the ethstats javascript client.
+// explorerEthstats is the configuration file for the berithstats javascript client.
 var explorerEthstats = `[
   {
     "name"              : "node-app",
@@ -118,7 +118,7 @@ func deployExplorer(client *sshClient, network string, chainspec []byte, config 
 		"Secret": config.ethstats[strings.Index(config.ethstats, ":")+1 : strings.Index(config.ethstats, "@")],
 		"Host":   config.ethstats[strings.Index(config.ethstats, "@")+1:],
 	})
-	files[filepath.Join(workdir, "ethstats.json")] = ethstats.Bytes()
+	files[filepath.Join(workdir, "berithstats.json")] = ethstats.Bytes()
 
 	composefile := new(bytes.Buffer)
 	template.Must(template.New("").Parse(explorerComposefile)).Execute(composefile, map[string]interface{}{

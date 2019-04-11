@@ -26,7 +26,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
 )
@@ -325,7 +325,7 @@ func (s *stateSync) loop() (err error) {
 }
 
 func (s *stateSync) commit(force bool) error {
-	if !force && s.bytesUncommitted < ethdb.IdealBatchSize {
+	if !force && s.bytesUncommitted < berithdb.IdealBatchSize {
 		return nil
 	}
 	start := time.Now()

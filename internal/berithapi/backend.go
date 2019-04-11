@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package ethapi implements the general Ethereum API functions.
-package ethapi
+// Package berithapi implements the general Ethereum API functions.
+package berithapi
 
 import (
 	"context"
@@ -28,7 +28,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
@@ -41,7 +41,7 @@ type Backend interface {
 	Downloader() *downloader.Downloader
 	ProtocolVersion() int
 	SuggestPrice(ctx context.Context) (*big.Int, error)
-	ChainDb() ethdb.Database
+	ChainDb() berithdb.Database
 	EventMux() *event.TypeMux
 	AccountManager() *accounts.Manager
 

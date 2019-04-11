@@ -24,7 +24,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
@@ -36,7 +36,7 @@ func ExampleGenerateChain() {
 		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
 		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
 		addr3   = crypto.PubkeyToAddress(key3.PublicKey)
-		db      = ethdb.NewMemDatabase()
+		db      = berithdb.NewMemDatabase()
 	)
 
 	// Ensure that key1 has some funds in the genesis block.

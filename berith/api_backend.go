@@ -30,13 +30,13 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/downloader"
 	"bitbucket.org/ibizsoftware/berith-chain/berith/gasprice"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
 
-// EthAPIBackend implements ethapi.Backend for full nodes
+// EthAPIBackend implements berithapi.Backend for full nodes
 type EthAPIBackend struct {
 	eth *Ethereum
 	gpo *gasprice.Oracle
@@ -201,7 +201,7 @@ func (b *EthAPIBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 	return b.gpo.SuggestPrice(ctx)
 }
 
-func (b *EthAPIBackend) ChainDb() ethdb.Database {
+func (b *EthAPIBackend) ChainDb() berithdb.Database {
 	return b.eth.ChainDb()
 }
 

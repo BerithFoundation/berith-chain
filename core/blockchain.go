@@ -37,7 +37,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
@@ -96,9 +96,9 @@ type BlockChain struct {
 	chainConfig *params.ChainConfig // Chain & network configuration
 	cacheConfig *CacheConfig        // Cache configuration for pruning
 
-	db     ethdb.Database // Low level persistent database to store final content in
-	triegc *prque.Prque   // Priority queue mapping block numbers to tries to gc
-	gcproc time.Duration  // Accumulates canonical block processing for trie dumping
+	db     berithdb.Database // Low level persistent database to store final content in
+	triegc *prque.Prque      // Priority queue mapping block numbers to tries to gc
+	gcproc time.Duration     // Accumulates canonical block processing for trie dumping
 
 	hc            *HeaderChain
 	rmLogsFeed    event.Feed
@@ -144,7 +144,7 @@ type BlockChain struct {
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
-func NewBlockChain(stakingDB *stakingdb.StakingDB, db ethdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
+func NewBlockChain(stakingDB *stakingdb.StakingDB, db berithdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{
 			TrieCleanLimit: 256,
@@ -870,7 +870,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 
 		stats.processed++
 
-		if batch.ValueSize() >= ethdb.IdealBatchSize {
+		if batch.ValueSize() >= berithdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				return 0, err
 			}
@@ -1005,7 +1005,7 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 				limit       = common.StorageSize(bc.cacheConfig.TrieDirtyLimit) * 1024 * 1024
 			)
 			if nodes > limit || imgs > 4*1024*1024 {
-				triedb.Cap(limit - ethdb.IdealBatchSize)
+				triedb.Cap(limit - berithdb.IdealBatchSize)
 			}
 			// Find the next state trie we need to commit
 			header := bc.GetHeaderByNumber(current - triesInMemory)

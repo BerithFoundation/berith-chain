@@ -34,7 +34,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 	"bitbucket.org/ibizsoftware/berith-chain/rlp"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
@@ -351,7 +351,7 @@ func (api *PrivateDebugAPI) GetBadBlocks(ctx context.Context) ([]*BadBlockArgs, 
 		} else {
 			results[i].RLP = fmt.Sprintf("0x%x", rlpBytes)
 		}
-		if results[i].Block, err = ethapi.RPCMarshalBlock(block, true, true); err != nil {
+		if results[i].Block, err = berithapi.RPCMarshalBlock(block, true, true); err != nil {
 			results[i].Block = map[string]interface{}{"error": err.Error()}
 		}
 	}

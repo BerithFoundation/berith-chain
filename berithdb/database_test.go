@@ -16,7 +16,7 @@
 
 // +build !js
 
-package ethdb_test
+package berithdb_test
 
 import (
 	"bytes"
@@ -27,15 +27,15 @@ import (
 	"sync"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 )
 
-func newTestLDB() (*ethdb.LDBDatabase, func()) {
+func newTestLDB() (*berithdb.LDBDatabase, func()) {
 	dirname, err := ioutil.TempDir(os.TempDir(), "ethdb_test_")
 	if err != nil {
 		panic("failed to create test file: " + err.Error())
 	}
-	db, err := ethdb.NewLDBDatabase(dirname, 0, 0)
+	db, err := berithdb.NewLDBDatabase(dirname, 0, 0)
 	if err != nil {
 		panic("failed to create test database: " + err.Error())
 	}
@@ -55,10 +55,10 @@ func TestLDB_PutGet(t *testing.T) {
 }
 
 func TestMemoryDB_PutGet(t *testing.T) {
-	testPutGet(ethdb.NewMemDatabase(), t)
+	testPutGet(berithdb.NewMemDatabase(), t)
 }
 
-func testPutGet(db ethdb.Database, t *testing.T) {
+func testPutGet(db berithdb.Database, t *testing.T) {
 	t.Parallel()
 
 	for _, k := range test_values {
@@ -154,10 +154,10 @@ func TestLDB_ParallelPutGet(t *testing.T) {
 }
 
 func TestMemoryDB_ParallelPutGet(t *testing.T) {
-	testParallelPutGet(ethdb.NewMemDatabase(), t)
+	testParallelPutGet(berithdb.NewMemDatabase(), t)
 }
 
-func testParallelPutGet(db ethdb.Database, t *testing.T) {
+func testParallelPutGet(db berithdb.Database, t *testing.T) {
 	const n = 8
 	var pending sync.WaitGroup
 

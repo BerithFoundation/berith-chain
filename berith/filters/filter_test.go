@@ -29,7 +29,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
@@ -51,7 +51,7 @@ func BenchmarkFilters(b *testing.B) {
 	defer os.RemoveAll(dir)
 
 	var (
-		db, _      = ethdb.NewLDBDatabase(dir, 0, 0)
+		db, _      = berithdb.NewLDBDatabase(dir, 0, 0)
 		mux        = new(event.TypeMux)
 		txFeed     = new(event.Feed)
 		rmLogsFeed = new(event.Feed)
@@ -110,7 +110,7 @@ func TestFilters(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	var (
-		db, _      = ethdb.NewLDBDatabase(dir, 0, 0)
+		db, _      = berithdb.NewLDBDatabase(dir, 0, 0)
 		mux        = new(event.TypeMux)
 		txFeed     = new(event.Feed)
 		rmLogsFeed = new(event.Feed)

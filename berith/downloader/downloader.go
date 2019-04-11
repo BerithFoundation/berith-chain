@@ -29,7 +29,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics"
@@ -102,7 +102,7 @@ type Downloader struct {
 	genesis uint64   // Genesis block number to limit sync to (e.g. light client CHT)
 	queue   *queue   // Scheduler for selecting the hashes to download
 	peers   *peerSet // Set of active peers from which download can proceed
-	stateDB ethdb.Database
+	stateDB berithdb.Database
 
 	rttEstimate   uint64 // Round trip time to target for download requests
 	rttConfidence uint64 // Confidence in the estimated RTT (unit: millionths to allow atomic ops)
@@ -205,7 +205,7 @@ type BlockChain interface {
 }
 
 // New creates a new downloader to fetch hashes and blocks from remote peers.
-func New(mode SyncMode, stateDb ethdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn) *Downloader {
+func New(mode SyncMode, stateDb berithdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn) *Downloader {
 	if lightchain == nil {
 		lightchain = chain
 	}
@@ -247,7 +247,7 @@ func New(mode SyncMode, stateDb ethdb.Database, mux *event.TypeMux, chain BlockC
 // In addition, during the state download phase of fast synchronisation the number
 // of processed and the total number of known states are also returned. Otherwise
 // these are zero.
-func (d *Downloader) Progress() ethereum.SyncProgress {
+func (d *Downloader) Progress() berith_chain.SyncProgress {
 	// Lock the current stats and return the progress
 	d.syncStatsLock.RLock()
 	defer d.syncStatsLock.RUnlock()
@@ -261,7 +261,7 @@ func (d *Downloader) Progress() ethereum.SyncProgress {
 	case LightSync:
 		current = d.lightchain.CurrentHeader().Number.Uint64()
 	}
-	return ethereum.SyncProgress{
+	return berith_chain.SyncProgress{
 		StartingBlock: d.syncStatsChainOrigin,
 		CurrentBlock:  current,
 		HighestBlock:  d.syncStatsChainHeight,

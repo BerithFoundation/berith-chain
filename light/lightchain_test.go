@@ -26,7 +26,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
@@ -37,7 +37,7 @@ var (
 )
 
 // makeHeaderChain creates a deterministic chain of headers rooted at parent.
-func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int) []*types.Header {
+func makeHeaderChain(parent *types.Header, n int, db berithdb.Database, seed int) []*types.Header {
 	blocks, _ := core.GenerateChain(params.TestChainConfig, types.NewBlockWithHeader(parent), ethash.NewFaker(), db, n, func(i int, b *core.BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
 	})
@@ -51,8 +51,8 @@ func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int) [
 // newCanonical creates a chain database, and injects a deterministic canonical
 // chain. Depending on the full flag, if creates either a full block chain or a
 // header only chain.
-func newCanonical(n int) (ethdb.Database, *LightChain, error) {
-	db := ethdb.NewMemDatabase()
+func newCanonical(n int) (berithdb.Database, *LightChain, error) {
+	db := berithdb.NewMemDatabase()
 	gspec := core.Genesis{Config: params.TestChainConfig}
 	genesis := gspec.MustCommit(db)
 	blockchain, _ := NewLightChain(&dummyOdr{db: db, indexerConfig: TestClientIndexerConfig}, gspec.Config, ethash.NewFaker())
@@ -69,7 +69,7 @@ func newCanonical(n int) (ethdb.Database, *LightChain, error) {
 
 // newTestLightChain creates a LightChain that doesn't validate anything.
 func newTestLightChain() *LightChain {
-	db := ethdb.NewMemDatabase()
+	db := berithdb.NewMemDatabase()
 	gspec := &core.Genesis{
 		Difficulty: big.NewInt(1),
 		Config:     params.TestChainConfig,
@@ -265,11 +265,11 @@ func makeHeaderChainWithDiff(genesis *types.Block, d []int, seed byte) []*types.
 
 type dummyOdr struct {
 	OdrBackend
-	db            ethdb.Database
+	db            berithdb.Database
 	indexerConfig *IndexerConfig
 }
 
-func (odr *dummyOdr) Database() ethdb.Database {
+func (odr *dummyOdr) Database() berithdb.Database {
 	return odr.db
 }
 

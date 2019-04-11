@@ -30,7 +30,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/state"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -49,7 +49,7 @@ var (
 type LightChain struct {
 	hc            *core.HeaderChain
 	indexerConfig *IndexerConfig
-	chainDb       ethdb.Database
+	chainDb       berithdb.Database
 	odr           OdrBackend
 	chainFeed     event.Feed
 	chainSideFeed event.Feed

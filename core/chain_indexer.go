@@ -27,7 +27,7 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/rawdb"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/event"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 )
@@ -67,8 +67,8 @@ type ChainIndexerChain interface {
 // after an entire section has been finished or in case of rollbacks that might
 // affect already finished sections.
 type ChainIndexer struct {
-	chainDb  ethdb.Database      // Chain database to index the data from
-	indexDb  ethdb.Database      // Prefixed table-view of the db to write index metadata into
+	chainDb  berithdb.Database   // Chain database to index the data from
+	indexDb  berithdb.Database   // Prefixed table-view of the db to write index metadata into
 	backend  ChainIndexerBackend // Background processor generating the index data content
 	children []*ChainIndexer     // Child indexers to cascade chain updates to
 
@@ -97,7 +97,7 @@ type ChainIndexer struct {
 // NewChainIndexer creates a new chain indexer to do background processing on
 // chain segments of a given size after certain number of confirmations passed.
 // The throttling parameter might be used to prevent database thrashing.
-func NewChainIndexer(chainDb, indexDb ethdb.Database, backend ChainIndexerBackend, section, confirm uint64, throttling time.Duration, kind string) *ChainIndexer {
+func NewChainIndexer(chainDb, indexDb berithdb.Database, backend ChainIndexerBackend, section, confirm uint64, throttling time.Duration, kind string) *ChainIndexer {
 	c := &ChainIndexer{
 		chainDb:     chainDb,
 		indexDb:     indexDb,

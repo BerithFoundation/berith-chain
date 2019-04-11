@@ -21,7 +21,7 @@ import (
 	"context"
 	"sync"
 
-	"bitbucket.org/ibizsoftware/berith-chain/internal/ethapi"
+	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
 	"bitbucket.org/ibizsoftware/berith-chain/log"
 	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
@@ -98,7 +98,7 @@ func (ui *StdIOUI) ShowInfo(message string) {
 		log.Info("Error calling 'ShowInfo'", "exc", err.Error(), "msg", message)
 	}
 }
-func (ui *StdIOUI) OnApprovedTx(tx ethapi.SignTransactionResult) {
+func (ui *StdIOUI) OnApprovedTx(tx berithapi.SignTransactionResult) {
 	err := ui.dispatch("OnApprovedTx", tx, nil)
 	if err != nil {
 		log.Info("Error calling 'OnApprovedTx'", "exc", err.Error(), "tx", tx)
