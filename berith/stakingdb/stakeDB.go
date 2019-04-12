@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 )
 
@@ -12,7 +12,7 @@ type StakingDB struct {
 	Encoder encodeFunc
 	Decoder decodeFunc
 	creator createFunc
-	stakeDB *ethdb.LDBDatabase
+	stakeDB *berithdb.LDBDatabase
 }
 
 type decodeFunc func(val []byte) (staking.StakingList, error)
@@ -33,7 +33,7 @@ func (s *StakingDB) CreateDB(filename string, decoder decodeFunc, encoder encode
 		return nil
 	}
 
-	db, err := ethdb.NewLDBDatabase(filename, 128, 1024)
+	db, err := berithdb.NewLDBDatabase(filename, 128, 1024)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err

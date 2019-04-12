@@ -21,7 +21,7 @@ import (
 	"sync"
 
 	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/ethdb"
+	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
 	"bitbucket.org/ibizsoftware/berith-chain/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -59,7 +59,7 @@ type Database interface {
 	TrieDB() *trie.Database
 }
 
-// Trie is a Ethereum Merkle Trie.
+// Trie is a Berith Merkle Trie.
 type Trie interface {
 	TryGet(key []byte) ([]byte, error)
 	TryUpdate(key, value []byte) error
@@ -68,20 +68,20 @@ type Trie interface {
 	Hash() common.Hash
 	NodeIterator(startKey []byte) trie.NodeIterator
 	GetKey([]byte) []byte // TODO(fjl): remove this when SecureTrie is removed
-	Prove(key []byte, fromLevel uint, proofDb ethdb.Putter) error
+	Prove(key []byte, fromLevel uint, proofDb berithdb.Putter) error
 }
 
 // NewDatabase creates a backing store for state. The returned database is safe for
 // concurrent use and retains a few recent expanded trie nodes in memory. To keep
 // more historical state in memory, use the NewDatabaseWithCache constructor.
-func NewDatabase(db ethdb.Database) Database {
+func NewDatabase(db berithdb.Database) Database {
 	return NewDatabaseWithCache(db, 0)
 }
 
 // NewDatabase creates a backing store for state. The returned database is safe for
 // concurrent use and retains both a few recent expanded trie nodes in memory, as
 // well as a lot of collapsed RLP trie nodes in a large memory cache.
-func NewDatabaseWithCache(db ethdb.Database, cache int) Database {
+func NewDatabaseWithCache(db berithdb.Database, cache int) Database {
 	csc, _ := lru.New(codeSizeCacheSize)
 	return &cachingDB{
 		db:            trie.NewDatabaseWithCache(db, cache),
@@ -179,6 +179,6 @@ func (m cachedTrie) Commit(onleaf trie.LeafCallback) (common.Hash, error) {
 	return root, err
 }
 
-func (m cachedTrie) Prove(key []byte, fromLevel uint, proofDb ethdb.Putter) error {
+func (m cachedTrie) Prove(key []byte, fromLevel uint, proofDb berithdb.Putter) error {
 	return m.SecureTrie.Prove(key, fromLevel, proofDb)
 }

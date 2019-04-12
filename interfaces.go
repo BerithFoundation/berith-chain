@@ -15,7 +15,7 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package ethereum defines interfaces for interacting with Ethereum.
-package ethereum
+package berith_chain
 
 import (
 	"context"
@@ -119,6 +119,8 @@ type CallMsg struct {
 	GasPrice *big.Int        // wei <-> gas exchange ratio
 	Value    *big.Int        // amount of wei sent along with the call
 	Data     []byte          // input data, usually an ABI-encoded contract method invocation
+	Base     types.JobWallet
+	Target   types.JobWallet
 }
 
 // A ContractCaller provides contract calls, essentially transactions that are executed by

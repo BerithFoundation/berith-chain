@@ -32,7 +32,7 @@ func (w *wizard) deployExplorer() {
 		return
 	}
 	if w.conf.ethstats == "" {
-		log.Error("No ethstats server configured")
+		log.Error("No berithstats server configured")
 		return
 	}
 	if w.conf.Genesis.Config.Ethash == nil {
@@ -67,7 +67,7 @@ func (w *wizard) deployExplorer() {
 	fmt.Printf("Which port should the explorer listen on? (default = %d)\n", infos.webPort)
 	infos.webPort = w.readDefaultInt(infos.webPort)
 
-	// Figure which virtual-host to deploy ethstats on
+	// Figure which virtual-host to deploy berithstats on
 	if infos.webHost, err = w.ensureVirtualHost(client, infos.webPort, infos.webHost); err != nil {
 		log.Error("Failed to decide on explorer host", "err", err)
 		return
