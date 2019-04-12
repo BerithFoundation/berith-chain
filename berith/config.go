@@ -63,7 +63,7 @@ func init() {
 
 type Config struct {
 	// The genesis block, which is inserted if the database is empty.
-	// If nil, the Ethereum main net block is used.
+	// If nil, the Berith main net block is used.
 	Genesis *core.Genesis `toml:",omitempty"`
 
 	// Protocol options

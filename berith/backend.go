@@ -86,7 +86,7 @@ type Berith struct {
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
 	bloomIndexer  *core.ChainIndexer             // Bloom indexer operating during block imports
 
-	APIBackend *EthAPIBackend
+	APIBackend *BerAPIBackend
 
 	miner     *miner.Miner
 	gasPrice  *big.Int
@@ -95,7 +95,7 @@ type Berith struct {
 	networkID     uint64
 	netRPCService *berithapi.PublicNetAPI
 
-	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
+	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and berithbase)
 
 	stakingDB *stakingdb.StakingDB
 }
@@ -136,7 +136,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 		return nil, stkErr
 	}
 	engine := CreateConsensusEngine(chainConfig, chainDb, stakingDB)
-	eth := &Berith{
+	ber := &Berith{
 		config:         config,
 		chainDb:        chainDb,
 		chainConfig:    chainConfig,
@@ -171,38 +171,38 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 		}
 		cacheConfig = &core.CacheConfig{Disabled: config.NoPruning, TrieCleanLimit: config.TrieCleanCache, TrieDirtyLimit: config.TrieDirtyCache, TrieTimeLimit: config.TrieTimeout}
 	)
-	eth.blockchain, err = core.NewBlockChain(stakingDB, chainDb, cacheConfig, eth.chainConfig, eth.engine, vmConfig, eth.shouldPreserve)
+	ber.blockchain, err = core.NewBlockChain(stakingDB, chainDb, cacheConfig, ber.chainConfig, ber.engine, vmConfig, ber.shouldPreserve)
 	if err != nil {
 		return nil, err
 	}
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
-		eth.blockchain.SetHead(compat.RewindTo)
+		ber.blockchain.SetHead(compat.RewindTo)
 		rawdb.WriteChainConfig(chainDb, genesisHash, chainConfig)
 	}
-	eth.bloomIndexer.Start(eth.blockchain)
+	ber.bloomIndexer.Start(ber.blockchain)
 
 	if config.TxPool.Journal != "" {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
 	}
-	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.blockchain)
+	ber.txPool = core.NewTxPool(config.TxPool, ber.chainConfig, ber.blockchain)
 
-	if eth.protocolManager, err = NewProtocolManager(eth.chainConfig, config.SyncMode, config.NetworkId, eth.eventMux, eth.txPool, eth.engine, eth.blockchain, chainDb, config.Whitelist); err != nil {
+	if ber.protocolManager, err = NewProtocolManager(ber.chainConfig, config.SyncMode, config.NetworkId, ber.eventMux, ber.txPool, ber.engine, ber.blockchain, chainDb, config.Whitelist); err != nil {
 		return nil, err
 	}
 
-	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine, config.MinerRecommit, config.MinerGasFloor, config.MinerGasCeil, eth.isLocalBlock)
-	eth.miner.SetExtra(makeExtraData(config.MinerExtraData))
+	ber.miner = miner.New(ber, ber.chainConfig, ber.EventMux(), ber.engine, config.MinerRecommit, config.MinerGasFloor, config.MinerGasCeil, ber.isLocalBlock)
+	ber.miner.SetExtra(makeExtraData(config.MinerExtraData))
 
-	eth.APIBackend = &EthAPIBackend{eth, nil}
+	ber.APIBackend = &BerAPIBackend{ber, nil}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.MinerGasPrice
 	}
-	eth.APIBackend.gpo = gasprice.NewOracle(eth.APIBackend, gpoParams)
+	ber.APIBackend.gpo = gasprice.NewOracle(ber.APIBackend, gpoParams)
 
-	return eth, nil
+	return ber, nil
 }
 
 func makeExtraData(extra []byte) []byte {
@@ -239,7 +239,7 @@ func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database
 	return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
 }
 
-// APIs return the collection of RPC services the ethereum package offers.
+// APIs return the collection of RPC services the berith package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (s *Berith) APIs() []rpc.API {
 	apis := berithapi.GetAPIs(s.APIBackend)
@@ -304,31 +304,31 @@ func (s *Berith) ResetWithGenesisBlock(gb *types.Block) {
 
 func (s *Berith) Berithbase() (eb common.Address, err error) {
 	s.lock.RLock()
-	etherbase := s.berithbase
+	berithbase := s.berithbase
 	s.lock.RUnlock()
 
-	if etherbase != (common.Address{}) {
-		return etherbase, nil
+	if berithbase != (common.Address{}) {
+		return berithbase, nil
 	}
 	if wallets := s.AccountManager().Wallets(); len(wallets) > 0 {
 		if accounts := wallets[0].Accounts(); len(accounts) > 0 {
-			etherbase := accounts[0].Address
+			berithbase := accounts[0].Address
 
 			s.lock.Lock()
-			s.berithbase = etherbase
+			s.berithbase = berithbase
 			s.lock.Unlock()
 
-			log.Info("Berithbase automatically configured", "address", etherbase)
-			return etherbase, nil
+			log.Info("Berithbase automatically configured", "address", berithbase)
+			return berithbase, nil
 		}
 	}
-	return common.Address{}, fmt.Errorf("etherbase must be explicitly specified")
+	return common.Address{}, fmt.Errorf("berithbase must be explicitly specified")
 }
 
 // isLocalBlock checks whether the specified block is mined
 // by local miner accounts.
 //
-// We regard two types of accounts as local miner account: etherbase
+// We regard two types of accounts as local miner account: berithbase
 // and accounts specified via `txpool.locals` flag.
 func (s *Berith) isLocalBlock(block *types.Block) bool {
 	author, err := s.engine.Author(block.Header())
@@ -336,11 +336,11 @@ func (s *Berith) isLocalBlock(block *types.Block) bool {
 		log.Warn("Failed to retrieve block author", "number", block.NumberU64(), "hash", block.Hash(), "err", err)
 		return false
 	}
-	// Check whether the given address is etherbase.
+	// Check whether the given address is berithbase.
 	s.lock.RLock()
-	etherbase := s.berithbase
+	berithbase := s.berithbase
 	s.lock.RUnlock()
-	if author == etherbase {
+	if author == berithbase {
 		return true
 	}
 	// Check whether the given address is specified by `txpool.local`
@@ -360,13 +360,13 @@ func (s *Berith) shouldPreserve(block *types.Block) bool {
 	return s.isLocalBlock(block)
 }
 
-// SetEtherbase sets the mining reward address.
-func (s *Berith) SetEtherbase(etherbase common.Address) {
+// SetBerithbase sets the mining reward address.
+func (s *Berith) SetBerithbase(base common.Address) {
 	s.lock.Lock()
-	s.berithbase = etherbase
+	s.berithbase = base
 	s.lock.Unlock()
 
-	s.miner.SetEtherbase(etherbase)
+	s.miner.SetBerithbase(base)
 }
 
 // StartMining starts the miner with the given number of CPU threads. If mining
@@ -439,7 +439,7 @@ func (s *Berith) EventMux() *event.TypeMux           { return s.eventMux }
 func (s *Berith) Engine() consensus.Engine           { return s.engine }
 func (s *Berith) ChainDb() berithdb.Database         { return s.chainDb }
 func (s *Berith) IsListening() bool                  { return true } // Always listening
-func (s *Berith) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
+func (s *Berith) BerVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
 func (s *Berith) NetVersion() uint64                 { return s.networkID }
 func (s *Berith) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
 

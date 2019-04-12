@@ -1288,13 +1288,13 @@ func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
 func RegisterEthStatsService(stack *node.Node, url string) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		// Retrieve both berith and les services
-		var ethServ *berith.Berith
-		ctx.Service(&ethServ)
+		var berServ *berith.Berith
+		ctx.Service(&berServ)
 
-		var lesServ *les.LightEthereum
+		var lesServ *les.LightBerith
 		ctx.Service(&lesServ)
 
-		return berithstats.New(url, ethServ, lesServ)
+		return berithstats.New(url, berServ, lesServ)
 	}); err != nil {
 		Fatalf("Failed to register the Ethereum Stats service: %v", err)
 	}

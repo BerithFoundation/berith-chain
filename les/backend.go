@@ -48,7 +48,7 @@ import (
 	rpc "bitbucket.org/ibizsoftware/berith-chain/rpc"
 )
 
-type LightEthereum struct {
+type LightBerith struct {
 	lesCommons
 
 	odr         *LesOdr
@@ -80,7 +80,7 @@ type LightEthereum struct {
 	wg sync.WaitGroup
 }
 
-func New(ctx *node.ServiceContext, config *berith.Config) (*LightEthereum, error) {
+func New(ctx *node.ServiceContext, config *berith.Config) (*LightBerith, error) {
 	chainDb, err := berith.CreateDB(ctx, config, "lightchaindata")
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightEthereum, error
 		return nil, stkErr
 	}
 
-	leth := &LightEthereum{
+	lber := &LightBerith{
 		lesCommons: lesCommons{
 			chainDb: chainDb,
 			config:  config,
@@ -118,43 +118,43 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightEthereum, error
 		bloomIndexer:   berith.NewBloomIndexer(chainDb, params.BloomBitsBlocksClient, params.HelperTrieConfirmations),
 	}
 
-	leth.relay = NewLesTxRelay(peers, leth.reqDist)
-	leth.serverPool = newServerPool(chainDb, quitSync, &leth.wg)
-	leth.retriever = newRetrieveManager(peers, leth.reqDist, leth.serverPool)
+	lber.relay = NewLesTxRelay(peers, lber.reqDist)
+	lber.serverPool = newServerPool(chainDb, quitSync, &lber.wg)
+	lber.retriever = newRetrieveManager(peers, lber.reqDist, lber.serverPool)
 
-	leth.odr = NewLesOdr(chainDb, light.DefaultClientIndexerConfig, leth.retriever)
-	leth.chtIndexer = light.NewChtIndexer(chainDb, leth.odr, params.CHTFrequencyClient, params.HelperTrieConfirmations)
-	leth.bloomTrieIndexer = light.NewBloomTrieIndexer(chainDb, leth.odr, params.BloomBitsBlocksClient, params.BloomTrieFrequency)
-	leth.odr.SetIndexers(leth.chtIndexer, leth.bloomTrieIndexer, leth.bloomIndexer)
+	lber.odr = NewLesOdr(chainDb, light.DefaultClientIndexerConfig, lber.retriever)
+	lber.chtIndexer = light.NewChtIndexer(chainDb, lber.odr, params.CHTFrequencyClient, params.HelperTrieConfirmations)
+	lber.bloomTrieIndexer = light.NewBloomTrieIndexer(chainDb, lber.odr, params.BloomBitsBlocksClient, params.BloomTrieFrequency)
+	lber.odr.SetIndexers(lber.chtIndexer, lber.bloomTrieIndexer, lber.bloomIndexer)
 
 	// Note: NewLightChain adds the trusted checkpoint so it needs an ODR with
 	// indexers already set but not started yet
-	if leth.blockchain, err = light.NewLightChain(leth.odr, leth.chainConfig, leth.engine); err != nil {
+	if lber.blockchain, err = light.NewLightChain(lber.odr, lber.chainConfig, lber.engine); err != nil {
 		return nil, err
 	}
 	// Note: AddChildIndexer starts the update process for the child
-	leth.bloomIndexer.AddChildIndexer(leth.bloomTrieIndexer)
-	leth.chtIndexer.Start(leth.blockchain)
-	leth.bloomIndexer.Start(leth.blockchain)
+	lber.bloomIndexer.AddChildIndexer(lber.bloomTrieIndexer)
+	lber.chtIndexer.Start(lber.blockchain)
+	lber.bloomIndexer.Start(lber.blockchain)
 
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
-		leth.blockchain.SetHead(compat.RewindTo)
+		lber.blockchain.SetHead(compat.RewindTo)
 		rawdb.WriteChainConfig(chainDb, genesisHash, chainConfig)
 	}
 
-	leth.txPool = light.NewTxPool(leth.chainConfig, leth.blockchain, leth.relay)
-	if leth.protocolManager, err = NewProtocolManager(leth.chainConfig, light.DefaultClientIndexerConfig, true, config.NetworkId, leth.eventMux, leth.engine, leth.peers, leth.blockchain, nil, chainDb, leth.odr, leth.relay, leth.serverPool, quitSync, &leth.wg); err != nil {
+	lber.txPool = light.NewTxPool(lber.chainConfig, lber.blockchain, lber.relay)
+	if lber.protocolManager, err = NewProtocolManager(lber.chainConfig, light.DefaultClientIndexerConfig, true, config.NetworkId, lber.eventMux, lber.engine, lber.peers, lber.blockchain, nil, chainDb, lber.odr, lber.relay, lber.serverPool, quitSync, &lber.wg); err != nil {
 		return nil, err
 	}
-	leth.ApiBackend = &LesApiBackend{leth, nil}
+	lber.ApiBackend = &LesApiBackend{lber, nil}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.MinerGasPrice
 	}
-	leth.ApiBackend.gpo = gasprice.NewOracle(leth.ApiBackend, gpoParams)
-	return leth, nil
+	lber.ApiBackend.gpo = gasprice.NewOracle(lber.ApiBackend, gpoParams)
+	return lber, nil
 }
 
 func lesTopic(genesisHash common.Hash, protocolVersion uint) discv5.Topic {
@@ -172,12 +172,12 @@ func lesTopic(genesisHash common.Hash, protocolVersion uint) discv5.Topic {
 
 type LightDummyAPI struct{}
 
-// Etherbase is the address that mining rewards will be send to
-func (s *LightDummyAPI) Etherbase() (common.Address, error) {
+// Berithbase is the address that mining rewards will be send to
+func (s *LightDummyAPI) Berithbase() (common.Address, error) {
 	return common.Address{}, fmt.Errorf("not supported")
 }
 
-// Coinbase is the address that mining rewards will be send to (alias for Etherbase)
+// Coinbase is the address that mining rewards will be send to (alias for Berithbase)
 func (s *LightDummyAPI) Coinbase() (common.Address, error) {
 	return common.Address{}, fmt.Errorf("not supported")
 }
@@ -192,9 +192,9 @@ func (s *LightDummyAPI) Mining() bool {
 	return false
 }
 
-// APIs returns the collection of RPC services the ethereum package offers.
+// APIs returns the collection of RPC services the berith package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
-func (s *LightEthereum) APIs() []rpc.API {
+func (s *LightBerith) APIs() []rpc.API {
 	return append(berithapi.GetAPIs(s.ApiBackend), []rpc.API{
 		{
 			Namespace: "berith",
@@ -220,26 +220,25 @@ func (s *LightEthereum) APIs() []rpc.API {
 	}...)
 }
 
-func (s *LightEthereum) ResetWithGenesisBlock(gb *types.Block) {
+func (s *LightBerith) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *LightEthereum) BlockChain() *light.LightChain      { return s.blockchain }
-func (s *LightEthereum) TxPool() *light.TxPool              { return s.txPool }
-func (s *LightEthereum) Engine() consensus.Engine           { return s.engine }
-func (s *LightEthereum) LesVersion() int                    { return int(ClientProtocolVersions[0]) }
-func (s *LightEthereum) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
-func (s *LightEthereum) EventMux() *event.TypeMux           { return s.eventMux }
-
+func (s *LightBerith) BlockChain() *light.LightChain      { return s.blockchain }
+func (s *LightBerith) TxPool() *light.TxPool              { return s.txPool }
+func (s *LightBerith) Engine() consensus.Engine           { return s.engine }
+func (s *LightBerith) LesVersion() int                    { return int(ClientProtocolVersions[0]) }
+func (s *LightBerith) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
+func (s *LightBerith) EventMux() *event.TypeMux           { return s.eventMux }
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.
-func (s *LightEthereum) Protocols() []p2p.Protocol {
+func (s *LightBerith) Protocols() []p2p.Protocol {
 	return s.makeProtocols(ClientProtocolVersions)
 }
 
 // Start implements node.Service, starting all internal goroutines needed by the
-// Ethereum protocol implementation.
-func (s *LightEthereum) Start(srvr *p2p.Server) error {
+// Berith protocol implementation.
+func (s *LightBerith) Start(srvr *p2p.Server) error {
 	log.Warn("Light client mode is an experimental feature")
 	s.startBloomHandlers(params.BloomBitsBlocksClient)
 	s.netRPCService = berithapi.NewPublicNetAPI(srvr, s.networkId)
@@ -251,8 +250,8 @@ func (s *LightEthereum) Start(srvr *p2p.Server) error {
 }
 
 // Stop implements node.Service, terminating all internal goroutines used by the
-// Ethereum protocol.
-func (s *LightEthereum) Stop() error {
+// Berith protocol.
+func (s *LightBerith) Stop() error {
 	s.odr.Stop()
 	s.bloomIndexer.Close()
 	s.chtIndexer.Close()

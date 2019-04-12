@@ -30,15 +30,15 @@ import (
 
 // Constants to match up protocol versions and messages
 const (
-	eth62 = 62
-	eth63 = 63
+	ber62 = 62
+	ber63 = 63
 )
 
 // ProtocolName is the official short name of the protocol used during capability negotiation.
 var ProtocolName = "berith"
 
 // ProtocolVersions are the supported versions of the berith protocol (first is primary).
-var ProtocolVersions = []uint{eth63, eth62}
+var ProtocolVersions = []uint{ber63, ber62}
 
 // ProtocolLengths are the number of implemented message corresponding to different protocol versions.
 var ProtocolLengths = []uint64{17, 8}

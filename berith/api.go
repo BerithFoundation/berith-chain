@@ -44,23 +44,23 @@ import (
 	// "bitbucket.org/ibizsoftware/berith-chain/log"
 )
 
-// PublicEthereumAPI provides an API to access Ethereum full node-related
+// PublicBerithAPI provides an API to access Berith full node-related
 // information.
 type PublicBerithAPI struct {
 	e *Berith
 }
 
-// NewPublicEthereumAPI creates a new Ethereum protocol API for full nodes.
+// NewPublicBerithAPI creates a new Berith protocol API for full nodes.
 func NewPublicBerithAPI(e *Berith) *PublicBerithAPI {
 	return &PublicBerithAPI{e}
 }
 
-// Etherbase is the address that mining rewards will be send to
+// Berithbase is the address that mining rewards will be send to
 func (api *PublicBerithAPI) Berithbase() (common.Address, error) {
 	return api.e.Berithbase()
 }
 
-// Coinbase is the address that mining rewards will be send to (alias for Etherbase)
+// Coinbase is the address that mining rewards will be send to (alias for Berithbase)
 func (api *PublicBerithAPI) Coinbase() (common.Address, error) {
 	return api.Berithbase()
 }
@@ -70,7 +70,7 @@ func (api *PublicBerithAPI) Hashrate() hexutil.Uint64 {
 	return hexutil.Uint64(api.e.Miner().HashRate())
 }
 
-// ChainId is the EIP-155 replay-protection chain id for the current ethereum chain config.
+// ChainId is the EIP-155 replay-protection chain id for the current berith chain config.
 func (api *PublicBerithAPI) ChainId() hexutil.Uint64 {
 	chainID := new(big.Int)
 	if config := api.e.chainConfig; config.IsEIP155(api.e.blockchain.CurrentBlock().Number()) {
@@ -112,25 +112,6 @@ func NewPrivateMinerAPI(e *Berith) *PrivateMinerAPI {
 // number of threads allowed to use and updates the minimum price required by the
 // transaction pool.
 func (api *PrivateMinerAPI) Start(threads *int) error {
-	
-	// minerAddr := api.e.etherbase
-	// parentNum := api.e.BlockChain().CurrentBlock().Number()
-	// parentNum = parentNum.Sub(parentNum, big.NewInt(1))
-	
-	// parentHeaderHash := api.e.BlockChain().GetHeaderByNumber(parentNum.Uint64()).Hash()
-	// stakingList, err:= stake.NewStakingMap(api.e.stakingDB, parentNum, parentHeaderHash)
-	
-	// if err != nil {
-	// log.Error("Getting staking list was failed.")
-	// return errors.New("getting staking list was failed")
-	// }
-	
-	// _, err = stakingList.Get(minerAddr)
-	// if err != nil {
-	// log.Error("Coinbase was not staked.")
-	// return errors.New("etherbase was not staked")
-	// }
-	
 	if threads == nil {
 		return api.e.StartMining(runtime.NumCPU())
 	}
@@ -161,9 +142,9 @@ func (api *PrivateMinerAPI) SetGasPrice(gasPrice hexutil.Big) bool {
 	return true
 }
 
-// SetEtherbase sets the etherbase of the miner
-func (api *PrivateMinerAPI) SetEtherbase(etherbase common.Address) bool {
-	api.e.SetEtherbase(etherbase)
+// SetBeritherbase sets the beritherbase of the miner
+func (api *PrivateMinerAPI) SetBerithbase(berithbase common.Address) bool {
+	api.e.SetBerithbase(berithbase)
 	return true
 }
 
@@ -177,16 +158,16 @@ func (api *PrivateMinerAPI) GetHashrate() uint64 {
 	return api.e.miner.HashRate()
 }
 
-// PrivateAdminAPI is the collection of Ethereum full node-related APIs
+// PrivateAdminAPI is the collection of Berith full node-related APIs
 // exposed over the private admin endpoint.
 type PrivateAdminAPI struct {
-	eth *Berith
+	e *Berith
 }
 
 // NewPrivateAdminAPI creates a new API definition for the full node private
-// admin methods of the Ethereum service.
-func NewPrivateAdminAPI(eth *Berith) *PrivateAdminAPI {
-	return &PrivateAdminAPI{eth: eth}
+// admin methods of the Berith service.
+func NewPrivateAdminAPI(e *Berith) *PrivateAdminAPI {
+	return &PrivateAdminAPI{e: e}
 }
 
 // ExportChain exports the current blockchain into a local file.
@@ -205,7 +186,7 @@ func (api *PrivateAdminAPI) ExportChain(file string) (bool, error) {
 	}
 
 	// Export the blockchain
-	if err := api.eth.BlockChain().Export(writer); err != nil {
+	if err := api.e.BlockChain().Export(writer); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -257,12 +238,12 @@ func (api *PrivateAdminAPI) ImportChain(file string) (bool, error) {
 			break
 		}
 
-		if hasAllBlocks(api.eth.BlockChain(), blocks) {
+		if hasAllBlocks(api.e.BlockChain(), blocks) {
 			blocks = blocks[:0]
 			continue
 		}
 		// Import the batch and reset the buffer
-		if _, err := api.eth.BlockChain().InsertChain(blocks); err != nil {
+		if _, err := api.e.BlockChain().InsertChain(blocks); err != nil {
 			return false, fmt.Errorf("batch %d: failed to insert: %v", batch, err)
 		}
 		blocks = blocks[:0]
@@ -270,16 +251,16 @@ func (api *PrivateAdminAPI) ImportChain(file string) (bool, error) {
 	return true, nil
 }
 
-// PublicDebugAPI is the collection of Ethereum full node APIs exposed
+// PublicDebugAPI is the collection of Berith full node APIs exposed
 // over the public debugging endpoint.
 type PublicDebugAPI struct {
-	eth *Berith
+	e *Berith
 }
 
 // NewPublicDebugAPI creates a new API definition for the full node-
-// related public debug methods of the Ethereum service.
-func NewPublicDebugAPI(eth *Berith) *PublicDebugAPI {
-	return &PublicDebugAPI{eth: eth}
+// related public debug methods of the Berith service.
+func NewPublicDebugAPI(e *Berith) *PublicDebugAPI {
+	return &PublicDebugAPI{e: e}
 }
 
 // DumpBlock retrieves the entire state of the database at a given block.
@@ -288,41 +269,41 @@ func (api *PublicDebugAPI) DumpBlock(blockNr rpc.BlockNumber) (state.Dump, error
 		// If we're dumping the pending state, we need to request
 		// both the pending block as well as the pending state from
 		// the miner and operate on those
-		_, stateDb := api.eth.miner.Pending()
+		_, stateDb := api.e.miner.Pending()
 		return stateDb.RawDump(), nil
 	}
 	var block *types.Block
 	if blockNr == rpc.LatestBlockNumber {
-		block = api.eth.blockchain.CurrentBlock()
+		block = api.e.blockchain.CurrentBlock()
 	} else {
-		block = api.eth.blockchain.GetBlockByNumber(uint64(blockNr))
+		block = api.e.blockchain.GetBlockByNumber(uint64(blockNr))
 	}
 	if block == nil {
 		return state.Dump{}, fmt.Errorf("block #%d not found", blockNr)
 	}
-	stateDb, err := api.eth.BlockChain().StateAt(block.Root())
+	stateDb, err := api.e.BlockChain().StateAt(block.Root())
 	if err != nil {
 		return state.Dump{}, err
 	}
 	return stateDb.RawDump(), nil
 }
 
-// PrivateDebugAPI is the collection of Ethereum full node APIs exposed over
+// PrivateDebugAPI is the collection of Berith full node APIs exposed over
 // the private debugging endpoint.
 type PrivateDebugAPI struct {
 	config *params.ChainConfig
-	eth    *Berith
+	e    *Berith
 }
 
 // NewPrivateDebugAPI creates a new API definition for the full node-related
-// private debug methods of the Ethereum service.
-func NewPrivateDebugAPI(config *params.ChainConfig, eth *Berith) *PrivateDebugAPI {
-	return &PrivateDebugAPI{config: config, eth: eth}
+// private debug methods of the Berith service.
+func NewPrivateDebugAPI(config *params.ChainConfig, e *Berith) *PrivateDebugAPI {
+	return &PrivateDebugAPI{config: config, e: e}
 }
 
 // Preimage is a debug API function that returns the preimage for a sha3 hash, if known.
 func (api *PrivateDebugAPI) Preimage(ctx context.Context, hash common.Hash) (hexutil.Bytes, error) {
-	if preimage := rawdb.ReadPreimage(api.eth.ChainDb(), hash); preimage != nil {
+	if preimage := rawdb.ReadPreimage(api.e.ChainDb(), hash); preimage != nil {
 		return preimage, nil
 	}
 	return nil, errors.New("unknown preimage")
@@ -338,7 +319,7 @@ type BadBlockArgs struct {
 // GetBadBlocks returns a list of the last 'bad blocks' that the client has seen on the network
 // and returns them as a JSON list of block-hashes
 func (api *PrivateDebugAPI) GetBadBlocks(ctx context.Context) ([]*BadBlockArgs, error) {
-	blocks := api.eth.BlockChain().BadBlocks()
+	blocks := api.e.BlockChain().BadBlocks()
 	results := make([]*BadBlockArgs, len(blocks))
 
 	var err error
@@ -415,19 +396,19 @@ func storageRangeAt(st state.Trie, start []byte, maxResult int) (StorageRangeRes
 func (api *PrivateDebugAPI) GetModifiedAccountsByNumber(startNum uint64, endNum *uint64) ([]common.Address, error) {
 	var startBlock, endBlock *types.Block
 
-	startBlock = api.eth.blockchain.GetBlockByNumber(startNum)
+	startBlock = api.e.blockchain.GetBlockByNumber(startNum)
 	if startBlock == nil {
 		return nil, fmt.Errorf("start block %x not found", startNum)
 	}
 
 	if endNum == nil {
 		endBlock = startBlock
-		startBlock = api.eth.blockchain.GetBlockByHash(startBlock.ParentHash())
+		startBlock = api.e.blockchain.GetBlockByHash(startBlock.ParentHash())
 		if startBlock == nil {
 			return nil, fmt.Errorf("block %x has no parent", endBlock.Number())
 		}
 	} else {
-		endBlock = api.eth.blockchain.GetBlockByNumber(*endNum)
+		endBlock = api.e.blockchain.GetBlockByNumber(*endNum)
 		if endBlock == nil {
 			return nil, fmt.Errorf("end block %d not found", *endNum)
 		}
@@ -442,19 +423,19 @@ func (api *PrivateDebugAPI) GetModifiedAccountsByNumber(startNum uint64, endNum 
 // With one parameter, returns the list of accounts modified in the specified block.
 func (api *PrivateDebugAPI) GetModifiedAccountsByHash(startHash common.Hash, endHash *common.Hash) ([]common.Address, error) {
 	var startBlock, endBlock *types.Block
-	startBlock = api.eth.blockchain.GetBlockByHash(startHash)
+	startBlock = api.e.blockchain.GetBlockByHash(startHash)
 	if startBlock == nil {
 		return nil, fmt.Errorf("start block %x not found", startHash)
 	}
 
 	if endHash == nil {
 		endBlock = startBlock
-		startBlock = api.eth.blockchain.GetBlockByHash(startBlock.ParentHash())
+		startBlock = api.e.blockchain.GetBlockByHash(startBlock.ParentHash())
 		if startBlock == nil {
 			return nil, fmt.Errorf("block %x has no parent", endBlock.Number())
 		}
 	} else {
-		endBlock = api.eth.blockchain.GetBlockByHash(*endHash)
+		endBlock = api.e.blockchain.GetBlockByHash(*endHash)
 		if endBlock == nil {
 			return nil, fmt.Errorf("end block %x not found", *endHash)
 		}
@@ -466,7 +447,7 @@ func (api *PrivateDebugAPI) getModifiedAccounts(startBlock, endBlock *types.Bloc
 	if startBlock.Number().Uint64() >= endBlock.Number().Uint64() {
 		return nil, fmt.Errorf("start block height (%d) must be less than end block height (%d)", startBlock.Number().Uint64(), endBlock.Number().Uint64())
 	}
-	triedb := api.eth.BlockChain().StateCache().TrieDB()
+	triedb := api.e.BlockChain().StateCache().TrieDB()
 
 	oldTrie, err := trie.NewSecure(startBlock.Root(), triedb, 0)
 	if err != nil {

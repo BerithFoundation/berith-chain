@@ -353,7 +353,7 @@ func (c *Client) BatchCallContext(ctx context.Context, b []BatchElem) error {
 }
 
 // EthSubscribe registers a subscripion under the "berith" namespace.
-func (c *Client) EthSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
+func (c *Client) BerithSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
 	return c.Subscribe(ctx, "berith", channel, args...)
 }
 
