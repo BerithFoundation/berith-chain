@@ -43,7 +43,7 @@ var bugCommand = cli.Command{
 
 const issueURL = "https://bitbucket.org/ibizsoftware/berith-chain/issues/new"
 
-// reportBug reports a bug by opening a new URL to the go-ethereum GH issue
+// reportBug reports a bug by opening a new URL to the berith GH issue
 // tracker and setting default values as the issue body.
 func reportBug(ctx *cli.Context) error {
 	// execute template and write contents to buff

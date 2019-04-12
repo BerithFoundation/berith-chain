@@ -71,7 +71,7 @@ var tomlSettings = toml.Config{
 	},
 }
 
-type ethstatsConfig struct {
+type berithStatsConfig struct {
 	URL string `toml:",omitempty"`
 }
 
@@ -79,7 +79,7 @@ type berConfig struct {
 	Ber       berith.Config
 	Shh       whisper.Config
 	Node      node.Config
-	Ethstats  ethstatsConfig
+	BerithStats  berithStatsConfig
 	Dashboard dashboard.Config
 }
 
@@ -130,9 +130,9 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	if err != nil {
 		utils.Fatalf("Failed to create the protocol stack: %v", err)
 	}
-	utils.SetEthConfig(ctx, stack, &cfg.Ber)
-	if ctx.GlobalIsSet(utils.EthStatsURLFlag.Name) {
-		cfg.Ethstats.URL = ctx.GlobalString(utils.EthStatsURLFlag.Name)
+	utils.SetBerithConfig(ctx, stack, &cfg.Ber)
+	if ctx.GlobalIsSet(utils.BerithStatsURLFlag.Name) {
+		cfg.BerithStats.URL = ctx.GlobalString(utils.BerithStatsURLFlag.Name)
 	}
 
 	utils.SetShhConfig(ctx, stack, &cfg.Shh)
@@ -177,9 +177,9 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		utils.RegisterShhService(stack, &cfg.Shh)
 	}
 
-	// Add the Ethereum Stats daemon if requested.
-	if cfg.Ethstats.URL != "" {
-		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
+	// Add the Berith Stats daemon if requested.
+	if cfg.BerithStats.URL != "" {
+		utils.RegisterBerithStatsService(stack, cfg.BerithStats.URL)
 	}
 	return stack
 }

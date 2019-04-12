@@ -340,9 +340,9 @@ var (
 		Usage: "Public address for block mining rewards (default = first account)",
 		Value: "0",
 	}
-	MinerLegacyEtherbaseFlag = cli.StringFlag{
-		Name:  "etherbase",
-		Usage: "Public address for block mining rewards (default = first account, deprecated, use --miner.etherbase)",
+	MinerLegacyBerithbaseFlag = cli.StringFlag{
+		Name:  "berithbase",
+		Usage: "Public address for block mining rewards (default = first account, deprecated, use --miner.berithbase)",
 		Value: "0",
 	}
 	MinerExtraDataFlag = cli.StringFlag{
@@ -379,7 +379,7 @@ var (
 		Usage: "Record information useful for VM and contract debugging",
 	}
 	// Logging and debug settings
-	EthStatsURLFlag = cli.StringFlag{
+	BerithStatsURLFlag = cli.StringFlag{
 		Name:  "berithstats",
 		Usage: "Reporting URL of a berithstats service (nodename:secret@host:port)",
 	}
@@ -801,7 +801,7 @@ func setIPC(ctx *cli.Context, cfg *node.Config) {
 }
 
 // makeDatabaseHandles raises out the number of allowed file handles per process
-// for Geth and returns half of the allowance to assign to the database.
+// for BER and returns half of the allowance to assign to the database.
 func makeDatabaseHandles() int {
 	limit, err := fdlimit.Maximum()
 	if err != nil {
@@ -838,22 +838,22 @@ func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error
 	return accs[index], nil
 }
 
-// setEtherbase retrieves the etherbase either from the directly specified
+// setBerithbase retrieves the berithbase either from the directly specified
 // command line flags or from the keystore if CLI indexed.
-func setEtherbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *berith.Config) {
-	// Extract the current etherbase, new flag overriding legacy one
-	var etherbase string
-	if ctx.GlobalIsSet(MinerLegacyEtherbaseFlag.Name) {
-		etherbase = ctx.GlobalString(MinerLegacyEtherbaseFlag.Name)
+func setBerithbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *berith.Config) {
+	// Extract the current berithbase, new flag overriding legacy one
+	var berithbase string
+	if ctx.GlobalIsSet(MinerLegacyBerithbaseFlag.Name) {
+		berithbase = ctx.GlobalString(MinerLegacyBerithbaseFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerBerithbaseFlag.Name) {
-		etherbase = ctx.GlobalString(MinerBerithbaseFlag.Name)
+		berithbase = ctx.GlobalString(MinerBerithbaseFlag.Name)
 	}
-	// Convert the etherbase into an address and configure it
-	if etherbase != "" {
-		account, err := MakeAddress(ks, etherbase)
+	// Convert the berithbase into an address and configure it
+	if berithbase != "" {
+		account, err := MakeAddress(ks, berithbase)
 		if err != nil {
-			Fatalf("Invalid miner etherbase: %v", err)
+			Fatalf("Invalid miner berithbase: %v", err)
 		}
 		cfg.Berithbase = account.Address
 	}
@@ -904,11 +904,11 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 	if !(lightClient || lightServer) {
 		lightPeers = 0
 	}
-	ethPeers := cfg.MaxPeers - lightPeers
+	peers := cfg.MaxPeers - lightPeers
 	if lightClient {
-		ethPeers = 0
+		peers = 0
 	}
-	log.Info("Maximum peer count", "BER", ethPeers, "total", cfg.MaxPeers)
+	log.Info("Maximum peer count", "BER", peers, "total", cfg.MaxPeers)
 
 	if ctx.GlobalIsSet(MaxPendingPeersFlag.Name) {
 		cfg.MaxPendingPeers = ctx.GlobalInt(MaxPendingPeersFlag.Name)
@@ -1108,14 +1108,14 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 	}
 }
 
-// SetEthConfig applies berith-related command line flags to the config.
-func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *berith.Config) {
+// SetBerithConfig applies berith-related command line flags to the config.
+func SetBerithConfig(ctx *cli.Context, stack *node.Node, cfg *berith.Config) {
 	// Avoid conflicting network flags
 	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
-	setEtherbase(ctx, ks, cfg)
+	setBerithbase(ctx, ks, cfg)
 	setGPO(ctx, &cfg.GPO)
 	setTxPool(ctx, &cfg.TxPool)
 	setWhitelist(ctx, cfg)
@@ -1283,9 +1283,9 @@ func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
 	}
 }
 
-// RegisterEthStatsService configures the Ethereum Stats daemon and adds it to
+// RegisterBerithStatsService configures the Berith Stats daemon and adds it to
 // the given node.
-func RegisterEthStatsService(stack *node.Node, url string) {
+func RegisterBerithStatsService(stack *node.Node, url string) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		// Retrieve both berith and les services
 		var berServ *berith.Berith
@@ -1296,7 +1296,7 @@ func RegisterEthStatsService(stack *node.Node, url string) {
 
 		return berithstats.New(url, berServ, lesServ)
 	}); err != nil {
-		Fatalf("Failed to register the Ethereum Stats service: %v", err)
+		Fatalf("Failed to register the Berith Stats service: %v", err)
 	}
 }
 
