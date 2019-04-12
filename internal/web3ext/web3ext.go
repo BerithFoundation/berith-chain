@@ -247,12 +247,7 @@ web3._extend({
 			name: 'setHead',
 			call: 'debug_setHead',
 			params: 1
-		}),
-		new web3._extend.Method({
-			name: 'seedHash',
-			call: 'debug_seedHash',
-			params: 1
-		}),
+		}),		
 		new web3._extend.Method({
 			name: 'dumpBlock',
 			call: 'debug_dumpBlock',
