@@ -19,7 +19,6 @@ package vm
 import (
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 )
@@ -66,8 +65,6 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	//[BRT] add interface
-	StakingList() stake.StakingList
 	SetStaking(common.Address, *big.Int)
 	GetStakeBalance(common.Address) *big.Int
 	RemoveStakeBalance(common.Address)

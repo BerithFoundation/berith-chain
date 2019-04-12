@@ -23,7 +23,6 @@ import (
 	"math/big"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
@@ -60,8 +59,6 @@ func (n *proofList) Put(key []byte, value []byte) error {
 type StateDB struct {
 	db   Database
 	trie Trie
-
-	stakingList stake.StakingList
 
 	// This map holds 'live' objects, which will get modified while processing a state transition.
 	stateObjects      map[common.Address]*stateObject
@@ -107,10 +104,6 @@ func New(root common.Hash, db Database) (*StateDB, error) {
 		preimages:         make(map[common.Hash][]byte),
 		journal:           newJournal(),
 	}, nil
-}
-
-func (self *StateDB) StakingList() stake.StakingList {
-	return self.stakingList
 }
 
 // setError remembers the first non-nil error it is called with.
@@ -599,7 +592,6 @@ func (self *StateDB) Copy() *StateDB {
 	state := &StateDB{
 		db:                self.db,
 		trie:              self.db.CopyTrie(self.trie),
-		stakingList:       self.stakingList,
 		stateObjects:      make(map[common.Address]*stateObject, len(self.journal.dirties)),
 		stateObjectsDirty: make(map[common.Address]struct{}, len(self.journal.dirties)),
 		refund:            self.refund,
