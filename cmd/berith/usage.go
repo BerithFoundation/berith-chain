@@ -181,7 +181,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MinerGasPriceFlag,
 			utils.MinerGasTargetFlag,
 			utils.MinerGasLimitFlag,
-			utils.MinerEtherbaseFlag,
+			utils.MinerBerithbaseFlag,
 			utils.MinerExtraDataFlag,
 			utils.MinerRecommitIntervalFlag,
 			utils.MinerNoVerfiyFlag,

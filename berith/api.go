@@ -57,7 +57,7 @@ func NewPublicBerithAPI(e *Berith) *PublicBerithAPI {
 
 // Etherbase is the address that mining rewards will be send to
 func (api *PublicBerithAPI) Berithbase() (common.Address, error) {
-	return api.e.Etherbase()
+	return api.e.Berithbase()
 }
 
 // Coinbase is the address that mining rewards will be send to (alias for Etherbase)

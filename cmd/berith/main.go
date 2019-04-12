@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// berith is the official command-line client for Ethereum.
+
 package main
 
 import (
@@ -99,7 +99,7 @@ var (
 		utils.MinerGasLimitFlag,
 		utils.MinerGasPriceFlag,
 		utils.MinerLegacyGasPriceFlag,
-		utils.MinerEtherbaseFlag,
+		utils.MinerBerithbaseFlag,
 		utils.MinerLegacyEtherbaseFlag,
 		utils.MinerExtraDataFlag,
 		utils.MinerLegacyExtraDataFlag,

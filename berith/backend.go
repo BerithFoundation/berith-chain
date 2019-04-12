@@ -90,7 +90,7 @@ type Berith struct {
 
 	miner     *miner.Miner
 	gasPrice  *big.Int
-	etherbase common.Address
+	berithbase common.Address
 
 	networkID     uint64
 	netRPCService *berithapi.PublicNetAPI
@@ -146,7 +146,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 		shutdownChan:   make(chan bool),
 		networkID:      config.NetworkId,
 		gasPrice:       config.MinerGasPrice,
-		etherbase:      config.Etherbase,
+		berithbase:      config.Berithbase,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 		stakingDB:      stakingDB,
@@ -302,9 +302,9 @@ func (s *Berith) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *Berith) Etherbase() (eb common.Address, err error) {
+func (s *Berith) Berithbase() (eb common.Address, err error) {
 	s.lock.RLock()
-	etherbase := s.etherbase
+	etherbase := s.berithbase
 	s.lock.RUnlock()
 
 	if etherbase != (common.Address{}) {
@@ -315,7 +315,7 @@ func (s *Berith) Etherbase() (eb common.Address, err error) {
 			etherbase := accounts[0].Address
 
 			s.lock.Lock()
-			s.etherbase = etherbase
+			s.berithbase = etherbase
 			s.lock.Unlock()
 
 			log.Info("Berithbase automatically configured", "address", etherbase)
@@ -338,7 +338,7 @@ func (s *Berith) isLocalBlock(block *types.Block) bool {
 	}
 	// Check whether the given address is etherbase.
 	s.lock.RLock()
-	etherbase := s.etherbase
+	etherbase := s.berithbase
 	s.lock.RUnlock()
 	if author == etherbase {
 		return true
@@ -363,7 +363,7 @@ func (s *Berith) shouldPreserve(block *types.Block) bool {
 // SetEtherbase sets the mining reward address.
 func (s *Berith) SetEtherbase(etherbase common.Address) {
 	s.lock.Lock()
-	s.etherbase = etherbase
+	s.berithbase = etherbase
 	s.lock.Unlock()
 
 	s.miner.SetEtherbase(etherbase)
@@ -393,15 +393,15 @@ func (s *Berith) StartMining(threads int) error {
 		s.txPool.SetGasPrice(price)
 
 		// Configure the local mining address
-		eb, err := s.Etherbase()
+		eb, err := s.Berithbase()
 		if err != nil {
-			log.Error("Cannot start mining without etherbase", "err", err)
-			return fmt.Errorf("etherbase missing: %v", err)
+			log.Error("Cannot start mining without berithbase", "err", err)
+			return fmt.Errorf("berithbase missing: %v", err)
 		}
 		if bsrr, ok := s.engine.(*bsrr.BSRR); ok {
 			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 			if wallet == nil || err != nil {
-				log.Error("Etherbase account unavailable locally", "err", err)
+				log.Error("Berithbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
 			}
 			bsrr.Authorize(eb, wallet.SignHash)

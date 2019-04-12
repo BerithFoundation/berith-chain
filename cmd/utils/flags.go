@@ -335,8 +335,8 @@ var (
 		Usage: "Minimum gas price for mining a transaction (deprecated, use --miner.gasprice)",
 		Value: berith.DefaultConfig.MinerGasPrice,
 	}
-	MinerEtherbaseFlag = cli.StringFlag{
-		Name:  "miner.etherbase",
+	MinerBerithbaseFlag = cli.StringFlag{
+		Name:  "miner.berithbase",
 		Usage: "Public address for block mining rewards (default = first account)",
 		Value: "0",
 	}
@@ -846,8 +846,8 @@ func setEtherbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *berith.Config) {
 	if ctx.GlobalIsSet(MinerLegacyEtherbaseFlag.Name) {
 		etherbase = ctx.GlobalString(MinerLegacyEtherbaseFlag.Name)
 	}
-	if ctx.GlobalIsSet(MinerEtherbaseFlag.Name) {
-		etherbase = ctx.GlobalString(MinerEtherbaseFlag.Name)
+	if ctx.GlobalIsSet(MinerBerithbaseFlag.Name) {
+		etherbase = ctx.GlobalString(MinerBerithbaseFlag.Name)
 	}
 	// Convert the etherbase into an address and configure it
 	if etherbase != "" {
@@ -855,7 +855,7 @@ func setEtherbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *berith.Config) {
 		if err != nil {
 			Fatalf("Invalid miner etherbase: %v", err)
 		}
-		cfg.Etherbase = account.Address
+		cfg.Berithbase = account.Address
 	}
 }
 

@@ -30,7 +30,6 @@ import (
 	"bitbucket.org/ibizsoftware/berith-chain/params"
 )
 
-// DefaultConfig contains default settings for use on the Ethereum main net.
 var DefaultConfig = Config{
 	SyncMode: downloader.FastSync,
 	NetworkId:      1,
@@ -88,7 +87,7 @@ type Config struct {
 	TrieTimeout        time.Duration
 
 	// Mining-related options
-	Etherbase      common.Address `toml:",omitempty"`
+	Berithbase      common.Address `toml:",omitempty"`
 	MinerNotify    []string       `toml:",omitempty"`
 	MinerExtraData []byte         `toml:",omitempty"`
 	MinerGasFloor  uint64
