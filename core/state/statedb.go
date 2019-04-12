@@ -23,7 +23,6 @@ import (
 	"math/big"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stake"
 	"bitbucket.org/ibizsoftware/berith-chain/common"
 	"bitbucket.org/ibizsoftware/berith-chain/core/types"
 	"bitbucket.org/ibizsoftware/berith-chain/crypto"
@@ -52,7 +51,7 @@ func (n *proofList) Put(key []byte, value []byte) error {
 	return nil
 }
 
-// StateDBs within the ethereum protocol are used to store anything
+// StateDBs within the berith protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
 // nested states. It's the general query interface to retrieve:
 // * Contracts
@@ -60,8 +59,6 @@ func (n *proofList) Put(key []byte, value []byte) error {
 type StateDB struct {
 	db   Database
 	trie Trie
-
-	stakingList stake.StakingList
 
 	// This map holds 'live' objects, which will get modified while processing a state transition.
 	stateObjects      map[common.Address]*stateObject
@@ -107,10 +104,6 @@ func New(root common.Hash, db Database) (*StateDB, error) {
 		preimages:         make(map[common.Hash][]byte),
 		journal:           newJournal(),
 	}, nil
-}
-
-func (self *StateDB) StakingList() stake.StakingList {
-	return self.stakingList
 }
 
 // setError remembers the first non-nil error it is called with.
@@ -568,7 +561,7 @@ func (self *StateDB) createObject(addr common.Address) (newobj, prev *stateObjec
 //   1. sends funds to sha(account ++ (nonce + 1))
 //   2. tx_create(sha(account ++ nonce)) (note that this gets the address of 1)
 //
-// Carrying over the balance ensures that Ether doesn't disappear.
+// Carrying over the balance ensures that Berith doesn't disappear.
 func (self *StateDB) CreateAccount(addr common.Address) {
 	newObj, prev := self.createObject(addr)
 	if prev != nil {
@@ -599,7 +592,6 @@ func (self *StateDB) Copy() *StateDB {
 	state := &StateDB{
 		db:                self.db,
 		trie:              self.db.CopyTrie(self.trie),
-		stakingList:       self.stakingList,
 		stateObjects:      make(map[common.Address]*stateObject, len(self.journal.dirties)),
 		stateObjectsDirty: make(map[common.Address]struct{}, len(self.journal.dirties)),
 		refund:            self.refund,

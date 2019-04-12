@@ -208,7 +208,7 @@ func TestBzzFeed(t *testing.T) {
 	//data for update 2
 	update2Data := []byte("foo")
 
-	topic, _ := feed.NewTopic("foo.eth", nil)
+	topic, _ := feed.NewTopic("foo.berith", nil)
 	updateRequest := feed.NewFirstRequest(topic)
 	updateRequest.SetData(update1Data)
 

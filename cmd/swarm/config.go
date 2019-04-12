@@ -81,7 +81,7 @@ const (
 	SWARM_ENV_STORE_CACHE_CAPACITY    = "SWARM_STORE_CACHE_CAPACITY"
 	SWARM_ACCESS_PASSWORD             = "SWARM_ACCESS_PASSWORD"
 	SWARM_AUTO_DEFAULTPATH            = "SWARM_AUTO_DEFAULTPATH"
-	GETH_ENV_DATADIR                  = "GETH_DATADIR"
+	BERITH_ENV_DATADIR                  = "BERITH_DATADIR"
 )
 
 // These settings ensure that TOML keys use the same names as Go struct fields.
@@ -125,7 +125,7 @@ func initSwarmNode(config *bzzapi.Config, stack *node.Node, ctx *cli.Context) {
 	//at this point, all vars should be set in the Config
 	//get the account for the provided swarm account
 	prvkey := getAccount(config.BzzAccount, ctx, stack)
-	//set the resolved config path (geth --datadir)
+	//set the resolved config path (berith --datadir)
 	config.Path = expandPath(stack.InstanceDir())
 	//finally, initialize the configuration
 	config.Init(prvkey)
@@ -284,7 +284,7 @@ func envVarsOverride(currentConfig *bzzapi.Config) (config *bzzapi.Config) {
 		}
 	}
 
-	if datadir := os.Getenv(GETH_ENV_DATADIR); datadir != "" {
+	if datadir := os.Getenv(BERITH_ENV_DATADIR); datadir != "" {
 		currentConfig.Path = expandPath(datadir)
 	}
 

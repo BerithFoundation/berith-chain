@@ -46,10 +46,10 @@ func makeWizard(network string) *wizard {
 // setting up a new or managing an existing Ethereum private network.
 func (w *wizard) run() {
 	fmt.Println("+-----------------------------------------------------------+")
-	fmt.Println("| Welcome to puppeth, your Ethereum private network manager |")
+	fmt.Println("| Welcome to puppeth, your Berith private network manager |")
 	fmt.Println("|                                                           |")
-	fmt.Println("| This tool lets you create a new Ethereum network down to  |")
-	fmt.Println("| the genesis block, bootnodes, miners and ethstats servers |")
+	fmt.Println("| This tool lets you create a new Berith network down to  |")
+	fmt.Println("| the genesis block, bootnodes, miners and berithstats servers |")
 	fmt.Println("| without the hassle that it would normally entail.         |")
 	fmt.Println("|                                                           |")
 	fmt.Println("| Puppeth uses SSH to dial in to remote servers, and builds |")
@@ -71,7 +71,7 @@ func (w *wizard) run() {
 			log.Error("I also like to live dangerously, still no spaces, hyphens or capital letters")
 		}
 	}
-	log.Info("Administering Ethereum network", "name", w.network)
+	log.Info("Administering Berith network", "name", w.network)
 
 	// Load initial configurations and connect to all live servers
 	w.conf.path = filepath.Join(os.Getenv("HOME"), ".puppeth", w.network)

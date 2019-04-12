@@ -48,7 +48,7 @@ type Config struct {
 	EVMInterpreter string
 }
 
-// Interpreter is used to run Ethereum based contracts and will utilise the
+// Interpreter is used to run Berith based contracts and will utilise the
 // passed environment to query external sources for state information.
 // The Interpreter will run the byte code VM based on the passed
 // configuration.

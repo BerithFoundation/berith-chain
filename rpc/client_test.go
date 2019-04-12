@@ -221,7 +221,7 @@ func TestClientSubscribeInvalidArg(t *testing.T) {
 }
 
 func TestClientSubscribe(t *testing.T) {
-	server := newTestServer("eth", new(NotificationTestService))
+	server := newTestServer("berith", new(NotificationTestService))
 	defer server.Stop()
 	client := DialInProc(server)
 	defer client.Close()
@@ -290,7 +290,7 @@ func TestClientSubscribeClose(t *testing.T) {
 		gotHangSubscriptionReq:  make(chan struct{}),
 		unblockHangSubscription: make(chan struct{}),
 	}
-	server := newTestServer("eth", service)
+	server := newTestServer("berith", service)
 	defer server.Stop()
 	client := DialInProc(server)
 	defer client.Close()
@@ -327,7 +327,7 @@ func TestClientSubscribeClose(t *testing.T) {
 // client hangs during shutdown when Unsubscribe races with Client.Close.
 func TestClientCloseUnsubscribeRace(t *testing.T) {
 	service := &NotificationTestService{}
-	server := newTestServer("eth", service)
+	server := newTestServer("berith", service)
 	defer server.Stop()
 
 	for i := 0; i < 20; i++ {
@@ -350,7 +350,7 @@ func TestClientCloseUnsubscribeRace(t *testing.T) {
 // This test checks that Client doesn't lock up when a single subscriber
 // doesn't read subscription events.
 func TestClientNotificationStorm(t *testing.T) {
-	server := newTestServer("eth", new(NotificationTestService))
+	server := newTestServer("berith", new(NotificationTestService))
 	defer server.Stop()
 
 	doTest := func(count int, wantError bool) {

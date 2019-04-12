@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	gethmetrics "bitbucket.org/ibizsoftware/berith-chain/metrics"
+	berithmetrics "bitbucket.org/ibizsoftware/berith-chain/metrics"
 	"bitbucket.org/ibizsoftware/berith-chain/metrics/influxdb"
 	"bitbucket.org/ibizsoftware/berith-chain/swarm/log"
 	"gopkg.in/urfave/cli.v1"
@@ -74,7 +74,7 @@ var Flags = []cli.Flag{
 }
 
 func Setup(ctx *cli.Context) {
-	if gethmetrics.Enabled {
+	if berithmetrics.Enabled {
 		log.Info("Enabling swarm metrics collection")
 		var (
 			enableExport = ctx.GlobalBool(MetricsEnableInfluxDBExportFlag.Name)
@@ -86,11 +86,11 @@ func Setup(ctx *cli.Context) {
 		)
 
 		// Start system runtime metrics collection
-		go gethmetrics.CollectProcessMetrics(2 * time.Second)
+		go berithmetrics.CollectProcessMetrics(2 * time.Second)
 
 		if enableExport {
 			log.Info("Enabling swarm metrics export to InfluxDB")
-			go influxdb.InfluxDBWithTags(gethmetrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "swarm.", map[string]string{
+			go influxdb.InfluxDBWithTags(berithmetrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "swarm.", map[string]string{
 				"host": hosttag,
 			})
 		}

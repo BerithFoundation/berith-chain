@@ -279,12 +279,12 @@ func (w *wizard) manageGenesis() {
 		out, _ := json.MarshalIndent(w.conf.Genesis, "", "  ")
 
 		// Export the native genesis spec used by puppeth and Geth
-		gethJson := filepath.Join(folder, fmt.Sprintf("%s.json", w.network))
-		if err := ioutil.WriteFile((gethJson), out, 0644); err != nil {
+		berithJson := filepath.Join(folder, fmt.Sprintf("%s.json", w.network))
+		if err := ioutil.WriteFile((berithJson), out, 0644); err != nil {
 			log.Error("Failed to save genesis file", "err", err)
 			return
 		}
-		log.Info("Saved native genesis chain spec", "path", gethJson)
+		log.Info("Saved native genesis chain spec", "path", berithJson)
 
 		// Export the genesis spec used by Aleth (formerly C++ Ethereum)
 		if spec, err := newAlethGenesisSpec(w.network, w.conf.Genesis); err != nil {

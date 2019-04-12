@@ -32,7 +32,7 @@ func (w *wizard) deployWallet() {
 		return
 	}
 	if w.conf.ethstats == "" {
-		log.Error("No ethstats server configured")
+		log.Error("No berithstats server configured")
 		return
 	}
 	// Select the server to interact with
@@ -59,7 +59,7 @@ func (w *wizard) deployWallet() {
 	fmt.Printf("Which port should the wallet listen on? (default = %d)\n", infos.webPort)
 	infos.webPort = w.readDefaultInt(infos.webPort)
 
-	// Figure which virtual-host to deploy ethstats on
+	// Figure which virtual-host to deploy berithstats on
 	if infos.webHost, err = w.ensureVirtualHost(client, infos.webPort, infos.webHost); err != nil {
 		log.Error("Failed to decide on wallet host", "err", err)
 		return

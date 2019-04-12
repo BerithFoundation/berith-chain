@@ -42,8 +42,8 @@ type ENS struct {
 }
 
 // NewENS creates a struct exposing convenient high-level operations for interacting with
-// the Ethereum Name Service.
-func NewENS(transactOpts *bind.TransactOpts, contractAddr common.Address, contractBackend bind.ContractBackend) (*ENS, error) {
+// the Berith Name Service.
+func NewBNS(transactOpts *bind.TransactOpts, contractAddr common.Address, contractBackend bind.ContractBackend) (*ENS, error) {
 	ens, err := contract.NewENS(contractAddr, contractBackend)
 	if err != nil {
 		return nil, err

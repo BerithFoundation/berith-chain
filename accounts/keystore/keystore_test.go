@@ -375,7 +375,7 @@ func checkEvents(t *testing.T, want []walletEvent, have []walletEvent) {
 }
 
 func tmpKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
-	d, err := ioutil.TempDir("", "eth-keystore-test")
+	d, err := ioutil.TempDir("", "berith-keystore-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -383,5 +383,5 @@ func tmpKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
 	if encrypted {
 		new = func(kd string) *KeyStore { return NewKeyStore(kd, veryLightScryptN, veryLightScryptP) }
 	}
-	return d, new(d)
+	return d, new(string(d))
 }
