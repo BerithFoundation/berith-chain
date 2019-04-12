@@ -52,7 +52,7 @@ var (
 	}
 	SwarmSwapAPIFlag = cli.StringFlag{
 		Name:   "swap-api",
-		Usage:  "URL of the Ethereum API provider to use to settle SWAP payments",
+		Usage:  "URL of the Berith API provider to use to settle SWAP payments",
 		EnvVar: SWARM_ENV_SWAP_API,
 	}
 	SwarmSyncDisabledFlag = cli.BoolTFlag{
@@ -139,7 +139,7 @@ var (
 	}
 	SwarmStorePath = cli.StringFlag{
 		Name:   "store.path",
-		Usage:  "Path to leveldb chunk DB (default <$GETH_ENV_DIR>/swarm/bzz-<$BZZ_KEY>/chunks)",
+		Usage:  "Path to leveldb chunk DB (default <$BERITH_ENV_DIR>/swarm/bzz-<$BZZ_KEY>/chunks)",
 		EnvVar: SWARM_ENV_STORE_PATH,
 	}
 	SwarmStoreCapacity = cli.Uint64Flag{

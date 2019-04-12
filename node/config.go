@@ -237,7 +237,7 @@ func DefaultWSEndpoint() string {
 // NodeName returns the devp2p node identifier.
 func (c *Config) NodeName() string {
 	name := c.name()
-	// Backwards compatibility: previous versions used title-cased "Geth", keep that.
+	// Backwards compatibility: previous versions used title-cased "BER", keep that.
 	if name == "berith" || name == "berith-testnet" {
 		name = "Berith"
 	}
@@ -264,7 +264,7 @@ func (c *Config) name() string {
 }
 
 // These resources are resolved differently for "berith" instances.
-var isOldGethResource = map[string]bool{
+var isOldBerithResource = map[string]bool{
 	"chaindata":          true,
 	"nodes":              true,
 	"nodekey":            true,
@@ -282,7 +282,7 @@ func (c *Config) ResolvePath(path string) string {
 	}
 	// Backwards-compatibility: ensure that data directory files created
 	// by berith 1.4 are used if they exist.
-	if warn, isOld := isOldGethResource[path]; isOld {
+	if warn, isOld := isOldBerithResource[path]; isOld {
 		oldpath := ""
 		if c.name() == "berith" {
 			oldpath = filepath.Join(c.DataDir, path)
@@ -419,7 +419,7 @@ func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
 	var ephemeral string
 	if keydir == "" {
 		// There is no datadir.
-		keydir, err = ioutil.TempDir("", "go-ethereum-keystore")
+		keydir, err = ioutil.TempDir("", "go-berith-keystore")
 		ephemeral = keydir
 	}
 

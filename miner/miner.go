@@ -44,7 +44,7 @@ type Miner struct {
 	mux      *event.TypeMux
 	worker   *worker
 	coinbase common.Address
-	eth      Backend
+	e      Backend
 	engine   consensus.Engine
 	exitCh   chan struct{}
 
@@ -52,13 +52,13 @@ type Miner struct {
 	shouldStart int32 // should start indicates whether we should start after sync
 }
 
-func New(eth Backend, config *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(block *types.Block) bool) *Miner {
+func New(e Backend, config *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(block *types.Block) bool) *Miner {
 	miner := &Miner{
-		eth:      eth,
+		e:      e,
 		mux:      mux,
 		engine:   engine,
 		exitCh:   make(chan struct{}),
-		worker:   newWorker(config, engine, eth, mux, recommit, gasFloor, gasCeil, isLocalBlock),
+		worker:   newWorker(config, engine, e, mux, recommit, gasFloor, gasCeil, isLocalBlock),
 		canStart: 1,
 	}
 	go miner.update()
@@ -166,5 +166,5 @@ func (self *Miner) PendingBlock() *types.Block {
 
 func (self *Miner) SetBerithbase(addr common.Address) {
 	self.coinbase = addr
-	self.worker.setEtherbase(addr)
+	self.worker.setBerithbase(addr)
 }

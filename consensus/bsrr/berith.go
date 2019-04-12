@@ -168,7 +168,7 @@ func sigHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
-// ecrecover extracts the Ethereum account address from a signed header.
+// ecrecover extracts the Berith account address from a signed header.
 func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, error) {
 	// If the signature's already cached, return that
 	hash := header.Hash()
@@ -181,7 +181,7 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	}
 	signature := header.Extra[len(header.Extra)-extraSeal:]
 
-	// Recover the public key and the Ethereum address
+	// Recover the public key and the Berith address
 	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
 	if err != nil {
 		return common.Address{}, err
@@ -205,7 +205,7 @@ type BSRR struct {
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
-	signer common.Address // Ethereum address of the signing key
+	signer common.Address // Berith address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
 
@@ -259,7 +259,7 @@ func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfi
 	return engine
 }
 
-// Author implements consensus.Engine, returning the Ethereum address recovered
+// Author implements consensus.Engine, returning the Berith address recovered
 // from the signature in the header's extra-data section.
 func (c *BSRR) Author(header *types.Header) (common.Address, error) {
 	return ecrecover(header, c.signatures)
@@ -375,84 +375,6 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	return c.verifySeal(chain, header, parents)
 }
 
-// snapshot retrieves the authorization snapshot at a given point in time.
-//func (c *BSRR) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
-//	// Search for a snapshot in memory or on disk for checkpoints
-//	var (
-//		headers []*types.Header
-//		snap    *Snapshot
-//	)
-//	for snap == nil {
-//		// If an in-memory snapshot was found, use that
-//		if s, ok := c.recents.Get(hash); ok {
-//			snap = s.(*Snapshot)
-//			break
-//		}
-//		// If an on-disk checkpoint snapshot can be found, use that
-//		if number%checkpointInterval == 0 {
-//			if s, err := loadSnapshot(c.config, c.signatures, c.db, hash); err == nil {
-//				log.Trace("Loaded voting snapshot from disk", "number", number, "hash", hash)
-//				snap = s
-//				break
-//			}
-//		}
-//		// If we're at an checkpoint block, make a snapshot if it's known
-//		if number == 0 || (number%c.config.Epoch == 0 && chain.GetHeaderByNumber(number-1) == nil) {
-//			checkpoint := chain.GetHeaderByNumber(number)
-//			if checkpoint != nil {
-//				hash := checkpoint.Hash()
-//
-//				signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
-//				for i := 0; i < len(signers); i++ {
-//					copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
-//				}
-//				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
-//				if err := snap.store(c.db); err != nil {
-//					return nil, err
-//				}
-//				log.Info("Stored checkpoint snapshot to disk", "number", number, "hash", hash)
-//				break
-//			}
-//		}
-//		// No snapshot for this header, gather the header and move backward
-//		var header *types.Header
-//		if len(parents) > 0 {
-//			// If we have explicit parents, pick from there (enforced)
-//			header = parents[len(parents)-1]
-//			if header.Hash() != hash || header.Number.Uint64() != number {
-//				return nil, consensus.ErrUnknownAncestor
-//			}
-//			parents = parents[:len(parents)-1]
-//		} else {
-//			// No explicit parents (or no more left), reach out to the database
-//			header = chain.GetHeader(hash, number)
-//			if header == nil {
-//				return nil, consensus.ErrUnknownAncestor
-//			}
-//		}
-//		headers = append(headers, header)
-//		number, hash = number-1, header.ParentHash
-//	}
-//	// Previous snapshot found, apply any pending headers on top of it
-//	for i := 0; i < len(headers)/2; i++ {
-//		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
-//	}
-//
-//	snap, err := snap.apply(chain, c.stakingDB, headers, c)
-//	if err != nil {
-//		return nil, err
-//	}
-//	c.recents.Add(snap.Hash, snap)
-//
-//	// If we've generated a new checkpoint snapshot, save to disk
-//	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
-//		if err = snap.store(c.db); err != nil {
-//			return nil, err
-//		}
-//		log.Trace("Stored voting snapshot to disk", "number", snap.Number, "hash", snap.Hash)
-//	}
-//	return snap, err
-//}
 
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.

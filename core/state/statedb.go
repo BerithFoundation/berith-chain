@@ -52,7 +52,7 @@ func (n *proofList) Put(key []byte, value []byte) error {
 	return nil
 }
 
-// StateDBs within the ethereum protocol are used to store anything
+// StateDBs within the berith protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
 // nested states. It's the general query interface to retrieve:
 // * Contracts
@@ -568,7 +568,7 @@ func (self *StateDB) createObject(addr common.Address) (newobj, prev *stateObjec
 //   1. sends funds to sha(account ++ (nonce + 1))
 //   2. tx_create(sha(account ++ nonce)) (note that this gets the address of 1)
 //
-// Carrying over the balance ensures that Ether doesn't disappear.
+// Carrying over the balance ensures that Berith doesn't disappear.
 func (self *StateDB) CreateAccount(addr common.Address) {
 	newObj, prev := self.createObject(addr)
 	if prev != nil {

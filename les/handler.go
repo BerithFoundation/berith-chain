@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package les implements the Light Ethereum Subprotocol.
+// Package les implements the Light Berith Subprotocol.
 package les
 
 import (
@@ -49,7 +49,7 @@ const (
 	softResponseLimit = 2 * 1024 * 1024 // Target maximum size of returned blocks, headers or node data.
 	estHeaderRlpSize  = 500             // Approximate size of an RLP encoded block header
 
-	ethVersion = 63 // equivalent berith version for the downloader
+	berithVersion = 63 // equivalent berith version for the downloader
 
 	MaxHeaderFetch           = 192 // Amount of block headers to be fetched per retrieval request
 	MaxBodyFetch             = 32  // Amount of block bodies to be fetched per retrieval request
@@ -123,7 +123,7 @@ type ProtocolManager struct {
 }
 
 // NewProtocolManager returns a new ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
-// with the ethereum network.
+// with the berith network.
 func NewProtocolManager(chainConfig *params.ChainConfig, indexerConfig *light.IndexerConfig, lightSync bool, networkId uint64, mux *event.TypeMux, engine consensus.Engine, peers *peerSet, blockchain BlockChain, txpool txPool, chainDb berithdb.Database, odr *LesOdr, txrelay *LesTxRelay, serverPool *serverPool, quitSync chan struct{}, wg *sync.WaitGroup) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
@@ -1241,7 +1241,7 @@ func (d *downloaderPeerNotify) registerPeer(p *peer) {
 		manager: pm,
 		peer:    p,
 	}
-	pm.downloader.RegisterLightPeer(p.id, ethVersion, pc)
+	pm.downloader.RegisterLightPeer(p.id, berithVersion, pc)
 }
 
 func (d *downloaderPeerNotify) unregisterPeer(p *peer) {

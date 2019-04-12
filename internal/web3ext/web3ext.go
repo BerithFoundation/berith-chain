@@ -589,8 +589,8 @@ web3._extend({
 			call: 'miner_stop'
 		}),
 		new web3._extend.Method({
-			name: 'setEtherbase',
-			call: 'miner_setEtherbase',
+			name: 'setBerithbase',
+			call: 'miner_setBerithbase',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),

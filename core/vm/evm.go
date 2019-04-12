@@ -73,9 +73,9 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 // it shouldn't be modified.
 type Context struct {
 	// CanTransfer returns whether the account contains
-	// sufficient ether to transfer the value
+	// sufficient berith to transfer the value
 	CanTransfer CanTransferFunc
-	// Transfer transfers ether from one account to the other
+	// Transfer transfers berith from one account to the other
 	Transfer TransferFunc
 	// GetHash returns the hash corresponding to n
 	GetHash GetHashFunc
@@ -92,7 +92,7 @@ type Context struct {
 	Difficulty  *big.Int       // Provides information for DIFFICULTY
 }
 
-// EVM is the Ethereum Virtual Machine base object and provides
+// EVM is the Berith Virtual Machine base object and provides
 // the necessary tools to run a contract on the given state with
 // the provided context. It should be noted that any error
 // generated through any of the calls should be considered a
@@ -116,7 +116,7 @@ type EVM struct {
 	// virtual machine configuration options used to initialise the
 	// evm.
 	vmConfig Config
-	// global (to this context) ethereum virtual machine
+	// global (to this context) berith virtual machine
 	// used throughout the execution of the tx.
 	interpreters []Interpreter
 	interpreter  Interpreter

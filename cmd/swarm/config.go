@@ -81,7 +81,7 @@ const (
 	SWARM_ENV_STORE_CACHE_CAPACITY    = "SWARM_STORE_CACHE_CAPACITY"
 	SWARM_ACCESS_PASSWORD             = "SWARM_ACCESS_PASSWORD"
 	SWARM_AUTO_DEFAULTPATH            = "SWARM_AUTO_DEFAULTPATH"
-	GETH_ENV_DATADIR                  = "GETH_DATADIR"
+	BERITH_ENV_DATADIR                  = "BERITH_DATADIR"
 )
 
 // These settings ensure that TOML keys use the same names as Go struct fields.
@@ -284,7 +284,7 @@ func envVarsOverride(currentConfig *bzzapi.Config) (config *bzzapi.Config) {
 		}
 	}
 
-	if datadir := os.Getenv(GETH_ENV_DATADIR); datadir != "" {
+	if datadir := os.Getenv(BERITH_ENV_DATADIR); datadir != "" {
 		currentConfig.Path = expandPath(datadir)
 	}
 

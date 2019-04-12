@@ -97,13 +97,13 @@ func init() {
 	utils.ListenPortFlag.Value = 30399
 }
 
-var app = utils.NewApp("", "Ethereum Swarm")
+var app = utils.NewApp("", "Berith Swarm")
 
 // This init function creates the cli.App.
 func init() {
 	app.Action = bzzd
 	app.Version = sv.ArchiveVersion(gitCommit)
-	app.Copyright = "Copyright 2013-2016 The go-ethereum Authors"
+	app.Copyright = "Copyright 2018-2019 The Berith Authors"
 	app.Commands = []cli.Command{
 		{
 			Action:             version,
@@ -270,7 +270,7 @@ func bzzd(ctx *cli.Context) error {
 
 	//optionally set the bootnodes before configuring the node
 	setSwarmBootstrapNodes(ctx, &cfg)
-	//setup the ethereum node
+	//setup the berith node
 	utils.SetNodeConfig(ctx, &cfg)
 	stack, err := node.New(&cfg)
 	if err != nil {
@@ -280,7 +280,7 @@ func bzzd(ctx *cli.Context) error {
 	//a few steps need to be done after the config phase is completed,
 	//due to overriding behavior
 	initSwarmNode(bzzconfig, stack, ctx)
-	//register BZZ as node.Service in the ethereum node
+	//register BZZ as node.Service in the berith node
 	registerBzzService(bzzconfig, stack)
 	//start the node
 	utils.StartNode(stack)
@@ -304,7 +304,7 @@ func registerBzzService(bzzconfig *bzzapi.Config, stack *node.Node) {
 		// In production, mockStore must be always nil.
 		return swarm.NewSwarm(bzzconfig, nil)
 	}
-	//register within the ethereum node
+	//register within the berith node
 	if err := stack.Register(boot); err != nil {
 		utils.Fatalf("Failed to register the Swarm service: %v", err)
 	}

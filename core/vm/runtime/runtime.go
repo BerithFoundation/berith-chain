@@ -117,7 +117,8 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 		input,
 		cfg.GasLimit,
 		cfg.Value,
-		false,
+		types.Main,
+		types.Main,
 	)
 
 	return ret, cfg.State, err

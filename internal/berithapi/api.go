@@ -49,7 +49,7 @@ const (
 	defaultGasPrice = params.GWei
 )
 
-// PublicEthereumAPI provides an API to access Ethereum related information.
+// PublicBerithAPI provides an API to access Berith related information.
 // It offers only methods that operate on public data that is freely available to anyone.
 type PublicBerithAPI struct {
 	b Backend
@@ -66,7 +66,7 @@ func (s *PublicBerithAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	return (*hexutil.Big)(price), err
 }
 
-// ProtocolVersion returns the current Ethereum protocol version this node supports
+// ProtocolVersion returns the current Berith protocol version this node supports
 func (s *PublicBerithAPI) ProtocolVersion() hexutil.Uint {
 	return hexutil.Uint(s.b.ProtocolVersion())
 }
@@ -412,7 +412,7 @@ func (s *PrivateAccountAPI) SignTransaction(ctx context.Context, args SendTxArgs
 // safely used to calculate a signature from.
 //
 // The hash is calulcated as
-//   keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
+//   keccak256("\x19Berith Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func signHash(data []byte) []byte {
@@ -420,8 +420,8 @@ func signHash(data []byte) []byte {
 	return crypto.Keccak256([]byte(msg))
 }
 
-// Sign calculates an Ethereum ECDSA signature for:
-// keccack256("\x19Ethereum Signed Message:\n" + len(message) + message))
+// Sign calculates an Berith ECDSA signature for:
+// keccack256("\x19Berith Signed Message:\n" + len(message) + message))
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
 // where the V value will be 27 or 28 for legacy reasons.
@@ -448,9 +448,9 @@ func (s *PrivateAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr c
 }
 
 // EcRecover returns the address for the account that was used to create the signature.
-// Note, this function is compatible with eth_sign and personal_sign. As such it recovers
+// Note, this function is compatible with berith_sign and personal_sign. As such it recovers
 // the address of:
-// hash = keccak256("\x19Ethereum Signed Message:\n"${message length}${message})
+// hash = keccak256("\x19Berith Signed Message:\n"${message length}${message})
 // addr = ecrecover(hash, signature)
 //
 // Note, the signature must conform to the secp256k1 curve R, S and V values, where
@@ -479,13 +479,13 @@ func (s *PrivateAccountAPI) SignAndSendTransaction(ctx context.Context, args Sen
 	return s.SendTransaction(ctx, args, passwd)
 }
 
-// PublicBlockChainAPI provides an API to access the Ethereum blockchain.
+// PublicBlockChainAPI provides an API to access the Berith blockchain.
 // It offers only methods that operate on public data that is freely available to anyone.
 type PublicBlockChainAPI struct {
 	b Backend
 }
 
-// NewPublicBlockChainAPI creates a new Ethereum blockchain API.
+// NewPublicBlockChainAPI creates a new Berith blockchain API.
 func NewPublicBlockChainAPI(b Backend) *PublicBlockChainAPI {
 	return &PublicBlockChainAPI{b}
 }
@@ -1323,14 +1323,12 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 }
 
 // Sign calculates an ECDSA signature for:
-// keccack256("\x19Ethereum Signed Message:\n" + len(message) + message).
+// keccack256("\x19Berith Signed Message:\n" + len(message) + message).
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
 // where the V value will be 27 or 28 for legacy reasons.
 //
 // The account associated with addr must be unlocked.
-//
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
 func (s *PublicTransactionPoolAPI) Sign(addr common.Address, data hexutil.Bytes) (hexutil.Bytes, error) {
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: addr}
@@ -1451,14 +1449,14 @@ func (s *PublicTransactionPoolAPI) Resend(ctx context.Context, sendArgs SendTxAr
 	return common.Hash{}, fmt.Errorf("Transaction %#x not found", matchTx.Hash())
 }
 
-// PublicDebugAPI is the collection of Ethereum APIs exposed over the public
+// PublicDebugAPI is the collection of Berith APIs exposed over the public
 // debugging endpoint.
 type PublicDebugAPI struct {
 	b Backend
 }
 
 // NewPublicDebugAPI creates a new API definition for the public debug methods
-// of the Ethereum service.
+// of the Berith service.
 func NewPublicDebugAPI(b Backend) *PublicDebugAPI {
 	return &PublicDebugAPI{b: b}
 }
@@ -1485,14 +1483,14 @@ func (api *PublicDebugAPI) PrintBlock(ctx context.Context, number uint64) (strin
 	return spew.Sdump(block), nil
 }
 
-// PrivateDebugAPI is the collection of Ethereum APIs exposed over the private
+// PrivateDebugAPI is the collection of Berith APIs exposed over the private
 // debugging endpoint.
 type PrivateDebugAPI struct {
 	b Backend
 }
 
 // NewPrivateDebugAPI creates a new API definition for the private debug methods
-// of the Ethereum service.
+// of the Berith service.
 func NewPrivateDebugAPI(b Backend) *PrivateDebugAPI {
 	return &PrivateDebugAPI{b: b}
 }
@@ -1557,7 +1555,7 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 	return hexutil.Uint(s.net.PeerCount())
 }
 
-// Version returns the current ethereum protocol version.
+// Version returns the current berith protocol version.
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
 }

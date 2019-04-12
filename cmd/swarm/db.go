@@ -45,12 +45,12 @@ var dbCommand = cli.Command{
 			Description: `
 Export a local chunk database as a tar archive (use - to send to stdout).
 
-    swarm db export ~/.ethereum/swarm/bzz-KEY/chunks chunks.tar
+    swarm db export ~/.berith/swarm/bzz-KEY/chunks chunks.tar
 
 The export may be quite large, consider piping the output through the Unix
 pv(1) tool to get a progress bar:
 
-    swarm db export ~/.ethereum/swarm/bzz-KEY/chunks - | pv > chunks.tar
+    swarm db export ~/.berith/swarm/bzz-KEY/chunks - | pv > chunks.tar
 `,
 		},
 		{
@@ -61,12 +61,12 @@ pv(1) tool to get a progress bar:
 			ArgsUsage:          "<chunkdb> <file>",
 			Description: `Import chunks from a tar archive into a local chunk database (use - to read from stdin).
 
-    swarm db import ~/.ethereum/swarm/bzz-KEY/chunks chunks.tar
+    swarm db import ~/.berith/swarm/bzz-KEY/chunks chunks.tar
 
 The import may be quite large, consider piping the input through the Unix
 pv(1) tool to get a progress bar:
 
-    pv chunks.tar | swarm db import ~/.ethereum/swarm/bzz-KEY/chunks -`,
+    pv chunks.tar | swarm db import ~/.berith/swarm/bzz-KEY/chunks -`,
 		},
 	},
 }

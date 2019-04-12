@@ -1,18 +1,13 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+/*
+d8888b. d88888b d8888b. d888888b d888888b db   db
+88  `8D 88'     88  `8D   `88'   `~~88~~' 88   88
+88oooY' 88ooooo 88oobY'    88       88    88ooo88
+88~~~b. 88~~~~~ 88`8b      88       88    88~~~88
+88   8D 88.     88 `88.   .88.      88    88   88
+Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
+
+	  copyrights by ibizsoftware 2018 - 2019
+*/
 
 package bsrr
 

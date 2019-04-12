@@ -74,7 +74,7 @@ func (p *hookedPrompter) SetWordCompleter(completer WordCompleter) {}
 type tester struct {
 	workspace string
 	stack     *node.Node
-	ethereum  *berith.Ethereum
+	berith  *berith.Berith
 	console   *Console
 	input     *hookedPrompter
 	output    *bytes.Buffer
@@ -89,20 +89,20 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 		t.Fatalf("failed to create temporary keystore: %v", err)
 	}
 
-	// Create a networkless protocol stack and start an Ethereum service within
+	// Create a networkless protocol stack and start an Berith service within
 	stack, err := node.New(&node.Config{DataDir: workspace, UseLightweightKDF: true, Name: testInstance})
 	if err != nil {
 		t.Fatalf("failed to create node: %v", err)
 	}
-	ethConf := &berith.Config{
+	con := &berith.Config{
 		Genesis:   core.DeveloperGenesisBlock(15, common.Address{}),
-		Etherbase: common.HexToAddress(testAddress),
+		Berithbase: common.HexToAddress(testAddress),
 	}
 	if confOverride != nil {
-		confOverride(ethConf)
+		confOverride(con)
 	}
-	if err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) { return berith.New(ctx, ethConf) }); err != nil {
-		t.Fatalf("failed to register Ethereum protocol: %v", err)
+	if err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) { return berith.New(ctx, con) }); err != nil {
+		t.Fatalf("failed to register Berith protocol: %v", err)
 	}
 	// Start the node and assemble the JavaScript console around it
 	if err = stack.Start(); err != nil {
@@ -127,13 +127,13 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 		t.Fatalf("failed to create JavaScript console: %v", err)
 	}
 	// Create the final tester and return
-	var ethereum *berith.Ethereum
-	stack.Service(&ethereum)
+	var berith *berith.Berith
+	stack.Service(&berith)
 
 	return &tester{
 		workspace: workspace,
 		stack:     stack,
-		ethereum:  ethereum,
+		berith:  berith,
 		console:   console,
 		input:     prompter,
 		output:    printer,
