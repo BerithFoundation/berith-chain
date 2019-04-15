@@ -49,6 +49,7 @@ const (
 var (
 	RewardBlock = big.NewInt(500)
 	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
+	SlashRound    = uint64(2)
 
 	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -233,6 +234,14 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		}
 	} else {
 		conf.StakeMinimum = StakeMinimum
+	}
+
+	if conf.SlashRound != 0 {
+		if conf.SlashRound == 0 {
+			conf.SlashRound = 1
+		}
+	} else {
+		conf.SlashRound = SlashRound
 	}
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
@@ -920,11 +929,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 
 	list.SetMiner(header.Coinbase)
 	sr := c.config.SlashRound
-	if sr < 0 {
-		sr = 1
-	}
 	if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
-		fmt.Println("###########################slashed##################################")
 		return c.slashBadSigner(chain, header, list, state)
 	}
 	return nil
