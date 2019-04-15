@@ -42,7 +42,6 @@ import (
 type config struct {
 	path      string   // File containing the configuration values
 	bootnodes []string // Bootnodes to always connect to by all nodes
-	ethstats  string   // Ethstats settings to cache for node deploys
 
 	Genesis *core.Genesis     `json:"genesis,omitempty"` // Genesis block to cache for node deploys
 	Servers map[string][]byte `json:"servers,omitempty"`
@@ -70,12 +69,8 @@ func (c config) flush() {
 }
 
 type wizard struct {
-	network string // Network name to manage
+	network 	string
 	conf    config // Configurations from previous runs
-
-	servers  map[string]*sshClient // SSH connections to servers to administer
-	services map[string][]string   // Ethereum services known to be running on servers
-
 	in   *bufio.Reader // Wrapper around stdin to allow reading user input
 	lock sync.Mutex    // Lock to protect configs during concurrent service discovery
 }

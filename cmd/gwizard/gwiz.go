@@ -30,8 +30,8 @@ import (
 // main is just a boring entry point to set up the CLI app.
 func main() {
 	app := cli.NewApp()
-	app.Name = "puppeth"
-	app.Usage = "assemble and maintain private Ethereum networks"
+	app.Name = "gwiz"
+	app.Usage = "Generate BerithGenesis File"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "network",
@@ -60,6 +60,8 @@ func runWizard(c *cli.Context) error {
 	if strings.Contains(network, " ") || strings.Contains(network, "-") || strings.ToLower(network) != network {
 		log.Crit("No spaces, hyphens or capital letters allowed in network name")
 	}
-	makeWizard(c.String("network")).run()
+	w := makeWizard()
+	w.run()
 	return nil
 }
+
