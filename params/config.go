@@ -166,10 +166,11 @@ type ChainConfig struct {
 	Bsrr   *BSRRConfig   `json:"bsrr,omitempty"`
 }
 type BSRRConfig struct {
-	Period uint64 `json:"period"`
-	Epoch  uint64 `json:"epoch"`
-	Rewards *big.Int `json:"rewards"`
+	Period       uint64   `json:"period"`
+	Epoch        uint64   `json:"epoch"`
+	Rewards      *big.Int `json:"rewards"`
 	StakeMinimum *big.Int `json:"stakeminimum"`
+	SlashRound   uint64   `json:"slashRound"`
 }
 
 func (b *BSRRConfig) String() string {
