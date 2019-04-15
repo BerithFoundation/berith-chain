@@ -919,7 +919,12 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 	}
 
 	list.SetMiner(header.Coinbase)
-	if header.Number.Uint64()%c.config.Epoch == 0 {
+	sr := c.config.SlashRound
+	if sr < 0 {
+		sr = 1
+	}
+	if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
+		fmt.Println("###########################slashed##################################")
 		return c.slashBadSigner(chain, header, list, state)
 	}
 	return nil
