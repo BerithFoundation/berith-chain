@@ -25,15 +25,15 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/common/math"
-	"bitbucket.org/ibizsoftware/berith-chain/core"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
-	"bitbucket.org/ibizsoftware/berith-chain/tests"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/tests"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into

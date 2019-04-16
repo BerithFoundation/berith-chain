@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-	"bitbucket.org/ibizsoftware/berith-chain/core/vm"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/tests"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

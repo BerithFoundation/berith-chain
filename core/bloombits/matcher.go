@@ -26,8 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/bitutil"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common/bitutil"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong

@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // Client defines typed wrappers for the Berith RPC API.

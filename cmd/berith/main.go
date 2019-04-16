@@ -18,7 +18,7 @@
 package main
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/berith"
+	"github.com/BerithFoundation/berith-chain/berith"
 	"fmt"
 	"math"
 	"os"
@@ -28,15 +28,15 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
-	"bitbucket.org/ibizsoftware/berith-chain/berithclient"
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/console"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/debug"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
-	"bitbucket.org/ibizsoftware/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/berithclient"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/console"
+	"github.com/BerithFoundation/berith-chain/internal/debug"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/elastic/gosigar"
 	"gopkg.in/urfave/cli.v1"
 )

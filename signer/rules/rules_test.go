@@ -22,13 +22,13 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
-	"bitbucket.org/ibizsoftware/berith-chain/signer/core"
-	"bitbucket.org/ibizsoftware/berith-chain/signer/storage"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/signer/core"
+	"github.com/BerithFoundation/berith-chain/signer/storage"
 )
 
 const JS = `

@@ -17,8 +17,8 @@
 package core
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.

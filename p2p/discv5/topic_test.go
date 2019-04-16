@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
 )
 
 func TestTopicRadius(t *testing.T) {

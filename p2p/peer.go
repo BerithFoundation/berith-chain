@@ -25,12 +25,12 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
-	"bitbucket.org/ibizsoftware/berith-chain/event"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var (

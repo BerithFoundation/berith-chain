@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // Tests that the account management snippets work correctly.

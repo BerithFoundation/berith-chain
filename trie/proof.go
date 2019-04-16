@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes

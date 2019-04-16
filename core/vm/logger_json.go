@@ -22,8 +22,8 @@ import (
 	"math/big"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
 )
 
 type JSONLogger struct {

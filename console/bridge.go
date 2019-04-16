@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/usbwallet"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/accounts/usbwallet"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/robertkrimen/otto"
 )
 

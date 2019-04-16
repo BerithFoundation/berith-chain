@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/stakingdb"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type StakingInfo struct {

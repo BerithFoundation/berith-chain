@@ -20,8 +20,8 @@ import (
 	"encoding/binary"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/metrics"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )

@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 func ExampleFeed_acknowledgedEvents() {

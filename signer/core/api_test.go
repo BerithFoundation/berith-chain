@@ -28,13 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/keystore"
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 //Used for testing

@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 	"golang.org/x/crypto/pbkdf2"
 )
 

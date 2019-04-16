@@ -17,8 +17,8 @@
 package les
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/p2p"
 )
 
 var (

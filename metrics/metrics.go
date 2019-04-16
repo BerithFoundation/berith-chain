@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

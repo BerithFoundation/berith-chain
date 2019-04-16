@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 var (

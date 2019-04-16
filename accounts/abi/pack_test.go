@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 func TestPack(t *testing.T) {

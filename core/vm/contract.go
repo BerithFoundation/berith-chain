@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // ContractRef is a reference to the contract's backing object

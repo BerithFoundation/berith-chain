@@ -19,9 +19,9 @@ package protocols
 import (
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/adapters"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 //dummy Balance implementation

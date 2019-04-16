@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/metrics"
 )
 
 //define some metrics

@@ -16,7 +16,7 @@
 
 package core
 
-import "bitbucket.org/ibizsoftware/berith-chain/common"
+import "github.com/BerithFoundation/berith-chain/common"
 
 // BadHashes represent a set of manually tracked bad hashes (usually hard forks)
 var BadHashes = map[common.Hash]bool{

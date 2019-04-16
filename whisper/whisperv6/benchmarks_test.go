@@ -20,7 +20,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	"golang.org/x/crypto/pbkdf2"
 )
 

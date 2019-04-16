@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 type bytesBacked interface {

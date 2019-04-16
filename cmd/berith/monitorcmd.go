@@ -25,9 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/node"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/gizak/termui"
 	"gopkg.in/urfave/cli.v1"
 )

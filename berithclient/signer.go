@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC

@@ -19,11 +19,11 @@ package node
 import (
 	"reflect"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/event"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // ServiceContext is a collection of service independent options inherited from

@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync/atomic"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/math"
-	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // Config are the configuration options for the Interpreter

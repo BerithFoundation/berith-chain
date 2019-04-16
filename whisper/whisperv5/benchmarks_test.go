@@ -19,7 +19,7 @@ package whisperv5
 import (
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {

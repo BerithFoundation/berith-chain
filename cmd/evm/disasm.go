@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/asm"
+	"github.com/BerithFoundation/berith-chain/core/asm"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

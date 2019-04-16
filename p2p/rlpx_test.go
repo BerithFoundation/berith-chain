@@ -32,11 +32,11 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto/ecies"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/pipes"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/ecies"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/pipes"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 func TestSharedSecret(t *testing.T) {

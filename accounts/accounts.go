@@ -20,10 +20,10 @@ package accounts
 import (
 	"math/big"
 
-	ethereum "bitbucket.org/ibizsoftware/berith-chain"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/event"
+	ethereum "github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 // Account represents an Ethereum account located at a specific location defined

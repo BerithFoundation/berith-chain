@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"math/rand"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type Vote struct {

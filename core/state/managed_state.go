@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type account struct {

@@ -22,9 +22,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/nat"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/nat"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 const (

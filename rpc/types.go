@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	mapset "github.com/deckarep/golang-set"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 )
 
 // API describes the set of methods offered over the RPC interface

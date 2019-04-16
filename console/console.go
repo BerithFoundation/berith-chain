@@ -28,9 +28,9 @@ import (
 	"strings"
 	"syscall"
 
-	"bitbucket.org/ibizsoftware/berith-chain/internal/jsre"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/web3ext"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/internal/jsre"
+	"github.com/BerithFoundation/berith-chain/internal/web3ext"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"

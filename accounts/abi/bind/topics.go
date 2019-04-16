@@ -22,9 +22,9 @@ import (
 	"math/big"
 	"reflect"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 // makeTopics converts a filter query argument list into a filter topic set.

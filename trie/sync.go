@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/prque"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/prque"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a

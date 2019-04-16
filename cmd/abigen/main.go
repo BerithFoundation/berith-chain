@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind"
-	"bitbucket.org/ibizsoftware/berith-chain/common/compiler"
+	"github.com/BerithFoundation/berith-chain/accounts/abi/bind"
+	"github.com/BerithFoundation/berith-chain/common/compiler"
 )
 
 var (

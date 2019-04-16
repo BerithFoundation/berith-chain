@@ -32,14 +32,14 @@ import (
 	"sync"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/node"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/adapters"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // ProtocolTester is the tester environment used for unit testing protocol

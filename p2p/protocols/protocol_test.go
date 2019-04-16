@@ -24,12 +24,12 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rlp"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/adapters"
-	p2ptest "bitbucket.org/ibizsoftware/berith-chain/p2p/testing"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	p2ptest "github.com/BerithFoundation/berith-chain/p2p/testing"
 )
 
 // handshake message type

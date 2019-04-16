@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -356,7 +356,7 @@ func unpackTestEventData(dest interface{}, hexData string, jsonEvent []byte, ass
 
 /*
 Taken from
-https://bitbucket.org/ibizsoftware/berith-chain/pull/15568
+https://github.com/BerithFoundation/berith-chain/pull/15568
 */
 
 type testResult struct {

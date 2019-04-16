@@ -23,11 +23,11 @@ package ens
 import (
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/contracts/ens/contract"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/accounts/abi/bind"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/contracts/ens/contract"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 var (

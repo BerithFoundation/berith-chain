@@ -1,9 +1,9 @@
 package brtapi
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-	"bitbucket.org/ibizsoftware/berith-chain/miner"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/miner"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"bytes"
 	"context"
 	"errors"
@@ -12,14 +12,14 @@ import (
 	// "fmt"
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/common/hexutil"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
 
-	// "bitbucket.org/ibizsoftware/berith-chain/berith/stake"
+	// "github.com/BerithFoundation/berith-chain/berith/stake"
 )
 
 //PrivateBerithAPI struct of berith private apis

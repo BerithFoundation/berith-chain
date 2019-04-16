@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // journalEntry is a modification entry in the state change journal that can be

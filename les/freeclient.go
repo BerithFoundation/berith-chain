@@ -23,11 +23,11 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
-	"bitbucket.org/ibizsoftware/berith-chain/common/prque"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/common/prque"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // freeClientPool implements a client database that limits the connection time
