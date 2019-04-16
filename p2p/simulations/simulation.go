@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
 )
 
 // Simulation provides a framework for running actions in a simulated network

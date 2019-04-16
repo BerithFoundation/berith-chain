@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

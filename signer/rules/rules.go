@@ -22,12 +22,12 @@ import (
 	"os"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/internal/berithapi"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/signer/core"
-	"bitbucket.org/ibizsoftware/berith-chain/signer/rules/deps"
-	"bitbucket.org/ibizsoftware/berith-chain/signer/storage"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/signer/core"
+	"github.com/BerithFoundation/berith-chain/signer/rules/deps"
+	"github.com/BerithFoundation/berith-chain/signer/storage"
 	"github.com/robertkrimen/otto"
 )
 

@@ -40,7 +40,7 @@ import (
 	"math/big"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 var dumpEnc bool

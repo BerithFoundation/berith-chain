@@ -22,8 +22,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/common"
 
 	"bytes"
 	"os"

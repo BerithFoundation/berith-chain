@@ -24,10 +24,10 @@ import (
 	"strings"
 	"syscall"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/console"
-	"bitbucket.org/ibizsoftware/berith-chain/node"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/console"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -43,7 +43,7 @@ var (
 		Description: `
 The Berith console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://bitbucket.org/ibizsoftware/berith-chain/wiki/JavaScript-Console.`,
+See https://github.com/BerithFoundation/berith-chain/wiki/JavaScript-Console.`,
 	}
 
 	attachCommand = cli.Command{
@@ -56,7 +56,7 @@ See https://bitbucket.org/ibizsoftware/berith-chain/wiki/JavaScript-Console.`,
 		Description: `
 The Berith console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://bitbucket.org/ibizsoftware/berith-chain/wiki/JavaScript-Console.
+See https://github.com/BerithFoundation/berith-chain/wiki/JavaScript-Console.
 This command allows to open a console on a running berith node.`,
 	}
 
@@ -69,7 +69,7 @@ This command allows to open a console on a running berith node.`,
 		Category:  "CONSOLE COMMANDS",
 		Description: `
 The JavaScript VM exposes a node admin interface as well as the Ðapp
-JavaScript API. See https://bitbucket.org/ibizsoftware/berith-chain/wiki/JavaScript-Console`,
+JavaScript API. See https://github.com/BerithFoundation/berith-chain/wiki/JavaScript-Console`,
 	}
 )
 

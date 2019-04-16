@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "bitbucket.org/ibizsoftware/berith-chain"
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi"
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi/bind"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/event"
+	ethereum "github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/accounts/abi/bind"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 // PublicResolverABI is the input ABI used to generate the binding from.

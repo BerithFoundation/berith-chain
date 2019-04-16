@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/evm/internal/compiler"
+	"github.com/BerithFoundation/berith-chain/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

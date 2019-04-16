@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/common/math"
 )
 
 func memorySha3(stack *Stack) *big.Int {

@@ -24,12 +24,12 @@ import (
 	"net"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/nat"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/netutil"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/nat"
+	"github.com/BerithFoundation/berith-chain/p2p/netutil"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 const Version = 4

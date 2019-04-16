@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
-	"bitbucket.org/ibizsoftware/berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 // NodeIterator is an iterator to traverse the entire state trie post-order,

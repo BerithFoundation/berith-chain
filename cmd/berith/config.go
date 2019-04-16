@@ -28,11 +28,11 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/berith"
-	"bitbucket.org/ibizsoftware/berith-chain/node"
-	"bitbucket.org/ibizsoftware/berith-chain/params"
-	whisper "bitbucket.org/ibizsoftware/berith-chain/whisper/whisperv6"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/berith"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/params"
+	whisper "github.com/BerithFoundation/berith-chain/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 

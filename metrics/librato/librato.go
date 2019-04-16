@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String

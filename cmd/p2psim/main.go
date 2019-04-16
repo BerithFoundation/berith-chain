@@ -45,12 +45,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/adapters"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

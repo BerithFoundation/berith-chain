@@ -17,7 +17,7 @@
 // Package bind generates Ethereum contract Go bindings.
 //
 // Detailed usage document and tutorial available on the go-ethereum Wiki page:
-// https://bitbucket.org/ibizsoftware/berith-chain/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+// https://github.com/BerithFoundation/berith-chain/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
 package bind
 
 import (
@@ -29,7 +29,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
 )
 
 // Lang is a target programming language selector to generate bindings for.

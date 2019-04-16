@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/state"
 )
 
 func TestBloom9(t *testing.T) {

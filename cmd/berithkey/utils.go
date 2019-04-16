@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/console"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/console"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

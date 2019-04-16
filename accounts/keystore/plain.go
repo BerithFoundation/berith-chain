@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type keyStorePlain struct {

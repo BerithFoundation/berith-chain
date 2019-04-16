@@ -1,7 +1,7 @@
 package staking
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 	"crypto/sha256"
 	"fmt"
 	"math"

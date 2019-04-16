@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"bitbucket.org/ibizsoftware/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/metrics"
 )
 
 var (

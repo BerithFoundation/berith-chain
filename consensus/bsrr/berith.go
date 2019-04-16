@@ -20,21 +20,22 @@ import (
 	"math/rand"
 	"sync"
 	"time"
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
 
-	"bitbucket.org/ibizsoftware/berith-chain/accounts"
-	"bitbucket.org/ibizsoftware/berith-chain/berith/staking"
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus"
-	"bitbucket.org/ibizsoftware/berith-chain/consensus/misc"
-	"bitbucket.org/ibizsoftware/berith-chain/core/state"
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto"
-	"bitbucket.org/ibizsoftware/berith-chain/crypto/sha3"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
-	"bitbucket.org/ibizsoftware/berith-chain/params"
-	"bitbucket.org/ibizsoftware/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rpc"
+
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/consensus/misc"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rlp"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -47,9 +48,9 @@ const (
 )
 
 var (
-	RewardBlock = big.NewInt(500)
+	RewardBlock  = big.NewInt(500)
 	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
-	SlashRound    = uint64(2)
+	SlashRound   = uint64(2)
 
 	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -342,7 +343,7 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 	}
 	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
 	if number > 0 {
-		if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64(){
+		if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
 			return errInvalidDifficulty
 		}
 		//if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
@@ -383,7 +384,6 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
-
 
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
@@ -517,12 +517,10 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 					return nil, errors.New("not match signer")
 				}
 
-
 			} else if header.Difficulty.Cmp(new(big.Int).Add(diffNoTurn, big.NewInt(int64(diff)))) != 0 {
 				fmt.Println("not match diff")
 				return nil, errors.New("not match diff")
 			}
-
 
 			fmt.Println("##################FINALIZE THE BLOCK#################")
 			fmt.Println("NUMBER : ", header.Number.String())
@@ -876,10 +874,10 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		}
 
 		//Reward -> Main
-		if (msg.Base() == types.Reward && msg.Target() == types.Main) &&
-			bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
-			continue
-		}
+		// if (msg.Base() == types.Reward && msg.Target() == types.Main) &&
+		// 	bytes.Equal(msg.From().Bytes(), msg.To().Bytes()) {
+		// 	continue
+		// }
 
 		var info staking.StakingInfo
 		info, err = list.GetInfo(msg.From())
@@ -888,10 +886,22 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			return err
 		}
 
-		value := msg.Value()
+		value := new(big.Int).Set(info.Value())
+		reward := new(big.Int).Set(info.Reward())
+
+		//Stake
+		if msg.Target() == types.Stake {
+			value.Add(value, msg.Value())
+		}
+
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
-			value.Mul(value, big.NewInt(-1))
+			value.Sub(value, msg.Value())
+		}
+
+		//transfer reward balance
+		if msg.Base() == types.Reward {
+			reward.Sub(reward, msg.Value())
 		}
 
 		blockNumber := number
@@ -901,9 +911,9 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 
 		input := stakingInfo{
 			address:     msg.From(),
-			value:       new(big.Int).Add(info.Value(), value),
+			value:       value,
 			blockNumber: blockNumber,
-			reward:      info.Reward(),
+			reward:      reward,
 		}
 
 		list.SetInfo(input)
@@ -979,7 +989,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	return signers, nil
 }
 
-func (c *BSRR)roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {
+func (c *BSRR) roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {
 	users := (*stakingList).GetRoundJoinRatio()
 	if users == nil {
 		return 0, errors.New("not reward ratio")

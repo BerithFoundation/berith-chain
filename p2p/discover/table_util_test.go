@@ -24,8 +24,8 @@ import (
 	"net"
 	"sync"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enode"
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
 )
 
 var nullNode *enode.Node

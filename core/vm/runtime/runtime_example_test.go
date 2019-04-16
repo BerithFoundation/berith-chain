@@ -19,8 +19,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/core/vm/runtime"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/vm/runtime"
 )
 
 func ExampleExecute() {

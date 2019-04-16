@@ -29,7 +29,7 @@ import (
 	"net"
 	"sort"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 const (

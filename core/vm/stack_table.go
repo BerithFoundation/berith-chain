@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {

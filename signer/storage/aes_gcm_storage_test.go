@@ -23,8 +23,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/mattn/go-colorable"
 )
 

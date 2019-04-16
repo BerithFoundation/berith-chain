@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common"
-	"bitbucket.org/ibizsoftware/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

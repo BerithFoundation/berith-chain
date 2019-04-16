@@ -26,7 +26,7 @@ import (
 	"net"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
 )
 
 // Node represents a host on the network.

@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
 )
 
 const (

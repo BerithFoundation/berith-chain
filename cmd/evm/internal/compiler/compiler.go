@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/asm"
+	"github.com/BerithFoundation/berith-chain/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

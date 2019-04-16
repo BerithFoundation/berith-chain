@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // In this example, our client wishes to track the latest 'block number'

@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

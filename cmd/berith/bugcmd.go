@@ -26,10 +26,10 @@ import (
 	"runtime"
 	"strings"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/internal/browser"
-	"bitbucket.org/ibizsoftware/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/cmd/internal/browser"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -41,7 +41,7 @@ var bugCommand = cli.Command{
 	Category:  "MISCELLANEOUS COMMANDS",
 }
 
-const issueURL = "https://bitbucket.org/ibizsoftware/berith-chain/issues/new"
+const issueURL = "https://github.com/BerithFoundation/berith-chain/issues/new"
 
 // reportBug reports a bug by opening a new URL to the berith GH issue
 // tracker and setting default values as the issue body.

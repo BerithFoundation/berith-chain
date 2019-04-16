@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"bitbucket.org/ibizsoftware/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // Tests that batched bloom bits are correctly rotated from the input bloom

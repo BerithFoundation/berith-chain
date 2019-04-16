@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/ibizsoftware/berith-chain/p2p/simulations/pipes"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/pipes"
 )
 
 func TestTCPPipe(t *testing.T) {
