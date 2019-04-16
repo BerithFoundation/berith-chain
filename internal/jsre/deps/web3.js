@@ -2609,7 +2609,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
                     inputFormatter: utils.toDecimal
                 }),
                 new Property({
-                    name: 'version.ethereum',
+                    name: 'version.berith',
                     getter: 'berith_protocolVersion',
                     inputFormatter: utils.toDecimal
                 }),
