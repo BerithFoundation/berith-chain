@@ -27,7 +27,7 @@ import (
 var (
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
 	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
-	RinkebyGenesisHash = common.HexToHash("0x6341fd3daf94b748c72ced5a5b26028f2474f5f00d824504e4fa37a75767e177")
+	BssrGenesisHash    = common.HexToHash("0xf8978323a3d69bc80326f73404f208e698b537495acafde5584d8354feb2df70")
 )
 
 var (
@@ -75,6 +75,25 @@ var (
 		SectionHead:  common.HexToHash("0x9fad89a5e3b993c8339b9cf2cbbeb72cd08774ea6b71b105b3dd880420c618f4"),
 		CHTRoot:      common.HexToHash("0xc815833881989c5d2035147e1a79a33d22cbc5313e104ff01e6ab405bd28b317"),
 		BloomRoot:    common.HexToHash("0xd94ee9f3c480858f53ec5d059aebdbb2e8d904702f100875ee59ec5f366e841d"),
+	}
+
+	// BrrChainConfig contains the chain parameters to run a node on the Berith POS test network.
+	BrrChainConfig = &ChainConfig{
+		ChainID:             big.NewInt(123),
+		HomesteadBlock:      big.NewInt(1),
+		DAOForkBlock:        nil,
+		DAOForkSupport:      true,
+		EIP150Block:         big.NewInt(2),
+		EIP150Hash:          common.HexToHash("0xc14b4c6553d27602b0b3ac246ba3cfed0b032bf6387be41fd5b0828fa28c6dc3"),
+		EIP155Block:         big.NewInt(3),
+		EIP158Block:         big.NewInt(3),
+		ByzantiumBlock:      big.NewInt(1),
+		ConstantinopleBlock: big.NewInt(1),
+		Bsrr: &BSRRConfig{
+			Period:  15,
+			Epoch:   30000,
+			Rewards: common.StringToBig("500000000000000000000000"),
+		},
 	}
 
 )

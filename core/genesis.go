@@ -162,8 +162,11 @@ func SetupGenesisBlockWithOverride(db berithdb.Database, genesis *Genesis, const
 	stored := rawdb.ReadCanonicalHash(db, 0)
 	if (stored == common.Hash{}) {
 		if genesis == nil {
-			log.Info("Writing default main-net genesis block")
-			genesis = DefaultGenesisBlock()
+			//log.Info("Writing default main-net genesis block")
+			//genesis = DefaultGenesisBlock()
+			// Setting BSRR as default genesis block
+			log.Info("Writing default berith-bsrr genesis block")
+			genesis = DefaultBsrrGenesisBlock()
 		} else {
 			log.Info("Writing custom genesis block")
 		}
@@ -219,6 +222,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 		return params.MainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
 		return params.TestnetChainConfig
+	case ghash == params.BssrGenesisHash:
+		return params.BrrChainConfig
 	default:
 		return params.MainnetChainConfig
 	}
@@ -327,6 +332,19 @@ func DefaultTestnetGenesisBlock() *Genesis {
 	}
 }
 
+// DefaultBsrrGenesisBlock returns the Rinkeby network genesis block.
+func DefaultBsrrGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.BrrChainConfig,
+		Timestamp:  0x00,
+		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   4700000,
+		Difficulty: big.NewInt(1),
+		Alloc: map[common.Address]GenesisAccount{
+			common.HexToAddress("0x0052ba9bc85df68fc5aae262ac02be4bf1cc1275"): {Balance: common.StringToBig("5000000000000000000000000000")},
+		},
+	}
+}
 
 func decodePrealloc(data string) GenesisAlloc {
 	var p []struct{ Addr, Balance *big.Int }
