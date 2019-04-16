@@ -29,7 +29,6 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 
 	"bitbucket.org/ibizsoftware/berith-chain/cmd/utils"
-	"bitbucket.org/ibizsoftware/berith-chain/dashboard"
 	"bitbucket.org/ibizsoftware/berith-chain/berith"
 	"bitbucket.org/ibizsoftware/berith-chain/node"
 	"bitbucket.org/ibizsoftware/berith-chain/params"
@@ -80,7 +79,6 @@ type berConfig struct {
 	Shh       whisper.Config
 	Node      node.Config
 	BerithStats  berithStatsConfig
-	Dashboard dashboard.Config
 }
 
 func loadConfig(file string, cfg *berConfig) error {
@@ -114,7 +112,6 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 		Ber:       berith.DefaultConfig,
 		Shh:       whisper.DefaultConfig,
 		Node:      defaultNodeConfig(),
-		Dashboard: dashboard.DefaultConfig,
 	}
 
 	// Load config file.
@@ -136,7 +133,6 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	}
 
 	utils.SetShhConfig(ctx, stack, &cfg.Shh)
-	utils.SetDashboardConfig(ctx, &cfg.Dashboard)
 
 	return stack, cfg
 }
@@ -158,9 +154,6 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	}
 	utils.RegisterBerithService(stack, &cfg.Ber)
 
-	if ctx.GlobalBool(utils.DashboardEnabledFlag.Name) {
-		utils.RegisterDashboardService(stack, &cfg.Dashboard, gitCommit)
-	}
 	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
 	shhEnabled := enableWhisper(ctx)
 	shhAutoEnabled := !ctx.GlobalIsSet(utils.WhisperEnabledFlag.Name) && ctx.GlobalIsSet(utils.DeveloperFlag.Name)
