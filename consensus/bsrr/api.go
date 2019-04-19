@@ -21,8 +21,8 @@ import (
 // API is a user facing RPC API to allow controlling the signer and voting
 // mechanisms of the proof-of-authority scheme.
 type API struct {
-	chain  consensus.ChainReader
-	bsrr *BSRR
+	chain consensus.ChainReader
+	bsrr  *BSRR
 }
 
 //// GetSnapshot retrieves the state snapshot at a given block.
@@ -49,6 +49,32 @@ type API struct {
 //	}
 //	return api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 //}
+
+func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
+	var header *types.Header
+	if number == nil || *number == rpc.LatestBlockNumber {
+		header = api.chain.CurrentHeader()
+	} else {
+		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	}
+
+	if header == nil {
+		return nil, errUnknownBlock
+	}
+	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), header.Hash())
+
+	if err != nil {
+		return nil, err
+	}
+
+	signersMap := signers.signersMap()
+
+	result := make([]common.Address, 0)
+	for k, _ := range signersMap {
+		result = append(result, k)
+	}
+	return result, nil
+}
 
 // GetSigners retrieves the list of authorized signers at the specified block.
 func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
