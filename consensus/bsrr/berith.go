@@ -59,8 +59,8 @@ var (
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 
-	diffInTurn = big.NewInt(2000000) // Block difficulty for in-turn signatures
-	diffNoTurn = big.NewInt(1000000) // Block difficulty for out-of-turn signatures
+	diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
+	diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -681,19 +681,16 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		return big.NewInt(0)
 	}
 
-	//30초 기준 공식 이므로 Period 값에 맞게 고쳐야함.
-	d := 30.0 / float64(config.Bsrr.Period)
+	d := float64(config.Bsrr.Period) / 10
+	n := float64(number) / d
 
-	blockNumber := number - config.Bsrr.Rewards.Uint64()
-	x := float64(blockNumber) / d
-
-	r := reward(x)
-	if r == 0 {
-		return big.NewInt(0)
+	var z float64 = 0
+	if n <=  3.15 * math.Pow(10, 6) {
+		z = 5
 	}
 
-	temp := r * 1e+10 / d
-
+	re := 26 - math.Round(n / (7.37 * math.Pow(10,6))) * 0.5 + z
+	temp := re * 1e+10
 	return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 
 }

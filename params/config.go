@@ -25,24 +25,24 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
-	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
-	BssrGenesisHash    = common.HexToHash("0xf8978323a3d69bc80326f73404f208e698b537495acafde5584d8354feb2df70")
+	MainnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
+	TestnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
 )
 
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(1),
-		HomesteadBlock:      big.NewInt(1150000),
-		DAOForkBlock:        big.NewInt(1920000),
-		DAOForkSupport:      true,
-		EIP150Block:         big.NewInt(2463000),
-		EIP150Hash:          common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
-		EIP155Block:         big.NewInt(2675000),
-		EIP158Block:         big.NewInt(2675000),
-		ByzantiumBlock:      big.NewInt(4370000),
-		ConstantinopleBlock: big.NewInt(7080000),
+		ChainID:             big.NewInt(15),
+		HomesteadBlock:      big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		Bsrr: &BSRRConfig{
+			Period:  10,
+			Epoch:   360,
+			Rewards: common.StringToBig("20"),
+			StakeMinimum: common.StringToBig("100000000000000000000000"),
+			SlashRound: 1,
+		},
 	}
 
 	// MainnetTrustedCheckpoint contains the light client trusted checkpoint for the main network.
@@ -56,29 +56,6 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(3),
-		HomesteadBlock:      big.NewInt(0),
-		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
-		EIP150Block:         big.NewInt(0),
-		EIP150Hash:          common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
-		EIP155Block:         big.NewInt(10),
-		EIP158Block:         big.NewInt(10),
-		ByzantiumBlock:      big.NewInt(1700000),
-		ConstantinopleBlock: big.NewInt(4230000),
-	}
-
-	// TestnetTrustedCheckpoint contains the light client trusted checkpoint for the Ropsten test network.
-	TestnetTrustedCheckpoint = &TrustedCheckpoint{
-		Name:         "testnet",
-		SectionIndex: 139,
-		SectionHead:  common.HexToHash("0x9fad89a5e3b993c8339b9cf2cbbeb72cd08774ea6b71b105b3dd880420c618f4"),
-		CHTRoot:      common.HexToHash("0xc815833881989c5d2035147e1a79a33d22cbc5313e104ff01e6ab405bd28b317"),
-		BloomRoot:    common.HexToHash("0xd94ee9f3c480858f53ec5d059aebdbb2e8d904702f100875ee59ec5f366e841d"),
-	}
-
-	// BrrChainConfig contains the chain parameters to run a node on the Berith POS test network.
-	BrrChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(123),
 		HomesteadBlock:      big.NewInt(1),
 		DAOForkBlock:        nil,
@@ -90,12 +67,22 @@ var (
 		ByzantiumBlock:      big.NewInt(1),
 		ConstantinopleBlock: big.NewInt(1),
 		Bsrr: &BSRRConfig{
-			Period:  15,
-			Epoch:   30000,
-			Rewards: common.StringToBig("500000000000000000000000"),
+			Period:  10,
+			Epoch:   360,
+			Rewards: common.StringToBig("20"),
+			StakeMinimum: common.StringToBig("100000000000000000000000"),
+			SlashRound: 1,
 		},
 	}
 
+	// TestnetTrustedCheckpoint contains the light client trusted checkpoint for the Ropsten test network.
+	TestnetTrustedCheckpoint = &TrustedCheckpoint{
+		Name:         "testnet",
+		SectionIndex: 139,
+		SectionHead:  common.HexToHash("0x9fad89a5e3b993c8339b9cf2cbbeb72cd08774ea6b71b105b3dd880420c618f4"),
+		CHTRoot:      common.HexToHash("0xc815833881989c5d2035147e1a79a33d22cbc5313e104ff01e6ab405bd28b317"),
+		BloomRoot:    common.HexToHash("0xd94ee9f3c480858f53ec5d059aebdbb2e8d904702f100875ee59ec5f366e841d"),
+	}
 )
 
 // TrustedCheckpoint represents a set of post-processed trie roots (CHT and
@@ -135,7 +122,7 @@ type ChainConfig struct {
 	EWASMBlock          *big.Int `json:"ewasmBlock,omitempty"`          // EWASM switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	Bsrr   *BSRRConfig   `json:"bsrr,omitempty"`
+	Bsrr *BSRRConfig `json:"bsrr,omitempty"`
 }
 type BSRRConfig struct {
 	Period       uint64   `json:"period"`
@@ -148,7 +135,6 @@ type BSRRConfig struct {
 func (b *BSRRConfig) String() string {
 	return "bsrr"
 }
-
 
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {

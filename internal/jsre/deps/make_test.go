@@ -30,17 +30,8 @@ func TestAsset(t *testing.T) {
 
 
 func TestConvertWeb3(t *testing.T){
-	dat, err := ioutil.ReadFile("d:/temp.js")
+	dat, err := ioutil.ReadFile("temp.js")
 	check(err)
-
-	//var buf bytes.Buffer
-	//gz := gzip.NewWriter(&buf)
-	//
-	//_, err = gz.Write(dat)
-	//check(err)
-
-
-
 
 	str := hex.EncodeToString(dat)
 
@@ -48,32 +39,14 @@ func TestConvertWeb3(t *testing.T){
 
 	str2 := hex.EncodeToString(tt)
 
-	//var rs = ""
-	//for i:=0 ; i< len(str); i+=2 {
-	//	fmt.Print("\\x" + string(str[i:i+2]))
-	//}
-
 
 	if str == str2 {
 		fmt.Println("sam sam")
 		fmt.Println(str)
-		//f, e := os.Create("d:/result.txt")
-		//check(e)
-		//
-		//_, e =f.Write([]byte(str))
-		//check(e)
-		//
-		//w := bufio.NewWriter(f)
-		//w.Flush()
-
-
 	} else {
 		fmt.Println("no sam")
 	}
 
-	//fmt.Println(str)
-	//fmt.Println()
-	//fmt.Println(str2)
 }
 
 

@@ -18,7 +18,6 @@
 package utils
 
 import (
-	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
@@ -28,6 +27,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -995,7 +996,6 @@ func setTxPool(ctx *cli.Context, cfg *core.TxPoolConfig) {
 		cfg.Lifetime = ctx.GlobalDuration(TxPoolLifetimeFlag.Name)
 	}
 }
-
 
 func setWhitelist(ctx *cli.Context, cfg *berith.Config) {
 	whitelist := ctx.GlobalString(WhitelistFlag.Name)

@@ -20,4 +20,4 @@ VsCode : https://code.visualstudio.com/
 
 ## License
 
-GNU License
+GNU License v3.0
