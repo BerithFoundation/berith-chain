@@ -25,27 +25,23 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0xf8978323a3d69bc80326f73404f208e698b537495acafde5584d8354feb2df70")
-	TestnetGenesisHash = common.HexToHash("0xcd1136c7b4ac252f63b498478be97b65cb2e8474c3bbdfe55cce2bd0ea4ebe70")
+	MainnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
+	TestnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
 )
 
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(123),
-		HomesteadBlock:      big.NewInt(1),
-		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
-		EIP150Block:         big.NewInt(2),
-		EIP150Hash:          common.HexToHash("0xc14b4c6553d27602b0b3ac246ba3cfed0b032bf6387be41fd5b0828fa28c6dc3"),
-		EIP155Block:         big.NewInt(3),
-		EIP158Block:         big.NewInt(3),
-		ByzantiumBlock:      big.NewInt(1),
-		ConstantinopleBlock: big.NewInt(1),
+		ChainID:             big.NewInt(15),
+		HomesteadBlock:      big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
-			Rewards: common.StringToBig("500000000000000000000000"),
+			Rewards: common.StringToBig("20"),
+			StakeMinimum: common.StringToBig("100000000000000000000000"),
+			SlashRound: 1,
 		},
 	}
 
@@ -73,7 +69,9 @@ var (
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
-			Rewards: common.StringToBig("500000000000000000000000"),
+			Rewards: common.StringToBig("20"),
+			StakeMinimum: common.StringToBig("100000000000000000000000"),
+			SlashRound: 1,
 		},
 	}
 
