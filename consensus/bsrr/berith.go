@@ -14,7 +14,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -497,14 +496,12 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			//Diff
 			diff, err := c.roundJoinRatio(&stakingList, header.Coinbase)
 			if err != nil {
-				fmt.Println(err)
 				return nil, err
 			}
 
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				fmt.Println("no Signers")
 				return nil, errors.New("no Signers")
 			}
 
@@ -513,28 +510,13 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 				signer := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))]
 
 				if header.Coinbase != signer {
-					fmt.Println("not match signer")
 					return nil, errors.New("not match signer")
 				}
 
 			} else if header.Difficulty.Cmp(new(big.Int).Add(diffNoTurn, big.NewInt(int64(diff)))) != 0 {
-				fmt.Println("not match diff")
 				return nil, errors.New("not match diff")
 			}
 
-			fmt.Println("##################FINALIZE THE BLOCK#################")
-			fmt.Println("NUMBER : ", header.Number.String())
-			fmt.Println("SIGNERS : [")
-			for _, signer := range signers {
-				fmt.Println("\t", signer.Hex())
-			}
-			fmt.Println("]")
-			fmt.Println("COINBASE : ", header.Coinbase.Hex())
-			fmt.Println("TARGET : ", signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))].Hex())
-
-			fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-			fmt.Println("PARENT : ", header.ParentHash.Hex())
-			stakingList.Print()
 		}
 	}
 
@@ -653,11 +635,6 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
 
 	if signers[number] == c.signer {
-		//fmt.Println("INTERN NODE")
-		//fmt.Println("BLOCK CREATOR :: ", signers)
-		//signer := signers[number]
-		//fmt.Print("SIGNER :: ", signer)
-		//fmt.Println("  NUMBER :: ", number)
 		return new(big.Int).Set(diffInTurn)
 	}
 	//return new(big.Int).Set(diffNoTurn)
@@ -717,16 +694,6 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 	}
 
 	miners := list.GetMiners()
-
-	fmt.Println("####### SINGER MAP #########")
-	for k, v := range signerMap {
-		fmt.Println("[", k.Hex(), ",", v, "]")
-	}
-
-	fmt.Println("####### MINERS #########")
-	for k, v := range miners {
-		fmt.Println("[", k.Hex(), ",", v, "]")
-	}
 
 	for k, _ := range signerMap {
 		_, ok := miners[k]
@@ -820,7 +787,6 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			return nil, err
 		}
 	}
-	//list.Print()
 	return list, nil
 
 }
