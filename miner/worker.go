@@ -19,7 +19,6 @@ package miner
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -348,12 +347,6 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			commit(false, commitInterruptNewHead)
 
 		case head := <-w.chainHeadCh:
-			fmt.Println("#################INSERT_CHAIN##############")
-			fmt.Println("NUMBER : ", head.Block.Number().String())
-			fmt.Println("COINBASE : ", head.Block.Coinbase().Hex())
-			fmt.Println("HASH : ", head.Block.Hash().Hex())
-			fmt.Println("CURRENTBLOCK : ", w.chain.CurrentHeader().Hash().Hex())
-			fmt.Println("DIFFICULTY : ", head.Block.Difficulty())
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
@@ -947,7 +940,6 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 	s := w.current.state.Copy()
 	block, err := w.engine.Finalize(w.chain, w.current.header, s, w.current.txs, uncles, w.current.receipts)
 	if err != nil {
-		fmt.Println("ERERERERERRREOREROEIROIEORE", err)
 		return err
 	}
 	if w.isRunning() {

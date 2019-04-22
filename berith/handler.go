@@ -26,14 +26,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/fetcher"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/consensus/misc"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/fetcher"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/p2p"
@@ -100,7 +100,6 @@ type ProtocolManager struct {
 	// and processing
 	wg sync.WaitGroup
 }
-
 
 func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, networkID uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb berithdb.Database, whitelist map[uint64]common.Hash) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
@@ -658,9 +657,6 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		request.Block.ReceivedAt = msg.ReceivedAt
 		request.Block.ReceivedFrom = p
 
-		fmt.Println("== New Block Recieved ==")
-		fmt.Println("number : ", request.Block.NumberU64(), " hash : ", request.Block.Hash().Hex())
-
 		// Mark the peer as owning the block and schedule it for import
 		p.MarkBlock(request.Block.Hash())
 		pm.fetcher.Enqueue(p.id, request.Block)
@@ -791,7 +787,6 @@ func (pm *ProtocolManager) txBroadcastLoop() {
 		}
 	}
 }
-
 
 type NodeInfo struct {
 	Network    uint64              `json:"network"`    // Berith network ID (1=Frontier, 2=Morden, Ropsten=3, Rinkeby=4)

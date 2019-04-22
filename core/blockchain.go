@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
 	"github.com/BerithFoundation/berith-chain/common/prque"
@@ -37,7 +38,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
@@ -931,37 +931,6 @@ func (bc *BlockChain) WriteBlockWithoutState(block *types.Block, td *big.Int) (e
 func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.Receipt, state *state.StateDB) (status WriteStatus, err error) {
 	bc.wg.Add(1)
 	defer bc.wg.Done()
-
-	//[Berith] stakingList 관련 로직 bsrr/berith.Finalize로 이동
-	// stakingList, stkErr := stake.NewStakingMap(bc.stakingDB, big.NewInt(0).Sub(block.Number(), big.NewInt(1)), block.Header().ParentHash)
-	// if stkErr != nil {
-	// 	return NonStatTy, stkErr
-	// }
-
-	// stakingList.Print()
-	// for _, tx := range block.Transactions() {
-	// 	msg, _ := tx.AsMessage(types.MakeSigner(bc.chainConfig, block.Number()))
-
-	// 	if (msg.From().String() == msg.To().String()) && (msg.Value().Cmp(big.NewInt(0)) > 0) {
-
-	// 		old, getErr := stakingList.Get(msg.From())
-	// 		if getErr != nil {
-	// 			return NonStatTy, getErr
-	// 		}
-	// 		if msg.Staking() {
-	// 			if setErr := stakingList.Set(old.Address(), new(big.Int).Add(old.Value(), msg.Value())); setErr != nil {
-	// 				return NonStatTy, setErr
-	// 			}
-	// 			if stkErr != nil {
-	// 				return NonStatTy, stkErr
-	// 			}
-	// 		} else {
-	// 			stakingList.Delete(old.Address())
-	// 		}
-	// 	}
-	// }
-
-	// stakingList.Commit(bc.stakingDB, block.Number(), block.Hash())
 
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
