@@ -22,8 +22,11 @@
         | **`Reward`**        | Stake 에 대한 Reward 를 지급하기 위한 Balance 입니다.           |
 
 - [리워드]
-    * 
-
+    * 블록 생성을 한자가 Reward 를 받게 됩니다. 
+    * 해당 블록을 생성하자는 자가 생성 못하게 된다면 다른 BC 에게 권한이 넘어가게 됩니다.        
+    
+     ![berith_reward](./doc/berith_reward.png)
+     
 - [선출]
     * 
 
