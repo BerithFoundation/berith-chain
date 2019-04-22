@@ -39,9 +39,9 @@ var (
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
-			Rewards: common.StringToBig("20"),
+			Rewards: common.StringToBig("25000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 1,
+			SlashRound: 3,
 		},
 	}
 
@@ -56,22 +56,16 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(123),
-		HomesteadBlock:      big.NewInt(1),
-		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
-		EIP150Block:         big.NewInt(2),
-		EIP150Hash:          common.HexToHash("0xc14b4c6553d27602b0b3ac246ba3cfed0b032bf6387be41fd5b0828fa28c6dc3"),
-		EIP155Block:         big.NewInt(3),
-		EIP158Block:         big.NewInt(3),
-		ByzantiumBlock:      big.NewInt(1),
-		ConstantinopleBlock: big.NewInt(1),
+		ChainID:             big.NewInt(15),
+		HomesteadBlock:      big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
-			Rewards: common.StringToBig("20"),
+			Rewards: common.StringToBig("25000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 1,
+			SlashRound: 3,
 		},
 	}
 
