@@ -9,7 +9,7 @@
     
     * BC 는 매 라운드 마다 선출 하게 되며, 블록을 생성한 BC는 블록에 대한 Reward 를 받을수 있습니다.
 
-    ![berith_chain](berith_chain.png)
+    ![berith_chain](./berith_chain.png)
 - [지갑 구성]
 
     * 한개의 계정은 3개의 Balance 로 이루어져 있습니다.        
@@ -27,7 +27,7 @@
     * 블록 생성을 한자가 Reward 를 받게 됩니다. 
     * 해당 블록을 생성하자는 자가 생성 못하게 된다면 다른 BC 에게 권한이 넘어가게 됩니다.        
     
-     ![berith_reward](./doc/berith_reward.png)
+     ![berith_reward](./berith_reward.png)
      
 - [BC 선출]
     * 스테이킹 수량, 기간 등을 고려하여 확률적으로 선출 됩니다.
