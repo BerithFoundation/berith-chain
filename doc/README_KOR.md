@@ -27,7 +27,7 @@
     * 블록 생성을 한자가 Reward 를 받게 됩니다. 
     * 해당 블록을 생성하자는 자가 생성 못하게 된다면 다른 BC 에게 권한이 넘어가게 됩니다.        
     
-     ![berith_reward](./doc/berith_reward.png)
+     ![berith_reward](berith_reward.PNG)
      
 - [BC 선출]
     * 스테이킹 수량, 기간 등을 고려하여 확률적으로 선출 됩니다.
