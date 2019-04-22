@@ -316,9 +316,7 @@ func DefaultGenesisBlock() *Genesis {
 		Mixhash: common.BytesToHash(hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000")),
 		Coinbase: common.HexToAddress("0x0000000000000000000000000000000000000000"),
 		Alloc: map[common.Address]GenesisAccount{
-			//common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("10000000000000000000000000000")},
-			common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("101412048018258352119736256430080") },
-
+			common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("10000000000000000000000000000")},
 		},
 	}
 }
@@ -335,8 +333,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		Mixhash: common.BytesToHash(hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000")),
 		Coinbase: common.HexToAddress("0x0000000000000000000000000000000000000000"),
 		Alloc: map[common.Address]GenesisAccount{
-			//common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("10000000000000000000000000000")},
-			common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("101412048018258352119736256430080") },
+			common.HexToAddress("0x78c2b0dfde452677ccd0cd00465e7cca0e3c5353"): {Balance: common.StringToBig("10000000000000000000000000000")},
 		},
 	}
 }
