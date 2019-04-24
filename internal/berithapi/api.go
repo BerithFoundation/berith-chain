@@ -46,7 +46,7 @@ import (
 )
 
 const (
-	defaultGasPrice = params.GWei
+	defaultGasPrice = params.Gmin
 )
 
 // PublicBerithAPI provides an API to access Berith related information.
