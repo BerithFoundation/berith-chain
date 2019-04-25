@@ -1164,12 +1164,12 @@ func SetBerithConfig(ctx *cli.Context, stack *node.Node, cfg *berith.Config) {
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 3
+			cfg.NetworkId = 1004
 		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 1337
+			cfg.NetworkId = 2337
 		}
 		// Create new developer account or reuse existing one
 		var (
