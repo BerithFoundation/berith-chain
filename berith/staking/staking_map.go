@@ -133,7 +133,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, byteArr)
 }
 
-func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash common.Hash, epoch uint64, perioid uint64) {
+func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash common.Hash, epoch uint64, period uint64) {
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
 		if v.Value().Cmp(big.NewInt(0)) > 0 {
@@ -157,10 +157,10 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash co
 	}
 
 	if len(votes) > 0 {
-		stotal := CalcS(&votes, number, perioid)
-		//p := CalcP2(&votes, stotal, number, perioid)
+		stotal := CalcS(&votes, number, period)
+		//p := CalcP2(&votes, stotal, number, period)
 		//r := CalcR2(&votes, p)
-		list.users = CalcP2(&votes, stotal, number, perioid)
+		list.users = CalcP2(&votes, stotal, number, period)
 		r := CalcR2(&votes, list.users)
 
 		//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()

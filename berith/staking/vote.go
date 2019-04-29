@@ -2,6 +2,7 @@ package staking
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -24,9 +25,9 @@ func (v *Vote) GetReward() float64 {
 	return float64(v.reward.Uint64())
 }
 
-func (v *Vote) GetAdvantage(number, snumber float64, perioid uint64) float64 {
+func (v *Vote) GetAdvantage(number, snumber float64, period uint64) float64 {
 	//div := 1.2 * (10 ^ 6)
-	p := float64(30) / float64(perioid)
+	p := float64(30) / float64(period)
 	y := 1.2 * float64(p)
 	div := y * math.Pow(10, 6)
 	adv := (number - snumber) / div
@@ -44,12 +45,12 @@ func (v *Vote) GetBlockNumber() float64 {
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 //S구하기
-func CalcS(votes *[]Vote, number, perioid uint64) float64 {
+func CalcS(votes *[]Vote, number, period uint64) float64 {
 	var stotal float64 = 0
 	for _, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
+		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
 		s := (stake + (reward * 0.5)) * (1 + adv)
 		stotal += s
 	}
@@ -57,7 +58,7 @@ func CalcS(votes *[]Vote, number, perioid uint64) float64 {
 }
 
 
-func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.Address]int {
+func CalcP2(votes *[]Vote, stotal float64, number, period uint64) *map[common.Address]int {
 	length := len(*votes)
 
 	p := make(map[common.Address]int, length)
@@ -66,15 +67,15 @@ func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.A
 	for _, vote := range *votes {
 		stake := vote.GetStake()
 		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
+		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
 		s := (stake + (reward * 0.5)) * (1 + adv)
 		temp := s / stotal * 10000000
 		if temp == 10000000 {
 			temp = 9999999
 		}
 		p[vote.address] = int(temp)
-		// fmt.Print("[SIG] : ", vote.address.Hex())
-		// fmt.Println("\t [P] : ", p[vote.address])
+		fmt.Print("[SIG] : ", vote.address.Hex())
+		fmt.Println("\t [P] : ", p[vote.address])
 	}
 
 	// fmt.Println("***********************************************************************")
