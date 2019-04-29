@@ -2,7 +2,6 @@ package staking
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -96,11 +95,11 @@ func CalcP2(votes *[]Vote, stotal *big.Int, number, period uint64) *map[common.A
 
 		p[vote.address] = int(tt)
 
-		fmt.Print("[SIG] : ", vote.address.Hex())
-		fmt.Print("\t [STAKE] : ", stake)
-		fmt.Print("\t [STOTAL] : ", stotal)
-		fmt.Print("\t [S] : ", s2)
-		fmt.Println("\t [P] : ", p[vote.address])
+		//fmt.Print("[SIG] : ", vote.address.Hex())
+		//fmt.Print("\t [STAKE] : ", stake)
+		//fmt.Print("\t [STOTAL] : ", stotal)
+		//fmt.Print("\t [S] : ", s2)
+		//fmt.Println("\t [P] : ", p[vote.address])
 	}
 
 	// fmt.Println("***********************************************************************")
