@@ -864,7 +864,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
-			value.Sub(value, msg.Value())
+			value.Set(big.NewInt(0))
 		}
 
 		//transfer reward balance
