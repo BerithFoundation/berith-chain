@@ -991,7 +991,7 @@ func newRPCTransactionFromBlockIndex(b *types.Block, index uint64) *RPCTransacti
 	if index >= uint64(len(txs)) {
 		return nil
 	}
-	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, types.Main, types.Main)
+	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, txs[index].Base(), txs[index].Target())
 }
 
 // newRPCRawTransactionFromBlockIndex returns the bytes of a transaction given a block and a transaction index.
