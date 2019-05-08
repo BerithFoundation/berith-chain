@@ -31,7 +31,7 @@ import (
 )
 
 var DefaultConfig = Config{
-	SyncMode: downloader.FastSync,
+	SyncMode:       downloader.FullSync,
 	NetworkId:      101,
 	LightPeers:     100,
 	DatabaseCache:  512,
@@ -87,7 +87,7 @@ type Config struct {
 	TrieTimeout        time.Duration
 
 	// Mining-related options
-	Berithbase      common.Address `toml:",omitempty"`
+	Berithbase     common.Address `toml:",omitempty"`
 	MinerNotify    []string       `toml:",omitempty"`
 	MinerExtraData []byte         `toml:",omitempty"`
 	MinerGasFloor  uint64
@@ -95,7 +95,6 @@ type Config struct {
 	MinerGasPrice  *big.Int
 	MinerRecommit  time.Duration
 	MinerNoverify  bool
-
 
 	// Transaction pool options
 	TxPool core.TxPoolConfig
