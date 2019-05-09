@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/common"
@@ -41,6 +40,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
@@ -54,7 +54,6 @@ const (
 type PublicBerithAPI struct {
 	b Backend
 }
-
 
 func NewPublicBerithAPI(b Backend) *PublicBerithAPI {
 	return &PublicBerithAPI{b}
@@ -940,8 +939,8 @@ type RPCTransaction struct {
 	To               *common.Address `json:"to"`
 	TransactionIndex hexutil.Uint    `json:"transactionIndex"`
 	Value            *hexutil.Big    `json:"value"`
-	Base 		 types.JobWallet			 `json:"base"`
-	Target 		 types.JobWallet			 `json:"target"`
+	Base             types.JobWallet `json:"base"`
+	Target           types.JobWallet `json:"target"`
 	V                *hexutil.Big    `json:"v"`
 	R                *hexutil.Big    `json:"r"`
 	S                *hexutil.Big    `json:"s"`
@@ -966,8 +965,8 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Value:    (*hexutil.Big)(tx.Value()),
-		Base:  base,
-		Target:  target,
+		Base:     base,
+		Target:   target,
 		V:        (*hexutil.Big)(v),
 		R:        (*hexutil.Big)(r),
 		S:        (*hexutil.Big)(s),
@@ -991,7 +990,7 @@ func newRPCTransactionFromBlockIndex(b *types.Block, index uint64) *RPCTransacti
 	if index >= uint64(len(txs)) {
 		return nil
 	}
-	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, types.Main, types.Main)
+	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, txs[index].Base(), txs[index].Target())
 }
 
 // newRPCRawTransactionFromBlockIndex returns the bytes of a transaction given a block and a transaction index.
@@ -1104,7 +1103,7 @@ func (s *PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Context, 
 	var tx *types.Transaction
 
 	// Retrieve a finalized transaction, or a pooled otherwise
-	if tx, _, _, _, _ , _= rawdb.ReadTransaction(s.b.ChainDb(), hash); tx == nil {
+	if tx, _, _, _, _, _ = rawdb.ReadTransaction(s.b.ChainDb(), hash); tx == nil {
 		if tx = s.b.GetPoolTransaction(hash); tx == nil {
 			// Transaction not found anywhere, abort
 			return nil, nil
@@ -1116,7 +1115,7 @@ func (s *PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Context, 
 
 // GetTransactionReceipt returns the transaction receipt for the given transaction hash.
 func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, hash common.Hash) (map[string]interface{}, error) {
-	tx, blockHash, blockNumber, index, _, _:= rawdb.ReadTransaction(s.b.ChainDb(), hash)
+	tx, blockHash, blockNumber, index, _, _ := rawdb.ReadTransaction(s.b.ChainDb(), hash)
 	if tx == nil {
 		return nil, nil
 	}
@@ -1192,10 +1191,10 @@ type SendTxArgs struct {
 	Nonce    *hexutil.Uint64 `json:"nonce"`
 	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
 	// newer name and should be preferred by clients.
-	Data  *hexutil.Bytes `json:"data"`
-	Input *hexutil.Bytes `json:"input"`
-	Base string `json:"base"`
-	Target string `json:"target"`
+	Data   *hexutil.Bytes `json:"data"`
+	Input  *hexutil.Bytes `json:"input"`
+	Base   string         `json:"base"`
+	Target string         `json:"target"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
