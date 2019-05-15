@@ -48,15 +48,15 @@ func CalcS(votes *[]Vote, number, period uint64) *big.Float {
 	stotal := big.NewFloat(0)
 	for _, vote := range *votes {
 		stake := vote.GetStake()
-		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
+		reward := big.NewInt(0)//vote.GetReward()
+		//adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
 
 		//freward, _ := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)).Int64()
 		//s1 := new(big.Int).Add(stake, big.NewInt(freward))
 		//s2 := new(big.Int).Mul(s1, big.NewInt(int64(1) + int64(adv)))
 		freward := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)) //reward * 0.5
 		s1 := new(big.Float).Add(new(big.Float).SetInt(stake), freward) //(stake + (reward * 0.5))
-		s2 := new(big.Float).Mul(s1, big.NewFloat(1 + adv)) //(stake + (reward * 0.5)) * (1 + adv)
+		s2 := new(big.Float).Mul(s1, big.NewFloat(1 + 0)) //(stake + (reward * 0.5)) * (1 + adv)
 
 		stotal = new(big.Float).Add(stotal, s2)
 	}
@@ -72,13 +72,13 @@ func CalcP2(votes *[]Vote, stotal *big.Float, number, period uint64) *map[common
 	// fmt.Println("******************************LIST & P*********************************")
 	for _, vote := range *votes {
 		stake := vote.GetStake()
-		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
+		reward := big.NewInt(0)//vote.GetReward()
+		//adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
 
 		//s := (stake + (reward * 0.5)) * (1 + adv)
 		freward := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)) //reward * 0.5
 		s1 := new(big.Float).Add(new(big.Float).SetInt(stake), freward) //(stake + (reward * 0.5))
-		s := new(big.Float).Mul(s1, big.NewFloat(1 + adv)) //(stake + (reward * 0.5)) * (1 + adv)
+		s := new(big.Float).Mul(s1, big.NewFloat(1 + 0)) //(stake + (reward * 0.5)) * (1 + adv)
 
 		//temp := s / stotal * 10000000
 		temp := new(big.Float).Mul(new(big.Float).Quo(s, stotal),  big.NewFloat(10000000))
