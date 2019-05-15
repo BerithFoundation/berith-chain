@@ -115,6 +115,12 @@ web3._extend({
 	property: 'bsrr',
 	methods: [
 		new web3._extend.Method({
+			name: 'getState',
+			call: 'bsrr_getState',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Method({
 			name: 'getBlockCreators',
 			call: 'bsrr_getBlockCreators',
 			params: 1,
