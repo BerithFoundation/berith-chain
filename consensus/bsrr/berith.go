@@ -508,7 +508,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				return nil, errors.New("no Signers")
+				//return nil, errors.New("no Signers")
 				log.Info("===========getSigners===============")
 				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
 				log.Info("[ParentHash]\t", header.ParentHash)
