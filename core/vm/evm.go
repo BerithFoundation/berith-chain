@@ -33,7 +33,7 @@ var emptyCodeHash = crypto.Keccak256Hash(nil)
 
 type (
 	// CanTransferFunc is the signature of a transfer guard function
-	CanTransferFunc func(StateDB, common.Address, *big.Int) bool
+	CanTransferFunc func(StateDB, common.Address, *big.Int, types.JobWallet) bool
 	// TransferFunc is the signature of a transfer function
 	//TransferFunc func(StateDB, common.Address, common.Address, *big.Int)
 	TransferFunc func(StateDB, common.Address, common.Address, *big.Int, types.JobWallet, types.JobWallet)
@@ -190,7 +190,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		return nil, gas, ErrDepth
 	}
 	// Fail if we're trying to transfer more than the available balance
-	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
+	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value, base) {
 		return nil, gas, ErrInsufficientBalance
 	}
 
@@ -262,7 +262,7 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 		return nil, gas, ErrDepth
 	}
 	// Fail if we're trying to transfer more than the available balance
-	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
+	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main) {
 		return nil, gas, ErrInsufficientBalance
 	}
 
@@ -380,7 +380,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	if evm.depth > int(params.CallCreateDepth) {
 		return nil, common.Address{}, gas, ErrDepth
 	}
-	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
+	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main) {
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
 	nonce := evm.StateDB.GetNonce(caller.Address())
