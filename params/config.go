@@ -25,8 +25,8 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
-	TestnetGenesisHash = common.HexToHash("0x2b6a7763372034145e2e514c40759e6c65d87bb37492bf84d2a7220b021bf428")
+	MainnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
+	TestnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
 )
 
 var (
@@ -38,8 +38,8 @@ var (
 		EIP158Block:         big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:  10,
-			Epoch:   20,
-			Rewards: common.StringToBig("25"),
+			Epoch:   360,
+			Rewards: common.StringToBig("2500"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
 			SlashRound: 3,
 		},
