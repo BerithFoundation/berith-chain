@@ -527,6 +527,8 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
+	users, _ := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+
 	stakingList.Vote(chain, header.Number.Uint64(), header.Hash(), c.config.Epoch, c.config.Period)
 
 	fmt.Println("#####################[FINALIZE]####################")
@@ -536,6 +538,10 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	fmt.Println("DIFFICULTY :", header.Difficulty.String())
 	fmt.Println("COINBASE :", header.Coinbase.Hex())
 	stakingList.Print()
+	fmt.Println("-----SIGNERS------")
+	for _, v := range users {
+		fmt.Println("[", v.Hex(), "]")
+	}
 
 	//Reward 보상
 	accumulateRewards(chain.Config(), state, header)
