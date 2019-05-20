@@ -14,6 +14,7 @@ package bsrr
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -485,6 +486,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] stakingList 처리 로직 추가
+
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, err
@@ -526,6 +528,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 
 	stakingList.Vote(chain, header.Number.Uint64(), header.Hash(), c.config.Epoch, c.config.Period)
+
+	fmt.Println("#####################[FINALIZE]####################")
+	fmt.Println("NUMBER :", header.Number.String())
+	fmt.Println("HASH :", header.Hash().Hex())
+	fmt.Println("ROOT : ", header.Root.Hex())
+	fmt.Println("DIFFICULTY :", header.Difficulty.String())
+	fmt.Println("COINBASE :", header.Coinbase.Hex())
+	stakingList.Print()
 
 	//Reward 보상
 	accumulateRewards(chain.Config(), state, header)
@@ -662,11 +672,11 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	n := float64(number) / d
 
 	var z float64 = 0
-	if n <=  3.15 * math.Pow(10, 6) {
+	if n <= 3.15*math.Pow(10, 6) {
 		z = 5
 	}
 
-	re := 26 - math.Round(n / (7.37 * math.Pow(10,6))) * 0.5 + z
+	re := 26 - math.Round(n/(7.37*math.Pow(10, 6)))*0.5 + z
 	if re <= 0 {
 		re = 0
 
