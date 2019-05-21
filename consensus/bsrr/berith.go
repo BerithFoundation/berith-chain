@@ -765,8 +765,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
-			genesis := chain.GetHeaderByNumber(0)
-			list.SetTarget(genesis.Hash())
+			list.SetTarget(prevHash)
 			break
 		}
 
@@ -956,7 +955,6 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 	fmt.Println("###################[GETSIGNER]######################")
 	fmt.Println("HASH :", target.GetTarget().Hex())
-
 	targetHeader := chain.GetHeaderByHash(target.GetTarget())
 
 	if targetHeader == nil {
@@ -965,7 +963,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 	list, err := c.getStakingList(chain, targetHeader.Number.Uint64(), targetHeader.Hash())
 	if err != nil {
-		return signers, err
+		return nil, err
 	}
 
 	temp := make([]common.Address, 0)

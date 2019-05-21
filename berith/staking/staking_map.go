@@ -118,6 +118,7 @@ func (list *StakingMap) Delete(address common.Address) error {
 // Print is function to print stakingList info
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
+	fmt.Println("TARGET :", list.target.Hex())
 	for k, v := range list.storage {
 		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
 	}
@@ -138,7 +139,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
 	byteArr[0], _ = json.Marshal(list.storage)
 	byteArr[1], _ = json.Marshal(list.miners)
-	byteArr[2], _ = json.Marshal(list.target)
+	byteArr[2] = list.target[:]
 	//rlpVal[1], _ = json.Marshal(list.sortedList)
 	return rlp.Encode(w, byteArr)
 }
@@ -208,6 +209,7 @@ func (list *StakingMap) Copy() StakingList {
 		storage:    list.storage,
 		sortedList: list.sortedList,
 		miners:     list.miners,
+		target:     list.target,
 	}
 }
 
@@ -242,10 +244,8 @@ func Decode(rlpData []byte) (StakingList, error) {
 	if err := json.Unmarshal(byteArr[1], &result.miners); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(byteArr[2], &result.target); err != nil {
-		return nil, err
-	}
 
+	result.target = common.BytesToHash(byteArr[2])
 	return result, nil
 
 }
