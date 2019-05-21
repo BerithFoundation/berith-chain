@@ -24,6 +24,7 @@ type StakingMap struct {
 	sortedList []common.Address
 	users      *map[common.Address]int
 	miners     map[common.Address]bool
+	target     common.Hash
 }
 type stkInfo struct {
 	StkAddress     common.Address `json:"address"`
@@ -36,6 +37,14 @@ func (s stkInfo) Address() common.Address { return s.StkAddress }
 func (s stkInfo) Value() *big.Int         { return s.StkValue }
 func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
 func (s stkInfo) Reward() *big.Int        { return s.StkReward }
+
+func (list *StakingMap) SetTarget(target common.Hash) {
+	list.target = target
+}
+
+func (list *StakingMap) GetTarget() common.Hash {
+	return list.target
+}
 
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
@@ -125,10 +134,11 @@ func (list *StakingMap) Print() {
 //EncodeRLP is function to encode
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
-	var byteArr [2][]byte
+	var byteArr [3][]byte
 
 	byteArr[0], _ = json.Marshal(list.storage)
 	byteArr[1], _ = json.Marshal(list.miners)
+	byteArr[2], _ = json.Marshal(list.target)
 	//rlpVal[1], _ = json.Marshal(list.sortedList)
 	return rlp.Encode(w, byteArr)
 }
@@ -214,7 +224,7 @@ func Encode(stakingList StakingList) ([]byte, error) {
 }
 
 func Decode(rlpData []byte) (StakingList, error) {
-	var byteArr [2][]byte
+	var byteArr [3][]byte
 	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
 		return nil, err
 	}
@@ -223,12 +233,16 @@ func Decode(rlpData []byte) (StakingList, error) {
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
+		target:     common.Hash{},
 	}
 	if err := json.Unmarshal(byteArr[0], &result.storage); err != nil {
 		return nil, err
 	}
 
 	if err := json.Unmarshal(byteArr[1], &result.miners); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(byteArr[2], &result.target); err != nil {
 		return nil, err
 	}
 

@@ -9,6 +9,8 @@ import (
 
 //StakingList list of staked accounts
 type StakingList interface {
+	SetTarget(target common.Hash)
+	GetTarget() common.Hash
 	GetInfoWithIndex(idx int) (StakingInfo, error)
 	GetInfo(address common.Address) (StakingInfo, error)
 	SetInfo(info StakingInfo) error
