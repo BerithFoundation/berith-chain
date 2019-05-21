@@ -37,9 +37,9 @@ var (
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
-			Period:       2,
-			Epoch:        15,
-			Rewards:      common.StringToBig("18"),
+			Period:       5,
+			Epoch:        10,
+			Rewards:      common.StringToBig("10"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
 			SlashRound:   3,
 		},
