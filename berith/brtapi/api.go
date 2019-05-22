@@ -135,6 +135,7 @@ type WalletTxArgs struct {
 	Value    *hexutil.Big    `json:"value"`
 	Gas      *hexutil.Uint64 `json:"gas"`
 	GasPrice *hexutil.Big    `json:"gasPrice"`
+	Nonce    *hexutil.Uint64 `json:"nonce"`
 }
 
 func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
@@ -157,6 +158,7 @@ func (s *PrivateBerithAPI) RewardToStake(ctx context.Context, args WalletTxArgs)
 	sendTx.target = types.Stake
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
+	sendTx.Nonce = args.Nonce
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -173,6 +175,7 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 	sendTx.target = types.Main
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
+	sendTx.Nonce = args.Nonce
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -200,7 +203,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	sendTx.target = types.Stake
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
-	
+	sendTx.Nonce = args.Nonce
+
 	return s.sendTransaction(ctx, *sendTx)
 }
 

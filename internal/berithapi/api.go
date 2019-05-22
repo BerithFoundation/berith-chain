@@ -982,7 +982,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 
 // newRPCPendingTransaction returns a pending transaction that will serialize to the RPC representation
 func newRPCPendingTransaction(tx *types.Transaction) *RPCTransaction {
-	return newRPCTransaction(tx, common.Hash{}, 0, 0, types.Main, types.Main)
+	return newRPCTransaction(tx, common.Hash{}, 0, 0, tx.Base(), tx.Target())
 }
 
 // newRPCTransactionFromBlockIndex returns a transaction that will serialize to the RPC representation.
