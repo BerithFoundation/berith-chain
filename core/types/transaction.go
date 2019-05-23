@@ -41,8 +41,6 @@ type Transaction struct {
 	hash atomic.Value
 	size atomic.Value
 	from atomic.Value
-	//send block
-	snum *big.Int
 }
 
 type txdata struct {
