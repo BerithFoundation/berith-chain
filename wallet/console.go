@@ -157,7 +157,7 @@ var (
 	}
 )
 
-func init() {
+func Init() {
 	// Initialize the CLI app and start Ber
 	app.Action = ber
 	app.HideVersion = true // we have a command to print the version
@@ -231,7 +231,7 @@ func init() {
 	}
 }
 
-func main() {
+func Start() {
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

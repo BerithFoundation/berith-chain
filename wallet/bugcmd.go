@@ -21,16 +21,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"os/exec"
 	"runtime"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/cmd/internal/browser"
 	"github.com/BerithFoundation/berith-chain/params"
 
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var bugCommand = cli.Command{
@@ -57,10 +55,6 @@ func reportBug(ctx *cli.Context) error {
 	printOSDetails(&buff)
 	fmt.Fprintln(&buff, header)
 
-	// open a new GH issue
-	if !browser.Open(issueURL + "?body=" + url.QueryEscape(buff.String())) {
-		fmt.Printf("Please file a new issue at %s using this template:\n\n%s", issueURL, buff.String())
-	}
 	return nil
 }
 
