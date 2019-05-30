@@ -229,3 +229,31 @@ func TestSha256(t *testing.T){
 	}
 
 }
+
+
+func TestCalcF(t *testing.T){
+	a := big.NewFloat(1.5)
+
+	b, _ := a.Int64()
+
+
+	fmt.Println(b)
+}
+
+
+func FloatToBigInt(val float64) *big.Int {
+	bigval := new(big.Float)
+	bigval.SetFloat64(val)
+	// Set precision if required.
+	// bigval.SetPrec(64)
+
+	coin := new(big.Float)
+	coin.SetInt(big.NewInt(1000000000000000000))
+
+	bigval.Mul(bigval, coin)
+
+	result := new(big.Int)
+	bigval.Int(result) // store converted number in result
+
+	return result
+}

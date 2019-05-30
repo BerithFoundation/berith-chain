@@ -16,17 +16,17 @@ type Vote struct {
 	reward  *big.Int       //reward balance
 }
 
-func (v *Vote) GetStake() float64 {
-	return float64(v.stake.Uint64())
+func (v *Vote) GetStake() *big.Int {
+	return v.stake
 }
 
-func (v *Vote) GetReward() float64 {
-	return float64(v.reward.Uint64())
+func (v *Vote) GetReward() *big.Int {
+	return v.reward
 }
 
-func (v *Vote) GetAdvantage(number, snumber float64, perioid uint64) float64 {
+func (v *Vote) GetAdvantage(number, snumber float64, period uint64) float64 {
 	//div := 1.2 * (10 ^ 6)
-	p := float64(30) / float64(perioid)
+	p := float64(30) / float64(period)
 	y := 1.2 * float64(p)
 	div := y * math.Pow(10, 6)
 	adv := (number - snumber) / div
@@ -44,20 +44,27 @@ func (v *Vote) GetBlockNumber() float64 {
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 //S구하기
-func CalcS(votes *[]Vote, number, perioid uint64) float64 {
-	var stotal float64 = 0
+func CalcS(votes *[]Vote, number, period uint64) *big.Float {
+	stotal := big.NewFloat(0)
 	for _, vote := range *votes {
 		stake := vote.GetStake()
-		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
-		s := (stake + (reward * 0.5)) * (1 + adv)
-		stotal += s
+		reward := big.NewInt(0)//vote.GetReward()
+		//adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
+
+		//freward, _ := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)).Int64()
+		//s1 := new(big.Int).Add(stake, big.NewInt(freward))
+		//s2 := new(big.Int).Mul(s1, big.NewInt(int64(1) + int64(adv)))
+		freward := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)) //reward * 0.5
+		s1 := new(big.Float).Add(new(big.Float).SetInt(stake), freward) //(stake + (reward * 0.5))
+		s2 := new(big.Float).Mul(s1, big.NewFloat(1 + 0)) //(stake + (reward * 0.5)) * (1 + adv)
+
+		stotal = new(big.Float).Add(stotal, s2)
 	}
 	return stotal
 }
 
 
-func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.Address]int {
+func CalcP2(votes *[]Vote, stotal *big.Float, number, period uint64) *map[common.Address]int {
 	length := len(*votes)
 
 	p := make(map[common.Address]int, length)
@@ -65,16 +72,32 @@ func CalcP2(votes *[]Vote, stotal float64, number, perioid uint64) *map[common.A
 	// fmt.Println("******************************LIST & P*********************************")
 	for _, vote := range *votes {
 		stake := vote.GetStake()
-		reward := vote.GetReward()
-		adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), perioid)
-		s := (stake + (reward * 0.5)) * (1 + adv)
-		temp := s / stotal * 10000000
-		if temp == 10000000 {
-			temp = 9999999
+		reward := big.NewInt(0)//vote.GetReward()
+		//adv := vote.GetAdvantage(float64(number), vote.GetBlockNumber(), period)
+
+		//s := (stake + (reward * 0.5)) * (1 + adv)
+		freward := new(big.Float).Mul(new(big.Float).SetInt(reward), big.NewFloat(0.5)) //reward * 0.5
+		s1 := new(big.Float).Add(new(big.Float).SetInt(stake), freward) //(stake + (reward * 0.5))
+		s := new(big.Float).Mul(s1, big.NewFloat(1 + 0)) //(stake + (reward * 0.5)) * (1 + adv)
+
+		//temp := s / stotal * 10000000
+		temp := new(big.Float).Mul(new(big.Float).Quo(s, stotal),  big.NewFloat(10000000))
+
+		tt, _ := temp.Int64()
+		if big.NewInt(tt) == big.NewInt( 10000000) {
+			tt = big.NewInt(9999999).Int64()
 		}
-		p[vote.address] = int(temp)
-		// fmt.Print("[SIG] : ", vote.address.Hex())
-		// fmt.Println("\t [P] : ", p[vote.address])
+
+		p[vote.address] = int(tt)
+
+		//fmt.Println("\t [BlockNumber]", number)
+		//fmt.Print("\t [SIG] : ", vote.address.Hex())
+		//fmt.Print("\t [REWARD] : ", reward)
+		//fmt.Print("\t [FREWARD] : ", freward)
+		//fmt.Print("\t [STAKE] : ", stake)
+		//fmt.Print("\t [STOTAL] : ", stotal)
+		//fmt.Print("\t [S] : ", s)
+		//fmt.Println("\t [P] : ", p[vote.address])
 	}
 
 	// fmt.Println("***********************************************************************")

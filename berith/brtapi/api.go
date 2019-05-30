@@ -1,13 +1,15 @@
 package brtapi
 
 import (
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/miner"
-	"github.com/BerithFoundation/berith-chain/rpc"
 	"bytes"
 	"context"
 	"errors"
 	"strconv"
+
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/miner"
+	"github.com/BerithFoundation/berith-chain/rpc"
 
 	// "fmt"
 	"math/big"
@@ -18,15 +20,14 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/log"
-
 	// "github.com/BerithFoundation/berith-chain/berith/stake"
 )
 
 //PrivateBerithAPI struct of berith private apis
 type PrivateBerithAPI struct {
 	backend        Backend
-	miner		   *miner.Miner
-	nonceLock *AddrLocker
+	miner          *miner.Miner
+	nonceLock      *AddrLocker
 	accountManager *accounts.Manager
 }
 
@@ -40,10 +41,10 @@ type SendTxArgs struct {
 	Nonce    *hexutil.Uint64 `json:"nonce"`
 	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
 	// newer name and should be preferred by clients.
-	Data  *hexutil.Bytes `json:"data"`
-	Input *hexutil.Bytes `json:"input"`
-	base  types.JobWallet `json:"base"`
-	target  types.JobWallet `json:"target"`
+	Data   *hexutil.Bytes  `json:"data"`
+	Input  *hexutil.Bytes  `json:"input"`
+	base   types.JobWallet `json:"base"`
+	target types.JobWallet `json:"target"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -101,12 +102,12 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 }
 
 //NewPrivateBerithAPI make new instance of PrivateBerithAPI
-func NewPrivateBerithAPI(b Backend, m *miner.Miner,nonceLock *AddrLocker) *PrivateBerithAPI {
+func NewPrivateBerithAPI(b Backend, m *miner.Miner, nonceLock *AddrLocker) *PrivateBerithAPI {
 	return &PrivateBerithAPI{
 		backend:        b,
-		miner:			m,
+		miner:          m,
 		accountManager: b.AccountManager(),
-		nonceLock: nonceLock,
+		nonceLock:      nonceLock,
 	}
 }
 
@@ -129,12 +130,12 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 	return tx.Hash(), nil
 }
 
-
 type WalletTxArgs struct {
 	From     common.Address  `json:"from"`
 	Value    *hexutil.Big    `json:"value"`
 	Gas      *hexutil.Uint64 `json:"gas"`
 	GasPrice *hexutil.Big    `json:"gasPrice"`
+	Nonce    *hexutil.Uint64 `json:"nonce"`
 }
 
 func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
@@ -157,6 +158,7 @@ func (s *PrivateBerithAPI) RewardToStake(ctx context.Context, args WalletTxArgs)
 	sendTx.target = types.Stake
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
+	sendTx.Nonce = args.Nonce
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -173,6 +175,7 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 	sendTx.target = types.Main
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
+	sendTx.Nonce = args.Nonce
 
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -185,10 +188,9 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, big.NewInt(1e+18))
 
 			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
-			return 	common.Hash{}, errors.New("staking balance failed")
+			return common.Hash{}, errors.New("staking balance failed")
 		}
 	}
-
 
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
@@ -200,7 +202,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	sendTx.target = types.Stake
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
-	
+	sendTx.Nonce = args.Nonce
+
 	return s.sendTransaction(ctx, *sendTx)
 }
 
@@ -220,16 +223,15 @@ func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (
 	return s.sendTransaction(ctx, *sendTx)
 }
 
-
 // private trasaction function
-func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error){
+func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
 	account := accounts.Account{Address: args.From}
 
 	wallet, err := s.backend.AccountManager().Find(account)
 	if err != nil {
 		return common.Hash{}, err
 	}
-	
+
 	s.nonceLock.LockAddr(args.From)
 	defer s.nonceLock.UnlockAddr(args.From)
 
@@ -239,7 +241,7 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-	
+
 	var chainID *big.Int
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
 		chainID = config.ChainID
@@ -251,7 +253,6 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 
 	return submitTransaction(ctx, s.backend, signed)
 }
-
 
 func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -267,4 +268,13 @@ func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Ad
 		return nil, err
 	}
 	return state.GetAccountInfo(address), state.Error()
+}
+
+func (s *PrivateBerithAPI) UpdateAccount(ctx context.Context, address common.Address, passphrase, newPassphrase string) error {
+	return fetchKeystore(s.accountManager).Update(accounts.Account{Address: address}, passphrase, newPassphrase)
+}
+
+// fetchKeystore retrives the encrypted keystore from the account manager.
+func fetchKeystore(am *accounts.Manager) *keystore.KeyStore {
+	return am.Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 }

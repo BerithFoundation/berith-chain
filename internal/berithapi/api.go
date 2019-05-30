@@ -46,7 +46,7 @@ import (
 )
 
 const (
-	defaultGasPrice = params.GWei
+	defaultGasPrice = params.Gmin
 )
 
 // PublicBerithAPI provides an API to access Berith related information.
@@ -982,7 +982,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 
 // newRPCPendingTransaction returns a pending transaction that will serialize to the RPC representation
 func newRPCPendingTransaction(tx *types.Transaction) *RPCTransaction {
-	return newRPCTransaction(tx, common.Hash{}, 0, 0, types.Main, types.Main)
+	return newRPCTransaction(tx, common.Hash{}, 0, 0, tx.Base(), tx.Target())
 }
 
 // newRPCTransactionFromBlockIndex returns a transaction that will serialize to the RPC representation.
@@ -991,7 +991,7 @@ func newRPCTransactionFromBlockIndex(b *types.Block, index uint64) *RPCTransacti
 	if index >= uint64(len(txs)) {
 		return nil
 	}
-	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, types.Main, types.Main)
+	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index, txs[index].Base(), txs[index].Target())
 }
 
 // newRPCRawTransactionFromBlockIndex returns the bytes of a transaction given a block and a transaction index.

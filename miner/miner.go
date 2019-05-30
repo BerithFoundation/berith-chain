@@ -168,3 +168,8 @@ func (self *Miner) SetBerithbase(addr common.Address) {
 	self.coinbase = addr
 	self.worker.setBerithbase(addr)
 }
+
+
+func (self *Miner) GetBerithbase() common.Address {
+	return  self.coinbase
+}

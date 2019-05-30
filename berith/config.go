@@ -32,7 +32,7 @@ import (
 
 var DefaultConfig = Config{
 	SyncMode: downloader.FastSync,
-	NetworkId:      1,
+	NetworkId:      101,
 	LightPeers:     100,
 	DatabaseCache:  512,
 	TrieCleanCache: 256,
@@ -40,7 +40,7 @@ var DefaultConfig = Config{
 	TrieTimeout:    60 * time.Minute,
 	MinerGasFloor:  8000000,
 	MinerGasCeil:   8000000,
-	MinerGasPrice:  big.NewInt(params.GWei),
+	MinerGasPrice:  big.NewInt(params.Gmin),
 	MinerRecommit:  3 * time.Second,
 
 	TxPool: core.DefaultTxPoolConfig,
