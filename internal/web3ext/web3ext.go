@@ -557,6 +557,12 @@ web3._extend({
         	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
         	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
 		}),
+		new web3._extend.Method({
+			name: 'updateAccount',
+			call: 'berith_updateAccount',
+        	params: 3,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null],        	
+		}),
 	],
 	properties: [
 		new web3._extend.Property({
