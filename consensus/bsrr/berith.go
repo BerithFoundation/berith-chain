@@ -14,7 +14,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -507,19 +506,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 				return nil, errors.New("no Signers")
 			}
 
-			fmt.Println("#####################[FINALIZE]####################")
-			fmt.Println("NUMBER :", header.Number.String())
-			fmt.Println("HASH :", header.Hash().Hex())
-			fmt.Println("ROOT : ", header.Root.Hex())
-			fmt.Println("DIFFICULTY :", header.Difficulty.String())
-			fmt.Println("COINBASE :", header.Coinbase.Hex())
-			fmt.Println("PARENT :", header.ParentHash.Hex())
-			stakingList.Print()
-			fmt.Println("-----SIGNERS------")
-			for _, v := range signers {
-				fmt.Println("[", v.Hex(), "]")
-			}
-
 			//diff 가 Max 수치 라면 블록 생성자 인가 판단 하고 아니라면 Diff 가 연산 이랑 같은지 판단
 			if header.Difficulty.Cmp(diffInTurn) == 0 {
 				signer := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))]
@@ -953,8 +939,6 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 		return nil, err
 	}
 
-	fmt.Println("###################[GETSIGNER]######################")
-	fmt.Println("HASH :", target.GetTarget().Hex())
 	targetHeader := chain.GetHeaderByHash(target.GetTarget())
 
 	if targetHeader == nil {
