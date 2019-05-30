@@ -31,7 +31,6 @@ var TestnetBootnodes = []string{
 	"enode://361616802dd85bede35d557fc53080eac9a637d7c2f76d7e7619ca7922f328ca3f3a5ee11a1522af68ad5bcf99e88398eb2566efdb0e201c5e1159b3a66aab5a@121.141.157.228:41172",
 }
 
-
 // DiscoveryV5Bootnodes are the enode URLs of the P2P bootstrap nodes for the
 // experimental RLPx v5 topic-discovery network.
 var DiscoveryV5Bootnodes = []string{

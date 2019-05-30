@@ -84,7 +84,7 @@ func CalcP2(votes *[]Vote, stotal *big.Float, number, period uint64) *map[common
 		temp := new(big.Float).Mul(new(big.Float).Quo(s, stotal),  big.NewFloat(10000000))
 
 		tt, _ := temp.Int64()
-		if big.NewInt(tt) == big.NewInt( 10000000) {
+		if big.NewInt(tt) == big.NewInt(10000000) {
 			tt = big.NewInt(9999999).Int64()
 		}
 

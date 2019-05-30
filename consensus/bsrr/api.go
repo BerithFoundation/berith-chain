@@ -12,6 +12,8 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
+	"errors"
+
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
@@ -49,6 +51,46 @@ type API struct {
 //	}
 //	return api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 //}
+
+func (api *API) GetState(number *rpc.BlockNumber) (string, error) {
+
+	header := api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	if header == nil {
+		return "", errors.New("No search a block")
+	}
+	state, err := api.chain.StateAt(header.Root)
+
+	if err != nil {
+		return "", err
+	}
+
+	users, err := api.GetBlockCreators(number)
+
+	if err != nil {
+		return "", err
+	}
+
+	result := "{\n\tHASH : " + header.Hash().Hex() + ", "
+	result += "\n\tROOT : " + header.Root.Hex() + ", "
+	result += "\n\tRESULTS : ["
+
+	for _, user := range users {
+
+		info := state.GetAccountInfo(user)
+		result += "\n\t\t{"
+		result += "\n\t\t\tCODEHASH : " + common.Bytes2Hex(info.CodeHash) + ", "
+		result += "\n\t\t\tNONCE : " + string(info.Nonce) + ", "
+		result += "\n\t\t\tROOT : " + info.Root.Hex() + ", "
+		result += "\n\t\t\tMAIN : " + info.Balance.String() + ", "
+		result += "\n\t\t\tREWARD : " + info.RewardBalance.String() + ", "
+		result += "\n\t\t\tSTAKE : " + info.StakeBalance.String()
+		result += "\n\t\t}, "
+	}
+	result += "\n\t]\n}"
+
+	return result, nil
+
+}
 
 func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
 	var header *types.Header

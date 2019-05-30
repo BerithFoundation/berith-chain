@@ -32,16 +32,16 @@ var (
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(105),
-		HomesteadBlock:      big.NewInt(0),
-		EIP155Block:         big.NewInt(0),
-		EIP158Block:         big.NewInt(0),
+		ChainID:        big.NewInt(105),
+		HomesteadBlock: big.NewInt(0),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
 			Rewards: common.StringToBig("2500"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 3,
+			SlashRound:   3,
 		},
 	}
 
@@ -56,16 +56,16 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(205),
-		HomesteadBlock:      big.NewInt(0),
-		EIP155Block:         big.NewInt(0),
-		EIP158Block:         big.NewInt(0),
+		ChainID:        big.NewInt(205),
+		HomesteadBlock: big.NewInt(0),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
-			Period:  10,
-			Epoch:   360,
-			Rewards: common.StringToBig("2500"),
+			Period:       10,
+			Epoch:        360,
+			Rewards:      common.StringToBig("2500"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 3,
+			SlashRound:   3,
 		},
 	}
 
