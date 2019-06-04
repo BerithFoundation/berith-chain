@@ -85,7 +85,7 @@ func start_ui(){
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
 			go func() {
-				time.Sleep(time.Second)
+				time.Sleep(time.Second * 2)
 				if err := bootstrap.SendMessage(w, "notify_show", ""); err != nil {
 					astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 				}

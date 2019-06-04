@@ -23,5 +23,6 @@
 
 # VS Code
 .vscode
+./wallet/resources/app/.vscode
 
 **/yarn-error.log
