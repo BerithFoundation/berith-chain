@@ -157,6 +157,10 @@ var (
 	}
 )
 
+var (
+	stack *node.Node
+)
+
 func Init() {
 	// Initialize the CLI app and start Ber
 	app.Action = ber
@@ -231,12 +235,17 @@ func Init() {
 	}
 }
 
+
+
 func Start() {
+
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+
 	}
 }
+
 
 // berith is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
@@ -245,9 +254,11 @@ func ber(ctx *cli.Context) error {
 	if args := ctx.Args(); len(args) > 0 {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
-	node := makeFullNode(ctx)
-	startNode(ctx, node)
-	node.Wait()
+	stack = makeFullNode(ctx)
+
+	startNode(ctx, stack)
+
+	stack.Wait()
 	return nil
 }
 
@@ -281,6 +292,10 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			utils.Fatalf("Failed to attach to self: %v", err)
 		}
 		stateReader := berithclient.NewClient(rpcClient)
+		ch <- NodeMsg{
+			t: "client",
+			v: rpcClient,
+		}
 
 		// Open any wallets already attached
 		for _, wallet := range stack.AccountManager().Wallets() {
@@ -336,4 +351,6 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}
+
+
 }

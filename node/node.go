@@ -246,6 +246,10 @@ func (n *Node) openDataDir() error {
 	return nil
 }
 
+func (n *Node) GetRpcApis() []rpc.API{
+	return n.rpcAPIs
+}
+
 // startRPC is a helper method to start all the various RPC endpoint during node
 // startup. It's not meant to be called at any time afterwards as it makes certain
 // assumptions about the state of the node.

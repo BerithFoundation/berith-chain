@@ -1,36 +1,46 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"time"
-
-	"encoding/json"
-
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
+	"time"
 )
 
-// Constants
-const htmlAbout = `Welcome on <b>Astilectron</b> demo!<br>
-This is using the bootstrap and the bundler.`
 
 // Vars
 var (
 	AppName string
 	BuiltAt string
-	debuging   = flag.Bool("d", false, "enables the debug mode")
+	debuging   = flag.Bool("d", true, "enables the debug mode")
+	node_testnet = flag.String("testnet", "", "testnet")
+	node_console = flag.String("console", "", "console")
 	w       *astilectron.Window
+
+
+	ctx 	context.Context
+	client *rpc.Client
+	ch = make(chan NodeMsg)
 )
+
+type NodeMsg struct {
+	t string
+	v interface{}
+}
 
 func init(){
 	Init()
 }
-
 func main() {
-	go Start()
+	start_ui()
+}
 
+
+func start_ui(){
 	// Init
 	flag.Parse()
 	astilog.FlagInit()
@@ -48,35 +58,55 @@ func main() {
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
 			Label: astilectron.PtrStr("File"),
-			SubMenu: []*astilectron.MenuItemOptions{
-				{
-					Label: astilectron.PtrStr("About"),
-					OnClick: func(e astilectron.Event) (deleteListener bool) {
-						if err := bootstrap.SendMessage(w, "about", htmlAbout, func(m *bootstrap.MessageIn) {
-							// Unmarshal payload
-							var s string
-							if err := json.Unmarshal(m.Payload, &s); err != nil {
-								astilog.Error(errors.Wrap(err, "unmarshaling payload failed"))
-								return
-							}
-							astilog.Infof("About modal has been displayed and payload is %s!", s)
-						}); err != nil {
-							astilog.Error(errors.Wrap(err, "sending about event failed"))
-						}
-						return
-					},
-				},
-				{Role: astilectron.MenuItemRoleClose},
-			},
+			//SubMenu: []*astilectron.MenuItemOptions{
+			//	{
+			//		Label: astilectron.PtrStr("About"),
+			//		OnClick: func(e astilectron.Event) (deleteListener bool) {
+			//			if err := bootstrap.SendMessage(w, "about", htmlAbout, func(m *bootstrap.MessageIn) {
+			//				// Unmarshal payload
+			//				var s string
+			//				if err := json.Unmarshal(m.Payload, &s); err != nil {
+			//					astilog.Error(errors.Wrap(err, "unmarshaling payload failed"))
+			//					return
+			//				}
+			//				astilog.Infof("About modal has been displayed and payload is %s!", s)
+			//			}); err != nil {
+			//				astilog.Error(errors.Wrap(err, "sending about event failed"))
+			//			}
+			//
+			//
+			//
+			//			return
+			//		},
+			//	},
+			//	{Role: astilectron.MenuItemRoleClose},
+			//},
 		}},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
 			go func() {
-				time.Sleep(5 * time.Second)
-				if err := bootstrap.SendMessage(w, "check.out.menu", "Don't forget to check out the menu!"); err != nil {
+				time.Sleep(time.Second)
+				if err := bootstrap.SendMessage(w, "notify_show", ""); err != nil {
 					astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 				}
+				for{
+					node := <-ch
+					switch node.t {
+					case "client":
+						client = node.v.(*rpc.Client)
+						ctx = context.TODO()
+						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
+							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
+						}
+
+						startPolling()
+
+						break
+					}
+				}
 			}()
+
+			go Start()
 			return nil
 		},
 		//RestoreAssets: RestoreAssets,
@@ -93,4 +123,21 @@ func main() {
 	}); err != nil {
 		astilog.Fatal(errors.Wrap(err, "running bootstrap failed"))
 	}
+}
+
+func startPolling(){
+	go func() {
+		for {
+			val, err := callNodeApi("berith_syncing", nil)
+			if err != nil {
+				astilog.Error(errors.Wrap(err, "polling failed"))
+			}
+
+			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
+				astilog.Error(errors.Wrap(err, "polling failed"))
+			}
+
+			time.Sleep(3 * time.Second)
+		}
+	}()
 }

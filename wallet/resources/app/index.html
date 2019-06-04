@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <link rel="stylesheet" href="static/css/base.css"/>
     <link rel="stylesheet" href="static/lib/astiloader/astiloader.css">
     <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
@@ -9,17 +10,16 @@
     <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-    <div class="left" id="dirs"></div>
-    <div class="right">
-        <div class="title"><span id="path"></span></div>
-        <div class="panel"><span class="stat" id="files_count"></span> file(s)</div>
-        <div class="panel"><span class="stat" id="files_size"></span> of file(s)</div>
-        <div class="panel" id="files_panel">
-            <div class="chart_title">Files repartition</div>
-            <div id="files"></div>
-        </div>
-    </div>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="static/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
     <script src="static/js/index.js"></script>
+
+    <script src="static/js/api/berith.js"></script>
+    <script src="static/js/api/admin.js"></script>
+
     <script src="static/lib/astiloader/astiloader.js"></script>
     <script src="static/lib/astimodaler/astimodaler.js"></script>
     <script src="static/lib/astinotifier/astinotifier.js"></script>
@@ -27,5 +27,14 @@
     <script type="text/javascript">
         index.init();
     </script>
+
+    <button onclick="berith.blockNumber()">Get Block</button>
+    <button onclick="admin.nodeInfo()">Node Info</button>
+    <button onclick="index.nextPage()">Next Page</button>
+    <textarea id="text"></textarea>
+
+
+    <textarea id="polling"></textarea>
+
 </body>
 </html>
