@@ -126,18 +126,18 @@ func start_ui(){
 }
 
 func startPolling(){
-	go func() {
-		for {
-			val, err := callNodeApi("berith_syncing", nil)
-			if err != nil {
-				astilog.Error(errors.Wrap(err, "polling failed"))
-			}
-
-			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
-				astilog.Error(errors.Wrap(err, "polling failed"))
-			}
-
-			time.Sleep(3 * time.Second)
-		}
-	}()
+	//go func() {
+	//	for {
+	//		val, err := callNodeApi("berith_syncing", nil)
+	//		if err != nil {
+	//			astilog.Error(errors.Wrap(err, "polling failed"))
+	//		}
+	//
+	//		if err := bootstrap.SendMessage(w, "polling", val); err != nil {
+	//			astilog.Error(errors.Wrap(err, "polling failed"))
+	//		}
+	//
+	//		time.Sleep(3 * time.Second)
+	//	}
+	//}()
 }

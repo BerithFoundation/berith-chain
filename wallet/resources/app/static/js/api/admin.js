@@ -4,6 +4,7 @@ let admin = {
 
         message.payload = {
             "api" : "admin_nodeInfo",
+            "args" : []
         }
 
         asticode.loader.show()

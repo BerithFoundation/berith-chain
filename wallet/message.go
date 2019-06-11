@@ -5,6 +5,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
+	"strings"
 )
 
 // handleMessages handles messages
@@ -35,7 +36,18 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	var result json.RawMessage
 
-	err := client.Call(&result, api.(string), args...)
+	p := make([]interface{}, 0)
+	for _, item := range args{
+		if item == nil {
+			break
+		}
+
+		temp := item.(string)
+		aa := strings.ReplaceAll(temp, "\"", "")
+		p = append(p, aa)
+	}
+
+	err := client.Call(&result, api.(string), p...)
 
 	var val string
 	switch err := err.(type) {
