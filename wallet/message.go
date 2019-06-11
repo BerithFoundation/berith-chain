@@ -25,8 +25,8 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		}
 
 		api := info["api"]
-		args := info["args"]
-		payload, err = callNodeApi(api, args)
+		args := info["args"].([]interface{})
+		payload, err = callNodeApi(api, args...)
 		break
 	}
 	return
@@ -34,10 +34,10 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	var result json.RawMessage
-	err := client.Call(&result, api.(string), args)
+
+	err := client.Call(&result, api.(string), args...)
 
 	var val string
-
 	switch err := err.(type) {
 	case nil:
 		if result == nil {
@@ -54,6 +54,29 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 
 	return val, err
 }
+
+//func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
+//	var result json.RawMessage
+//	err := client.Call(&result, api.(string), args)
+//
+//	var val string
+//
+//	switch err := err.(type) {
+//	case nil:
+//		if result == nil {
+//
+//		} else {
+//			val = string(result)
+//			return val, err
+//		}
+//	case rpc.Error:
+//		return val, err
+//	default:
+//		return val, err
+//	}
+//
+//	return val, err
+//}
 
 
 
