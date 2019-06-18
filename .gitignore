@@ -10,6 +10,9 @@
 *un~
 .DS_Store
 */**/.DS_Store
+cmd/berith/Berith/*
+cmd/berith/berith.exe
+cmd/berith/password.txt
 
 #*
 .#*
