@@ -1,15 +1,12 @@
 package staking
 
 import (
-	"github.com/BerithFoundation/berith-chain/common"
-	"crypto/sha256"
 	"fmt"
-	"math"
+	"github.com/BerithFoundation/berith-chain/common"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"testing"
-	"time"
 )
 
 type VoteTest struct {
@@ -19,6 +16,7 @@ type VoteTest struct {
 	reward *big.Int //reward balance
 }
 
+/*
 func TestVoting(t *testing.T){
 
 	number := 100
@@ -146,31 +144,57 @@ func fadvTest(number, snumber float64) float64 {
 		return adv
 	}
 }
+*/
 
 func TestVoting2(t *testing.T)  {
-	number := uint64(100)
-	period := uint64(10)
+	number := uint64(1000000)
+	epoch := uint64(20)
+	perioid := uint64(10)
 
-	votes := make([]Vote, 0)
 
-	for i:=0; i<1360; i++ {
-		v := Vote{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000000 + (int64(i) * 1000)), big.NewInt(1), big.NewInt(100)}
-		votes = append(votes, v)
+	cs := NewCandidates(number, perioid)
+
+	v := rand.Int63n(100000000000000000)
+	fmt.Println(v)
+
+	loop := 1000
+
+	for i:=0; i<loop; i++ {
+
+		value := rand.Int63n(100000)
+
+		//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18))
+		stake := new(big.Int).Mul(big.NewInt(value * int64(loop)), big.NewInt(1e+18))
+		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), stake, big.NewInt(1), big.NewInt(100)}
+		cs.Add(c)
 	}
 
-	stotal := CalcS(&votes, number, period)
-	p := CalcP2(&votes, stotal, number, period)
-	r := CalcR2(&votes, p)
+	//라운드상의 토탈 스테이커
+	//total := new(big.Int).Div(cs.TotalStakeBalance(), big.NewInt(1e+18))
+	//fmt.Println("TOTAL :: ", total)
+	//
+	//tt, srt := cs.MakeSRT()
+	//fmt.Println("TT :: ", tt)
+	//fmt.Println("OK :: ", len(*srt))
+	//for i:=0; i<len(*srt); i++ {
+	//
+	//	cc := (*srt)[uint64(i)]
+	//
+	//	fmt.Println("PRIORITY :: ", i)
+	//	fmt.Print("MIN :: ", cc.min)
+	//	fmt.Print(" --- ")
+	//	fmt.Println("MAX :: ", cc.max)
+	//}
 
-	n := common.HexToAddress("0x2c21bf2f10eb55d538f1af154260025f605613283437d872f9ede4736b41a58d").Big().Int64()
 
-	signers := GetSigners(n, &votes, r, 20)
-
-	for _, sig := range *signers {
-		fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-	}
+	bc := cs.GetBlockCreator(number, epoch, perioid)
+	fmt.Println("OK :: ", len(*bc))
+	//for key, val := range *bc {
+	//	fmt.Print("SIGNER :: ", common.Bytes2Hex(key.Bytes()))
+	//	fmt.Println(" VALUE :: ", val)
+	//}
 }
-
+/*
 func TestReward(t *testing.T){
 	period := 10
 	for i:=0; i<315000000; i+=100000 {
@@ -257,3 +281,5 @@ func FloatToBigInt(val float64) *big.Int {
 
 	return result
 }
+
+*/

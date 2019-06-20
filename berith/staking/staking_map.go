@@ -155,32 +155,34 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash co
 
 	sortedList := make([]common.Address, 0)
 
-	votes := make([]Vote, 0)
+	cs := new(Candidates)
 	for _, info := range kv {
 
 		reward := info.StkReward
 		if reward == nil {
 			reward = big.NewInt(0)
 		}
-
-		v := Vote{info.Address(), info.Value(), info.BlockNumber(), reward}
-		votes = append(votes, v)
+		cs.Add(Candidate{info.Address(), info.Value(), info.BlockNumber(), reward})
 	}
 
-	if len(votes) > 0 {
-		stotal := CalcS(&votes, number, period)
-		//p := CalcP2(&votes, stotal, number, period)
-		//r := CalcR2(&votes, p)
-		list.users = CalcP2(&votes, stotal, number, period)
-		r := CalcR2(&votes, list.users)
+	size := len(cs.selections)
+	if size > 0 {
 
-		//n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
-		n := common.HexToAddress(hash.Hex()).Big().Int64()
-		sig := GetSigners(n, &votes, r, epoch)
+		//bc := cs.GetBlockCreator(number, epoch, period)
 
-		for _, item := range *sig {
-			sortedList = append(sortedList, item)
-		}
+		//stotal := CalcS(&votes, number, period)
+		////p := CalcP2(&votes, stotal, number, period)
+		////r := CalcR2(&votes, p)
+		//list.users = CalcP2(&votes, stotal, number, period)
+		//r := CalcR2(&votes, list.users)
+		//
+		////n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
+		//n := common.HexToAddress(hash.Hex()).Big().Int64()
+		//sig := GetSigners(n, &votes, r, epoch)
+
+		//for _, item := range *bc {
+		//	sortedList = append(sortedList, item)
+		//}
 	}
 
 	list.sortedList = sortedList
