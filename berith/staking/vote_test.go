@@ -10,276 +10,43 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
-type VoteTest struct {
-	address common.Address //address
-	stake   *big.Int       //stake balance
-	block   *big.Int       //stake block number
-	reward  *big.Int       //reward balance
-}
-
-/*
-func TestVoting(t *testing.T){
-
-	number := 100
-
-	temps := make([]VoteTest, 0)
-
-	for i:=0; i<1360; i++ {
-		v := VoteTest{common.BytesToAddress([]byte(strconv.Itoa(i))), big.NewInt(10000000 + int64(i)), big.NewInt(1), big.NewInt(100)}
-		temps = append(temps, v)
-	}
-
-	length := len(temps)
-
-	//S 계산
-	var stotal float64 = 0
-	for _, vote := range temps {
-		s := (float64(vote.stake.Uint64()) + float64(vote.reward.Uint64())*0.5) * (1 + fadvTest(float64(number), float64(vote.block.Uint64())))
-		stotal += s
-	}
-	//fmt.Println("S :: ", stotal)
-
-
-	//P 계산
-	p := make([]int, length)
-	for i, vote := range temps {
-		s := (float64(vote.stake.Uint64()) + float64(vote.reward.Uint64())*0.5) * (1 + fadvTest(float64(number), float64(vote.block.Uint64())))
-		temp:= s/ stotal * 1000000
-		if temp == 1000000 {
-			temp = 999999
-		}
-
-		p[i] = int(temp)
-
-		//p = append(p, int(temp))
-	}
-	fmt.Println("P :: ", p)
-
-	//R 계산
-	//r := make([]int, length)
-	//for i, _ := range temps {
-	//	for j:=0; j<=i; j++ {
-	//
-	//		r[i] += p[j]
-	//	}
-	//}
-
-	//r := make([]int, length)
-	//for i, _ := range temps {
-	//	for j:=0; j<=i; j++ {
-	//
-	//		r[i] += p[j]
-	//	}
-	//}
-
-	r := make([]int, 0)
-	for i:=0; i<length; i++{
-		r = append(r, 0)
-		for j:=0; j<=i; j++ {
-			r[i] += p[j]
-		}
-	}
-
-	//fmt.Println("R :: ", r)
-
-
-	n := common.HexToAddress("0x2c21bf2f10eb55d538f1af154260025f605613283437d872f9ede4736b41a58d").Big().Int64()
-	//fmt.Println(n)
-
-	signers := make([]common.Address, 0)
-
-	for i:=0; i<360; i++ {
-		rand.Seed(n + int64(i))
-		seed := rand.Int63n(999999)
-		//seed := int64(876543)
-		//fmt.Println("SEED", seed)
-		for i, v := range temps {
-			if seed < int64(r[i]) {
-				//fmt.Printf("%s \n",v.address)
-				signers = append(signers, v.address)
-				break
-			}
-		}
-	}
-
-
-	//for _, sig := range signers {
-	//	fmt.Println("SIGNER :: ", common.Bytes2Hex(sig.Bytes()))
-	//}
-	//fmt.Println("SIGNER :: ", signers)
-
-
-
-
-
-	//for _, vote := range temps{
-	//	s:= (float64(vote.stake.Uint64()) + float64(vote.reward.Uint64())*0.5) * (1 + fadv(float64(number), float64(vote.block.Uint64())))
-	//
-	//
-	//	p := new(big.Int).Div(total, vote.stake)
-	//
-	//	fmt.Printf("%s [보정수치] %f , [P] %d \r\n", vote.address, s, p.Uint64())
-	//
-	//	r := 0
-	//	for i:=1;  uint64(i) < p.Uint64(); i++ {
-	//		r = i + r
-	//	}
-	//
-	//	fmt.Println("R :: ", r)
-	//
-	//}
-
-
-}
-
-
-//ADV
-func fadvTest(number, snumber float64) float64 {
-
-	div := 1.2 * math.Pow(10, 6)
-
-	adv := (number - snumber) / div
-	if adv >= 1 {
-		return 1
-	} else {
-		return adv
-	}
-}
-*/
-
 func TestVoting2(t *testing.T) {
 	number := uint64(1000000)
 	epoch := uint64(20)
 	perioid := uint64(10)
 
-	cs := NewCandidates(number, perioid)
+	for i:=0; i<10; i++{
 
-	v := rand.Int63n(100000000000000000)
-	fmt.Println(v)
+		fmt.Println("블록 넘버 :: ", i)
 
-	loop := 10000
+		cs := NewCandidates(number, perioid)
 
-	for i := 0; i < loop; i++ {
+		v := rand.Int63n(100000000000000000)
+		fmt.Println(v)
 
-		value := int64(100000)
+		loop := 10000
 
-		//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18))
-		stake := new(big.Int).Mul(big.NewInt(value), big.NewInt(1e+18))
-		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), stake, big.NewInt(1), big.NewInt(100)}
-		cs.Add(c)
+		for i := 0; i < loop; i++ {
+
+			value := int64(100000)
+
+			//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18))
+			stake := new(big.Int).Mul(big.NewInt(value + int64(i)), big.NewInt(1e+18))
+			c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), stake, big.NewInt(1), big.NewInt(100)}
+			cs.Add(c)
+		}
+
+
+		cs.GetBlockCreator(number + uint64(i), epoch, perioid)
+
+		fmt.Println("=================================================================================")
 	}
 
-	//라운드상의 토탈 스테이커
-	//total := new(big.Int).Div(cs.TotalStakeBalance(), big.NewInt(1e+18))
-	//fmt.Println("TOTAL :: ", total)
-	//
-	//tt, srt := cs.MakeSRT()
-	//fmt.Println("TT :: ", tt)
-	//fmt.Println("OK :: ", len(*srt))
-	//for i:=0; i<len(*srt); i++ {
-	//
-	//	cc := (*srt)[uint64(i)]
-	//
-	//	fmt.Println("PRIORITY :: ", i)
-	//	fmt.Print("MIN :: ", cc.min)
-	//	fmt.Print(" --- ")
-	//	fmt.Println("MAX :: ", cc.max)
-	//}
 
-	bc := cs.GetBlockCreator(number, epoch, perioid)
-	fmt.Println("OK :: ", len(*bc))
+	//bc := cs.GetBlockCreator(number, epoch, perioid)
+	//fmt.Println("OK :: ", len(*bc))
 	//for key, val := range *bc {
 	//	fmt.Print("SIGNER :: ", common.Bytes2Hex(key.Bytes()))
 	//	fmt.Println(" VALUE :: ", val)
 	//}
 }
-
-/*
-func TestReward(t *testing.T){
-	period := 10
-	for i:=0; i<315000000; i+=100000 {
-
-		d := 30.0 / float64(period)
-
-		blockNumber := i - period
-		x := float64(blockNumber) / d
-
-		r := reward(x)
-
-		temp := r * 1e+10 / d
-
-		re := new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
-		//re := big.NewInt(int64(temp))
-
-		fmt.Println(re)
-
-		time.Sleep(100)
-	}
-
-}
-
-
-func reward(number float64) float64 {
-	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := number + math.Pow(10, 7.6)
-
-	y := up/down - 60.0
-
-	if y < 0 {
-		return float64(0)
-	}
-	return y
-}
-
-
-func TestSha256(t *testing.T){
-	seed := int64(100)
-
-	for i:=16; i<20; i++{
-		a := []byte {byte(seed + int64(i))}
-		//sum := sha256.Sum256(a)
-		hash := sha256.New()
-		hash.Write(a)
-		md := hash.Sum(nil)
-
-		h := common.BytesToHash(md)
-		//mdStr := hex.EncodeToString(md)
-		n := common.HexToAddress(h.Hex()).Big().Int64()
-
-
-
-
-		fmt.Println(n)
-	}
-
-}
-
-
-func TestCalcF(t *testing.T){
-	a := big.NewFloat(1.5)
-
-	b, _ := a.Int64()
-
-
-	fmt.Println(b)
-}
-
-
-func FloatToBigInt(val float64) *big.Int {
-	bigval := new(big.Float)
-	bigval.SetFloat64(val)
-	// Set precision if required.
-	// bigval.SetPrec(64)
-
-	coin := new(big.Float)
-	coin.SetInt(big.NewInt(1000000000000000000))
-
-	bigval.Mul(bigval, coin)
-
-	result := new(big.Int)
-	bigval.Int(result) // store converted number in result
-
-	return result
-}
-
-*/
