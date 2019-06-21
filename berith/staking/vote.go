@@ -2,10 +2,11 @@ package staking
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"math"
 	"math/big"
 	"math/rand"
+
+	"github.com/pkg/errors"
 
 	"github.com/BerithFoundation/berith-chain/common"
 )
@@ -16,7 +17,6 @@ type Candidate struct {
 	block   *big.Int       //block number -- Contribution
 	reward  *big.Int       //reward balance
 }
-
 
 func (c *Candidate) GetStake() *big.Int {
 	return c.stake
@@ -31,6 +31,7 @@ func (c *Candidate) GetBlockNumber() float64 {
 }
 
 var aa = 0
+
 //Stake 기간 Adv를 구한다.
 func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 	p := float64(30) / float64(period) //30초 기준의 공식이기때문에
@@ -45,18 +46,17 @@ func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 	}
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 type Candidates struct {
-	number uint64
-	period uint64
+	number     uint64
+	period     uint64
 	selections map[uint64]Candidate
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
 	return &Candidates{
-		number: number,
-		period: period,
+		number:     number,
+		period:     period,
 		selections: make(map[uint64]Candidate, 0),
 	}
 }
@@ -66,16 +66,16 @@ func (cs *Candidates) Add(c Candidate) {
 	cs.selections[uint64(s)] = c
 }
 
-func (cs *Candidates) Remove(key uint64){
+func (cs *Candidates) Remove(key uint64) {
 	delete(cs.selections, key)
 }
 
 //총 스테이킹 량 , 가산점 추가된 결과
 func (cs *Candidates) TotalStakeBalance() *big.Int {
 	total := big.NewInt(0)
-	for _,c := range cs.selections {
+	for _, c := range cs.selections {
 		//adv 적용
-		adv := int64(c.GetAdvantage(cs.number, cs.period) * 10) + 10
+		adv := int64(c.GetAdvantage(cs.number, cs.period)*10) + 10
 		advStake := new(big.Int).Div(new(big.Int).Mul(c.stake, big.NewInt(adv)), big.NewInt(10))
 		total = new(big.Int).Div(new(big.Int).Add(total, advStake), big.NewInt(1e+10))
 	}
@@ -83,38 +83,41 @@ func (cs *Candidates) TotalStakeBalance() *big.Int {
 }
 
 type StakerRange struct {
-	ckey uint64
+	ckey    uint64
 	address common.Address
-	min *big.Int
-	max *big.Int
+	min     *big.Int
+	max     *big.Int
 }
+
 //Make Staker Range Table
-func (cs *Candidates)MakeSRT() (*big.Int, *map[common.Address]StakerRange) {
+func (cs *Candidates) MakeSRT() (*big.Int, *map[common.Address]StakerRange) {
 	srt := make(map[common.Address]StakerRange, 0)
 	total := big.NewInt(0)
 
-	temp := big.NewInt(0)
-	for key, c := range cs.selections{
+	//temp := big.NewInt(0)
+	for key, c := range cs.selections {
 		//ADV
-		adv := int64(c.GetAdvantage(cs.number, cs.period) * 10) + 10
+		adv := int64(c.GetAdvantage(cs.number, cs.period)*10) + 10
 		advStake := new(big.Int).Div(new(big.Int).Mul(c.stake, big.NewInt(adv)), big.NewInt(10))
-		total = new(big.Int).Div(new(big.Int).Add(total, advStake), big.NewInt(1e+10))
+		//total = new(big.Int).Div(new(big.Int).Add(total, advStake), big.NewInt(1e+10))
 
 		sr := &StakerRange{
-			ckey:key,
-			address:c.address,
-			min:big.NewInt(0),
-			max:big.NewInt(0),
+			ckey:    key,
+			address: c.address,
+			min:     big.NewInt(0),
+			max:     big.NewInt(0),
 		}
-		if key == 0 {
-			sr.min = big.NewInt(0)
-			sr.max = new(big.Int).Div(advStake, big.NewInt(1e+10))
-			temp = sr.max
-		} else {
-			sr.min = new(big.Int).Div(new(big.Int).Add(temp, big.NewInt(1)),big.NewInt(1e+10))
-			sr.max = new(big.Int).Div(new(big.Int).Add(temp, advStake), big.NewInt(1e+10))
-			temp = sr.max
-		}
+		// if key == 0 {
+		sr.min = big.NewInt(0)
+		sr.max = new(big.Int).Div(advStake, big.NewInt(1e+15))
+		//fmt.Println("MAXXXX ::::", sr.max)
+		total.Add(total, sr.max)
+		//temp = sr.max
+		// } else {
+		// 	sr.min = new(big.Int).Div(new(big.Int).Add(temp, big.NewInt(1)), big.NewInt(1e+10))
+		// 	sr.max = new(big.Int).Div(new(big.Int).Add(temp, advStake), big.NewInt(1e+10))
+		// 	temp = sr.max
+		// }
 
 		srt[c.address] = *sr
 	}
@@ -124,7 +127,7 @@ func (cs *Candidates)MakeSRT() (*big.Int, *map[common.Address]StakerRange) {
 }
 
 //BC 선출
-func (cs *Candidates)GetBlockCreator(number uint64, epoch, period uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) GetBlockCreator(number uint64, epoch, period uint64) *map[common.Address]*big.Int {
 
 	bc := make(map[common.Address]*big.Int, 0)
 
@@ -134,49 +137,54 @@ func (cs *Candidates)GetBlockCreator(number uint64, epoch, period uint64) *map[c
 
 	dst := cs
 
-	selector :=  func (value int64, srt *map[common.Address]StakerRange) (error, int64, common.Address){
+	var total *big.Int
+
+	selector := func(value int64, srt *map[common.Address]StakerRange) (error, int64, common.Address) {
 		// Range 확인
-		for _, s := range *srt{
-			if s.min.Cmp(big.NewInt(value)) != -1 && big.NewInt(value).Cmp(s.max) != -1 {
+		for _, s := range *srt {
+			if big.NewInt(value).Cmp(s.max) == 1 {
+				value -= s.max.Int64()
 				continue
 			}
 
 			return nil, int64(s.ckey), s.address
 		}
-		return errors.New("empty SRT"), -1,common.Address{}
+		return errors.New("empty SRT"), -1, common.Address{}
 	}
-
 
 	loop := func(value int64, srt *map[common.Address]StakerRange) bool {
 		//total := new(big.Int).Div(cs.TotalStakeBalance(), big.NewInt(1e+18))
-		_, key, addr := selector(value, srt)
+		value %= total.Int64()
+		_, _, addr := selector(value, srt)
 		if _, exists := bc[addr]; !exists {
 			bc[addr] = big.NewInt(1000)
-			
-			dst.Remove(uint64(key))
+
+			//dst.Remove(uint64(key))
+			total.Sub(total, (*srt)[addr].max)
+			delete(*srt, addr)
+
 			return true //remove & next
 		} else {
 			return false //re random
 		}
 	}
 
-
-
 	var flag = true //remove : true, re loop : false
 
-	var total *big.Int
 	var srt *map[common.Address]StakerRange
-
+	total, srt = dst.MakeSRT()
+	//value := rand.Int63n(total.Int64())
+	fmt.Println("TOTAL ::::: ", total.String(), total.Int64())
 	for {
-		if len(dst.selections) == 0{
+		//fmt.Println("TOTAL :::::: ", total.String(), total.Int64())
+		if total.Cmp(big.NewInt(0)) == 0 {
 			break
 		}
 
 		if flag {
 			//Next >> 새로 테이블 생성
-			t, srt := dst.MakeSRT() //SRT 만들기
-			total = t
 			value := rand.Int63n(total.Int64())
+			//fmt.Println("VAL :::: ", value)
 			flag = loop(value, srt)
 		} else {
 			// 다시 선출
@@ -184,6 +192,11 @@ func (cs *Candidates)GetBlockCreator(number uint64, epoch, period uint64) *map[c
 			flag = loop(value, srt)
 		}
 	}
+
+	// for k, v := range bc {
+	// 	fmt.Println("[", k.Hex(), " , ", v, "]")
+	// }
+	fmt.Println(len(bc))
 
 	return &bc
 }
@@ -224,7 +237,6 @@ func (cs *Candidates)GetBlockCreator(number uint64, epoch, period uint64) *map[c
 //
 //	return false
 //}
-
 
 //S구하기
 //func CalcS(votes *[]Vote, number, period uint64) *big.Float {
@@ -333,4 +345,3 @@ func (cs *Candidates)GetBlockCreator(number uint64, epoch, period uint64) *map[c
 //
 //	return &sigs
 //}
-

@@ -2,18 +2,19 @@ package staking
 
 import (
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/common"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type VoteTest struct {
 	address common.Address //address
-	stake *big.Int	//stake balance
-	block *big.Int //stake block number
-	reward *big.Int //reward balance
+	stake   *big.Int       //stake balance
+	block   *big.Int       //stake block number
+	reward  *big.Int       //reward balance
 }
 
 /*
@@ -146,25 +147,24 @@ func fadvTest(number, snumber float64) float64 {
 }
 */
 
-func TestVoting2(t *testing.T)  {
+func TestVoting2(t *testing.T) {
 	number := uint64(1000000)
 	epoch := uint64(20)
 	perioid := uint64(10)
-
 
 	cs := NewCandidates(number, perioid)
 
 	v := rand.Int63n(100000000000000000)
 	fmt.Println(v)
 
-	loop := 1000
+	loop := 10000
 
-	for i:=0; i<loop; i++ {
+	for i := 0; i < loop; i++ {
 
-		value := rand.Int63n(100000)
+		value := int64(100000)
 
 		//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18))
-		stake := new(big.Int).Mul(big.NewInt(value * int64(loop)), big.NewInt(1e+18))
+		stake := new(big.Int).Mul(big.NewInt(value), big.NewInt(1e+18))
 		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), stake, big.NewInt(1), big.NewInt(100)}
 		cs.Add(c)
 	}
@@ -186,7 +186,6 @@ func TestVoting2(t *testing.T)  {
 	//	fmt.Println("MAX :: ", cc.max)
 	//}
 
-
 	bc := cs.GetBlockCreator(number, epoch, perioid)
 	fmt.Println("OK :: ", len(*bc))
 	//for key, val := range *bc {
@@ -194,6 +193,7 @@ func TestVoting2(t *testing.T)  {
 	//	fmt.Println(" VALUE :: ", val)
 	//}
 }
+
 /*
 func TestReward(t *testing.T){
 	period := 10
