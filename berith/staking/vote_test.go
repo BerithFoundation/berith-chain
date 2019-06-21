@@ -157,14 +157,14 @@ func TestVoting2(t *testing.T)  {
 	v := rand.Int63n(100000000000000000)
 	fmt.Println(v)
 
-	loop := 1000
+	loop := 10000
 
 	for i:=0; i<loop; i++ {
 
 		value := rand.Int63n(100000)
 
 		//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18))
-		stake := new(big.Int).Mul(big.NewInt(value * int64(loop)), big.NewInt(1e+18))
+		stake := new(big.Int).Mul(big.NewInt(value), big.NewInt(1e+18))
 		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), stake, big.NewInt(1), big.NewInt(100)}
 		cs.Add(c)
 	}
