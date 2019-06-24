@@ -2,7 +2,6 @@ package staking
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -159,7 +158,7 @@ func (cs *Candidates) GetBlockCreator(number, epoch, period uint64) *map[common.
 		loop(value)
 	}
 
-	fmt.Println(len(bc))
+	//fmt.Println(len(bc))
 
 	return &bc
 }
