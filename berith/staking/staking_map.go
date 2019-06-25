@@ -134,14 +134,14 @@ func (list *StakingMap) Print() {
 	for k, v := range list.storage {
 		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
 	}
-	// fmt.Println("==== sortedList ====")
-	// for _, v := range list.sortedList {
-	// 	fmt.Println(v.Hex())
-	// }
-	fmt.Println("====== MINERS ======")
-	for k, v := range list.miners {
-		fmt.Println("[", k.Hex(), ",", v, "]")
+	fmt.Println("==== sortedList ====")
+	for _, v := range list.sortedList {
+		fmt.Println(v.Hex())
 	}
+	// fmt.Println("====== MINERS ======")
+	// for k, v := range list.miners {
+	// 	fmt.Println("[", k.Hex(), ",", v, "]")
+	// }
 }
 
 //EncodeRLP is function to encode

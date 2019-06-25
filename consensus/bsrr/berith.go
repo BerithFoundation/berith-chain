@@ -14,6 +14,7 @@ package bsrr
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -491,6 +492,13 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
+
+	stakingList.Print()
+	fmt.Println("#####################################")
+	fmt.Println("NUMBER : ", header.Number.String())
+	fmt.Println("HASH : ", header.Hash().Hex())
+	fmt.Println("COINBASE : ", header.Coinbase.Hex())
+	fmt.Println("#####################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
 		//Epoch 이후에 처리
