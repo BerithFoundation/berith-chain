@@ -196,9 +196,11 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		return
 	}
 
-	cs := new(Candidates)
-	cs.number = blockNumber
-	cs.period = period
+	cs := &Candidates{
+		number:     blockNumber,
+		period:     period,
+		selections: make(map[uint64]Candidate),
+	}
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
 		reward := info.StkReward

@@ -631,6 +631,7 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	fmt.Println("==================[DIFFICULTY]=================")
 	fmt.Println("HASH : ", target.Hash().Hex())
 	fmt.Println("NUMBER : ", target.Number.String())
+	fmt.Println("COMPARE : ", target.Number.Cmp(big.NewInt(0)))
 	if target.Number.Cmp(big.NewInt(0)) <= 0 {
 		return big.NewInt(1234)
 	}
