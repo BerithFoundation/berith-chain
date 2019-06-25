@@ -43,7 +43,8 @@ const (
 	inmemorySigners    = 128 * 3 // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096    // Number of recent block signatures to keep in memory
 
-	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	stakingInterval = 10
+	wiggleTime      = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
 var (
@@ -451,7 +452,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	header.Nonce = parent.Nonce
 
 	// Set the correct difficulty
-	header.Difficulty = c.CalcDifficulty(chain, uint64(0), parent)
+	header.Difficulty = c.CalcDifficulty(chain, number-1, parent)
 
 	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 nonce값을 현재 블록의 번호로 변경한다.
 	if number%c.config.Epoch == 0 {
@@ -495,53 +496,23 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		//Epoch 이후에 처리
 		if header.Number.Uint64() > c.config.Epoch {
 			//Diff
-			diff, err := c.roundJoinRatio(&stakingList, header.Coinbase)
-			if err != nil {
-				//return nil, err
-				log.Info("===========roundJoinRatio===============")
-				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
-				log.Info("[ParentHash]\t", header.ParentHash)
-				log.Info("[BASE]\t", header.Coinbase)
-				log.Info("[MSG]\t", err)
-				log.Info("========================================")
-			}
 
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				//return nil, errors.New("no Signers")
-				log.Info("===========getSigners===============")
-				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
-				log.Info("[ParentHash]\t", header.ParentHash)
-				log.Info("[BASE]\t", header.Coinbase)
-				log.Info("[MSG]\t", err)
-				log.Info("====================================")
+				return nil, err
 			}
 
-			//diff 가 Max 수치 라면 블록 생성자 인가 판단 하고 아니라면 Diff 가 연산 이랑 같은지 판단
-			if header.Difficulty.Cmp(diffInTurn) == 0 {
-				signer := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))]
-
-				if header.Coinbase != signer {
-					//return nil, errors.New("not match signer")
-					log.Info("===========difficulty cmp===============")
-					log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
-					log.Info("[ParentHash]\t", header.ParentHash)
-					log.Info("[BASE]\t", header.Coinbase)
-					log.Info("[MSG]\t", "not match signer")
-					log.Info("========================================")
-				}
-
-			} else if header.Difficulty.Cmp(new(big.Int).Add(diffNoTurn, big.NewInt(int64(diff)))) != 0 {
-				//return nil, errors.New("not match diff")
-				log.Info("===========difficulty cmp===============")
-				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
-				log.Info("[ParentHash]\t", header.ParentHash)
-				log.Info("[BASE]\t", header.Coinbase)
-				log.Info("[MSG]\t", "not match diff")
-				log.Info("========================================")
+			signerMap := signers.signersMap()
+			if _, ok := signerMap[header.Coinbase]; !ok {
+				return nil, errUnauthorizedSigner
 			}
 
+			parent := chain.GetHeader(header.Hash(), header.Number.Uint64()-1)
+			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
+			if predicted.Cmp(header.Difficulty) != 0 {
+				return nil, errInvalidDifficulty
+			}
 		}
 	}
 
@@ -549,8 +520,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, err
 	}
-
-	stakingList.Vote(chain, header.Number.Uint64(), header.Hash(), c.config.Epoch, c.config.Period)
 
 	//Reward 보상
 	accumulateRewards(chain.Config(), state, header)
@@ -641,30 +610,36 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
-	signers, err := c.getSigners(chain, parent.Number.Uint64(), parent.Hash())
+	return c.calcDifficulty(c.signer, chain, time, parent)
+}
+func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
+	target := parent
+	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(stakingInterval))
+	for target.Number.Cmp(targetNumber) > 0 {
+		if target.Number.Cmp(big.NewInt(0)) <= 0 {
+			return big.NewInt(1234)
+		}
+		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
+	}
+
+	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
+
 	if err != nil {
-		return new(big.Int).Set(diffNoTurn)
+		return big.NewInt(0)
 	}
 
-	//Nonce 에 대한 List 로 변경
-	stakingList, err := c.getStakingList(chain, parent.Number.Uint64(), parent.Hash())
-	if err != nil {
-		return new(big.Int).Set(diffNoTurn)
+	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
+
+	if reordered {
+		bytes, _ := list.Encode()
+		c.cache.Add(target.Hash(), bytes)
+
+		if target.Number.Uint64()%c.config.Period == 0 {
+			c.stakingDB.Commit(target.Hash().Hex(), list)
+		}
 	}
 
-	user, err := c.roundJoinRatio(&stakingList, c.signer)
-	if err != nil {
-		return new(big.Int).Set(diffNoTurn)
-	}
-
-	number := ((parent.Number.Uint64() + 1) % c.config.Epoch) % uint64(len(signers))
-
-	if signers[number] == c.signer {
-		return new(big.Int).Set(diffInTurn)
-	}
-	//return new(big.Int).Set(diffNoTurn)
-
-	return new(big.Int).Add(big.NewInt(int64(user)), diffNoTurn)
+	return diff
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
@@ -811,13 +786,18 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 
-	list.Vote(chain, number, hash, c.config.Epoch, c.config.Period)
-	if number%c.config.Epoch == 0 {
-		err := c.stakingDB.Commit(hash.Hex(), list)
-		if err != nil {
-			return nil, err
-		}
+	list.Sort()
+
+	bytes, err := list.Encode()
+	if err != nil {
+		return nil, err
 	}
+	c.cache.Add(number, bytes)
+
+	if number%c.config.Period == 0 {
+		c.stakingDB.Commit(hash.Hex(), list)
+	}
+
 	return list, nil
 
 }
@@ -834,12 +814,6 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 			stakingList.SetTarget(block.Hash())
 		}
 	}
-
-	bytes, err := stakingList.Encode()
-	if err != nil {
-		return err
-	}
-	c.cache.Add(blocks[len(blocks)-1].Hash(), bytes)
 
 	return nil
 }
@@ -934,11 +908,11 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		list.SetInfo(input)
 	}
 
-	list.SetMiner(header.Coinbase)
-	sr := c.config.SlashRound
-	if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
-		return c.slashBadSigner(chain, header, list, state)
-	}
+	// list.SetMiner(header.Coinbase)
+	// sr := c.config.SlashRound
+	// if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
+	// 	return c.slashBadSigner(chain, header, list, state)
+	// }
 	return nil
 }
 
@@ -958,35 +932,36 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	for i := 0; i < len(signers); i++ {
 		copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
 	}
-	target, err := c.getStakingList(chain, number, hash)
+
+	target := chain.GetHeader(hash, number)
+	targetNumber := number - stakingInterval
+
+	if targetNumber <= 0 {
+		return signers, nil
+	}
+	for target.Number.Uint64() > 0 && target.Number.Uint64() > targetNumber {
+		target = chain.GetHeader(target.Hash(), target.Number.Uint64()-1)
+		if target == nil {
+			return nil, errors.New("invalid ancestor")
+		}
+	}
+
+	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
+
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Failed to get staking list")
 	}
 
-	targetHeader := chain.GetHeaderByHash(target.GetTarget())
+	list.Sort()
 
-	if targetHeader == nil {
-		return nil, errors.New("unknown ancestor")
+	result := list.ToArray()
+
+	if len(result) <= 0 {
+		return signers, nil
 	}
 
-	list, err := c.getStakingList(chain, targetHeader.Number.Uint64(), targetHeader.Hash())
-	if err != nil {
-		return nil, err
-	}
+	return result, nil
 
-	temp := make([]common.Address, 0)
-	for i := uint64(0); i < uint64(list.Len()); i++ {
-		var info staking.StakingInfo
-		info, err = list.GetInfoWithIndex(int(i))
-
-		temp = append(temp, info.Address())
-	}
-
-	if len(temp) > 0 {
-		return temp, nil
-	}
-
-	return signers, nil
 }
 
 func (c *BSRR) roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {

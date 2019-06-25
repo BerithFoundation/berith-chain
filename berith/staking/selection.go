@@ -68,7 +68,6 @@ func (cs *Candidates) Add(c Candidate) {
 	cs.selections[uint64(s)] = c
 }
 
-
 //총 스테이킹 량 , 가산점 추가된 결과
 func (cs *Candidates) TotalStakeBalance() *big.Int {
 	total := big.NewInt(0)
@@ -81,9 +80,8 @@ func (cs *Candidates) TotalStakeBalance() *big.Int {
 	return total.Div(total, big.NewInt(1e+10))
 }
 
-
 //숫자 > 해시 > 숫자
-func (cs Candidates) GetSeed(number uint64) int64{
+func (cs Candidates) GetSeed(number uint64) int64 {
 
 	bt := []byte{byte(number)}
 	hash := sha256.New()
@@ -96,7 +94,7 @@ func (cs Candidates) GetSeed(number uint64) int64{
 }
 
 //BC 선출
-func (cs *Candidates) GetBlockCreator(number, epoch, period uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.Int {
 
 	bc := make(map[common.Address]*big.Int, 0)
 
@@ -131,7 +129,7 @@ func (cs *Candidates) GetBlockCreator(number, epoch, period uint64) *map[common.
 
 	loop := func(value int64) {
 		err, key, addr := selector(value)
-		if err != nil{
+		if err != nil {
 			return
 		}
 
