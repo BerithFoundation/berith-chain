@@ -67,6 +67,10 @@ func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period u
 		flag = true
 		list.selectSigner(blockNumber, period)
 	}
+
+	if len(list.table) <= 0 {
+		return big.NewInt(1234), false
+	}
 	return list.table[addr], flag
 }
 
@@ -186,6 +190,10 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 	if len(list.sortedList) <= 0 {
 		list.Sort()
+	}
+
+	if len(list.sortedList) <= 0 {
+		return
 	}
 
 	cs := new(Candidates)
