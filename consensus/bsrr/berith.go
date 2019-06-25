@@ -498,6 +498,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	fmt.Println("NUMBER : ", header.Number.String())
 	fmt.Println("HASH : ", header.Hash().Hex())
 	fmt.Println("COINBASE : ", header.Coinbase.Hex())
+	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
 	fmt.Println("#####################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
