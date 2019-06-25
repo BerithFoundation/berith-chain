@@ -164,7 +164,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
 func (list *StakingMap) Sort() {
 
-	if len(list.sortedList) <= 0 {
+	if len(list.sortedList) > 0 {
 		return
 	}
 
