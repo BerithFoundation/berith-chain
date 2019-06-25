@@ -71,7 +71,12 @@ func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period u
 	if len(list.table) <= 0 {
 		return big.NewInt(1234), false
 	}
-	return list.table[addr], flag
+
+	result, ok := list.table[addr]
+	if !ok {
+		result = big.NewInt(0)
+	}
+	return result, flag
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
