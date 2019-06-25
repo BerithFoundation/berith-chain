@@ -1,9 +1,8 @@
 package walletdb
 
 import (
-	"testing"
-
 	"github.com/BerithFoundation/berith-chain/common"
+	"testing"
 )
 
 func Test01(t *testing.T) {
@@ -16,12 +15,12 @@ func Test01(t *testing.T) {
 
 	member.PrivateKey[0] = 12
 
-	contact := Contact{
-		Name:    "taejun_bae",
-		Address: common.BigToAddress(common.Big32),
-	}
-
-	db, err := NewWalletDB("/Users/swk/test.ldb")
+	var contact Contact
+	contact = make(map[common.Address]string,0)
+	//hexToAddress
+	contact[common.BigToAddress(common.Big32)] = "kimmegi"
+	contact[common.BigToAddress(common.Big3)] = "gorilla"
+	db, err := NewWalletDB("/Users/kimmegi/test.ldb")
 	if err != nil {
 		t.Error(err)
 		return
@@ -41,36 +40,36 @@ func Test01(t *testing.T) {
 	db.db.Close()
 
 }
-
-func Test02(t *testing.T) {
-
-	var (
-		err     error
-		member  Member
-		contact Contact
-	)
-
-	db, err := NewWalletDB("/Users/swk/test.ldb")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	err = db.Select([]byte("swk"), &member)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	err = db.Select([]byte("soni"), &contact)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	t.Log(member)
-	t.Log(contact)
-
-	db.db.Close()
-
-}
+//
+//func Test01(t *testing.T) {
+//
+//	var (
+//		err     error
+//		member  Member
+//		contact = make(Contact,0)
+//	)
+//
+//	db, err := NewWalletDB("/Users/kimmegi/test.ldb")
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//
+//	err = db.Select([]byte("swk"), &member)
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//
+//	err = db.Select([]byte("soni"), &contact)
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//
+//	t.Log(member)
+//	t.Log(contact)
+//
+//	db.db.Close()
+//
+//}

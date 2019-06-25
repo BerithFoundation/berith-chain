@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
@@ -19,8 +20,9 @@ var (
 	debuging   = flag.Bool("d", true, "enables the debug mode")
 	node_testnet = flag.String("testnet", "", "testnet")
 	node_console = flag.String("console", "", "console")
+	node_datadir = flag.String("datadir", "", "datadir")
 	w       *astilectron.Window
-
+	WalletDB *walletdb.WalletDB
 
 	ctx 	context.Context
 	client *rpc.Client
@@ -44,7 +46,7 @@ func start_ui(){
 	// Init
 	flag.Parse()
 	astilog.FlagInit()
-
+	WalletDB ,_ = walletdb.NewWalletDB("/Users/kimmegi/test.ldb")
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
@@ -98,8 +100,7 @@ func start_ui(){
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 						}
-
-						startPolling()
+						//startPolling()
 
 						break
 					}
@@ -126,18 +127,29 @@ func start_ui(){
 }
 
 func startPolling(){
-	//go func() {
-	//	for {
-	//		val, err := callNodeApi("berith_syncing", nil)
-	//		if err != nil {
-	//			astilog.Error(errors.Wrap(err, "polling failed"))
-	//		}
-	//
-	//		if err := bootstrap.SendMessage(w, "polling", val); err != nil {
-	//			astilog.Error(errors.Wrap(err, "polling failed"))
-	//		}
-	//
-	//		time.Sleep(3 * time.Second)
-	//	}
-	//}()
+	go func() {
+		for {
+			// polling 로직
+			val, err := callNodeApi("berith_syncing", nil)
+			if err != nil {
+				astilog.Error(errors.Wrap(err, "polling failed"))
+			}
+
+			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
+				astilog.Error(errors.Wrap(err, "polling failed"))
+			}
+			//coinbase 조회
+			val2, err2 := callNodeApi("berith_coinbase" , nil)
+			if err2 != nil {
+				astilog.Error(errors.Wrap(err2, "coinbase null"))
+			}
+			if err2 := bootstrap.SendMessage(w, "coinbase", val2); err2 != nil {
+				astilog.Error(errors.Wrap(err2, "coinbase null"))
+			}
+
+			time.Sleep(3 * time.Second)
+		}
+	}()
 }
+
+
