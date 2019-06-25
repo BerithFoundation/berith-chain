@@ -494,12 +494,12 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 
 	stakingList.Print()
-	fmt.Println("#####################################")
+	fmt.Println("##############[FINALIZE]##############")
 	fmt.Println("NUMBER : ", header.Number.String())
 	fmt.Println("HASH : ", header.Hash().Hex())
 	fmt.Println("COINBASE : ", header.Coinbase.Hex())
 	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-	fmt.Println("#####################################")
+	fmt.Println("######################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
 		//Epoch 이후에 처리
@@ -622,12 +622,15 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	return c.calcDifficulty(c.signer, chain, time, parent)
 }
 func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
+
 	target := parent
 	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(stakingInterval))
 	for target.Number.Cmp(big.NewInt(0)) > 0 && target.Number.Cmp(targetNumber) > 0 {
 		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
-
+	fmt.Println("==================[DIFFICULTY]=================")
+	fmt.Println("HASH : ", target.Hash().Hex())
+	fmt.Println("NUMBER : ", target.Number.String())
 	if target.Number.Cmp(big.NewInt(0)) <= 0 {
 		return big.NewInt(1234)
 	}
@@ -639,7 +642,8 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	}
 
 	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
-
+	list.Print()
+	fmt.Println("DIFFICULTY : ", diff.String())
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
