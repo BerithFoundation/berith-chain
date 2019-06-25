@@ -624,10 +624,10 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	target := parent
 	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(stakingInterval))
 	for target.Number.Cmp(targetNumber) > 0 {
+		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 		if target.Number.Cmp(big.NewInt(0)) <= 0 {
 			return big.NewInt(1234)
 		}
-		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
 
 	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
