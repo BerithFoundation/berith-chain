@@ -955,7 +955,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 		return signers, nil
 	}
 	for target.Number.Uint64() > 0 && target.Number.Uint64() > targetNumber {
-		target = chain.GetHeader(target.Hash(), target.Number.Uint64()-1)
+		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 		if target == nil {
 			return nil, errors.New("invalid ancestor")
 		}
