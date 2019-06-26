@@ -23,6 +23,7 @@ package keystore
 import (
 	"crypto/ecdsa"
 	crand "crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -373,6 +374,25 @@ func (ks *KeyStore) Find(a accounts.Account) (accounts.Account, error) {
 	ks.cache.mu.Unlock()
 	return a, err
 }
+
+
+//Public Key to Private Key
+func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
+
+	addr := common.HexToAddress(address)
+	path := ks.storage.JoinPath(keyFileName(addr))
+
+	acc := accounts.Account{
+		Address: addr,
+		URL: accounts.URL{Scheme: KeyStoreScheme, Path: path},
+	}
+	_, key, err := ks.getDecryptedKey(acc, auth)
+	if err != nil {
+		return "", errors.New("not found key")
+	}
+	return hex.EncodeToString(crypto.FromECDSA(key.PrivateKey)), nil
+}
+
 
 func (ks *KeyStore) getDecryptedKey(a accounts.Account, auth string) (accounts.Account, *Key, error) {
 	a, err := ks.Find(a)

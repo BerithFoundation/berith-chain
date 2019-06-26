@@ -297,6 +297,11 @@ func (s *PrivateAccountAPI) NewAccount(password string) (common.Address, error) 
 	return common.Address{}, err
 }
 
+func (s *PrivateAccountAPI) PrivateKey(acc string, password string) (string, error){
+	ks := fetchKeystore(s.am)
+	return ks.GetPrivateKey(acc, password)
+}
+
 // fetchKeystore retrives the encrypted keystore from the account manager.
 func fetchKeystore(am *accounts.Manager) *keystore.KeyStore {
 	return am.Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
