@@ -31,7 +31,9 @@ let index = {
                 case "polling":
                     $('#polling').val(message.payload)
                     break;
-
+                case "coinbase":
+                    berith.coinbase()
+                    break;
             }
         });
     },

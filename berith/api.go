@@ -470,3 +470,4 @@ func (api *PrivateDebugAPI) getModifiedAccounts(startBlock, endBlock *types.Bloc
 	}
 	return dirty, nil
 }
+

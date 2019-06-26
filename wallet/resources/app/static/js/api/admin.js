@@ -12,7 +12,7 @@ let admin = {
             // Init
             asticode.loader.hide();
             console.log($('#text'))
-            $('#text').val(message.payload)
+            $('#nodeInfo').val(message.payload)
         })
     },
 }
