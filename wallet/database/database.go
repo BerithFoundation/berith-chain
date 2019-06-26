@@ -45,10 +45,6 @@ func (c Contact) DecodeRLP(r *rlp.Stream) error {
 	return nil
 }
 
-//type Contact struct {
-//	Name string
-//	Address common.Address
-//}
 
 type Transactions struct {
 	txs []common.Hash
