@@ -502,7 +502,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	if header.Coinbase != common.HexToAddress("0") {
 		//Epoch 이후에 처리
-		if header.Number.Uint64() > uint64(50) {
+		if header.Number.Uint64() > c.config.Epoch {
 			//Diff
 
 			var signers signers
