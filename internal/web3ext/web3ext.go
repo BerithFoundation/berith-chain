@@ -670,7 +670,7 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter, null]
 		}),
 		new web3._extend.Method({
-			name: 'getPrivateKey',
+			name: 'privateKey',
 			call: 'personal_privateKey',
 			params: 2,
 			inputFormatter: [null, null]
