@@ -127,14 +127,22 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		return errors.New("empty SRT"), -1, common.Address{}
 	}
 
+
 	loop := func(value int64) {
 		err, key, addr := selector(value)
 		if err != nil {
 			return
 		}
 
-		DIF -= DIF_R
-		bc[addr] = big.NewInt(DIF)
+
+		if DIF == DIF_MAX {
+			bc[addr] = big.NewInt(DIF_MAX)
+			DIF -= DIF_R
+		} else {
+			bc[addr] = big.NewInt(DIF)
+			DIF -= DIF_R
+		}
+
 		stake := cp.selections[uint64(key)].stake
 		total.Sub(total, stake)
 		delete(cp.selections, uint64(key))

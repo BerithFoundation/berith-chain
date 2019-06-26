@@ -66,8 +66,8 @@ func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period u
 	if len(list.table) <= 0 {
 		flag = true
 		list.selectSigner(blockNumber, period)
+		fmt.Println("12312312323")
 	}
-
 	if len(list.table) <= 0 {
 		return big.NewInt(1234), false
 	}
@@ -220,6 +220,10 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 	}
 
 	list.table = *cs.GetBlockCreator(blockNumber)
+
+	for key, value := range list.table {
+		fmt.Println("ADDRESS :: " + key.String(), "DIFF :: " + value.String())
+	}
 
 }
 

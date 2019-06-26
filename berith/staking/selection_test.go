@@ -12,9 +12,9 @@ import (
 
 func TestVoting2(t *testing.T) {
 	number := uint64(10000)
-	epoch := uint64(20)
+	//epoch := uint64(20)
 	perioid := uint64(10)
-	loop := 10000
+	loop := 10
 
 	for i:=0; i<10; i++{
 
@@ -38,14 +38,14 @@ func TestVoting2(t *testing.T) {
 		}
 
 
-		cs.GetBlockCreator(number + uint64(i), epoch, perioid)
+		bc := cs.GetBlockCreator(number + uint64(i))
 		//bc := cs.GetBlockCreator(number + uint64(i), epoch, perioid)
 
-		//for key, val := range *bc {
-		//	fmt.Print("SIGNER :: ", common.Bytes2Hex(key.Bytes()))
-		//	fmt.Println(" VALUE :: ", val)
-		//}
-		//fmt.Println("=================================================================================")
+		for key, val := range *bc {
+			fmt.Print("SIGNER :: ", common.Bytes2Hex(key.Bytes()))
+			fmt.Println(" VALUE :: ", val)
+		}
+		fmt.Println("=================================================================================")
 	}
 
 
