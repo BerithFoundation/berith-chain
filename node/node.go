@@ -623,3 +623,24 @@ func (n *Node) apis() []rpc.API {
 		},
 	}
 }
+// returns the final configuration being used
+func (n *Node) Config() *Config{
+	return n.config
+}
+
+func (n *Node) FetchKeystoreDir() (string, error) {
+
+	switch {
+	case filepath.IsAbs(n.config.KeyStoreDir):
+		return n.config.KeyStoreDir, nil
+	case n.config.DataDir != "":
+		if n.config.KeyStoreDir == "" {
+			return filepath.Join(n.config.DataDir, datadirDefaultKeyStore), nil
+		} else {
+			return filepath.Abs(n.config.KeyStoreDir)
+		}
+	case n.config.KeyStoreDir != "":
+		return filepath.Abs(n.config.KeyStoreDir)
+	}
+	return "", errors.New("Couldn't find keystore directory")
+}

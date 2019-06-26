@@ -2,13 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 )
@@ -46,7 +50,30 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		args := info["args"].([]interface{})
 		payload , err = callDB(api , args...)
 		break
+	case "exportKeystore":
+		var info map[string]interface{}
+		err = json.Unmarshal(m.Payload, &info)
+		if err != nil {
+			payload = nil
+			break
+		}
+		args := info["args"].([]interface{})
+		payload, err = exportKeystore(args)
+		break
+
+	case "importKeystore":
+		var info map[string]interface{}
+		err = json.Unmarshal(m.Payload, &info)
+		if err != nil {
+			payload = nil
+			break
+		}
+		args := info["args"].([]interface{})
+		err = importKeystore(args)
+		payload = nil
+		break
 	}
+
 	return
 }
 
@@ -153,5 +180,60 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	}
 
 	return nil ,nil
+}
+
+
+func exportKeystore(args []interface{}) (interface{}, error) {
+	tempFileName:= "keystore.zip"
+
+	dir, err := stack.FetchKeystoreDir()
+	if (err!=nil) {
+		return nil, err
+	}
+	log.Info("Found keystore dir: ", dir)
+	password:= args[0].(string)
+	targetPath := dir + string(os.PathSeparator) + tempFileName
+	er := ZipSecure(dir,targetPath,password)
+	if er != nil {
+		return nil,er
+	}
+	log.Info("Successfully created temp file, "+tempFileName+", at: " +dir)
+
+	zippedFile, err := os.Open(targetPath)
+	if err != nil {
+		return nil,err
+	}
+
+	body, err := ioutil.ReadAll(zippedFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	zippedFile.Close()
+	os.Remove(targetPath)
+	log.Info("Removed temp file, "+tempFileName+", from: " +dir)
+
+	return body, nil
+}
+
+
+func importKeystore(args []interface{}) (error)  {
+
+	dir, err := stack.FetchKeystoreDir()
+	if (err!=nil) {
+		return err
+	}
+	log.Info("Found keystore dir: ", dir)
+
+	inputFilePath:= args[0].(string)
+	password:= args[1].(string)
+	log.Debug("Input keystore file path: ", dir)
+
+	er := UnzipSecure(inputFilePath,dir,password)
+	if er != nil {
+		return er
+	}
+	log.Info("Successfully imported keystore folder")
+	return err
 }
 

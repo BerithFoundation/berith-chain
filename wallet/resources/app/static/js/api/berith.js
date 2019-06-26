@@ -147,5 +147,66 @@ let berith = {
             $('#rtsResult').val(message.payload)
         })
     },
+    exportKeystore: function () {
+        let message = {"name": "exportKeystore"};
+        let password = $('#exportPassword').val()
 
+        if (!password) {
+            alert("Enter password to export keystore")
+            return
+        }
+
+
+
+        message.payload = {
+            "args" : [password]
+        }
+
+
+
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            var bytes = base64ToArrayBuffer(message.payload)
+            var blob=new Blob([bytes], {type: "application/zip"});
+            var link=document.createElement('a');
+            link.href=window.URL.createObjectURL(blob);
+            link.download="berith-keystore.data";
+            link.click();
+            asticode.loader.hide();
+        })
+    },
+
+    importKeystore: function (e) {
+        asticode.loader.show()
+        let file = document.getElementById("keystoreFile").files[0];
+        let message = {"name": "importKeystore"};
+        let password = $('#importPassword').val()
+
+        if (!password) {
+            alert("Enter keystore backup file password")
+            return
+        }
+
+
+
+        message.payload = {
+            "args" : [file.path, password]
+        }
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+        })
+    },
 }
+
+
+function base64ToArrayBuffer(base64) {
+    var binaryString = window.atob(base64);
+    var binaryLen = binaryString.length;
+    var bytes = new Uint8Array(binaryLen);
+    for (var i = 0; i < binaryLen; i++) {
+        var ascii = binaryString.charCodeAt(i);
+        bytes[i] = ascii;
+    }
+    return bytes;
+}
+
