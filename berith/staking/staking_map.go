@@ -206,13 +206,16 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		period:     period,
 		selections: make(map[uint64]Candidate),
 	}
+
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
 		reward := info.StkReward
 		if reward == nil {
 			reward = big.NewInt(0)
 		}
-		cs.Add(Candidate{info.Address(), info.Value(), info.BlockNumber(), reward})
+		value, _ := new(big.Int).SetString(info.Value().String(), 10)
+		blockNumber, _ := new(big.Int).SetString(info.BlockNumber().String(), 10)
+		cs.Add(Candidate{info.Address(), value, blockNumber, reward})
 
 	}
 

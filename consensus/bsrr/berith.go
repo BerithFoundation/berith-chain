@@ -502,7 +502,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	if header.Coinbase != common.HexToAddress("0") {
 		//Epoch 이후에 처리
-		if header.Number.Uint64() > c.config.Epoch {
+		if header.Number.Uint64() > uint64(50) {
 			//Diff
 
 			var signers signers
@@ -516,7 +516,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 				return nil, errUnauthorizedSigner
 			}
 
-			parent := chain.GetHeader(header.Hash(), header.Number.Uint64()-1)
+			parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
 			if predicted.Cmp(header.Difficulty) != 0 {
 				return nil, errInvalidDifficulty
