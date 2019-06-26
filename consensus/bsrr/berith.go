@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -583,13 +582,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
-	if header.Difficulty.Cmp(diffInTurn) == -1 {
-		// It's not our turn explicitly to sign, delay it a bit
-		wiggle := time.Duration(len(signers.signersMap())/2+1) * wiggleTime
-		delay += time.Duration(rand.Int63n(int64(wiggle)))
-		delay += time.Duration(int64(c.config.Period)) * time.Second
-		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
-	}
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
