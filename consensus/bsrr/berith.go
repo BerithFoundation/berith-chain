@@ -43,7 +43,7 @@ const (
 	inmemorySigners    = 128 * 3 // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096    // Number of recent block signatures to keep in memory
 
-	stakingInterval = 10
+	//stakingInterval = 10
 	wiggleTime      = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
@@ -59,8 +59,8 @@ var (
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 
-	diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
-	diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
+	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
+	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -342,14 +342,14 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 		return errInvalidUncleHash
 	}
 	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	if number > 0 {
-		if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
-			return errInvalidDifficulty
-		}
-		//if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
-		//	return errInvalidDifficulty
-		//}
-	}
+	//if number > 0 {
+	//	if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
+	//		return errInvalidDifficulty
+	//	}
+	//	if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
+	//		return errInvalidDifficulty
+	//	}
+	//}
 	// If all checks passed, validate any special fields for hard forks
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
@@ -616,8 +616,10 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 }
 func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 
+
+
 	target := parent
-	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(stakingInterval))
+	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(int64(c.config.Epoch)))
 	for target.Number.Cmp(big.NewInt(0)) > 0 && target.Number.Cmp(targetNumber) > 0 {
 		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
@@ -942,7 +944,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	target := chain.GetHeader(hash, number)
-	targetNumber := number - stakingInterval
+	targetNumber := number - c.config.Epoch
 
 	if targetNumber <= 0 {
 		return signers, nil
