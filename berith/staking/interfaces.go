@@ -4,7 +4,6 @@ import (
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/consensus"
 )
 
 //StakingList list of staked accounts
@@ -19,12 +18,14 @@ type StakingList interface {
 	Decode(rlpData []byte) (StakingList, error)
 	Copy() StakingList
 	Len() int
-	Vote(chain consensus.ChainReader, number uint64, hash common.Hash, epoch uint64, period uint64)
 	Print()
 	GetRoundJoinRatio() *map[common.Address]int
 	SetMiner(address common.Address)
 	InitMiner()
 	GetMiners() map[common.Address]bool
+	Sort()
+	GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool)
+	ToArray() []common.Address
 }
 
 type StakingInfo interface {

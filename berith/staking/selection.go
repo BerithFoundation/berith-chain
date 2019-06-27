@@ -67,7 +67,6 @@ func (cs *Candidates) Add(c Candidate) {
 	cs.selections[uint64(s)] = c
 }
 
-
 //총 스테이킹 량 , 가산점 추가된 결과
 func (cs *Candidates) TotalStakeBalance() *big.Int {
 	total := big.NewInt(0)
@@ -80,9 +79,8 @@ func (cs *Candidates) TotalStakeBalance() *big.Int {
 	return total.Div(total, big.NewInt(1e+10))
 }
 
-
 //숫자 > 해시 > 숫자
-func (cs Candidates) GetSeed(number uint64) int64{
+func (cs Candidates) GetSeed(number uint64) int64 {
 
 	bt := []byte{byte(number)}
 	hash := sha256.New()
@@ -95,7 +93,7 @@ func (cs Candidates) GetSeed(number uint64) int64{
 }
 
 //BC 선출
-func (cs *Candidates) GetBlockCreator(number, epoch, period uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.Int {
 
 	bc := make(map[common.Address]*big.Int, 0)
 
@@ -128,14 +126,22 @@ func (cs *Candidates) GetBlockCreator(number, epoch, period uint64) *map[common.
 		return errors.New("empty SRT"), -1, common.Address{}
 	}
 
+
 	loop := func(value int64) {
 		err, key, addr := selector(value)
-		if err != nil{
+		if err != nil {
 			return
 		}
 
-		DIF -= DIF_R
-		bc[addr] = big.NewInt(DIF)
+
+		if DIF == DIF_MAX {
+			bc[addr] = big.NewInt(DIF_MAX)
+			DIF -= DIF_R
+		} else {
+			bc[addr] = big.NewInt(DIF)
+			DIF -= DIF_R
+		}
+
 		stake := cp.selections[uint64(key)].stake
 		total.Sub(total, stake)
 		delete(cp.selections, uint64(key))
