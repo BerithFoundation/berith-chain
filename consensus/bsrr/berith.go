@@ -14,7 +14,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"sync"
@@ -637,8 +636,6 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	}
 
 	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
-	list.Print()
-	fmt.Println("DIFFICULTY : ", diff.String())
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
