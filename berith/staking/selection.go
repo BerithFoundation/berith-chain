@@ -114,14 +114,16 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 	total := cp.TotalStakeBalance()
 
 	selector := func(value int64) (error, int64, common.Address) {
+		temp := new(big.Int).Add(total, big.NewInt(0))
 		// Range 확인
 		for key, s := range cp.selections {
-			stake := s.stake
-			stake.Div(stake, big.NewInt(1e+10))
-			if stake.Cmp(big.NewInt(value)) != -1 { //stake < value
+			stake := new(big.Int).Div(s.stake, big.NewInt(1e+10))
+			temp.Sub(temp, stake)
+			if temp.Cmp(big.NewInt(value)) == 1 { //total - stake > value
 				continue
 			}
 
+			//total - stake <= value
 			return nil, int64(key), s.address
 		}
 		return errors.New("empty SRT"), -1, common.Address{}
@@ -143,7 +145,7 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 			DIF -= DIF_R
 		}
 
-		stake := cp.selections[uint64(key)].stake
+		stake := new(big.Int).Div(cp.selections[uint64(key)].stake, big.NewInt(1e+10))
 		total.Sub(total, stake)
 		delete(cp.selections, uint64(key))
 	}
@@ -161,7 +163,7 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		}
 
 		value = rand.Int63n(total.Int64())
-
+		//fmt.Println("RAND ::", value)
 		loop(value)
 	}
 
