@@ -497,6 +497,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
 		font = color.Green
 	}
+	stakingList.Print()
 	font.Println("##############[FINALIZE]##############")
 	font.Println("NUMBER : ", header.Number.String())
 	font.Println("HASH : ", header.Hash().Hex())
