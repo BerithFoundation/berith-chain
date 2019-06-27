@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
@@ -26,12 +27,15 @@ var (
 
 	ctx 	context.Context
 	client *rpc.Client
+	stack *node.Node
+
 	ch = make(chan NodeMsg)
 )
 
 type NodeMsg struct {
 	t string
 	v interface{}
+	stack interface{}
 }
 
 func init(){
@@ -56,6 +60,7 @@ func start_ui(){
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/icon.icns",
 			AppIconDefaultPath: "resources/icon.png",
+			//DataDirectoryPath: "C:\\Users\\Usman\\go\\src\\github.com\\BerithFoundation\\berith-chain\\wallet",
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
@@ -92,10 +97,11 @@ func start_ui(){
 					astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 				}
 				for{
-					node := <-ch
-					switch node.t {
+					nodeChannel := <-ch
+					switch nodeChannel.t {
 					case "client":
-						client = node.v.(*rpc.Client)
+						client = nodeChannel.v.(*rpc.Client)
+						stack = nodeChannel.stack.(*node.Node)
 						ctx = context.TODO()
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
@@ -103,6 +109,7 @@ func start_ui(){
 						//startPolling()
 
 						break
+
 					}
 				}
 			}()

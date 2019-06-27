@@ -157,10 +157,6 @@ var (
 	}
 )
 
-var (
-	stack *node.Node
-)
-
 func Init() {
 	// Initialize the CLI app and start Ber
 	app.Action = ber
@@ -254,8 +250,7 @@ func ber(ctx *cli.Context) error {
 	if args := ctx.Args(); len(args) > 0 {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
-	stack = makeFullNode(ctx)
-
+	stack := makeFullNode(ctx)
 	startNode(ctx, stack)
 
 	stack.Wait()
@@ -295,6 +290,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		ch <- NodeMsg{
 			t: "client",
 			v: rpcClient,
+			stack: stack,
 		}
 
 		// Open any wallets already attached

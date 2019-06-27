@@ -21,12 +21,13 @@ import (
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	switch m.Name {
-	case "init":
+	/*case "init":
 		ch <- NodeMsg{
 			t: "init",
 			v: nil,
+			stack: nil,
 		}
-		break
+		break*/
 	case "callApi":
 		var info map[string]interface{}
 		err = json.Unmarshal(m.Payload, &info)
