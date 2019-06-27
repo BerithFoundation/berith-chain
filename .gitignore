@@ -10,9 +10,15 @@
 *un~
 .DS_Store
 */**/.DS_Store
-cmd/berith/Berith
-cmd/berith/berith
+cmd/berith/Berith/*
+berith/berith/*
 cmd/berith/berith.exe
+cmd/berith/password.txt
+wallet/Berith/*
+wallet/vendor/
+wallet/output/
+berith/keystore
+berith/history
 cmd/berith/debug
 
 #*
@@ -27,5 +33,6 @@ cmd/berith/debug
 
 # VS Code
 .vscode
+./wallet/resources/app/.vscode
 
 **/yarn-error.log

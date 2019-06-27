@@ -17,6 +17,7 @@
 package keystore
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -384,4 +385,25 @@ func tmpKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
 		new = func(kd string) *KeyStore { return NewKeyStore(kd, veryLightScryptN, veryLightScryptP) }
 	}
 	return d, new(string(d))
+}
+
+
+//Public Key >> Private Key
+func TestKeyStore_GetPrivateKey(t *testing.T) {
+	dir, ks := tmpKeyStore(t, true)
+	defer os.RemoveAll(dir)
+
+	pass := "passwd"
+	acc, err := ks.NewAccount(pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pk, err := ks.GetPrivateKey(acc.Address.String(), pass)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(pk)
 }

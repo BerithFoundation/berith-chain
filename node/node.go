@@ -246,6 +246,10 @@ func (n *Node) openDataDir() error {
 	return nil
 }
 
+func (n *Node) GetRpcApis() []rpc.API{
+	return n.rpcAPIs
+}
+
 // startRPC is a helper method to start all the various RPC endpoint during node
 // startup. It's not meant to be called at any time afterwards as it makes certain
 // assumptions about the state of the node.
@@ -618,4 +622,25 @@ func (n *Node) apis() []rpc.API {
 			Public:    true,
 		},
 	}
+}
+// returns the final configuration being used
+func (n *Node) Config() *Config{
+	return n.config
+}
+
+func (n *Node) FetchKeystoreDir() (string, error) {
+
+	switch {
+	case filepath.IsAbs(n.config.KeyStoreDir):
+		return n.config.KeyStoreDir, nil
+	case n.config.DataDir != "":
+		if n.config.KeyStoreDir == "" {
+			return filepath.Join(n.config.DataDir, datadirDefaultKeyStore), nil
+		} else {
+			return filepath.Abs(n.config.KeyStoreDir)
+		}
+	case n.config.KeyStoreDir != "":
+		return filepath.Abs(n.config.KeyStoreDir)
+	}
+	return "", errors.New("Couldn't find keystore directory")
 }

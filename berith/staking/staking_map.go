@@ -10,7 +10,6 @@ import (
 	"sort"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
@@ -22,8 +21,8 @@ import (
 type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
-	users      *map[common.Address]int
 	miners     map[common.Address]bool
+	table      map[common.Address]*big.Int
 	target     common.Hash
 }
 type stkInfo struct {
@@ -60,6 +59,24 @@ func (list *StakingMap) InitMiner() {
 
 func (list *StakingMap) GetMiners() map[common.Address]bool {
 	return list.miners
+}
+
+func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool) {
+	flag := false
+	if len(list.table) <= 0 {
+		flag = true
+		list.selectSigner(blockNumber, period)
+		fmt.Println("12312312323")
+	}
+	if len(list.table) <= 0 {
+		return big.NewInt(1234), false
+	}
+
+	result, ok := list.table[addr]
+	if !ok {
+		result = big.NewInt(0)
+	}
+	return result, flag
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
@@ -107,6 +124,10 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 	return nil
 }
 
+func (list *StakingMap) ToArray() []common.Address {
+	return list.sortedList
+}
+
 //Delete is function to delete address from the staking list
 func (list *StakingMap) Delete(address common.Address) error {
 	if _, ok := list.storage[address]; ok {
@@ -122,29 +143,36 @@ func (list *StakingMap) Print() {
 	for k, v := range list.storage {
 		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
 	}
-	// fmt.Println("==== sortedList ====")
-	// for _, v := range list.sortedList {
-	// 	fmt.Println(v.Hex())
-	// }
-	fmt.Println("====== MINERS ======")
-	for k, v := range list.miners {
-		fmt.Println("[", k.Hex(), ",", v, "]")
+	fmt.Println("==== sortedList ====")
+	for _, v := range list.sortedList {
+		fmt.Println(v.Hex())
 	}
+	// fmt.Println("====== MINERS ======")
+	// for k, v := range list.miners {
+	// 	fmt.Println("[", k.Hex(), ",", v, "]")
+	// }
 }
 
 //EncodeRLP is function to encode
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
-	var byteArr [3][]byte
+	var byteArr [5][]byte
 
 	byteArr[0], _ = json.Marshal(list.storage)
 	byteArr[1], _ = json.Marshal(list.miners)
 	byteArr[2] = list.target[:]
+	byteArr[3], _ = json.Marshal(list.table)
+	byteArr[4], _ = json.Marshal(list.sortedList)
 	//rlpVal[1], _ = json.Marshal(list.sortedList)
 	return rlp.Encode(w, byteArr)
 }
 
-func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash common.Hash, epoch uint64, period uint64) {
+func (list *StakingMap) Sort() {
+
+	if len(list.sortedList) > 0 {
+		return
+	}
+
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
 		if v.Value().Cmp(big.NewInt(0)) > 0 {
@@ -155,41 +183,52 @@ func (list *StakingMap) Vote(chain consensus.ChainReader, number uint64, hash co
 
 	sortedList := make([]common.Address, 0)
 
-	cs := new(Candidates)
 	for _, info := range kv {
 
-		reward := info.StkReward
-		if reward == nil {
-			reward = big.NewInt(0)
-		}
-		cs.Add(Candidate{info.Address(), info.Value(), info.BlockNumber(), reward})
-	}
-
-	size := len(cs.selections)
-	if size > 0 {
-
-		//bc := cs.GetBlockCreator(number, epoch, period)
-
-		//stotal := CalcS(&votes, number, period)
-		////p := CalcP2(&votes, stotal, number, period)
-		////r := CalcR2(&votes, p)
-		//list.users = CalcP2(&votes, stotal, number, period)
-		//r := CalcR2(&votes, list.users)
-		//
-		////n := common.HexToAddress(header.ParentHash.Hex()).Big().Int64()
-		//n := common.HexToAddress(hash.Hex()).Big().Int64()
-		//sig := GetSigners(n, &votes, r, epoch)
-
-		//for _, item := range *bc {
-		//	sortedList = append(sortedList, item)
-		//}
+		sortedList = append(sortedList, info.Address())
 	}
 
 	list.sortedList = sortedList
 }
 
+func (list *StakingMap) selectSigner(blockNumber, period uint64) {
+
+	if len(list.sortedList) <= 0 {
+		list.Sort()
+	}
+
+	if len(list.sortedList) <= 0 {
+		return
+	}
+
+	cs := &Candidates{
+		number:     blockNumber,
+		period:     period,
+		selections: make(map[uint64]Candidate),
+	}
+
+	for _, addr := range list.sortedList {
+		info := list.storage[addr]
+		reward := info.StkReward
+		if reward == nil {
+			reward = big.NewInt(0)
+		}
+		value, _ := new(big.Int).SetString(info.Value().String(), 10)
+		blockNumber, _ := new(big.Int).SetString(info.BlockNumber().String(), 10)
+		cs.Add(Candidate{info.Address(), value, blockNumber, reward})
+
+	}
+
+	list.table = *cs.GetBlockCreator(blockNumber)
+
+	for key, value := range list.table {
+		fmt.Println("ADDRESS :: " + key.String(), "DIFF :: " + value.String())
+	}
+
+}
+
 func (list *StakingMap) GetRoundJoinRatio() *map[common.Address]int {
-	return list.users
+	return nil
 }
 
 type infoForSort []stkInfo
@@ -212,6 +251,7 @@ func (list *StakingMap) Copy() StakingList {
 		sortedList: list.sortedList,
 		miners:     list.miners,
 		target:     list.target,
+		table:      list.table,
 	}
 }
 
@@ -228,7 +268,7 @@ func Encode(stakingList StakingList) ([]byte, error) {
 }
 
 func Decode(rlpData []byte) (StakingList, error) {
-	var byteArr [3][]byte
+	var byteArr [5][]byte
 	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
 		return nil, err
 	}
@@ -237,6 +277,7 @@ func Decode(rlpData []byte) (StakingList, error) {
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
+		table:      make(map[common.Address]*big.Int),
 		target:     common.Hash{},
 	}
 	if err := json.Unmarshal(byteArr[0], &result.storage); err != nil {
@@ -248,6 +289,15 @@ func Decode(rlpData []byte) (StakingList, error) {
 	}
 
 	result.target = common.BytesToHash(byteArr[2])
+
+	if err := json.Unmarshal(byteArr[3], &result.table); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(byteArr[4], &result.sortedList); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 
 }
@@ -258,5 +308,6 @@ func New() StakingList {
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
+		table:      make(map[common.Address]*big.Int),
 	}
 }
