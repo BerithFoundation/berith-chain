@@ -29,7 +29,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
-var maxPrice = big.NewInt(500 * params.GWei)
+var maxPrice = big.NewInt(500 * params.Gmin)
 
 type Config struct {
 	Blocks     int

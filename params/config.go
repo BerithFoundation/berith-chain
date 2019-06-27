@@ -25,23 +25,23 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0bb9e9aee271c65fead79d770176ccfeadb157900f83f854c181e8339b3b74319cb4d7579456170e39c5d36db499867b4bbba1d4393e9ca012a6d6c7187ba1a9")
-	TestnetGenesisHash = common.HexToHash("0bb9e9aee271c65fead79d770176ccfeadb157900f83f854c181e8339b3b74319cb4d7579456170e39c5d36db499867b4bbba1d4393e9ca012a6d6c7187ba1a9")
+	MainnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
+	TestnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
 )
 
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(15),
-		HomesteadBlock:      big.NewInt(0),
-		EIP155Block:         big.NewInt(0),
-		EIP158Block:         big.NewInt(0),
+		ChainID:        big.NewInt(105),
+		HomesteadBlock: big.NewInt(0),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:  10,
 			Epoch:   360,
-			Rewards: common.StringToBig("25000"),
+			Rewards: common.StringToBig("2500"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 3,
+			SlashRound:   3,
 		},
 	}
 
@@ -56,16 +56,16 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(15),
-		HomesteadBlock:      big.NewInt(0),
-		EIP155Block:         big.NewInt(0),
-		EIP158Block:         big.NewInt(0),
+		ChainID:        big.NewInt(205),
+		HomesteadBlock: big.NewInt(0),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
-			Period:  10,
-			Epoch:   360,
-			Rewards: common.StringToBig("25000"),
+			Period:       10,
+			Epoch:        360,
+			Rewards:      common.StringToBig("2500"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound: 3,
+			SlashRound:   3,
 		},
 	}
 

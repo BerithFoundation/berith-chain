@@ -17,6 +17,7 @@
 package core
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/common"
@@ -97,9 +98,20 @@ func newInsertIterator(chain types.Blocks, results <-chan error, validator Valid
 	}
 }
 
+func (it *insertIterator) print(typ string) {
+	fmt.Println("#############################[ITERATOR]###############################")
+	fmt.Println("TYPE :", typ)
+	fmt.Println("LENGTH :", len(it.chain))
+	fmt.Println("INDEX :", it.index)
+	for _, v := range it.chain {
+		fmt.Println("[", v.Number().String(), ",", v.Hash().Hex(), "]")
+	}
+}
+
 // next returns the next block in the iterator, along with any potential validation
 // error for that block. When the end is reached, it will return (nil, nil).
 func (it *insertIterator) next() (*types.Block, error) {
+	// it.print("NEXT")
 	if it.index+1 >= len(it.chain) {
 		it.index = len(it.chain)
 		return nil, nil
@@ -113,7 +125,8 @@ func (it *insertIterator) next() (*types.Block, error) {
 
 // current returns the current block that's being processed.
 func (it *insertIterator) current() *types.Block {
-	if it.index < 0 || it.index+1 >= len(it.chain) {
+	// it.print("CURRENT")
+	if it.index < 0 || it.index >= len(it.chain) {
 		return nil
 	}
 	return it.chain[it.index]

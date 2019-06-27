@@ -115,6 +115,12 @@ web3._extend({
 	property: 'bsrr',
 	methods: [
 		new web3._extend.Method({
+			name: 'getState',
+			call: 'bsrr_getState',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Method({
 			name: 'getBlockCreators',
 			call: 'bsrr_getBlockCreators',
 			params: 1,
@@ -523,7 +529,7 @@ web3._extend({
 			name: 'stopStaking',
 			call: 'berith_stopStaking',
 			params: 1,
-			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'getStakeBalance',
@@ -556,6 +562,12 @@ web3._extend({
         	params: 2,
         	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
         	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
+		new web3._extend.Method({
+			name: 'updateAccount',
+			call: 'berith_updateAccount',
+        	params: 3,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null],        	
 		}),
 	],
 	properties: [

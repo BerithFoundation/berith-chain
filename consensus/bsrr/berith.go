@@ -485,6 +485,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] stakingList 처리 로직 추가
+
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, err
@@ -496,13 +497,25 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			//Diff
 			diff, err := c.roundJoinRatio(&stakingList, header.Coinbase)
 			if err != nil {
-				return nil, err
+				//return nil, err
+				log.Info("===========roundJoinRatio===============")
+				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
+				log.Info("[ParentHash]\t", header.ParentHash)
+				log.Info("[BASE]\t", header.Coinbase)
+				log.Info("[MSG]\t", err)
+				log.Info("========================================")
 			}
 
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				return nil, errors.New("no Signers")
+				//return nil, errors.New("no Signers")
+				log.Info("===========getSigners===============")
+				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
+				log.Info("[ParentHash]\t", header.ParentHash)
+				log.Info("[BASE]\t", header.Coinbase)
+				log.Info("[MSG]\t", err)
+				log.Info("====================================")
 			}
 
 			//diff 가 Max 수치 라면 블록 생성자 인가 판단 하고 아니라면 Diff 가 연산 이랑 같은지 판단
@@ -510,11 +523,23 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 				signer := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))]
 
 				if header.Coinbase != signer {
-					return nil, errors.New("not match signer")
+					//return nil, errors.New("not match signer")
+					log.Info("===========difficulty cmp===============")
+					log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
+					log.Info("[ParentHash]\t", header.ParentHash)
+					log.Info("[BASE]\t", header.Coinbase)
+					log.Info("[MSG]\t", "not match signer")
+					log.Info("========================================")
 				}
 
 			} else if header.Difficulty.Cmp(new(big.Int).Add(diffNoTurn, big.NewInt(int64(diff)))) != 0 {
-				return nil, errors.New("not match diff")
+				//return nil, errors.New("not match diff")
+				log.Info("===========difficulty cmp===============")
+				log.Info("[BlockNumber]\t", header.Number.Uint64() - 1)
+				log.Info("[ParentHash]\t", header.ParentHash)
+				log.Info("[BASE]\t", header.Coinbase)
+				log.Info("[MSG]\t", "not match diff")
+				log.Info("========================================")
 			}
 
 		}
@@ -662,14 +687,19 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	n := float64(number) / d
 
 	var z float64 = 0
-	if n <=  3.15 * math.Pow(10, 6) {
+	if n <= 3.15*math.Pow(10, 6) {
 		z = 5
 	}
 
-	re := 26 - math.Round(n / (7.37 * math.Pow(10,6))) * 0.5 + z
-	temp := re * 1e+10
-	return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	re := 26 - math.Round(n/(7.37*math.Pow(10, 6)))*0.5 + z
+	if re <= 0 {
+		re = 0
 
+		return big.NewInt(0)
+	} else {
+		temp := re * 1e+10
+		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	}
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
@@ -745,6 +775,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
+			list.SetTarget(prevHash)
 			break
 		}
 
@@ -799,6 +830,9 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
+		if block.NumberU64()%c.config.Epoch == 0 {
+			stakingList.SetTarget(block.Hash())
+		}
 	}
 
 	bytes, err := stakingList.Encode()
@@ -859,7 +893,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
-			value.Sub(value, msg.Value())
+			value.Set(big.NewInt(0))
 		}
 
 		//transfer reward balance
@@ -924,17 +958,20 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	for i := 0; i < len(signers); i++ {
 		copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
 	}
-	header := chain.GetHeader(hash, number)
-	if header == nil {
-		return nil, errors.New("unknown header")
+	target, err := c.getStakingList(chain, number, hash)
+	if err != nil {
+		return nil, err
 	}
-	target := chain.GetHeaderByNumber(header.Nonce.Uint64())
-	if target == nil {
+
+	targetHeader := chain.GetHeaderByHash(target.GetTarget())
+
+	if targetHeader == nil {
 		return nil, errors.New("unknown ancestor")
 	}
-	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
+
+	list, err := c.getStakingList(chain, targetHeader.Number.Uint64(), targetHeader.Hash())
 	if err != nil {
-		return signers, err
+		return nil, err
 	}
 
 	temp := make([]common.Address, 0)
