@@ -2,6 +2,7 @@ package staking
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -64,9 +65,6 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 }
 
 func (cs *Candidates) Add(c Candidate) {
-	//s := len(cs.selections)
-	//cs.selections[uint64(s)] = c
-	//중복체크?? 해야하나?
 	cs.selections = append(cs.selections, c)
 }
 
@@ -100,8 +98,14 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 
 	bc := make(map[common.Address]*big.Int, 0)
 
-	cp := NewCandidates(cs.number, cs.period)
-	cp.selections = append(cp.selections, cs.selections...)
+	NEXT := 0
+	//Copy
+	err, cp := nextCandidate(cs, NEXT)
+	if err != nil {
+		return &bc
+	}
+
+	//cp.selections = append(cp.selections, cs.selections...)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
@@ -128,16 +132,6 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 			//total - stake <= value
 			return nil, int64(i), s.address
 		}
-		//for key, s := range cp.selections {
-		//	stake := new(big.Int).Div(s.stake, big.NewInt(1e+10))
-		//	temp.Sub(temp, stake)
-		//	if temp.Cmp(big.NewInt(value)) == 1 { //total - stake > value
-		//		continue
-		//	}
-		//
-		//	//total - stake <= value
-		//	return nil, int64(key), s.address
-		//}
 		return errors.New("empty SRT"), -1, common.Address{}
 	}
 
@@ -169,7 +163,13 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 	for {
 
 		if len(cp.selections) == 0 {
-			break
+			NEXT += 100
+			//fmt.Println("NEXT :: ", NEXT)
+			err, cp = nextCandidate(cs, NEXT)
+			if err != nil {
+				break
+			}
+			total = cp.TotalStakeBalance()
 		}
 
 		if total.Cmp(big.NewInt(0)) == 0 {
@@ -180,9 +180,37 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		loop(value)
 	}
 
-	//fmt.Println(len(bc))
+	fmt.Println(len(bc))
 
 	return &bc
+}
+
+
+func nextCandidate(cs *Candidates, idx int) (error, *Candidates){
+	cp := NewCandidates(cs.number, cs.period)
+	nextSize := len(cs.selections[idx:])
+
+	if nextSize == 0 {
+		return errors.New("SIZE ZERO"), nil
+	}
+
+	if len(cs.selections[idx:]) < 100{
+		cp.selections = append(cp.selections, cs.selections[idx:]...)
+	} else {
+		cp.selections = append(cp.selections, cs.selections[idx:idx+100]...)
+	}
+	return nil, cp
+}
+
+func SumStakeBalance(cs *Candidates, start int, end int) *big.Int {
+	total := big.NewInt(0)
+	for _, c := range cs.selections[start:end] {
+		//adv 적용
+		adv := int64(c.GetAdvantage(cs.number, cs.period)*10) + 10
+		advStake := new(big.Int).Div(new(big.Int).Mul(c.stake, big.NewInt(adv)), big.NewInt(10))
+		total.Add(total, advStake)
+	}
+	return total.Div(total, big.NewInt(1e+10))
 }
 
 func removeSlice(cs []Candidate, i int64) []Candidate{
