@@ -12,8 +12,11 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
-var DIF_MAX = int64(500000)
-var DIF_MIN = int64(10000)
+var (
+	DIF_MAX = int64(500000)
+	DIF_MIN = int64(10000)
+	NEXT = 0
+)
 
 type Candidate struct {
 	address common.Address //address
@@ -98,7 +101,7 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 
 	bc := make(map[common.Address]*big.Int, 0)
 
-	NEXT := 0
+
 	//Copy
 	err, cp := nextCandidate(cs, NEXT)
 	if err != nil {
