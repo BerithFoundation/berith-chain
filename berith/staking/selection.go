@@ -15,8 +15,10 @@ import (
 var (
 	DIF_MAX = int64(500000)
 	DIF_MIN = int64(10000)
-	NEXT = 0
+	START_IDX = 0
 )
+
+const GROUP_UNIT = 100
 
 type Candidate struct {
 	address common.Address //address
@@ -103,10 +105,24 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 
 
 	//Copy
-	err, cp := nextCandidate(cs, NEXT)
-	if err != nil {
-		return &bc
+	var cp *Candidates
+	var err error
+	size := len(cs.selections)
+	if len(cs.selections) < GROUP_UNIT {
+		err, cp = nextCandidate(cs, 0, size)
+		START_IDX = size
+		if err != nil {
+			return &bc
+		}
+	} else {
+		err, cp = nextCandidate(cs, 0, GROUP_UNIT)
+		START_IDX = GROUP_UNIT
+		if err != nil {
+			return &bc
+		}
 	}
+
+
 
 	//cp.selections = append(cp.selections, cs.selections...)
 
@@ -166,11 +182,21 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 	for {
 
 		if len(cp.selections) == 0 {
-			NEXT += 100
-			//fmt.Println("NEXT :: ", NEXT)
-			err, cp = nextCandidate(cs, NEXT)
-			if err != nil {
+			remainder := len(cs.selections) - START_IDX
+			if remainder <= 0 {
 				break
+			}
+
+			if remainder < GROUP_UNIT {
+				err, cp = nextCandidate(cs, START_IDX, START_IDX + remainder)
+				START_IDX += remainder
+			} else {
+				//fmt.Println("NEXT :: ", NEXT)
+				err, cp = nextCandidate(cs, START_IDX, START_IDX + GROUP_UNIT)
+				START_IDX += GROUP_UNIT
+				if err != nil {
+					break
+				}
 			}
 			total = cp.TotalStakeBalance()
 		}
@@ -189,31 +215,21 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 }
 
 
-func nextCandidate(cs *Candidates, idx int) (error, *Candidates){
+func nextCandidate(cs *Candidates, start, end int) (error, *Candidates){
 	cp := NewCandidates(cs.number, cs.period)
-	nextSize := len(cs.selections[idx:])
+
+	nextSize := len(cs.selections[start:end])
 
 	if nextSize == 0 {
 		return errors.New("SIZE ZERO"), nil
 	}
 
-	if len(cs.selections[idx:]) < 100{
-		cp.selections = append(cp.selections, cs.selections[idx:]...)
+	if end - start < GROUP_UNIT{
+		cp.selections = append(cp.selections, cs.selections[start:]...)
 	} else {
-		cp.selections = append(cp.selections, cs.selections[idx:idx+100]...)
+		cp.selections = append(cp.selections, cs.selections[start:end]...)
 	}
 	return nil, cp
-}
-
-func SumStakeBalance(cs *Candidates, start int, end int) *big.Int {
-	total := big.NewInt(0)
-	for _, c := range cs.selections[start:end] {
-		//adv 적용
-		adv := int64(c.GetAdvantage(cs.number, cs.period)*10) + 10
-		advStake := new(big.Int).Div(new(big.Int).Mul(c.stake, big.NewInt(adv)), big.NewInt(10))
-		total.Add(total, advStake)
-	}
-	return total.Div(total, big.NewInt(1e+10))
 }
 
 func removeSlice(cs []Candidate, i int64) []Candidate{

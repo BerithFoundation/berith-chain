@@ -1,7 +1,6 @@
 package staking
 
 import (
-	"fmt"
 	"math/big"
 	"strconv"
 	"testing"
@@ -20,7 +19,7 @@ func TestVoting2(t *testing.T) {
 	number := uint64(1000)
 	//epoch := uint64(20)
 	perioid := uint64(10)
-	loop := 10000
+	loop := 1445
 
 	cs := NewCandidates(number, perioid)
 
@@ -34,15 +33,15 @@ func TestVoting2(t *testing.T) {
 		cs.Add(c)
 	}
 
-	//cs.GetBlockCreator(number)
-	bc := cs.GetBlockCreator(number)
-
-	idx := 1
-	for key, val := range *bc {
-		fmt.Print("SIGNER " + strconv.Itoa(idx) + "::  ", common.Bytes2Hex(key.Bytes()))
-		fmt.Println(" VALUE :: ", val)
-		idx++
-	}
+	cs.GetBlockCreator(number)
+	//bc := cs.GetBlockCreator(number)
+	//
+	//idx := 1
+	//for key, val := range *bc {
+	//	fmt.Print("SIGNER " + strconv.Itoa(idx) + "::  ", common.Bytes2Hex(key.Bytes()))
+	//	fmt.Println(" VALUE :: ", val)
+	//	idx++
+	//}
 
 
 
