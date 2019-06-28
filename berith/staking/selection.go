@@ -2,7 +2,6 @@ package staking
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -52,20 +51,23 @@ func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 type Candidates struct {
 	number     uint64
 	period     uint64
-	selections map[uint64]Candidate
+	//selections map[uint64]Candidate
+	selections []Candidate
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
 	return &Candidates{
 		number:     number,
 		period:     period,
-		selections: make(map[uint64]Candidate, 0),
+		selections: make([]Candidate, 0),
 	}
 }
 
 func (cs *Candidates) Add(c Candidate) {
-	s := len(cs.selections)
-	cs.selections[uint64(s)] = c
+	//s := len(cs.selections)
+	//cs.selections[uint64(s)] = c
+	//중복체크?? 해야하나?
+	cs.selections = append(cs.selections, c)
 }
 
 //총 스테이킹 량 , 가산점 추가된 결과
@@ -99,9 +101,7 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 	bc := make(map[common.Address]*big.Int, 0)
 
 	cp := NewCandidates(cs.number, cs.period)
-	for k, c := range cs.selections {
-		cp.selections[k] = c
-	}
+	cp.selections = append(cp.selections, cs.selections...)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
@@ -116,7 +116,9 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 	selector := func(value int64) (error, int64, common.Address) {
 		temp := new(big.Int).Add(total, big.NewInt(0))
 		// Range 확인
-		for key, s := range cp.selections {
+
+		for i:=0; i<len(cp.selections); i++ {
+			s := cp.selections[uint64(i)]
 			stake := new(big.Int).Div(s.stake, big.NewInt(1e+10))
 			temp.Sub(temp, stake)
 			if temp.Cmp(big.NewInt(value)) == 1 { //total - stake > value
@@ -124,8 +126,18 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 			}
 
 			//total - stake <= value
-			return nil, int64(key), s.address
+			return nil, int64(i), s.address
 		}
+		//for key, s := range cp.selections {
+		//	stake := new(big.Int).Div(s.stake, big.NewInt(1e+10))
+		//	temp.Sub(temp, stake)
+		//	if temp.Cmp(big.NewInt(value)) == 1 { //total - stake > value
+		//		continue
+		//	}
+		//
+		//	//total - stake <= value
+		//	return nil, int64(key), s.address
+		//}
 		return errors.New("empty SRT"), -1, common.Address{}
 	}
 
@@ -135,7 +147,6 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		if err != nil {
 			return
 		}
-
 
 		if DIF == DIF_MAX {
 			bc[addr] = big.NewInt(DIF_MAX)
@@ -147,7 +158,10 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 
 		stake := new(big.Int).Div(cp.selections[uint64(key)].stake, big.NewInt(1e+10))
 		total.Sub(total, stake)
-		delete(cp.selections, uint64(key))
+
+		//remove Index
+		//delete(cp.selections, uint64(key))
+		cp.selections = removeSlice(cp.selections, key)
 	}
 
 	value := int64(0)
@@ -163,11 +177,17 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		}
 
 		value = rand.Int63n(total.Int64())
-		//fmt.Println("RAND ::", value)
 		loop(value)
 	}
 
-	fmt.Println(len(bc))
+	//fmt.Println(len(bc))
 
 	return &bc
+}
+
+func removeSlice(cs []Candidate, i int64) []Candidate{
+	t1 := cs[:i]
+	t2 := cs[i+1:]
+	t1 = append(t1, t2...)
+	return t1
 }
