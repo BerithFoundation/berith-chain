@@ -24,6 +24,7 @@ type StakingList interface {
 	InitMiner()
 	GetMiners() map[common.Address]bool
 	Sort()
+	ClearTable()
 	GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool)
 	ToArray() []common.Address
 }

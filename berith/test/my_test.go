@@ -5,6 +5,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/BerithFoundation/berith-chain/rlp"
+
+	lru "github.com/hashicorp/golang-lru"
+
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/common"
@@ -23,31 +27,45 @@ func (stk StakingInfo) BlockNumber() *big.Int   { return stk.blockNumber }
 func (stk StakingInfo) Reward() *big.Int        { return stk.reward }
 
 func Test1(t *testing.T) {
+	cache, _ := lru.NewARC(10)
 	db := new(stakingdb.StakingDB)
-	db.CreateDB("/Users/swk/clique/berith/stakingDB", staking.Decode, staking.Encode, staking.New)
-
-	iter := db.Iterator()
-
-	if iter.First() {
-
-		for {
-			key := string(iter.Key())
-
-			fmt.Println("KEY : ", key)
-
-			list, err := db.GetStakingList(key)
-
-			if err != nil {
-				fmt.Println("ERROR : ", err)
-			} else {
-				list.Print()
-			}
-
-			if !iter.Next() {
-				break
-			}
-
-		}
+	db.CreateDB("/Users/swk/test.ldb", staking.Decode, staking.Encode, staking.New)
+	list := db.NewStakingList()
+	for i := int64(0); i < 5; i++ {
+		val, _ := new(big.Int).SetString("100000000000000000000000", 10)
+		list.SetInfo(StakingInfo{
+			address:     common.BigToAddress(big.NewInt(i)),
+			value:       val,
+			blockNumber: big.NewInt(10),
+			reward:      big.NewInt(0),
+		})
 	}
+	list.Sort()
+	diff, reordered := list.GetDifficulty(common.BigToAddress(big.NewInt(1)), 10, 10)
+	fmt.Println(diff, reordered)
+	list.Print()
+	encoded, _ := rlp.EncodeToBytes(list)
+	cache.Add("stk", encoded)
+	db.Commit("stk", list)
+
+	incache, _ := cache.Get("stk")
+
+	outcache, ok := incache.([]byte)
+
+	if !ok {
+		fmt.Println("failed to get list in cache")
+	}
+
+	list1, err := staking.Decode(outcache)
+
+	if err != nil {
+		fmt.Println("failed to decode data in cache", err)
+	}
+
+	list1.Print()
+
+	list2, _ := db.GetStakingList("stk")
+
+	list2.Print()
 
 }

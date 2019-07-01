@@ -191,6 +191,11 @@ func (list *StakingMap) Sort() {
 	list.sortedList = sortedList
 }
 
+func (list *StakingMap) ClearTable() {
+	list.sortedList = make([]common.Address, 0)
+	list.table = make(map[common.Address]*big.Int)
+}
+
 func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 	if len(list.sortedList) <= 0 {
@@ -222,7 +227,7 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 	list.table = *cs.GetBlockCreator(blockNumber)
 
 	for key, value := range list.table {
-		fmt.Println("ADDRESS :: " + key.String(), "DIFF :: " + value.String())
+		fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
 	}
 
 }
