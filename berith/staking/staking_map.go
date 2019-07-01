@@ -206,11 +206,13 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		return
 	}
 
-	cs := &Candidates{
-		number:     blockNumber,
-		period:     period,
-		selections: make(map[uint64]Candidate),
-	}
+	//cs := &Candidates{
+	//	number:     blockNumber,
+	//	period:     period,
+	//	selections: make([]Candidate, 0),
+	//}
+
+	cs := NewCandidates(blockNumber, period)
 
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
