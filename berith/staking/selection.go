@@ -2,7 +2,6 @@ package staking
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -83,6 +82,23 @@ func (cs *Candidates) TotalStakeBalance() *big.Int {
 		total.Add(total, advStake)
 	}
 	return total.Div(total, big.NewInt(1e+10))
+}
+
+//ROI 산출
+func (cs *Candidates) GetROI(address common.Address) float64 {
+	total := cs.TotalStakeBalance()
+	roi := big.NewFloat(0)
+	for _, c := range cs.selections {
+		if c.address == address {
+			stake :=  new(big.Int).Div(c.stake, big.NewInt(1e+8))
+			roi.Quo( new(big.Float).SetInt(stake), new(big.Float).SetInt(total))
+			break
+		}
+	}
+
+	f, _ := roi.Float64()
+	r := math.Round(f * float64(100)) / float64(100)
+	return r
 }
 
 //숫자 > 해시 > 숫자
@@ -208,9 +224,6 @@ func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.In
 		value = rand.Int63n(total.Int64())
 		loop(value)
 	}
-
-	fmt.Println(len(bc))
-
 	return &bc
 }
 
