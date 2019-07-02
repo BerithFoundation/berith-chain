@@ -17,6 +17,10 @@ import (
 //	VoteRatio = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(1))
 //)
 
+var (
+	roi		map[common.Address]float64
+)
+
 //StakingMap map implements StakingList
 type StakingMap struct {
 	storage    map[common.Address]stkInfo
@@ -66,7 +70,6 @@ func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period u
 	if len(list.table) <= 0 {
 		flag = true
 		list.selectSigner(blockNumber, period)
-		fmt.Println("12312312323")
 	}
 	if len(list.table) <= 0 {
 		return big.NewInt(1234), false
@@ -227,6 +230,8 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 	}
 
 	list.table = *cs.GetBlockCreator(blockNumber)
+	roi = cs.GetRoi()
+
 
 	for key, value := range list.table {
 		fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
@@ -234,8 +239,8 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 }
 
-func (list *StakingMap) GetRoundJoinRatio() *map[common.Address]int {
-	return nil
+func (list *StakingMap) GetRoi(address common.Address) float64 {
+	return roi[address]
 }
 
 type infoForSort []stkInfo

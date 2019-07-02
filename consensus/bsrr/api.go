@@ -13,7 +13,6 @@ package bsrr
 
 import (
 	"errors"
-
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
@@ -141,7 +140,7 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 	return signers, nil
 }
 
-func (api *API) GetRoundJoinRatio(address common.Address, number *rpc.BlockNumber) (int, error) {
+func (api *API) GetRoi(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)
 	var header *types.Header
 	if number == nil || *number == rpc.LatestBlockNumber {
@@ -154,17 +153,23 @@ func (api *API) GetRoundJoinRatio(address common.Address, number *rpc.BlockNumbe
 		return 0, errUnknownBlock
 	}
 
-	stakingList, err := api.bsrr.getStakingList(api.chain, header.Number.Uint64(), header.Hash())
+	//epoch := api.bsrr.config.Epoch
+
+	//num := header.Number
+	//prev := new(big.Int).Sub(num, big.NewInt(int64(epoch - 2)))
+	prev_header := api.chain.GetHeaderByNumber(uint64(5720))
+
+	stakingList, err := api.bsrr.getStakingList(api.chain, prev_header.Number.Uint64(), prev_header.Hash())
 	if err != nil {
 		return 0, err
 	}
 
-	ratio, err := api.bsrr.roundJoinRatio(&stakingList, address)
+	roi, err := api.bsrr.getRoi(&stakingList, address)
 	if err != nil {
 		return 0, err
 	}
 
-	return ratio, nil
+	return roi, nil
 }
 
 // GetSignersAtHash retrieves the list of authorized signers at the specified block.

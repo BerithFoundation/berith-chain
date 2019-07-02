@@ -45,7 +45,10 @@ func TestVoting2(t *testing.T) {
 	//	idx++
 	//}
 
-	roi := cs.GetROI(common.BytesToAddress([]byte(strconv.Itoa(1))))
+
+
+
+	roi := cs.GetRoi(common.BytesToAddress([]byte(strconv.Itoa(1))))
 	fmt.Println("ROI :: ", roi)
 
 

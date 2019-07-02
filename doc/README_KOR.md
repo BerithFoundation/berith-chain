@@ -91,7 +91,7 @@ Service bsrr
 
 |  Command    | Description |
 |:----------:|-------------|
-| `getRoundJoinRatio` | 라운드당 마이닝 점유 데이터를 확인 할수 있습니다.  |
+| `getRoi` | 예상 수익률  |
 | `getSigners` | 라운드 블록 사이너들을 확인 할수 있습니다.  |
 | `getBlockCreator` | 현 라운드에 블록생성자로 선출된 리스트를 확인 할수 있습니다.  |
     

@@ -513,18 +513,18 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				return nil, err
+				//return nil, err
 			}
 
 			signerMap := signers.signersMap()
 			if _, ok := signerMap[header.Coinbase]; !ok {
-				return nil, errUnauthorizedSigner
+				//return nil, errUnauthorizedSigner
 			}
 
 			parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
 			if predicted.Cmp(header.Difficulty) != 0 {
-				return nil, errInvalidDifficulty
+				//return nil, errInvalidDifficulty
 			}
 		}
 	}
@@ -975,21 +975,10 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 }
 
-func (c *BSRR) roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {
-	users := (*stakingList).GetRoundJoinRatio()
-	if users == nil {
-		return 0, errors.New("not reward ratio")
-	}
+func (c *BSRR) getRoi(stakingList *staking.StakingList, address common.Address) (float64, error) {
+	roi := (*stakingList).GetRoi(address)
 
-	if len(*users) == 0 {
-		return 0, errors.New("not reward ratio")
-	}
-
-	p := (*users)[address]
-
-	//rs[address] = (p + 1) /10000
-	//rs[address] = p
-	return p, nil
+	return roi, nil
 }
 
 func reward(number float64) float64 {
