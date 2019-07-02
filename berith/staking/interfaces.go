@@ -19,7 +19,7 @@ type StakingList interface {
 	Copy() StakingList
 	Len() int
 	Print()
-	GetRoi(address common.Address) float64
+	GetRoi(address common.Address, blockNumber, period uint64) float64
 	SetMiner(address common.Address)
 	InitMiner()
 	GetMiners() map[common.Address]bool

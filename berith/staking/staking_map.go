@@ -13,13 +13,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
-//var (
-//	VoteRatio = new(big.Int).Mul(big.NewInt(1e+18), big.NewInt(1))
-//)
-
-var (
-	roi		map[common.Address]float64
-)
 
 //StakingMap map implements StakingList
 type StakingMap struct {
@@ -230,8 +223,6 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 	}
 
 	list.table = *cs.GetBlockCreator(blockNumber)
-	roi = cs.GetRoi()
-
 
 	for key, value := range list.table {
 		fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
@@ -239,8 +230,22 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 }
 
-func (list *StakingMap) GetRoi(address common.Address) float64 {
-	return roi[address]
+func (list *StakingMap) GetRoi(address common.Address, blockNumber, period uint64) float64 {
+	cs := NewCandidates(blockNumber, period)
+
+	for _, addr := range list.sortedList {
+		info := list.storage[addr]
+		reward := info.StkReward
+		if reward == nil {
+			reward = big.NewInt(0)
+		}
+		value, _ := new(big.Int).SetString(info.Value().String(), 10)
+		blockNumber, _ := new(big.Int).SetString(info.BlockNumber().String(), 10)
+		cs.Add(Candidate{info.Address(), value, blockNumber, reward})
+	}
+
+	roi := cs.GetRoi(address)
+	return roi
 }
 
 type infoForSort []stkInfo

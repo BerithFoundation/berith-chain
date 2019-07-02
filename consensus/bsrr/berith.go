@@ -134,6 +134,8 @@ var (
 	errRecentlySigned = errors.New("recently signed")
 
 	errStakeValueError = errors.New("stake value Failure")
+
+	errNoData = errors.New("no data")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -975,8 +977,8 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 }
 
-func (c *BSRR) getRoi(stakingList *staking.StakingList, address common.Address) (float64, error) {
-	roi := (*stakingList).GetRoi(address)
+func (c *BSRR) getRoi(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
+	roi := (*stakingList).GetRoi(address, blockNumber, c.config.Period)
 
 	return roi, nil
 }

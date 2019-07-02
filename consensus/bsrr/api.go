@@ -143,6 +143,7 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 func (api *API) GetRoi(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)
 	var header *types.Header
+	var num int64
 	if number == nil || *number == rpc.LatestBlockNumber {
 		header = api.chain.CurrentHeader()
 	} else {
@@ -153,18 +154,24 @@ func (api *API) GetRoi(address common.Address, number *rpc.BlockNumber) (float64
 		return 0, errUnknownBlock
 	}
 
-	//epoch := api.bsrr.config.Epoch
+	num = header.Number.Int64()
 
-	//num := header.Number
-	//prev := new(big.Int).Sub(num, big.NewInt(int64(epoch - 2)))
-	prev_header := api.chain.GetHeaderByNumber(uint64(5720))
+	epoch := int64(api.bsrr.config.Epoch)
 
-	stakingList, err := api.bsrr.getStakingList(api.chain, prev_header.Number.Uint64(), prev_header.Hash())
+	if num <= epoch{
+		return 0, errNoData
+	}
+
+	//p := header.ParentHash
+	//uint64(num - epoch - 2)
+	//	prev_header := api.chain.GetHeaderByNumber(5740)
+
+	stakingList, err := api.bsrr.getStakingList(api.chain, uint64(num), header.Hash())
 	if err != nil {
 		return 0, err
 	}
 
-	roi, err := api.bsrr.getRoi(&stakingList, address)
+	roi, err := api.bsrr.getRoi(&stakingList, address, 5740)
 	if err != nil {
 		return 0, err
 	}

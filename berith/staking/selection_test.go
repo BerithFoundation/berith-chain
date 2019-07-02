@@ -20,7 +20,7 @@ func TestVoting2(t *testing.T) {
 	number := uint64(1000)
 	//epoch := uint64(20)
 	perioid := uint64(10)
-	loop := 10
+	loop := 10000
 
 	cs := NewCandidates(number, perioid)
 
@@ -44,9 +44,6 @@ func TestVoting2(t *testing.T) {
 	//	fmt.Println(" VALUE :: ", val)
 	//	idx++
 	//}
-
-
-
 
 	roi := cs.GetRoi(common.BytesToAddress([]byte(strconv.Itoa(1))))
 	fmt.Println("ROI :: ", roi)

@@ -85,19 +85,23 @@ func (cs *Candidates) TotalStakeBalance() *big.Int {
 }
 
 //ROI 산출
-func (cs *Candidates) GetRoi() map[common.Address]float64 {
-	result := make(map[common.Address]float64, 0)
+func (cs *Candidates) GetRoi(address common.Address) float64 {
 	total := cs.TotalStakeBalance()
 	roi := big.NewFloat(0)
+
+	stake := big.NewInt(0)
 	for _, c := range cs.selections {
-		stake :=  new(big.Int).Div(c.stake, big.NewInt(1e+8))
-		roi.Quo( new(big.Float).SetInt(stake), new(big.Float).SetInt(total))
-		f, _ := roi.Float64()
-		r := math.Round(f * float64(100)) / float64(100)
-		result[c.address] = r
+		if c.address == address {
+			stake =  new(big.Int).Div(c.stake, big.NewInt(1e+8))
+			break
+		}
 	}
 
-	return result
+	roi.Quo( new(big.Float).SetInt(stake), new(big.Float).SetInt(total))
+	f, _ := roi.Float64()
+	r := math.Round(f * float64(100)) / float64(100)
+
+	return r
 }
 
 //숫자 > 해시 > 숫자
