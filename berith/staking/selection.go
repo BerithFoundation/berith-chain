@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	DIF_MAX = int64(500000)
-	DIF_MIN = int64(10000)
+	DIF_MAX   = int64(500000)
+	DIF_MIN   = int64(10000)
 	START_IDX = 0
 )
 
@@ -22,21 +22,22 @@ const GROUP_UNIT = 100
 
 type Candidate struct {
 	address common.Address //address
-	stake   *big.Int       //stake balance
-	block   *big.Int       //block number -- Contribution
-	reward  *big.Int       //reward balance
+	stake   uint64         //stake balance
+	block   uint64         //block number -- Contribution
+	reward  uint64         //reward balance
+	val     uint64
 }
 
-func (c *Candidate) GetStake() *big.Int {
+func (c *Candidate) GetStake() uint64 {
 	return c.stake
 }
 
-func (c *Candidate) GetReward() *big.Int {
+func (c *Candidate) GetReward() uint64 {
 	return c.reward
 }
 
 func (c *Candidate) GetBlockNumber() float64 {
-	return float64(c.block.Uint64())
+	return float64(c.block)
 }
 
 //Stake 기간 Adv를 구한다.
@@ -45,7 +46,7 @@ func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 	y := 1.2 * float64(p)
 	div := y * math.Pow(10, 6) //10의6승
 
-	adv := (float64(number) - float64(c.block.Uint64())) / div
+	adv := (float64(number) - c.GetBlockNumber()) / div
 	if adv >= 1 {
 		return 1
 	} else {
@@ -55,10 +56,11 @@ func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 type Candidates struct {
-	number     uint64
-	period     uint64
+	number uint64
+	period uint64
 	//selections map[uint64]Candidate
 	selections []Candidate
+	total      uint64
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
@@ -66,23 +68,16 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 		number:     number,
 		period:     period,
 		selections: make([]Candidate, 0),
+		total:      0,
 	}
 }
 
 func (cs *Candidates) Add(c Candidate) {
+	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
+	advStake := c.stake * adv
+	cs.total += advStake
+	c.val = cs.total
 	cs.selections = append(cs.selections, c)
-}
-
-//총 스테이킹 량 , 가산점 추가된 결과
-func (cs *Candidates) TotalStakeBalance() *big.Int {
-	total := big.NewInt(0)
-	for _, c := range cs.selections {
-		//adv 적용
-		adv := int64(c.GetAdvantage(cs.number, cs.period)*10) + 10
-		advStake := new(big.Int).Div(new(big.Int).Mul(c.stake, big.NewInt(adv)), big.NewInt(10))
-		total.Add(total, advStake)
-	}
-	return total.Div(total, big.NewInt(1e+10))
 }
 
 //숫자 > 해시 > 숫자
@@ -98,143 +93,113 @@ func (cs Candidates) GetSeed(number uint64) int64 {
 	return seed
 }
 
-//BC 선출
-func (cs *Candidates) GetBlockCreator(number uint64) *map[common.Address]*big.Int {
+type Range struct {
+	min   uint64
+	max   uint64
+	start int
+	end   int
+}
 
-	bc := make(map[common.Address]*big.Int, 0)
+type Queue struct {
+	storage []Range
+	size    int
+	front   int
+	rear    int
+}
 
+func (q *Queue) enqueue(r Range) error {
+	next := (q.rear + 1) % q.size
+	if next == q.front {
+		return errors.New("Queue is full")
+	}
+	q.storage[q.rear] = r
+	q.rear = next
+	return nil
+}
 
-	//Copy
-	var cp *Candidates
-	var err error
-	size := len(cs.selections)
-	if len(cs.selections) < GROUP_UNIT {
-		err, cp = nextCandidate(cs, 0, size)
-		START_IDX = size
-		if err != nil {
-			return &bc
-		}
-	} else {
-		err, cp = nextCandidate(cs, 0, GROUP_UNIT)
-		START_IDX = GROUP_UNIT
-		if err != nil {
-			return &bc
-		}
+func (q *Queue) dequeue() (Range, error) {
+	if q.front == q.rear {
+		return Range{}, errors.New("Queue is Empty")
+	}
+	result := q.storage[q.front]
+	q.front = (q.front + 1) % q.size
+	return result, nil
+}
+
+func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
+	if r.end-r.start <= 1 {
+		return cs.selections[r.start].address
 	}
 
+	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
 
+	start := r.start
+	end := r.end
+	for {
+		target := (start + end) / 2
+		a := r.min
+		if target > 0 {
+			a = cs.selections[target-1].val
+		}
+		b := cs.selections[target].val
 
-	//cp.selections = append(cp.selections, cs.selections...)
+		if random >= a && random <= b {
+			if r.start != target {
+				q.enqueue(Range{
+					min:   r.min,
+					max:   a - 1,
+					start: r.start,
+					end:   target,
+				})
+			}
+			if target+1 != r.end {
+				q.enqueue(Range{
+					min:   b + 1,
+					max:   r.max,
+					start: target + 1,
+					end:   r.end,
+				})
+			}
+			return cs.selections[target].address
+		}
+
+		if random < a {
+			end = target
+		} else {
+			start = target + 1
+		}
+	}
+}
+
+func (cs *Candidates) BinarySearch(number uint64) *map[common.Address]*big.Int {
+	queue := &Queue{
+		storage: make([]Range, len(cs.selections)),
+		size:    len(cs.selections),
+		front:   0,
+		rear:    0,
+	}
+	result := make(map[common.Address]*big.Int)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
 
-	seed := cs.GetSeed(number)
-	//seed := 100000000 + int64(number)
-	//fmt.Println("SEED :: ", seed)
-	rand.Seed(seed)
+	rand.Seed(cs.GetSeed(number))
 
-	total := cp.TotalStakeBalance()
+	queue.enqueue(Range{
+		min:   0,
+		max:   cs.total,
+		start: 0,
+		end:   len(cs.selections),
+	})
 
-	selector := func(value int64) (error, int64, common.Address) {
-		temp := new(big.Int).Add(total, big.NewInt(0))
-		// Range 확인
-
-		for i:=0; i<len(cp.selections); i++ {
-			s := cp.selections[uint64(i)]
-			stake := new(big.Int).Div(s.stake, big.NewInt(1e+10))
-			temp.Sub(temp, stake)
-			if temp.Cmp(big.NewInt(value)) == 1 { //total - stake > value
-				continue
-			}
-
-			//total - stake <= value
-			return nil, int64(i), s.address
-		}
-		return errors.New("empty SRT"), -1, common.Address{}
+	for queue.front != queue.rear {
+		r, _ := queue.dequeue()
+		account := r.binarySearch(queue, cs)
+		result[account] = big.NewInt(DIF)
+		DIF -= DIF_R
 	}
 
+	fmt.Println(DIF)
 
-	loop := func(value int64) {
-		err, key, addr := selector(value)
-		if err != nil {
-			return
-		}
-
-		if DIF == DIF_MAX {
-			bc[addr] = big.NewInt(DIF_MAX)
-			DIF -= DIF_R
-		} else {
-			bc[addr] = big.NewInt(DIF)
-			DIF -= DIF_R
-		}
-
-		stake := new(big.Int).Div(cp.selections[uint64(key)].stake, big.NewInt(1e+10))
-		total.Sub(total, stake)
-
-		//remove Index
-		//delete(cp.selections, uint64(key))
-		cp.selections = removeSlice(cp.selections, key)
-	}
-
-	value := int64(0)
-	//fmt.Println("TOTAL ::::: ", total.String(), total.Int64())
-	for {
-
-		if len(cp.selections) == 0 {
-			remainder := len(cs.selections) - START_IDX
-			if remainder <= 0 {
-				break
-			}
-
-			if remainder < GROUP_UNIT {
-				err, cp = nextCandidate(cs, START_IDX, START_IDX + remainder)
-				START_IDX += remainder
-			} else {
-				//fmt.Println("NEXT :: ", NEXT)
-				err, cp = nextCandidate(cs, START_IDX, START_IDX + GROUP_UNIT)
-				START_IDX += GROUP_UNIT
-				if err != nil {
-					break
-				}
-			}
-			total = cp.TotalStakeBalance()
-		}
-
-		if total.Cmp(big.NewInt(0)) == 0 {
-			break
-		}
-
-		value = rand.Int63n(total.Int64())
-		loop(value)
-	}
-
-	fmt.Println(len(bc))
-
-	return &bc
-}
-
-
-func nextCandidate(cs *Candidates, start, end int) (error, *Candidates){
-	cp := NewCandidates(cs.number, cs.period)
-
-	nextSize := len(cs.selections[start:end])
-
-	if nextSize == 0 {
-		return errors.New("SIZE ZERO"), nil
-	}
-
-	if end - start < GROUP_UNIT{
-		cp.selections = append(cp.selections, cs.selections[start:]...)
-	} else {
-		cp.selections = append(cp.selections, cs.selections[start:end]...)
-	}
-	return nil, cp
-}
-
-func removeSlice(cs []Candidate, i int64) []Candidate{
-	t1 := cs[:i]
-	t2 := cs[i+1:]
-	t1 = append(t1, t2...)
-	return t1
+	return &result
 }

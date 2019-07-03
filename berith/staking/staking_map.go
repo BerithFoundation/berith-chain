@@ -220,13 +220,12 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		if reward == nil {
 			reward = big.NewInt(0)
 		}
-		value, _ := new(big.Int).SetString(info.Value().String(), 10)
-		blockNumber, _ := new(big.Int).SetString(info.BlockNumber().String(), 10)
-		cs.Add(Candidate{info.Address(), value, blockNumber, reward})
+		value := new(big.Int).Div(info.Value(), big.NewInt(1e+18)).Uint64()
+		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0})
 
 	}
 
-	list.table = *cs.GetBlockCreator(blockNumber)
+	list.table = *cs.BinarySearch(blockNumber)
 
 	for key, value := range list.table {
 		fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
