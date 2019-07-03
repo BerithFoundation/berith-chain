@@ -171,7 +171,7 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, err
 	}
 
-	roi, err := api.bsrr.getJoinRatio(&stakingList, address, 5732)
+	roi, err := api.bsrr.getJoinRatio(&stakingList, address, uint64(num))
 	if err != nil {
 		return 0, err
 	}
