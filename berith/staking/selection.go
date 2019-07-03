@@ -174,7 +174,7 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
-		size:    len(cs.selections),
+		size:    len(cs.selections) + 1,
 		front:   0,
 		rear:    0,
 	}
