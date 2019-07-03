@@ -201,12 +201,6 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		return
 	}
 
-	//cs := &Candidates{
-	//	number:     blockNumber,
-	//	period:     period,
-	//	selections: make([]Candidate, 0),
-	//}
-
 	cs := NewCandidates(blockNumber, period)
 
 	for _, addr := range list.sortedList {
@@ -216,34 +210,32 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 			reward = big.NewInt(0)
 		}
 		value := new(big.Int).Div(info.Value(), big.NewInt(1e+18)).Uint64()
-		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0})
+		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0, 0})
 
 	}
 
-	list.table = *cs.BinarySearch(blockNumber)
+	list.table = *cs.BlockCreator(blockNumber)
 
-	for key, value := range list.table {
-		fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
-	}
+	//for key, value := range list.table {
+	//	fmt.Println("ADDRESS :: "+key.String(), "DIFF :: "+value.String())
+	//}
 
 }
 
-func (list *StakingMap) GetRoi(address common.Address, blockNumber, period uint64) float64 {
-	// cs := NewCandidates(blockNumber, period)
+func (list *StakingMap) GetJoinRatio(address common.Address, blockNumber, period uint64) float64 {
+	cs := NewCandidates(blockNumber, period)
 
-	// for _, addr := range list.sortedList {
-	// 	info := list.storage[addr]
-	// 	reward := info.StkReward
-	// 	if reward == nil {
-	// 		reward = big.NewInt(0)
-	// 	}
-	// 	value, _ := new(big.Int).SetString(info.Value().String(), 10)
-	// 	blockNumber, _ := new(big.Int).SetString(info.BlockNumber().String(), 10)
-	// 	cs.Add(Candidate{info.Address(), value, blockNumber, reward})
-	// }
-
-	// roi := cs.GetRoi(address)
-	return 0
+	for _, addr := range list.sortedList {
+		info := list.storage[addr]
+		reward := info.StkReward
+		if reward == nil {
+			reward = big.NewInt(0)
+		}
+		value := new(big.Int).Div(info.Value(), big.NewInt(1e+18)).Uint64()
+		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0, 0})
+	}
+	roi := cs.getJoinRatio(address)
+	return roi
 }
 
 type infoForSort []stkInfo

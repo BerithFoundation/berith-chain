@@ -140,7 +140,7 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 	return signers, nil
 }
 
-func (api *API) GetRoi(address common.Address, number *rpc.BlockNumber) (float64, error) {
+func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)
 	var header *types.Header
 	var num int64
@@ -171,7 +171,7 @@ func (api *API) GetRoi(address common.Address, number *rpc.BlockNumber) (float64
 		return 0, err
 	}
 
-	roi, err := api.bsrr.getRoi(&stakingList, address, 5740)
+	roi, err := api.bsrr.getJoinRatio(&stakingList, address, 5732)
 	if err != nil {
 		return 0, err
 	}

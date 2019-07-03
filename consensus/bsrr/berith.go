@@ -977,8 +977,8 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 }
 
-func (c *BSRR) getRoi(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
-	roi := (*stakingList).GetRoi(address, blockNumber, c.config.Period)
+func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
+	roi := (*stakingList).GetJoinRatio(address, blockNumber, c.config.Period)
 
 	return roi, nil
 }

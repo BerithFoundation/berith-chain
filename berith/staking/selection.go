@@ -2,7 +2,6 @@ package staking
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -25,7 +24,8 @@ type Candidate struct {
 	stake   uint64         //stake balance
 	block   uint64         //block number -- Contribution
 	reward  uint64         //reward balance
-	val     uint64
+	val     uint64		   //sum
+	advStake		uint64		   //advStake
 }
 
 func (c *Candidate) GetStake() uint64 {
@@ -73,9 +73,9 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 }
 
 func (cs *Candidates) Add(c Candidate) {
-	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
-	advStake := c.stake * adv
-	cs.total += advStake
+	adv := uint64(c.GetAdvantage(cs.number, cs.period) * 10) + 10
+	c.advStake = c.stake * adv
+	cs.total += c.advStake
 	c.val = cs.total
 	cs.selections = append(cs.selections, c)
 }
@@ -171,7 +171,7 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	}
 }
 
-func (cs *Candidates) BinarySearch(number uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
 		size:    len(cs.selections),
@@ -199,7 +199,23 @@ func (cs *Candidates) BinarySearch(number uint64) *map[common.Address]*big.Int {
 		DIF -= DIF_R
 	}
 
-	fmt.Println(DIF)
+	//fmt.Println(DIF)
 
 	return &result
+}
+
+
+//ROI 산출
+func (cs *Candidates) getJoinRatio(address common.Address) float64 {
+	stake := uint64(0)
+	for _, c := range cs.selections {
+		if c.address == address {
+			stake =  c.advStake
+			break
+		}
+	}
+
+	f := float64(stake) / float64(cs.total)
+	r := math.Round(f * float64(100))
+	return r
 }
