@@ -19,7 +19,7 @@ func TestVoting2(t *testing.T) {
 	number := uint64(10000)
 	//epoch := uint64(20)
 	perioid := uint64(10)
-	loop := 4
+	loop := 100000
 
 	cs := NewCandidates(number, perioid)
 
@@ -37,11 +37,11 @@ func TestVoting2(t *testing.T) {
 	//
 	fmt.Println(len(*bc))
 	//
-	idx := 1
-	for key, val := range *bc {
-		fmt.Print("SIGNER "+strconv.Itoa(idx)+"::  ", common.Bytes2Hex(key.Bytes()))
-		fmt.Println(" VALUE :: ", val)
-		idx++
-	}
+	//idx := 1
+	//for key, val := range *bc {
+	//	fmt.Print("SIGNER "+strconv.Itoa(idx)+"::  ", common.Bytes2Hex(key.Bytes()))
+	//	fmt.Println(" VALUE :: ", val)
+	//	idx++
+	//}
 
 }
