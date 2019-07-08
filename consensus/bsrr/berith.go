@@ -515,18 +515,18 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			var signers signers
 			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 			if err != nil {
-				//return nil, err
+				return nil, err
 			}
 
 			signerMap := signers.signersMap()
 			if _, ok := signerMap[header.Coinbase]; !ok {
-				//return nil, errUnauthorizedSigner
+				return nil, errUnauthorizedSigner
 			}
 
 			parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
 			if predicted.Cmp(header.Difficulty) != 0 {
-				//return nil, errInvalidDifficulty
+				return nil, errInvalidDifficulty
 			}
 		}
 	}
