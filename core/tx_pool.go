@@ -629,9 +629,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 
 	//[BERITH] 악의 적인 Stake 를 막기 위함. (여기에 걸린다면 소스를 수정 했다고 봐야함)
+	stakedAmount := pool.currentState.GetStakeBalance(*tx.To())
+	totalStakingAmount := tx.Value().Add(tx.Value(), stakedAmount)
 	minimum := pool.chainconfig.Bsrr.StakeMinimum
 	if tx.Base() == types.Main && tx.Target() == types.Stake {
-		if tx.Value().Cmp(minimum) == -1 {
+		if totalStakingAmount.Cmp(minimum) == -1 {
 			return ErrStakingBalance
 		}
 	}

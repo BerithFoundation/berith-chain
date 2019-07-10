@@ -15,6 +15,14 @@ cmd/berith/berith
 cmd/berith/berith.exe
 cmd/berith/debug
 
+wallet/Berith/*
+wallet/vendor/
+wallet/output/
+berith/keystore
+berith/history
+berith/berith
+cmd/berith/password.txt
+
 #*
 .#*
 *#
