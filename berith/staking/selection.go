@@ -14,10 +14,8 @@ import (
 var (
 	DIF_MAX   = int64(500000)
 	DIF_MIN   = int64(10000)
-	START_IDX = 0
+	TS = uint64(0) //Total Staking Value
 )
-
-const GROUP_UNIT = 100
 
 type Candidate struct {
 	address common.Address //address
@@ -78,6 +76,8 @@ func (cs *Candidates) Add(c Candidate) {
 	cs.total += c.advStake
 	c.val = cs.total
 	cs.selections = append(cs.selections, c)
+
+	TS += c.stake //Total Staking 
 }
 
 //숫자 > 해시 > 숫자
@@ -195,7 +195,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	for queue.front != queue.rear {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF)
+		result[account] = big.NewInt(DIF + int64(TS))
 		DIF -= DIF_R
 	}
 
