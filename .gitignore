@@ -21,6 +21,14 @@ berith/keystore
 berith/history
 cmd/berith/debug
 
+wallet/Berith/*
+wallet/vendor/
+wallet/output/
+berith/keystore
+berith/history
+berith/berith
+cmd/berith/password.txt
+
 #*
 .#*
 *#

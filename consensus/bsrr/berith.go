@@ -14,7 +14,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"sync"
@@ -35,6 +34,8 @@ import (
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/gookit/color"
+
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -44,7 +45,7 @@ const (
 	inmemorySignatures = 4096    // Number of recent block signatures to keep in memory
 
 	//stakingInterval = 10
-	wiggleTime      = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
 var (
@@ -133,6 +134,8 @@ var (
 	errRecentlySigned = errors.New("recently signed")
 
 	errStakeValueError = errors.New("stake value Failure")
+
+	errNoData = errors.New("no data")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -492,13 +495,17 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, err
 	}
 
+	font := color.Yellow
+	if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
+		font = color.Green
+	}
 	stakingList.Print()
-	fmt.Println("##############[FINALIZE]##############")
-	fmt.Println("NUMBER : ", header.Number.String())
-	fmt.Println("HASH : ", header.Hash().Hex())
-	fmt.Println("COINBASE : ", header.Coinbase.Hex())
-	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-	fmt.Println("######################################")
+	font.Println("##############[FINALIZE]##############")
+	font.Println("NUMBER : ", header.Number.String())
+	font.Println("HASH : ", header.Hash().Hex())
+	font.Println("COINBASE : ", header.Coinbase.Hex())
+	font.Println("DIFFICULTY : ", header.Difficulty.String())
+	font.Println("######################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
 		//Epoch 이후에 처리
@@ -616,17 +623,11 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 }
 func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 
-
-
 	target := parent
 	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(int64(c.config.Epoch)))
 	for target.Number.Cmp(big.NewInt(0)) > 0 && target.Number.Cmp(targetNumber) > 0 {
 		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
-	fmt.Println("==================[DIFFICULTY]=================")
-	fmt.Println("HASH : ", target.Hash().Hex())
-	fmt.Println("NUMBER : ", target.Number.String())
-	fmt.Println("COMPARE : ", target.Number.Cmp(big.NewInt(0)))
 	if target.Number.Cmp(big.NewInt(0)) <= 0 {
 		return big.NewInt(1234)
 	}
@@ -638,8 +639,6 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	}
 
 	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
-	list.Print()
-	fmt.Println("DIFFICULTY : ", diff.String())
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
@@ -787,6 +786,10 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 	for i := 0; i < len(blocks)/2; i++ {
 		blocks[i], blocks[len(blocks)-1-i] = blocks[len(blocks)-1-i], blocks[i]
+	}
+
+	if len(blocks) > 0 {
+		list.ClearTable()
 	}
 
 	list = list.Copy()
@@ -974,21 +977,10 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 }
 
-func (c *BSRR) roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {
-	users := (*stakingList).GetRoundJoinRatio()
-	if users == nil {
-		return 0, errors.New("not reward ratio")
-	}
+func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
+	roi := (*stakingList).GetJoinRatio(address, blockNumber, c.config.Period)
 
-	if len(*users) == 0 {
-		return 0, errors.New("not reward ratio")
-	}
-
-	p := (*users)[address]
-
-	//rs[address] = (p + 1) /10000
-	//rs[address] = p
-	return p, nil
+	return roi, nil
 }
 
 func reward(number float64) float64 {
