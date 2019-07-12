@@ -40,8 +40,6 @@ func init(){
 func main() {
 	start_ui()
 }
-
-
 func start_ui(){
 	// Init
 	flag.Parse()
@@ -106,19 +104,19 @@ func start_ui(){
 					}
 				}
 			}()
-
 			go Start()
 			return nil
 		},
 		//RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
-			Homepage:       "index.html",
+			Homepage:       "/html/login.html",
+			//Homepage:       "index.html",
 			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
 				BackgroundColor: astilectron.PtrStr("#333"),
 				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(700),
-				Width:           astilectron.PtrInt(700),
+				Height:          astilectron.PtrInt(1250),
+				Width:           astilectron.PtrInt(1250),
 			},
 		}},
 	}); err != nil {

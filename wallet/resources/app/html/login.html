@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>Berith PC Wallet</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+    <meta name="subject" content="" />
+    <meta name="application-name" content="">
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="copyright" content="Copyrights (c) " />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+    <script src="../static/js/api/berith.js"></script>
+    <link rel="import" href="../static/common.html">
+</head>
+    
+<body>
+    <div class="wrap">
+        <div class="login">
+            <div class="login_header">
+                <h1 class="logo">berith wallet</h1>
+            </div>
+            <div class="inp_group" id = "idGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <h5>지갑명</h5>
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" id = "loginID" type="text" />
+                    </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <p class="error_txt">
+                </p>
+            </div>
+            <div class="inp_group" id = "pwdGroup"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <h5>비밀번호</h5>
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" id = "loginPwd" type="password" /><!-- type: password/text -->
+                        <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                    </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <p class="error_txt">
+                </p>
+            </div>
+            <div class="btn_area">
+                <a class="btn full red on" onclick=fnLogin() >로그인</a><!-- on -->
+            </div>
+            <div class="btn_area">
+                <a class="btn white" href="createAccount.html">지갑 생성</a>
+                <a class="btn white" href="#!">Keystore File 복원</a>
+            </div>
+            
+                
+        </div>
+    </div><!-- e://wrap -->
+
+    <script type = "text/javascript">
+        $('#loginID').focus(function(){
+            $('#idGroup').addClass('active del')
+        });
+        $('#loginID').blur(function(){
+            $('#idGroup').removeClass('active del')
+        });
+        $('#loginPwd').focus(function(){
+            $('#pwdGroup').addClass('active del')
+        });
+        $('#loginPwd').blur(function(){
+            $('#pwdGroup').removeClass('active del')
+        });
+        function fnLogin(){
+            berith.blockNumber()
+            var loginId = $('#loginID').val()
+            var loginPwd = $('#loginPwd').val()
+
+            if(loginId == ""){
+                $('#idGroup').addClass('error')
+                $('.error_txt').html("아이디를 입력하세요.")
+                $('#loginID').focus()
+            return ;
+            }
+            if(loginPwd == ""){
+                $('#idGroup').removeClass('error')
+                $('.error_txt').html("비밀번호를 입력하세요.")
+                $('#loginPwd').focus()
+                return ;
+            }
+            //database.selectMember()
+        }
+    </script>
+</body>
+</html>

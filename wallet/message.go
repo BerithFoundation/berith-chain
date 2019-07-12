@@ -17,9 +17,17 @@ import (
 	"strings"
 )
 
-
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+	var info map[string]interface{}
+	err = json.Unmarshal(m.Payload, &info)
+	if err != nil{
+		payload = nil
+		return
+	}
+	api := info["api"]
+	args := info["args"].([]interface{})
+
 	switch m.Name {
 	case "init":
 		ch <- NodeMsg{
@@ -28,52 +36,22 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		}
 		break
 	case "callApi":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil{
-			payload = nil
-			break
-		}
-
-		api := info["api"]
-		args := info["args"].([]interface{})
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil{
-			payload = nil
-			break
-		}
-		api := info["api"]
-		args := info["args"].([]interface{})
 		payload , err = callDB(api , args...)
 		break
 	case "exportKeystore":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
 		args := info["args"].([]interface{})
 		payload, err = exportKeystore(args)
 		break
 
 	case "importKeystore":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
 		args := info["args"].([]interface{})
 		err = importKeystore(args)
 		payload = nil
 		break
 	}
-
 	return
 }
 
@@ -125,6 +103,7 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 
 	return val, err
 }
+
 func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	key := make([]string, 0)
 	for _, item := range args{
@@ -138,7 +117,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	switch api.(string) {
 	case "selectContact" :
 		contact := make(walletdb.Contact,0)
-		err := WalletDB.Select([]byte(acc+"-contact"), &contact)
+		err := WalletDB.Select([]byte(acc), &contact)
 		if err != nil {
 			return nil, err
 		}
@@ -158,20 +137,21 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte(acc), &contact)
 		contact[common.HexToAddress(key[0])] = key[1]
-		err := WalletDB.Insert([]byte(acc+"-contact") , contact)
+		err := WalletDB.Insert([]byte(acc) , contact)
 		if err != nil {
 			return nil, err
 		}
 		return  nil , nil
 		break
 	case "insertMember":
+		newAcc ,err := callNodeApi("personal_newAccount", key[2])
 		member := walletdb.Member{
-			Address: common.HexToAddress(acc),
+			Address: common.HexToAddress(newAcc),
 			ID : key[0],
 			Password: key[1],
 		}
 		member.PrivateKey[0] = 12
-		err = WalletDB.Insert([]byte(acc+"-member") , member)
+		err = WalletDB.Insert([]byte(key[0]) , member)
 		if err != nil {
 			return nil , err
 		}
@@ -181,7 +161,6 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 
 	return nil ,nil
 }
-
 
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName:= "keystore.zip"
@@ -215,7 +194,6 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 
 	return body, nil
 }
-
 
 func importKeystore(args []interface{}) (error)  {
 

@@ -32,21 +32,31 @@ let personal = {
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
-            $('#unlockAccount').val(message.payload)
+            $('#lockAccount').val(message.payload)
         })
     },
-    lockAccount: function () {
+    getPrivateKey: function (getPrivateAdd , getPrivatePwd ) {
         let message = {"name": "callApi"};
         message.payload = {
-            "api" : "personal_lockAccount",
-            "args" : [account ]
+            "api" : "personal_privateKey",
+            "args" : [getPrivateAdd,getPrivatePwd ]
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
-            $('#unlockAccount').val(message.payload)
+            $('#getPrivateResult').val(message.payload)
         })
-    }
-
-    //personal_importRawKey
+    },
+    importRawKey : function (importRawKeyAdd , importRawKeyPwd) {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "personal_importRawKey",
+            "args" : [importRawKeyAdd,importRawKeyPwd ]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            $('#importRawKeyResult').val(message.payload)
+        })
+    },
 }

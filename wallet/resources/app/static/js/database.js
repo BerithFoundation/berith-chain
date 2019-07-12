@@ -10,6 +10,7 @@ let database = {
             asticode.loader.hide()
             var obj = message.payload
             console.log("contact :: " +message.payload)
+            console.log("sdfsdfsdf :: " + Array.isArray(obj))
             var keys = Object.keys(obj);
             var contents = ''
             $('#contactData').empty()
@@ -21,6 +22,22 @@ let database = {
                 contents += '</tr>'
             }
             $('#contactData').append(contents)
+        })
+    },
+    checkLogin : function(memberName, memberPwd) {
+        let message = {"name" : "callDB"}
+        message.payload = {
+            "api" : "selectMember",
+            "args" : ["aa"]
+        }
+        astilectron.sendMessage(message , function (message) {
+            var obj = message.payload
+            console.log("array :: " + Array.isArray(obj))
+            obj.forEach((v) => {
+                console.log("Address :: " +v.Address)
+                console.log("ID :: " +v.ID)
+                console.log("Password :: " +v.Password)
+            })
         })
     },
     selectMember : function () {
@@ -71,4 +88,5 @@ let database = {
             // 성공 메세지 처리
         })
     },
+
 }

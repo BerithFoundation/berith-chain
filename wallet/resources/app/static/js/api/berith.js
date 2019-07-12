@@ -2,28 +2,24 @@ let berith = {
 
     blockNumber: function () {
         let message = {"name": "callApi"};
-
         message.payload = {
             "api" : "berith_blockNumber",
             "args" : []
         }
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
             console.log("msg :: " + message.payload)
-            $('#blockNumber').val(message.payload)
+            $('#loginID').val(message.payload)
         })
     },
 
     coinbase: function () {
         let message = {"name": "callApi"};
-
         message.payload = {
             "api" : "berith_coinbase",
             "args" : []
         }
-
         //asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
           //  asticode.loader.hide();
@@ -34,12 +30,10 @@ let berith = {
 
     accounts: function () {
         let message = {"name": "callApi"};
-
         message.payload = {
             "api" : "berith_accounts",
             "args" : []
         }
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
@@ -53,7 +47,6 @@ let berith = {
             "api" : "berith_getBalance",
             "args" : [account,"latest" ]
         }
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
@@ -67,7 +60,6 @@ let berith = {
             "api" : "berith_getStakeBalance",
             "args" : [account,"latest" ]
         }
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
@@ -81,7 +73,6 @@ let berith = {
             "api" : "berith_getRewardBalance",
             "args" : [account,"latest" ]
         }
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
@@ -147,6 +138,34 @@ let berith = {
             $('#rtsResult').val(message.payload)
         })
     },
+
+    pendingTransactions: function ( ) {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "berith_pendingTransactions",
+            "args" : []
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            $('#pendingResult').val(message.payload)
+        })
+    },
+
+    updateAccount : function (updateAccountAdd , updateAccountPwd , updateAccountNewPwd) {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "berith_updateAccount",
+            "args" : [updateAccountAdd,updateAccountPwd,updateAccountNewPwd]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            $('#updateAccountResult').val(message.payload)
+            console.log("updateAccount ::: " + message.payload)
+        })
+    },
+
     exportKeystore: function () {
         let message = {"name": "exportKeystore"};
         let password = $('#exportPassword').val()
@@ -155,15 +174,9 @@ let berith = {
             alert("Enter password to export keystore")
             return
         }
-
-
-
         message.payload = {
             "args" : [password]
         }
-
-
-
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             var bytes = base64ToArrayBuffer(message.payload)
@@ -175,7 +188,6 @@ let berith = {
             asticode.loader.hide();
         })
     },
-
     importKeystore: function (e) {
         asticode.loader.show()
         let file = document.getElementById("keystoreFile").files[0];
@@ -186,9 +198,6 @@ let berith = {
             alert("Enter keystore backup file password")
             return
         }
-
-
-
         message.payload = {
             "args" : [file.path, password]
         }
@@ -197,7 +206,6 @@ let berith = {
         })
     },
 }
-
 
 function base64ToArrayBuffer(base64) {
     var binaryString = window.atob(base64);
