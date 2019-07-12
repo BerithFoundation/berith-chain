@@ -498,7 +498,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
-		font = color.BgLightBlue
+		font = color.Blue
 		font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
 			return nil, errInvalidDifficulty
