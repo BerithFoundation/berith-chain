@@ -9,14 +9,16 @@ let index = {
         document.addEventListener('astilectron-ready', function() {
             // Listen
             index.listen();
+
+            let message = {"name": "init"};
+            asticode.loader.show()
+            astilectron.sendMessage(message, function(message) {
+                // Init
+                asticode.loader.hide();
+            })
         })
 
-        let message = {"name": "init"};
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            // Init
-            asticode.loader.hide();
-        })
+
     },
     listen: function() {
         //폴링 리시브등록?
@@ -40,4 +42,4 @@ let index = {
     nextPage : function () {
         location.href="http://google.com"
     },
-};
+}

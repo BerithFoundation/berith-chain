@@ -29,12 +29,13 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	args := info["args"].([]interface{})
 
 	switch m.Name {
-	case "init":
+	/*case "init":
 		ch <- NodeMsg{
 			t: "init",
 			v: nil,
+			stack: nil,
 		}
-		break
+		break*/
 	case "callApi":
 		payload, err = callNodeApi(api, args...)
 		break
