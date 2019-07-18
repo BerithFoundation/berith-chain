@@ -481,6 +481,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	font.Println("HASH : ", header.Hash().Hex())
 	font.Println("COINBASE : ", header.Coinbase.Hex())
 	font.Println("DIFFICULTY : ", header.Difficulty.String())
+	font.Println("UNCLES : ", header.UncleHash.Hex())
 	font.Println("######################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
