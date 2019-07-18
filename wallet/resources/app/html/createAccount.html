@@ -12,12 +12,10 @@
     <meta name="copyright" content="Copyrights (c) " />
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
-
-    <link rel="import" href="../static/common.html">
-    <script src="../static/js/database.js"></script>
 </head>
     
 <body>
+<link rel="import" href="../static/common.html">
     <div class="wrap">
         <!-- 콘텐츠 영역 -->
     </div><!-- e://wrap -->
@@ -59,7 +57,7 @@
                         <h5>비밀번호 확인</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
-                                <input class="inp" type="text" id = "loginPwdR" /><!-- type: password/text -->
+                                <input class="inp" type="password" id = "loginPwdR" /><!-- type: password/text -->
                                 <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
                             </span>
                             <a class="del" href="#!">삭제</a>
@@ -70,7 +68,7 @@
                     </div>
                 </div>
                 <div class="pop_footer">
-                    <a class="btn red " onclick=fnCreateAccount() >다음</a><!-- 확성화 active/ on 추가 -->
+                    <a class="btn red" id ="btnCreate" onclick=fnCreateAccount() >다음</a><!-- 확성화 active/ on 추가 -->
                 </div>
             </div><!-- e://pop_wrap  -->
     </div>
@@ -94,6 +92,31 @@
             $('#pwdGroupR').removeClass('active del')
         });
 
+        $("#loginID").on("propertychange change keyup paste input", function() {
+            var currentVal = $(this).val();
+            if( currentVal != "" && $('#loginPwd').val() != "" && $('#loginPwdR').val() != ""){
+                $('#btnCreate').addClass('on')
+            }else{
+                $('#btnCreate').removeClass('on')
+            }
+        });
+        $("#loginPwd").on("propertychange change keyup paste input", function() {
+            var currentVal = $(this).val();
+            if( currentVal != "" && $('#loginID').val() != "" && $('#loginPwdR').val() != ""){
+                $('#btnCreate').addClass('on')
+            }else{
+                $('#btnCreate').removeClass('on')
+            }
+        });
+        $("#loginPwdR").on("propertychange change keyup paste input", function() {
+            var currentVal = $(this).val();
+            if( currentVal != "" && $('#loginPwd').val() != "" && $('#loginID').val() != ""){
+                $('#btnCreate').addClass('on')
+            }else{
+                $('#btnCreate').removeClass('on')
+            }
+        });
+
         function fnCreateAccount(){
             var loginId = $('#loginID').val()
             var loginPwd = $('#loginPwd').val()
@@ -102,7 +125,6 @@
             if(loginId == ""){
                 $('#idGroup').addClass('error')
                 $('#err1').html("아이디를 입력하세요")
-                $('')
                 $('#loginID').focus()
                 return
             }

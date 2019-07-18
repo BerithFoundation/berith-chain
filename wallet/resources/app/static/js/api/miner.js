@@ -8,7 +8,10 @@ let miner = {
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
+            var obj  = message.payload
+            console.log("obj :: " +obj)
             $('#setBerithbase').val(message.payload)
+            location.href="main.html?Address="+setAccount;
         })
     },
     miningStart: function () {

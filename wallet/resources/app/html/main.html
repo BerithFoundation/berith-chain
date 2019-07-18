@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>Berith PC Wallet</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+    <meta name="subject" content="" />
+    <meta name="application-name" content="">
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="copyright" content="Copyrights (c) " />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+    <script src="../static/lib/qrcodegen/qrcode.js"></script>
+
+</head>
+    
+<body>
+<link rel="import" href="../static/common.html">
+    <div class="wrap">
+        <header class="header">
+            <h1><a class="logo" href="#">베리드 월렛</a></h1>
+            <div class="nav">
+                <ul>
+                    <li>선출될 확률 : <em>35%</em></li>
+                    <li>참여 수 : <em>300</em></li>
+                </ul>
+                <a class="btn_export" href="#!">Export</a>
+                <a class="btn_contact" href="#!">Contact</a>
+                <a class="btn_setting" href="#!">Setting</a>
+            </div>
+        </header><!-- e://header -->
+        
+        <div class="contents_wrap">
+            <div class="gnb">
+                <ul class="gnb_menu">
+                    <li><a class="btn_mywallet" href="#!">My Wallet</a></li>
+                    <li><a class="btn_send" href="#!">Send</a></li>
+                    <li><a class="btn_transaction" href="#!">Transactions</a></li>
+                </ul>
+                <span class="logout"><a class="btn_logout" href="login.html">로그아웃</a></span>
+            </div><!-- e://gnb -->
+            <div class="container main">
+                <div class="aside">
+                    <h2>MY WALLET</h2>
+                    <div class="txt_wrap">
+                        <strong>My Address</strong>
+                        <p class="addr" id ="myAdd" ></p>
+                        <span><a class="copy" onclick="copyToClipboard('#myAdd')">복사</a><a class="qr" onclick="qrCreate()">qr</a></span>
+                    </div>
+                    <hr/>
+                    <ul class="info">
+                        <li><strong>Stake</strong><spna>Main Balance<i class="arrow"></i>Stake Balance</spna></li>
+                        <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
+                        <li><strong>Add</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
+                        <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
+                    </ul>
+
+                    <div class="one_sec_wrap" id = "popCopy"><!-- view/hide -->
+                        <div class="bg"></div>
+                        <p class="complete">복사 완료</p>
+                    </div>
+
+                </div><!-- e://aside -->
+                
+                <div class="content">
+                    <div class="top_area">
+                        <div class="txt_wrap">
+                            <strong>Total Balance</strong>
+                            <p class="coin"><em>6298697982</em><em>29191492 </em>BER</p>
+                        </div>
+                    </div><!-- e://top_area -->
+                    <div class="middle_area">
+                        <div class="left">
+                            <div class="con_box">
+                                <div class="txt_wrap">
+                                    <strong>Main Balance</strong>
+                                    <p class="coin"><em>35194782642</em><em>10289718 </em>BER</p>
+                                    <a class="btn_send" href="#!">Send</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="con_box">
+                                <div class="txt_wrap">
+                                    <strong>Main Balance</strong>
+                                    <p class="coin"><em>35194782642</em><em>10289718 </em>BER</p>
+                                </div>
+                            </div>
+                            <div class="con_box">
+                                <div class="txt_wrap">
+                                    <strong>Main Balance</strong>
+                                    <p class="coin"><em>35194782642</em><em>10289718 </em>BER</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- e://middle_area -->
+                    <div class="btn_area">
+                        <a class="btn_main" href="#!">Stake</a>
+                        <a class="btn_main" href="#!">Break</a>
+                        <a class="btn_main" href="#!">Withdraw</a>
+                        <a class="btn_main" href="#!">Add</a>
+                    </div> 
+                </div><!-- e://content -->
+                <div class="sync_bar "><!--hide -->  
+                    <strong>Synchronizing…</strong>
+                    <span class="progress">
+                        <span class="progress_bar" style="width:45%"></span>
+                    </span>
+                    <span class="progress_info">45%</span>
+                </div>   
+
+            </div><!-- e://container -->
+        </div>
+    </div><!-- e://wrap -->
+
+    <div class="ly_pop hide view"><!-- view/hide -->
+        <div class="bg_dimmed"></div>
+        <div class="pop_wrap">
+                <div class="pop_header">
+                    <h5>QR코드</h5>
+                    <a class="btn_close" href="#!">close</a>
+                </div>
+                <div class="pop_body">
+                    <div class="pop_con_top">
+                        <span class="qr_img">
+                            <img src="../images/common/qr_sample.png" alt="qr images"/>
+                        </span>
+                    </div>
+                </div>
+                <div class="pop_footer">
+                    <a class="btn red on" href="#!">이미지 저장</a>    
+                </div>
+            </div><!-- e://pop_wrap  -->
+    </div>
+    <script type="text/javascript">
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+        var add
+        $(document).ready(function(){
+            add = getParameterByName("Address")
+            console.log("main add :: " + add)
+            $('#myAdd').text(add)
+        });
+        function copyText() {
+            var copyText = document.getElementById("myAdd");
+            copyText.select();
+            document.execCommand("copy");
+            $('#popCopy').removeClass('hide')
+            $('#popCopy').addClass('view')
+            setTimeout(function() {
+                $('#popCopy').removeClass('view')
+                $('#popCopy').addClass('hide')
+            }, 1000);
+        }
+        function copyToClipboard(element) {
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val($(element).text()).select();
+            document.execCommand("copy");
+            $temp.remove();
+            $('#popCopy').removeClass('hide')
+            $('#popCopy').addClass('view')
+            setTimeout(function() {
+                $('#popCopy').removeClass('view')
+                $('#popCopy').addClass('hide')
+            }, 1000);
+        }
+        function qrCreate() {
+
+        }
+    </script>
+</body>
+
+</html>

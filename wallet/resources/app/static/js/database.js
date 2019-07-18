@@ -26,19 +26,35 @@ let database = {
     },
     checkLogin : function(memberName, memberPwd) {
         let message = {"name" : "callDB"}
+        var result
         message.payload = {
-            "api" : "selectMember",
-            "args" : ["aa"]
+            "api" : "checkLogin",
+            "args" : [memberName,memberPwd ]
         }
         astilectron.sendMessage(message , function (message) {
+            if ( message == undefined){
+                console.log("no exists !!! ")
+                $('#idGroup').addClass('error')
+                $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
+                result = false
+                return
+            }
             var obj = message.payload
-            console.log("array :: " + Array.isArray(obj))
-            obj.forEach((v) => {
-                console.log("Address :: " +v.Address)
-                console.log("ID :: " +v.ID)
-                console.log("Password :: " +v.Password)
-            })
+            if(memberPwd != obj.Password) {
+                $('#pwdGroup').addClass('error')
+                $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+                result = false
+                return
+            }else {
+                $('#idGroup').removeClass('error')
+                $('#pwdGroup').removeClass('error')
+                miner.setBerithbase(obj.Address);
+
+                result = true
+                return
+            }
         })
+        return result
     },
     selectMember : function () {
         let message = {"name" : "callDB"}
@@ -85,8 +101,42 @@ let database = {
         asticode.loader.show()
         astilectron.sendMessage(message , function (message) {
             asticode.loader.hide()
-            // 성공 메세지 처리
-        })
+            var obj = message.payload
+            if(obj == "err"){
+                $('#idGroup').addClass('error')
+                $('#err1').html("이미 존재하는 아이디 입니다.")
+                return
+            }else{
+                console.log("ADD :: " + obj.Address)
+                console.log("id :: " + obj.ID)
+                console.log("pwd :: " + obj.Password)
+                console.log("private :: " + obj.PrivateKey)
+                location.href="createAccountConfirm.html?Address="+obj.Address+"&ID="+obj.ID+"&PrivateKey="+obj.PrivateKey;
+            }
+        });
     },
+    restoreMember : function (add , id , pwd , privateKey) {
+        let message = {"name" : "callDB"}
+        message.payload = {
+            "api" : "restoreMember",
+            "args" : [add , id , pwd , privateKey]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message , function (message) {
+            asticode.loader.hide()
+            var obj = message.payload
+            if(obj == "err"){
+                $('#idGroup').addClass('error')
+                $('#err1').html("이미 존재하는 아이디 입니다.")
+                return
+            }else{
+                console.log("ADD :: " + obj.Address)
+                console.log("id :: " + obj.ID)
+                console.log("pwd :: " + obj.Password)
+                console.log("private :: " + obj.PrivateKey)
+                location.href="keystoreRestoreConfirm.html";
+            }
+        });
+    }
 
 }

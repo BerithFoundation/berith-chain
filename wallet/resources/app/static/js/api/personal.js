@@ -56,7 +56,11 @@ let personal = {
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
-            $('#importRawKeyResult').val(message.payload)
+            var obj =message.payload
+            var obj2 = JSON.parse(obj)
+            console.log( "obj ::: " + obj)
+            console.log( "obj2 ::: " + obj2)
+            location.href="keystoreRestore2.html?importRawKey="+importRawKeyAdd+"&pwd="+importRawKeyPwd+"&add="+obj2;
         })
     },
 }

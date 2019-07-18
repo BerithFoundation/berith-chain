@@ -22,6 +22,7 @@ var (
 	node_testnet = flag.String("testnet", "", "testnet")
 	node_console = flag.String("console", "", "console")
 	node_datadir = flag.String("datadir", "", "datadir")
+	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
 	w       *astilectron.Window
 	WalletDB *walletdb.WalletDB
 
@@ -52,40 +53,14 @@ func start_ui(){
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
-		//Asset:    Asset,
-		//AssetDir: AssetDir,
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/icon.icns",
 			AppIconDefaultPath: "resources/icon.png",
-			//DataDirectoryPath: "C:\\Users\\Usman\\go\\src\\github.com\\BerithFoundation\\berith-chain\\wallet",
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
 			Label: astilectron.PtrStr("File"),
-			//SubMenu: []*astilectron.MenuItemOptions{
-			//	{
-			//		Label: astilectron.PtrStr("About"),
-			//		OnClick: func(e astilectron.Event) (deleteListener bool) {
-			//			if err := bootstrap.SendMessage(w, "about", htmlAbout, func(m *bootstrap.MessageIn) {
-			//				// Unmarshal payload
-			//				var s string
-			//				if err := json.Unmarshal(m.Payload, &s); err != nil {
-			//					astilog.Error(errors.Wrap(err, "unmarshaling payload failed"))
-			//					return
-			//				}
-			//				astilog.Infof("About modal has been displayed and payload is %s!", s)
-			//			}); err != nil {
-			//				astilog.Error(errors.Wrap(err, "sending about event failed"))
-			//			}
-			//
-			//
-			//
-			//			return
-			//		},
-			//	},
-			//	{Role: astilectron.MenuItemRoleClose},
-			//},
 		}},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]

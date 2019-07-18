@@ -128,7 +128,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	case "selectMember":
 		var member walletdb.Member
 
-		err := WalletDB.Select([]byte(acc+"-member"), &member)
+		err := WalletDB.Select([]byte("qwer5910"), &member)
 		if err != nil {
 			return nil, err
 		}
@@ -144,20 +144,55 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		}
 		return  nil , nil
 		break
+	case "restoreMember":
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[1]), &mem)
+		if err == nil {
+			return "err" , err
+		}
+		member := walletdb.Member{
+			Address: common.HexToAddress(key[0]),
+			ID : key[1],
+			Password: key[2],
+			PrivateKey: key[3],
+		}
+		err = WalletDB.Insert([]byte(key[1]) , member)
+		if err != nil {
+			return nil , err
+		}
+		return member, nil
+		break
 	case "insertMember":
-		newAcc ,err := callNodeApi("personal_newAccount", key[2])
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[0]), &mem)
+		if err == nil {
+			return "err" , err
+		}
+		newAcc ,err := callNodeApi("personal_newAccount", key[1])
+		newAcc = strings.ReplaceAll(newAcc , "\"","")
+		privateKey , err := callNodeApi("personal_privateKey",newAcc , key[1] )
+		privateKey = strings.ReplaceAll(privateKey , "\"","")
 		member := walletdb.Member{
 			Address: common.HexToAddress(newAcc),
 			ID : key[0],
 			Password: key[1],
+			PrivateKey: privateKey,
 		}
-		member.PrivateKey[0] = 12
 		err = WalletDB.Insert([]byte(key[0]) , member)
 		if err != nil {
 			return nil , err
 		}
+		return member, nil
 		break
+	case "checkLogin":
+		var member walletdb.Member
 
+		err := WalletDB.Select([]byte(key[0]), &member)
+		if err != nil {
+			return nil, err
+		}
+		return member, nil
+		break
 	}
 
 	return nil ,nil

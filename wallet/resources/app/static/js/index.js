@@ -17,8 +17,6 @@ let index = {
                 asticode.loader.hide();
             })
         })
-
-
     },
     listen: function() {
         //폴링 리시브등록?

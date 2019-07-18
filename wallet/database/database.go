@@ -10,7 +10,7 @@ import (
 
 type Member struct {
 	Address    common.Address
-	PrivateKey [256]byte
+	PrivateKey string
 	ID         string
 	Password   string
 }

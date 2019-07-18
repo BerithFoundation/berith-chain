@@ -13,10 +13,13 @@
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
     <script src="../static/js/api/berith.js"></script>
-    <link rel="import" href="../static/common.html">
+    <script src="../static/js/api/miner.js"></script>
+
 </head>
     
 <body>
+    <link rel="import" href="../static/common.html">
+
     <div class="wrap">
         <div class="login">
             <div class="login_header">
@@ -50,7 +53,7 @@
             </div>
             <div class="btn_area">
                 <a class="btn white" href="createAccount.html">지갑 생성</a>
-                <a class="btn white" href="#!">Keystore File 복원</a>
+                <a class="btn white" href="keystoreRestore.html">Keystore File 복원</a>
             </div>
             
                 
@@ -58,6 +61,7 @@
     </div><!-- e://wrap -->
 
     <script type = "text/javascript">
+
         $('#loginID').focus(function(){
             $('#idGroup').addClass('active del')
         });
@@ -70,8 +74,7 @@
         $('#loginPwd').blur(function(){
             $('#pwdGroup').removeClass('active del')
         });
-        function fnLogin(){
-            berith.blockNumber()
+        function  fnLogin(){
             var loginId = $('#loginID').val()
             var loginPwd = $('#loginPwd').val()
 
@@ -83,11 +86,12 @@
             }
             if(loginPwd == ""){
                 $('#idGroup').removeClass('error')
+                $('#pwdGroup').addClass('error')
                 $('.error_txt').html("비밀번호를 입력하세요.")
                 $('#loginPwd').focus()
                 return ;
             }
-            //database.selectMember()
+           database.checkLogin(loginId, loginPwd)
         }
     </script>
 </body>
