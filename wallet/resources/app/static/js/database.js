@@ -48,8 +48,8 @@ let database = {
             }else {
                 $('#idGroup').removeClass('error')
                 $('#pwdGroup').removeClass('error')
-                miner.setBerithbase(obj.Address);
-
+                console.log( "objAddress :: "  +obj.Address)
+                personal.hasAddress(obj.Address)
                 result = true
                 return
             }

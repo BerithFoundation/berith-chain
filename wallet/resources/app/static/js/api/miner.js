@@ -9,8 +9,9 @@ let miner = {
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
             var obj  = message.payload
-            console.log("obj :: " +obj)
-            $('#setBerithbase').val(message.payload)
+            console.log("obj1 :: " +setAccount)
+            console.log("obj2 :: " +obj)
+            //$('#setBerithbase').val(message.payload)
             location.href="main.html?Address="+setAccount;
         })
     },

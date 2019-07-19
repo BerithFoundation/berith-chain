@@ -41,11 +41,11 @@ let berith = {
         })
     },
 
-    getBalance: function () {
+    getBalance: function (address) {
         let message = {"name": "callApi"};
         message.payload = {
             "api" : "berith_getBalance",
-            "args" : [account,"latest" ]
+            "args" : [address,"latest" ]
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
@@ -131,6 +131,7 @@ let berith = {
         message.payload = {
             "api" : "berith_rewardToStake",
             "args" : [{from : account , value: valueData2 } ]
+        }
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {

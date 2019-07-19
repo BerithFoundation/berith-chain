@@ -10,5 +10,7 @@ let qrcode = {
             correctLevel : QRCode.CorrectLevel.H
         });
         $("#qrcode > img").css({"margin":"auto"});
+        $("#qrcode > img").attr("id", "qrImg")
+        // $("#qrcode > canvas").attr("id", "qrImg")
     }
 }

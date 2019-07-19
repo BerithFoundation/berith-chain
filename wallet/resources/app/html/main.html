@@ -13,7 +13,8 @@
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
     <script src="../static/lib/qrcodegen/qrcode.js"></script>
-
+    <script src="../static/lib/html2canvas.js"></script>
+    <script src="../static/lib/FileSaver.js"></script>
 </head>
     
 <body>
@@ -57,7 +58,7 @@
                         <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
                     </ul>
 
-                    <div class="one_sec_wrap" id = "popCopy"><!-- view/hide -->
+                    <div class="one_sec_wrap hide" id = "popCopy"><!-- view/hide -->
                         <div class="bg"></div>
                         <p class="complete">복사 완료</p>
                     </div>
@@ -115,22 +116,18 @@
         </div>
     </div><!-- e://wrap -->
 
-    <div class="ly_pop hide view"><!-- view/hide -->
+    <div class="ly_pop hide" id = "qrPop"><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
                 <div class="pop_header">
                     <h5>QR코드</h5>
-                    <a class="btn_close" href="#!">close</a>
+                    <a class="btn_close" onclick="qrPopClose()">close</a>
                 </div>
-                <div class="pop_body">
-                    <div class="pop_con_top">
-                        <span class="qr_img">
-                            <img src="../images/common/qr_sample.png" alt="qr images"/>
-                        </span>
-                    </div>
+                <div class="pop_body" >
+                    <div class="pop_con_top" id = "qrcode"></div>
                 </div>
                 <div class="pop_footer">
-                    <a class="btn red on" href="#!">이미지 저장</a>    
+                    <a class="btn red on" id = "download">이미지 저장</a>
                 </div>
             </div><!-- e://pop_wrap  -->
     </div>
@@ -172,8 +169,41 @@
             }, 1000);
         }
         function qrCreate() {
-
+            $('#qrPop').removeClass('hide')
+            $('#qrPop').addClass('view')
+            qrcode.qrgen(add)
         }
+        function qrPopClose() {
+            $("#qrcode").empty();
+            $('#qrPop').removeClass('view')
+            $('#qrPop').addClass('hide')
+        }
+        // $("#download").click(function(){
+        //     PrintDiv($("#qrcode"))
+        // });
+        // function PrintDiv(div) {
+        //     div = div[0];
+        //     html2canvas(div).then(function(canvas){
+        //       var myImage = canvas.toDataURL();
+        //       downloadURI(myImage, "qrcode.png")
+        //     });
+        // }
+        // function downloadURI(){
+        //     var link = document.createElement("a")
+        //     link.download = name;
+        //     ling.href = uri;
+        //     document.body.appendChild(link);
+        //     link.click();
+        // }
+        // $("#download").click(function(){
+        //     html2canvas($("#qrcode"), {
+        //         onrendered: function(canvas) {
+        //             canvas.toBlob(function(blob) {
+        //                 saveAs(blob, 'image.png');
+        //             });
+        //         }
+        //     });
+        // });
     </script>
 </body>
 
