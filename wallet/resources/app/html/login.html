@@ -63,6 +63,11 @@
 
     <script type = "text/javascript">
 
+        $('.login').keypress(function (e) {
+            if(e.keyCode=='13')
+                fnLogin()
+        });
+
         $('#loginID').focus(function(){
             $('#idGroup').addClass('active del')
         });

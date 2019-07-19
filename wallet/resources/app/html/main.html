@@ -178,9 +178,10 @@
             $('#qrPop').removeClass('view')
             $('#qrPop').addClass('hide')
         }
-        // $("#download").click(function(){
-        //     PrintDiv($("#qrcode"))
-        // });
+        $("#download").click(function(){
+            this.href = $('#qrcode').find('img:first').attr("src");
+            this.download = "QrCode"
+        });
         // function PrintDiv(div) {
         //     div = div[0];
         //     html2canvas(div).then(function(canvas){
