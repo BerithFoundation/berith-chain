@@ -9,7 +9,9 @@ let berith = {
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
+            var obj = message.payload
             console.log("msg :: " + message.payload)
+            blockNumber = obj
             $('#loginID').val(message.payload)
         })
     },
@@ -42,16 +44,26 @@ let berith = {
     },
 
     getBalance: function (address) {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_getBalance",
-            "args" : [address,"latest" ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#getBalance').val(message.payload)
-        })
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name": "callApi"};
+                message.payload = {
+                    "api": "berith_getBalance",
+                    "args": [address, "latest"]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message, function (message) {
+                    asticode.loader.hide();
+                    var obj = JSON.parse(message.payload)
+                    console.log("getB : " + obj)
+                    // var val = hexConvert.HexToValueString(JSON.parse(obj))
+                    // var val = hexConvert.HexToValueString(obj)
+                    var val  =parseInt(obj, 16);
+                    mainBalance = val
+                    resolve(mainBalance)
+                }) // astilectron
+            }) // settimeout
+        }) // promise
     },
 
     getStakeBalance: function () {
@@ -131,7 +143,7 @@ let berith = {
         message.payload = {
             "api" : "berith_rewardToStake",
             "args" : [{from : account , value: valueData2 } ]
-        }
+
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {

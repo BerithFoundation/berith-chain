@@ -44,5 +44,21 @@ let hexConvert = {
         rs.error = err;
         return rs
     }
+    },
+    pad :function (n, width) {
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join('0') + n;
+    },
+
+    HexToValueString: function (hex){
+        var t = hexToDec(hex);
+
+        var big = BigInt(t.toString());
+
+        var t2 = big.dividedToIntegerBy("1e18"); //0
+
+        var m = big.mod("1e18"); //127
+
+        return t2 + "." + this.pad(m.toString(), 18);
     }
 }
