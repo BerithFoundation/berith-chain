@@ -63,7 +63,7 @@ body input[type="password"]{font-family:"NanumGothic";}
 body input[type="password"]::placeholder {font-family:"NanumGothic";}
 body input[type="checkbox"]{display:none; -webkit-appearance:none;-webkit-border-radius:0;}
 body input:checked[type="checkbox"]{-webkit-appearance:checkbox}
-body input[type="radio"]{border:none;-webkit-appearance:none}
+/* body input[type="radio"]{border:none;-webkit-appearance:none} */
 
 body button,body input[type="button"],
 body input[type="submit"],
