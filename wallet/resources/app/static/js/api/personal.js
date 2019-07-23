@@ -21,18 +21,7 @@ let personal = {
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
             var obj = message.payload
-            console.log("hasAddress :: " + obj)
-            if (obj == "true"){
-                miner.setBerithbase(address);
-                console.log( "trtrtrttr")
-                return
-            }else{
-                console.log( "ffffffff")
-                $('#idGroup').addClass('error')
-                $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
-                    "Keystore File 복원을 진행해 주세요.\n")
-                return
-            }
+            return obj;
 
             //
         })

@@ -85,20 +85,53 @@
             var loginId = $('#loginID').val()
             var loginPwd = $('#loginPwd').val()
 
+            if (validateFields(loginId,loginPwd)) {
+                let result = database.checkLogin(loginId, loginPwd);
+
+                if (result) {
+                    let hasAddress = personal.hasAddress(obj.Address)
+                    console.log("hasAddress :: " + obj)
+                    if (obj == hasAddress) {
+                        miner.setBerithbase(address);
+                        console.log("trtrtrttr")
+                        return
+                    } else {
+                        console.log("ffffffff")
+                        $('#idGroup').addClass('error')
+                        $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
+                            "Keystore File 복원을 진행해 주세요.\n")
+                        return
+                    }
+
+                    $('#idGroup').removeClass('error')
+                    $('#pwdGroup').removeClass('error')
+                    console.log("objAddress :: " + obj.Address)
+                } else {
+                    $('#pwdGroup').addClass('error')
+                    $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+                }
+
+
+            }
+
+        }
+
+
+        function validateFields(loginId, loginPwd) {
             if(loginId == ""){
                 $('#idGroup').addClass('error')
                 $('.error_txt').html("아이디를 입력하세요.")
                 $('#loginID').focus()
-            return ;
+                return false ;
             }
             if(loginPwd == ""){
                 $('#idGroup').removeClass('error')
                 $('#pwdGroup').addClass('error')
                 $('.error_txt').html("비밀번호를 입력하세요.")
                 $('#loginPwd').focus()
-                return ;
+                return false;
             }
-           database.checkLogin(loginId, loginPwd)
+            return true;
         }
     </script>
 </body>
