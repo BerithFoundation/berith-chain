@@ -1,28 +1,26 @@
 let database = {
     selectContact : function () {
-        let message = {"name" : "callDB"}
-        message.payload = {
-            "api" : "selectContact",
-            "args" : ["soni"]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message , function (message) {
-            asticode.loader.hide()
-            var obj = message.payload
-            console.log("contact :: " +message.payload)
-            console.log("sdfsdfsdf :: " + Array.isArray(obj))
-            var keys = Object.keys(obj);
-            var contents = ''
-            $('#contactData').empty()
-            for ( var i in keys) {
-                contents += '<tr>'
-                console.log("key="+keys[i]+ ",  data="+ obj[keys[i]]);
-                contents += '<td><input type="text" value="'+keys[i]+'"></td>'
-                contents += '<td><input type="text" value="'+obj[keys[i]]+'"></td>'
-                contents += '</tr>'
-            }
-            $('#contactData').append(contents)
-        })
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name" : "callDB"}
+                message.payload = {
+                    "api" : "selectContact",
+                    "args" : ["soni"]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message , function (message) {
+                    asticode.loader.hide()
+                    if ( message == undefined){
+                        var obj = ""
+                        resolve(obj)
+                        return
+                    }else{
+                        var obj = message.payload
+                        resolve(obj)
+                    }
+                }) // astilectron
+            }) // settimeout
+        }) // promise
     },
     checkLogin : async function (memberName, memberPwd) {
         result = await sendMessage("callDB", "checkLogin", [memberName, memberPwd]);
@@ -57,16 +55,22 @@ let database = {
         })
     },
     insertContact : function (contactAdd , contactName) {
-        let message = {"name" : "callDB"}
-        message.payload = {
-            "api" : "insertContact",
-            "args" : [contactAdd , contactName]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message , function (message) {
-            asticode.loader.hide()
-            // 성공 메세지 처리
-        })
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name" : "callDB"}
+                message.payload = {
+                    "api" : "insertContact",
+                    "args" : [contactAdd , contactName]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message , function (message) {
+                    asticode.loader.hide()
+                    var obj = message.payload
+                    console.log( "insertContact ::: " + obj)
+                    resolve(obj)
+                })
+            }) // settimeout
+        }) // promise
     },
     insertMember : function (memberName , memberPwd) {
         let message = {"name" : "callDB"}

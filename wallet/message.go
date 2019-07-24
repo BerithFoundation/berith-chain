@@ -142,7 +142,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		if err != nil {
 			return nil, err
 		}
-		return  nil , nil
+		return  contact , nil
 		break
 	case "restoreMember":
 		var mem walletdb.Member

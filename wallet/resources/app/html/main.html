@@ -19,6 +19,7 @@
     
 <body>
 <link rel="import" href="../static/common.html">
+
 <script src="../static/js/api/berith.js"></script>
     <div class="wrap">
         <header class="header">
@@ -29,7 +30,7 @@
                     <li>참여 수 : <em>300</em></li>
                 </ul>
                 <a class="btn_export" href="#!">Export</a>
-                <a class="btn_contact" href="#!">Contact</a>
+                <a class="btn_contact" onclick="openContactList()">Contact</a>
                 <a class="btn_setting" href="#!">Setting</a>
             </div>
         </header><!-- e://header -->
@@ -56,7 +57,7 @@
                         <li><strong>Stake</strong><spna>Main Balance<i class="arrow"></i>Stake Balance</spna></li>
                         <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
                         <li><strong>Add</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
-                        <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
+                        <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Main Balance</span></li>
                     </ul>
 
                     <div class="one_sec_wrap hide" id = "popCopy"><!-- view/hide -->
@@ -78,7 +79,7 @@
                             <div class="con_box">
                                 <div class="txt_wrap">
                                     <strong>Main Balance</strong>
-                                    <p class="coin"><em id = "mainBalance"></em>BER</p>
+                                    <p class="coin"><em id = "mainBalance"></em> BER</p>
                                     <a class="btn_send" href="#!">Send</a>
                                 </div>
                             </div>
@@ -87,13 +88,13 @@
                             <div class="con_box">
                                 <div class="txt_wrap">
                                     <strong>Stake Balance</strong>
-                                    <p class="coin"><em id = "stakeBalance"></em>BER</p>
+                                    <p class="coin"><em id = "stakeBalance"></em> BER</p>
                                 </div>
                             </div>
                             <div class="con_box">
                                 <div class="txt_wrap">
                                     <strong>Reward Balance</strong>
-                                    <p class="coin"><em id = "rewardBalance"></em>BER</p>
+                                    <p class="coin"><em id = "rewardBalance"></em> BER</p>
                                 </div>
                             </div>
                         </div>
@@ -132,7 +133,16 @@
                 </div>
             </div><!-- e://pop_wrap  -->
     </div>
+
+    <!--contact Pop -->
+    <div id = contactPop> </div>
+    <!--contac Add Pop  -->
+    <div id = contactAddPop ></div>
     <script type="text/javascript">
+        $(document).ready(function(){
+            $("#contactPop").load("contactList.html");
+            $("#contactAddPop").load("contactAdd.html");
+        });
         function getParameterByName(name) {
             name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
             var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -144,13 +154,19 @@
             add = getParameterByName("Address")
             $('#myAdd').text(add)
         });
-        setTimeout(function() {
-            console.log("setTimeout !!!! ")
-            berith.getBalance(add).then((resolve) => {
-                console.log("mainBalance ::: " +mainBalance)
+        setTimeout(async function() {
+            await berith.getBalance(add).then((resolve) => {
                 $('#mainBalance').text(mainBalance)
             })
+            await berith.getStakeBalance(add).then((resolve) => {
+                $('#stakeBalance').text(stakeBalance)
+            })
+            await berith.getRewardBalance(add).then((resolve) => {
+                $('#rewardBalance').text(rewardBalance)
 
+                totalBalance = mainBalance + stakeBalance + rewardBalance
+                $('#totBalance').text(totalBalance)
+            })
         }, 1000);
 
         function copyText() {
@@ -191,29 +207,9 @@
             this.href = $('#qrcode').find('img:first').attr("src");
             this.download = "QrCode"
         });
-        // function PrintDiv(div) {
-        //     div = div[0];
-        //     html2canvas(div).then(function(canvas){
-        //       var myImage = canvas.toDataURL();
-        //       downloadURI(myImage, "qrcode.png")
-        //     });
-        // }
-        // function downloadURI(){
-        //     var link = document.createElement("a")
-        //     link.download = name;
-        //     ling.href = uri;
-        //     document.body.appendChild(link);
-        //     link.click();
-        // }
-        // $("#download").click(function(){
-        //     html2canvas($("#qrcode"), {
-        //         onrendered: function(canvas) {
-        //             canvas.toBlob(function(blob) {
-        //                 saveAs(blob, 'image.png');
-        //             });
-        //         }
-        //     });
-        // });
+
+
+
     </script>
 </body>
 

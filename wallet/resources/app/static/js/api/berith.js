@@ -55,9 +55,6 @@ let berith = {
                 astilectron.sendMessage(message, function (message) {
                     asticode.loader.hide();
                     var obj = JSON.parse(message.payload)
-                    console.log("getB : " + obj)
-                    // var val = hexConvert.HexToValueString(JSON.parse(obj))
-                    // var val = hexConvert.HexToValueString(obj)
                     var val  =parseInt(obj, 16);
                     mainBalance = val
                     resolve(mainBalance)
@@ -66,30 +63,46 @@ let berith = {
         }) // promise
     },
 
-    getStakeBalance: function () {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_getStakeBalance",
-            "args" : [account,"latest" ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#getStakeBalance').val(message.payload)
-        })
+    getStakeBalance: function (address) {
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name": "callApi"};
+                message.payload = {
+                    "api" : "berith_getStakeBalance",
+                    "args" : [address,"latest" ]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message, function(message) {
+                    asticode.loader.hide();
+                    var obj =JSON.parse(message.payload)
+                    var val = parseInt(obj,16)
+                    stakeBalance = val
+                    resolve(stakeBalance)
+                }) // astilectron
+            }) // settimeout
+        }) // promise
     },
 
-    getRewardBalance: function () {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_getRewardBalance",
-            "args" : [account,"latest" ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#getRewardBalance').val(message.payload)
-        })
+    getRewardBalance: function (address) {
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name": "callApi"};
+                message.payload = {
+                    "api" : "berith_getRewardBalance",
+                    "args" : [address,"latest" ]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message, function(message) {
+                    asticode.loader.hide();
+                    var obj =JSON.parse(message.payload)
+                    var val = parseInt(obj,16)
+                    rewardBalance = val
+                    // totalBalance = mainBalance + stakeBalance + rewardBalance
+                    // console.log( "totBalance ::: " + totalBalance)
+                    resolve(rewardBalance)
+                })
+            }) // settimeout
+        }) // promise
     },
 
     sendTransaction: function (sendAmount , sendAccount) {

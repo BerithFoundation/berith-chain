@@ -1,6 +1,9 @@
 var account
 var mainBalance
 var blockNumber
+var stakeBalance
+var rewardBalance
+var totalBalance
 //var privateAccount
 // var transAmount
 // var transAccount
