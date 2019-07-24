@@ -11,7 +11,7 @@ let personal = {
             $('#newAccount').val(message.payload)
         })
     },
-    hasAddress: function (address) {
+    /*hasAddress: function (address) {
         let message = {"name": "callApi"};
         message.payload = {
             "api" : "personal_hasAddress",
@@ -22,9 +22,11 @@ let personal = {
             asticode.loader.hide();
             var obj = message.payload
             return obj;
-
-            //
         })
+    },*/
+    hasAddress : async function (address) {
+        result = await sendMessage("callApi", "personal_hasAddress", [address]);
+        return result.payload;
     },
     unlockAccount: function () {
         let message = {"name": "callApi"};

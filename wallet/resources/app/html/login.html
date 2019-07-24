@@ -81,39 +81,47 @@
         $('#loginPwd').blur(function(){
             $('#pwdGroup').removeClass('active del')
         });
-        function  fnLogin(){
+        async function  fnLogin(){
             var loginId = $('#loginID').val()
             var loginPwd = $('#loginPwd').val()
 
             if (validateFields(loginId,loginPwd)) {
-                let result = database.checkLogin(loginId, loginPwd);
-
-                if (result) {
-                    let hasAddress = personal.hasAddress(obj.Address)
-                    console.log("hasAddress :: " + obj)
-                    if (obj == hasAddress) {
-                        miner.setBerithbase(address);
-                        console.log("trtrtrttr")
-                        return
-                    } else {
-                        console.log("ffffffff")
+                let apiResult = await database.checkLogin(loginId, loginPwd);
+                    if (apiResult == undefined) {
+                        console.log("no exists !!! ")
                         $('#idGroup').addClass('error')
-                        $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
-                            "Keystore File 복원을 진행해 주세요.\n")
-                        return
+                        $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
                     }
 
-                    $('#idGroup').removeClass('error')
-                    $('#pwdGroup').removeClass('error')
-                    console.log("objAddress :: " + obj.Address)
-                } else {
-                    $('#pwdGroup').addClass('error')
-                    $('.error_txt').html("비밀번호가 일치하지 않습니다.")
-                }
+                    var obj = apiResult.payload
+                    if(loginPwd != obj.Password) {
+                        $('#pwdGroup').addClass('error')
+                        $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+
+                    } else {
+                        $('#idGroup').removeClass('error')
+                        $('#pwdGroup').removeClass('error')
+                        console.log("objAddress :: " + obj.Address)
+
+                        let hasAddress = await personal.hasAddress(obj.Address)
+                        console.log("hasAddress :: " + hasAddress)
+                        if (hasAddress == "true") {
+                            let isSetBerithbase = await miner.setBerithbase(obj.Address);
+                            if (isSetBerithbase == "true") {
+                                location.href = "main.html?Address=" + obj.Address;
+                            } else {
+                                console.error("Something went wrong while setting Berithbase!!!")
+                            }
+                        } else {
+                            console.log("ffffffff")
+                            $('#idGroup').addClass('error')
+                            $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
+                                "Keystore File 복원을 진행해 주세요.\n")
+                        }
+                    }
 
 
             }
-
         }
 
 

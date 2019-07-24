@@ -49,7 +49,7 @@ func start_ui(){
 	// Init
 	flag.Parse()
 	astilog.FlagInit()
-	WalletDB ,_ = walletdb.NewWalletDB("/Users/kimmegi/test.ldb")
+	WalletDB ,_ = walletdb.NewWalletDB("/Users/usman/test.ldb")
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
@@ -57,6 +57,7 @@ func start_ui(){
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/icon.icns",
 			AppIconDefaultPath: "resources/icon.png",
+			DataDirectoryPath:"C:\\Users\\Usman\\go\\src\\github.com\\BerithFoundation\\berith-chain\\wallet",
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{

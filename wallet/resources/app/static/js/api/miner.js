@@ -1,5 +1,5 @@
 let miner = {
-    setBerithbase: function (setAccount) {
+    /*setBerithbase: function (setAccount) {
         let message = {"name": "callApi"};
         message.payload = {
             "api" : "miner_setBerithbase",
@@ -11,9 +11,13 @@ let miner = {
             var obj  = message.payload
             console.log("obj1 :: " +setAccount)
             console.log("obj2 :: " +obj)
-            //$('#setBerithbase').val(message.payload)
-            location.href="main.html?Address="+setAccount;
-        })
+            return obj;
+        });
+    },*/
+
+    setBerithbase : async function (address) {
+        result = await sendMessage("callApi", "miner_setBerithbase", [address]);
+        return result.payload;
     },
     miningStart: function () {
         let message = {"name": "callApi"};

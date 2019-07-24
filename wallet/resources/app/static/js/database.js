@@ -24,29 +24,14 @@ let database = {
             $('#contactData').append(contents)
         })
     },
-    checkLogin : function(memberName, memberPwd) {
-        let message = {"name" : "callDB"}
-        var result
-        message.payload = {
-            "api" : "checkLogin",
-            "args" : [memberName,memberPwd ]
-        }
-        astilectron.sendMessage(message , function (message) {
-            if ( message == undefined){
-                console.log("no exists !!! ")
-                $('#idGroup').addClass('error')
-                $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
-                result = false
-            }
-            var obj = message.payload
-            if(memberPwd != obj.Password) {
-                result = false
-            }else {
-                result = true
-            }
-        })
-        return result
+    checkLogin : async function (memberName, memberPwd) {
+        result = await sendMessage("callDB", "checkLogin", [memberName, memberPwd]);
+        return result;
     },
+
+
+
+
     selectMember : function () {
         let message = {"name" : "callDB"}
         message.payload = {
