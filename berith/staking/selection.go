@@ -180,6 +180,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	}
 	result := make(map[common.Address]*big.Int)
 
+
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
 
@@ -199,6 +200,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 		DIF -= DIF_R
 	}
 
+	TS = uint64(0)
 	//fmt.Println(DIF)
 
 	return &result

@@ -36,7 +36,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/gookit/color"
 
-	lru "github.com/hashicorp/golang-lru"
+	"github.com/hashicorp/golang-lru"
 )
 
 const (
@@ -73,18 +73,6 @@ var (
 	// that is not part of the local blockchain.
 	errUnknownBlock = errors.New("unknown block")
 
-	// errInvalidCheckpointBeneficiary is returned if a checkpoint/epoch transition
-	// block has a beneficiary set to non-zeroes.
-	errInvalidCheckpointBeneficiary = errors.New("beneficiary in checkpoint block non-zero")
-
-	// errInvalidVote is returned if a nonce value is something else that the two
-	// allowed constants of 0x00..0 or 0xff..f.
-	errInvalidVote = errors.New("vote nonce not 0x00..0 or 0xff..f")
-
-	// errInvalidCheckpointVote is returned if a checkpoint/epoch transition block
-	// has a vote nonce set to non-zeroes.
-	errInvalidCheckpointVote = errors.New("vote nonce in checkpoint block non-zero")
-
 	// errMissingVanity is returned if a block's extra-data section is shorter than
 	// 32 bytes, which is required to store the signer vanity.
 	errMissingVanity = errors.New("extra-data 32 byte vanity prefix missing")
@@ -101,10 +89,6 @@ var (
 	// invalid list of signers (i.e. non divisible by 20 bytes).
 	errInvalidCheckpointSigners = errors.New("invalid signer list on checkpoint block")
 
-	// errMismatchingCheckpointSigners is returned if a checkpoint block contains a
-	// list of signers different than the one the local node calculated.
-	errMismatchingCheckpointSigners = errors.New("mismatching signer list on checkpoint block")
-
 	// errInvalidMixDigest is returned if a block's mix digest is non-zero.
 	errInvalidMixDigest = errors.New("non-zero mix digest")
 
@@ -113,10 +97,6 @@ var (
 
 	// errInvalidDifficulty is returned if the difficulty of a block neither 1 or 2.
 	errInvalidDifficulty = errors.New("invalid difficulty")
-
-	// errWrongDifficulty is returned if the difficulty of a block doesn't match the
-	// turn of the signer.
-	errWrongDifficulty = errors.New("wrong difficulty")
 
 	// ErrInvalidTimestamp is returned if the timestamp of a block is lower than
 	// the previous block's timestamp + the minimum block period.
@@ -129,13 +109,9 @@ var (
 	// errUnauthorizedSigner is returned if a header is signed by a non-authorized entity.
 	errUnauthorizedSigner = errors.New("unauthorized signer")
 
-	// errRecentlySigned is returned if a header is signed by an authorized entity
-	// that already signed a header recently, thus is temporarily not allowed to.
-	errRecentlySigned = errors.New("recently signed")
-
-	errStakeValueError = errors.New("stake value Failure")
-
 	errNoData = errors.New("no data")
+
+	errStakingList = errors.New("not found staking list")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -492,7 +468,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
-		return nil, err
+		return nil, errStakingList
 	}
 
 	font := color.Yellow
@@ -505,35 +481,34 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	font.Println("HASH : ", header.Hash().Hex())
 	font.Println("COINBASE : ", header.Coinbase.Hex())
 	font.Println("DIFFICULTY : ", header.Difficulty.String())
+	font.Println("UNCLES : ", header.UncleHash.Hex())
 	font.Println("######################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
-		//Epoch 이후에 처리
-		if header.Number.Uint64() > c.config.Epoch {
-			//Diff
+		//Diff
+		var signers signers
+		signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+		if err != nil {
+			return nil, errUnauthorizedSigner
+		}
 
-			var signers signers
-			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-			if err != nil {
-				return nil, err
-			}
+		signerMap := signers.signersMap()
+		if _, ok := signerMap[header.Coinbase]; !ok {
+			return nil, errUnauthorizedSigner
+		}
 
-			signerMap := signers.signersMap()
-			if _, ok := signerMap[header.Coinbase]; !ok {
-				return nil, errUnauthorizedSigner
-			}
-
-			parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
-			if predicted.Cmp(header.Difficulty) != 0 {
-				return nil, errInvalidDifficulty
-			}
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
+		font = color.Blue
+		font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
+		if predicted.Cmp(header.Difficulty) != 0 {
+			return nil, errInvalidDifficulty
 		}
 	}
 
 	err = c.setStakingListWithTxs(state, chain, stakingList, txs, header)
 	if err != nil {
-		return nil, err
+		return nil, errStakingList
 	}
 
 	//Reward 보상
