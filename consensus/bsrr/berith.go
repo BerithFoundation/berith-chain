@@ -665,8 +665,8 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header) {
-
-	state.AddRewardBalance(header.Coinbase, getReward(config, header))
+	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
+	//state.AddRewardBalance(header.Coinbase, getReward(config, header))
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함

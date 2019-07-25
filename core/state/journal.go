@@ -142,6 +142,11 @@ type (
 		account *common.Address
 		prev    *big.Int
 	}
+
+	behindChange struct {
+		account *common.Address
+		prev []Behind
+	}
 )
 
 func (ch createObjectChange) revert(s *StateDB) {
@@ -258,5 +263,13 @@ func (ch rewardChange) revert(s *StateDB) {
 }
 
 func (ch rewardChange) dirtied() *common.Address {
+	return ch.account
+}
+
+func (ch behindChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setBehind(ch.prev)
+}
+
+func (ch behindChange) dirtied() *common.Address {
 	return ch.account
 }

@@ -409,7 +409,21 @@ func (self *StateDB) GetRewardBalance(addr common.Address) *big.Int {
 	return common.Big0
 }
 
+// [Berith] Behind Balance
+func (self *StateDB) AddBehindBalance(addr common.Address, number, amount *big.Int) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.AddBehindBalance(number, amount)
+	}
+}
 
+func (self *StateDB) GetBehindBalance(addr common.Address) []Behind {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.BehindBalance()
+	}
+	return []Behind{}
+}
 
 // AddBalance adds amount to the account associated with addr.
 func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {

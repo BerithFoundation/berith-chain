@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -143,7 +144,15 @@ func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.
 	if state == nil || err != nil {
 		return nil, err
 	}
+
+	behind := state.GetBehindBalance(address)
+	for i, item := range behind {
+		fmt.Print("INDEX  :: ", i)
+		fmt.Println( "\t ITEM :: ", item)
+	}
+
 	return (*hexutil.Big)(state.GetRewardBalance(address)), state.Error()
+	//return (*hexutil.Big)(state.GetRewardBalance(address)), state.Error()
 }
 
 // RewardToStake
