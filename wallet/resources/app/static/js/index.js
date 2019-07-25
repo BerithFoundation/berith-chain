@@ -6,16 +6,20 @@ let index = {
         asticode.notifier.init();
 
         // Wait for astilectron to be ready
-        document.addEventListener('astilectron-ready', function() {
+        document.addEventListener('astilectron-ready', async function() {
             // Listen
             index.listen();
 
             let message = {"name": "init"};
-            asticode.loader.show()
+            /*asticode.loader.show()
             astilectron.sendMessage(message, function(message) {
                 // Init
                 asticode.loader.hide();
-            })
+            })*/
+            let responseValue = await sendMessage("init", "", [])
+            console.log(responseValue)
+            onPageload(); // all pages should include this method to guarantee a successful page load.
+
         })
     },
     listen: function() {

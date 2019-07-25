@@ -150,10 +150,37 @@
             return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
         var add
-        $(document).ready(function(){
-            add = getParameterByName("Address")
-            $('#myAdd').text(add)
-        });
+
+
+        async function onPageload() {
+            let account = sessionStorage.getItem('account');
+            $('#myAdd').text(account);
+
+            let mainBalance = await berith.getBalance(account);
+            $('#mainBalance').text(mainBalance);
+
+            let stakeBalance = await berith.getStakeBalance(account);
+            $('#stakeBalance').text(stakeBalance);
+
+            let rewardBalance = await berith.getRewardBalance(account);
+            $('#rewardBalance').text(rewardBalance);
+
+            totalBalance = mainBalance + stakeBalance + rewardBalance;
+            $('#totBalance').text(totalBalance);
+
+
+
+            /*
+            await berith.getRewardBalance(add).then((resolve) => {
+                $('#rewardBalance').text(rewardBalance)
+
+                totalBalance = mainBalance + stakeBalance + rewardBalance
+                $('#totBalance').text(totalBalance)
+            })*/
+        };
+
+
+/*
         setTimeout(async function() {
             await berith.getBalance(add).then((resolve) => {
                 $('#mainBalance').text(mainBalance)
@@ -168,6 +195,8 @@
                 $('#totBalance').text(totalBalance)
             })
         }, 1000);
+
+*/
 
         function copyText() {
             var copyText = document.getElementById("myAdd");

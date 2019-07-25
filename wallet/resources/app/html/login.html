@@ -31,7 +31,7 @@
                 <h5>지갑명</h5>
                 <div class="box_inp">
                     <span class="inp_wrap">
-                        <input class="inp" id = "loginID" type="text" />
+                        <input class="inp" id = "loginID" type="text" value="usman"/>
                     </span>
                     <a class="del" href="#!">삭제</a>
                 </div>
@@ -42,7 +42,7 @@
                 <h5>비밀번호</h5>
                 <div class="box_inp">
                     <span class="inp_wrap">
-                        <input class="inp" id = "loginPwd" type="password" /><!-- type: password/text -->
+                        <input class="inp" id = "loginPwd" type="password" value="usman123"/><!-- type: password/text -->
                         <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
                     </span>
                     <a class="del" href="#!">삭제</a>
@@ -64,66 +64,69 @@
 
     <script type = "text/javascript">
 
-        $('.login').keypress(function (e) {
-            if(e.keyCode=='13')
-                fnLogin()
-        });
+        function onPageload() {
+            $('.login').keypress(function (e) {
+                if (e.keyCode == '13')
+                    fnLogin()
+            });
 
-        $('#loginID').focus(function(){
-            $('#idGroup').addClass('active del')
-        });
-        $('#loginID').blur(function(){
-            $('#idGroup').removeClass('active del')
-        });
-        $('#loginPwd').focus(function(){
-            $('#pwdGroup').addClass('active del')
-        });
-        $('#loginPwd').blur(function(){
-            $('#pwdGroup').removeClass('active del')
-        });
+            $('#loginID').focus(function () {
+                $('#idGroup').addClass('active del')
+            });
+            $('#loginID').blur(function () {
+                $('#idGroup').removeClass('active del')
+            });
+            $('#loginPwd').focus(function () {
+                $('#pwdGroup').addClass('active del')
+            });
+            $('#loginPwd').blur(function () {
+                $('#pwdGroup').removeClass('active del')
+            });
+        }
+
+
         async function  fnLogin(){
             var loginId = $('#loginID').val()
             var loginPwd = $('#loginPwd').val()
-
             if (validateFields(loginId,loginPwd)) {
                 let apiResult = await database.checkLogin(loginId, loginPwd);
-                    if (apiResult == undefined) {
-                        console.log("no exists !!! ")
-                        $('#idGroup').addClass('error')
-                        $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
-                    }
-
-                    var obj = apiResult.payload
-                    if(loginPwd != obj.Password) {
-                        $('#pwdGroup').addClass('error')
-                        $('.error_txt').html("비밀번호가 일치하지 않습니다.")
-
-                    } else {
-                        $('#idGroup').removeClass('error')
-                        $('#pwdGroup').removeClass('error')
-                        console.log("objAddress :: " + obj.Address)
-
-                        let hasAddress = await personal.hasAddress(obj.Address)
-                        console.log("hasAddress :: " + hasAddress)
-                        if (hasAddress == "true") {
-                            let isSetBerithbase = await miner.setBerithbase(obj.Address);
-                            if (isSetBerithbase == "true") {
-                                location.href = "main.html?Address=" + obj.Address;
-                            } else {
-                                console.error("Something went wrong while setting Berithbase!!!")
-                            }
-                        } else {
-                            console.log("ffffffff")
-                            $('#idGroup').addClass('error')
-                            $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
-                                "Keystore File 복원을 진행해 주세요.\n")
-                        }
-                    }
-
-
+                if (apiResult == undefined) {
+                    console.log("no exists !!! ")
+                    $('#idGroup').addClass('error')
+                    $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
+                }
+                var obj = apiResult.payload
+                if(loginPwd != obj.Password) {
+                    $('#pwdGroup').addClass('error')
+                    $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+                } else {
+                    handlSuccessfulLogin(obj.Address);
+                }
             }
         }
 
+        async function handlSuccessfulLogin(address) {
+            $('#idGroup').removeClass('error')
+            $('#pwdGroup').removeClass('error')
+            console.log("address :: " + address)
+            let hasAddress = await personal.hasAddress(address)
+            console.log("hasAddress :: " + hasAddress)
+            if (hasAddress == "true") {
+                let isSetBerithbase = await miner.setBerithbase(address);
+                if (isSetBerithbase == "true") {
+                    sessionStorage.setItem('account', address);
+                    //location.href = "main.html?Address=" + obj.Address;
+                    location.href ="main.html"
+                } else {
+                    console.error("Something went wrong while setting Berithbase!!!")
+                }
+            } else {
+                console.log("ffffffff")
+                $('#idGroup').addClass('error')
+                $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
+                    "Keystore File 복원을 진행해 주세요.\n")
+            }
+        }
 
         function validateFields(loginId, loginPwd) {
             if(loginId == ""){

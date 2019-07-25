@@ -43,6 +43,7 @@ let berith = {
         })
     },
 
+    /*
     getBalance: function (address) {
         return new Promise(resolve => {
             setTimeout(()=> {
@@ -62,7 +63,17 @@ let berith = {
             }) // settimeout
         }) // promise
     },
+    */
 
+
+    getBalance : async function (address) {
+        result = await sendMessage("callApi", "berith_getBalance", [address,"latest"]);
+        var obj = JSON.parse(result.payload)
+        var val  =parseInt(obj, 16);
+        return val;
+    },
+
+    /*
     getStakeBalance: function (address) {
         return new Promise(resolve => {
             setTimeout(()=> {
@@ -81,8 +92,16 @@ let berith = {
                 }) // astilectron
             }) // settimeout
         }) // promise
+    },*/
+
+    getStakeBalance : async function (address) {
+        result = await sendMessage("callApi", "berith_getStakeBalance", [address,"latest"]);
+        var obj = JSON.parse(result.payload)
+        var val  =parseInt(obj, 16);
+        return val;
     },
 
+    /*
     getRewardBalance: function (address) {
         return new Promise(resolve => {
             setTimeout(()=> {
@@ -103,6 +122,13 @@ let berith = {
                 })
             }) // settimeout
         }) // promise
+    },
+*/
+    getRewardBalance : async function (address) {
+        result = await sendMessage("callApi", "berith_getRewardBalance", [address,"latest"]);
+        var obj = JSON.parse(result.payload)
+        var val  =parseInt(obj, 16);
+        return val;
     },
 
     sendTransaction: function (sendAmount , sendAccount) {

@@ -1,3 +1,4 @@
+
 var account
 var mainBalance
 var blockNumber
@@ -10,8 +11,6 @@ var totalBalance
 // var stakeAmount
 // var stakeAccount
 
-
-
 async function sendMessage(methodType, methodName, args) {
     let messagePromise = new Promise(function (resolve) {
         let message = {"name": methodType};
@@ -20,9 +19,12 @@ async function sendMessage(methodType, methodName, args) {
             "args": args
         }
         asticode.loader.show()
-        astilectron.sendMessage(message, function (message) {
+
+        console.log("Request: ", JSON.stringify(message))
+        astilectron.sendMessage(message, function (response) {
             asticode.loader.hide();
-            resolve(message);
+            console.log("Response: ", JSON.stringify(response))
+            resolve(response);
         });
     });
     return messagePromise;
