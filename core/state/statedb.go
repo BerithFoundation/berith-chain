@@ -420,7 +420,12 @@ func (self *StateDB) AddBehindBalance(addr common.Address, number, amount *big.I
 func (self *StateDB) GetFirstBehindBalance(addr common.Address) (Behind, error) {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
-		return stateObject.GetFirstBehindBalance(), nil
+		behind, err := stateObject.GetFirstBehindBalance()
+		if err != nil {
+			return Behind{}, errors.New("empty behind")
+		}
+
+		return behind, nil
 	}
 	return Behind{}, errors.New("empty behind")
 }

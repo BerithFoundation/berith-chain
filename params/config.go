@@ -41,7 +41,7 @@ var (
 			Epoch:   10,
 			Rewards: common.StringToBig("20"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   3,
+			SlashRound:   100,
 		},
 	}
 

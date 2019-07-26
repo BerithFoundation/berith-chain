@@ -20,6 +20,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"bytes"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"math/big"
 
@@ -479,9 +480,16 @@ func (self *stateObject) BehindBalance() []Behind {
 	return self.data.BehindBalance
 }
 
-func (self *stateObject) GetFirstBehindBalance() Behind{
+func (self *stateObject) GetFirstBehindBalance() (Behind, error){
 	behind := self.data.BehindBalance
-	return behind[0]
+	if behind == nil {
+		return Behind{}, errors.New("nil behind")
+	}
+	if len(behind) == 0 {
+		return Behind{}, errors.New("nil behind")
+	}
+
+	return behind[0], nil
 }
 
 func (self *stateObject) RemoveFirstBehindBalance() {
