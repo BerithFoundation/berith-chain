@@ -465,7 +465,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] stakingList 처리 로직 추가
-
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, errStakingList
@@ -666,7 +665,20 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header) {
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
-	//state.AddRewardBalance(header.Coinbase, getReward(config, header))
+
+	behind, err := state.GetFirstBehindBalance(header.Coinbase)
+	if err != nil {
+		return
+	}
+
+	target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
+	if header.Number.Cmp(target) == -1{
+		return
+	}
+
+	//bihind --> reword
+	state.AddRewardBalance(header.Coinbase, behind.Balance)
+	state.RemoveFirstBehindBalance(header.Coinbase)
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함

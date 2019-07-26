@@ -417,6 +417,23 @@ func (self *StateDB) AddBehindBalance(addr common.Address, number, amount *big.I
 	}
 }
 
+func (self *StateDB) GetFirstBehindBalance(addr common.Address) (Behind, error) {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetFirstBehindBalance(), nil
+	}
+	return Behind{}, errors.New("empty behind")
+}
+
+func (self *StateDB) RemoveFirstBehindBalance(addr common.Address) {
+	stateObject := self.getStateObject(addr)
+	if stateObject == nil {
+		return
+	}
+
+	stateObject.RemoveFirstBehindBalance()
+}
+
 func (self *StateDB) GetBehindBalance(addr common.Address) []Behind {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {

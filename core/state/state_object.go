@@ -479,6 +479,16 @@ func (self *stateObject) BehindBalance() []Behind {
 	return self.data.BehindBalance
 }
 
+func (self *stateObject) GetFirstBehindBalance() Behind{
+	behind := self.data.BehindBalance
+	return behind[0]
+}
+
+func (self *stateObject) RemoveFirstBehindBalance() {
+	behind := self.data.BehindBalance
+	self.setBehind(behind[1:])
+}
+
 //[Berith] set Reward Balance
 func (self *stateObject) SetReward(amount *big.Int) {
 	self.db.journal.append(rewardChange{
