@@ -69,21 +69,26 @@ let database = {
             }) // settimeout
         }) // promise
     },
-    updateContact : function (contactAdd , contactName) {
-        let message = {"name" : "callDB"}
-        message.payload = {
-            "api" : "updateContact",
-            "args" : [contactAdd , contactName]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message , function (message) {
-            asticode.loader.hide()
-            var obj = message.payload
-            var keys = Object.keys(obj)
-            for ( var i in keys) {
-                console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
-            }
-        })
+    updateContact : function (contactAdd ) {
+        return new Promise(resolve => {
+            setTimeout(()=> {
+                let message = {"name" : "callDB"}
+                message.payload = {
+                    "api" : "updateContact",
+                    "args" : [contactAdd ]
+                }
+                asticode.loader.show()
+                astilectron.sendMessage(message , function (message) {
+                    asticode.loader.hide()
+                    var obj = message.payload
+                    // var keys = Object.keys(obj)
+                    // for ( var i in keys) {
+                    //     console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
+                    // }
+                    resolve(obj)
+                })
+            }) // settimeout
+        }) // promise
     },
     insertMember : function (memberName , memberPwd) {
         let message = {"name" : "callDB"}
