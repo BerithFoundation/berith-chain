@@ -76,31 +76,28 @@
                 </table>
 
                 <div class="pagination" id ="contactPaging">
-                    <!--
-                    <a class="prev" href="#!">Prev</a>
-                    <a class = "active" href="#!">1</a>  first page
-                    <a class="jump_prev" href="#!">Previous 5 Pages</a>
-
-                    <a href="#!">4</a>
-                    <a href="#!">5</a>
-                    <a href="#!">6</a>
-                    <a href="#!">7</a>
-                    <a href="#!">8</a>
-
-                    <a class="jump_next" href="#!">Next 5 Pages</a>
-                    <a href="#!">50</a> last page
-                    <a class="next" href="#!">Next</a> -->
                 </div><!-- e://pagination -->
             </div>
             <div class="pop_footer">
                 <a class="btn red on" href="#!">확인</a>
             </div>
         </div><!-- e://pop_wrap  -->
+        <div class="one_sec_wrap hide" id = "popCopyContact"><!-- view/hide -->
+            <div class="bg"></div>
+            <p class="complete">복사 완료</p>
+        </div>
     </div>
+    <div id ="contactUpdatePop"></div>
+    <div id ="contactDeletePop"></div>
     <script type = "text/javascript">
         var pageCnt = 0
         var contents = new Array()
         var contactDataAll
+
+        $(document).ready(function(){
+            $("#contactUpdatePop").load("contactUpdate.html");
+            $("#contactDeletePop").load("contactDeleteConfirm.html");
+        });
 
         $('#searchText').focus(function(){
             $('#searchGroup').addClass('active del')
@@ -156,9 +153,9 @@
                         cnt++;
                         contents[vv] += '<tr>'
                         contents[vv] += '<td class="name">'+obj[keys[i]]+'</td>'
-                        contents[vv] += '<td class="addr">'+keys[i]+'<a class="icon copy" href="#!">보이기</a></td>'
-                        contents[vv] += '<td class="send"><a class="btn small send" href="#!">Send</a></td>'
-                        contents[vv] += '<td class="edit"><a class="icon edit" href="#!">Edit</a></td>'
+                        contents[vv] += '<td class="addr" id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
+                        contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
+                        contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'" onclick="openContactUpdate($(this))">Edit</a></td>'
                         contents[vv] += '<td class="del"><a class="icon del" href="#!">Delete</a></td'
                         contents[vv] += '</tr>'
                     }else {
@@ -167,9 +164,9 @@
                             cnt++;
                             contents[vv] += '<tr>'
                             contents[vv] += '<td class="name">'+obj[keys[i]]+'</td>'
-                            contents[vv] += '<td class="addr">'+keys[i]+'<a class="icon copy" href="#!">보이기</a></td>'
-                            contents[vv] += '<td class="send"><a class="btn small send" href="#!">Send</a></td>'
-                            contents[vv] += '<td class="edit"><a class="icon edit" href="#!">Edit</a></td>'
+                            contents[vv] += '<td class="addr"  id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
+                            contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
+                            contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'"  onclick="openContactUpdate($(this))">Edit</a></td>'
                             contents[vv] += '<td class="del"><a class="icon del" href="#!">Delete</a></td'
                             contents[vv] += '</tr>'
                         }else if(radioVal == "userAdd" && keys[i].includes(text)){
@@ -177,9 +174,9 @@
                             cnt++;
                             contents[vv] += '<tr>'
                             contents[vv] += '<td class="name">'+obj[keys[i]]+'</td>'
-                            contents[vv] += '<td class="addr">'+keys[i]+'<a class="icon copy" href="#!">보이기</a></td>'
-                            contents[vv] += '<td class="send"><a class="btn small send" href="#!">Send</a></td>'
-                            contents[vv] += '<td class="edit"><a class="icon edit" href="#!">Edit</a></td>'
+                            contents[vv] += '<td class="addr" id  id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
+                            contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
+                            contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'"  onclick="openContactUpdate($(this))">Edit</a></td>'
                             contents[vv] += '<td class="del"><a class="icon del" href="#!">Delete</a></td'
                             contents[vv] += '</tr>'
                         }
@@ -245,6 +242,24 @@
 
             $('#contactData').empty()
             $('#contactData').append(contents[obj2-1])
+        }
+        function copyTextContact(value){
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val($(value).text()).select();
+            document.execCommand("copy");
+            $temp.remove();
+            $('#popCopyContact').removeClass('hide')
+            $('#popCopyContact').addClass('view')
+            setTimeout(function() {
+                $('#popCopyContact').removeClass('view')
+                $('#popCopyContact').addClass('hide')
+            }, 1000);
+        }
+        function movePageSend(value) {
+            var addNum = value.attr('id')
+            var addr = $('#addr'+addNum).text()
+            location.href = "send.html?addr="+addr
         }
     </script>
 </body>

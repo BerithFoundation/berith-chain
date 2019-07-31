@@ -13,8 +13,6 @@
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
 
-    <link rel="stylesheet" href="../static/css/style.css" />
-    <link rel="shortcut icon" href="../images/common/berith_pa.ico"> 
     
 </head>
     
@@ -101,11 +99,16 @@
             $('#contactAdd').removeClass('view');
             $('#contactAdd').addClass('hide');
         }
+
         async function fnContactAdd(){
             var contactAddName = $('#contactAddName').val()
             var contactAddAddress = $('#contactAddAddress').val()
-            var validation = await database.selectContact()
-            
+            var validation = await validateAdd( contactAddAddress, contactAddName)
+            console.log("valresult :: " + validation)
+            if(validation == false) {
+                console.log("val fail")
+                return
+            }
             var obj = await database.insertContact(contactAddAddress, contactAddName)
             console.log("add success ::" + obj)
             if(  obj != null){
@@ -120,6 +123,41 @@
                 },3000)
             }
         }
+        async function validateAdd(add ,name){
+            var obj = await database.selectContact()
+            var keys = Object.keys(obj);
+            if( name == ""){
+                $('#contactAddNameGroup').addClass('error')
+                $('#err1').html("저장할 이름을 입력하세요.")
+                $('#contactAddName').focus()
+                return false
+            }
+            if( add == ""){
+                $('#contactAddAddressGroup').addClass('error')
+                $('#err2').html("주소를 입력하세요.")
+                $('#contactAddAddress').focus()
+                return false
+            }
+            for ( var i in keys) {
+                // console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
+                if (name == obj[keys[i]]){
+                    console.log("same Name !!! ")
+                    $('#contactAddNameGroup').addClass('error')
+                    $('#err1').html("이미 존재하는 이름 입니다.")
+                    $('#contactAddName').focus()
+                    return false
+                }
+                if( add == keys[i]) {
+                    console.log("same add !!! ")
+                    $('#contactAddAddressGroup').addClass('error')
+                    $('#err2').html("이미 존재하는 주소 입니다.")
+                    $('#contactAddAddress').focus()
+                    return false
+                }
+            }
+            return true
+        }
+
     </script>
 </body>
 

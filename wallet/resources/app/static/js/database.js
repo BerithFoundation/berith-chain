@@ -27,9 +27,6 @@ let database = {
         return result;
     },
 
-
-
-
     selectMember : function () {
         let message = {"name" : "callDB"}
         message.payload = {
@@ -71,6 +68,22 @@ let database = {
                 })
             }) // settimeout
         }) // promise
+    },
+    updateContact : function (contactAdd , contactName) {
+        let message = {"name" : "callDB"}
+        message.payload = {
+            "api" : "updateContact",
+            "args" : [contactAdd , contactName]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message , function (message) {
+            asticode.loader.hide()
+            var obj = message.payload
+            var keys = Object.keys(obj)
+            for ( var i in keys) {
+                console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
+            }
+        })
     },
     insertMember : function (memberName , memberPwd) {
         let message = {"name" : "callDB"}

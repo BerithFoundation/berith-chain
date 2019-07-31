@@ -20,10 +20,10 @@ async function sendMessage(methodType, methodName, args) {
         }
         asticode.loader.show()
 
-        console.log("Request: ", JSON.stringify(message))
+        // console.log("Request: ", JSON.stringify(message))
         astilectron.sendMessage(message, function (response) {
             asticode.loader.hide();
-            console.log("Response: ", JSON.stringify(response))
+            // console.log("Response: ", JSON.stringify(response))
             resolve(response);
         });
     });

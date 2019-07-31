@@ -13,7 +13,7 @@ func Test01(t *testing.T) {
 		Password: "1234",
 	}
 
-	member.PrivateKey[0] = 12
+	//member.PrivateKey[0] = 12
 
 	var contact Contact
 	contact = make(map[common.Address]string,0)

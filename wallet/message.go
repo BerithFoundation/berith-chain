@@ -144,6 +144,22 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		}
 		return  contact , nil
 		break
+	case "updateContact":
+		contact := make(walletdb.Contact, 0)
+		WalletDB.Select([]byte(acc), &contact)
+		delete(contact, common.HexToAddress(key[0]))
+		contact[common.HexToAddress(key[0])] = key[1]
+		tempContact := make(walletdb.Contact, 0)
+		err := WalletDB.Insert([]byte(acc) , tempContact)
+		if err != nil {
+			return nil , err
+		}
+		err2 := WalletDB.Insert([]byte(acc) , contact)
+		if err2 != nil {
+			return nil , err2
+		}
+		return contact, nil
+		break
 	case "restoreMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[1]), &mem)
