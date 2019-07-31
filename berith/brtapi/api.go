@@ -190,7 +190,7 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	}
 	stakedAmount := state.GetStakeBalance(args.From)
 	stakingAmount := args.Value.ToInt()
-	totalStakingAmount := stakingAmount.Add(stakingAmount,stakedAmount)
+	totalStakingAmount := new(big.Int).Add(stakingAmount,stakedAmount)
 
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
 		if totalStakingAmount.Cmp(config.Bsrr.StakeMinimum) <= -1 {
