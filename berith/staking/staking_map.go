@@ -108,6 +108,7 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 
 	if info.Value().Cmp(big.NewInt(0)) < 1 && info.Reward().Cmp(big.NewInt(0)) < 1 {
 		delete(list.storage, info.Address())
+		return nil
 	}
 
 	list.storage[info.Address()] = stkInfo{
