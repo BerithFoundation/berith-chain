@@ -12,9 +12,8 @@ import (
 )
 
 var (
-	DIF_MAX   = int64(500000)
+	DIF_MAX   = int64(5000000)
 	DIF_MIN   = int64(10000)
-	TS = uint64(0) //Total Staking Value
 )
 
 type Candidate struct {
@@ -58,7 +57,8 @@ type Candidates struct {
 	period uint64
 	//selections map[uint64]Candidate
 	selections []Candidate
-	total      uint64
+	total      uint64 //Total Staking  + Adv
+	ts uint64//Total Staking Value
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
@@ -67,6 +67,7 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 		period:     period,
 		selections: make([]Candidate, 0),
 		total:      0,
+		ts : 	0,
 	}
 }
 
@@ -77,7 +78,7 @@ func (cs *Candidates) Add(c Candidate) {
 	c.val = cs.total
 	cs.selections = append(cs.selections, c)
 
-	TS += c.stake //Total Staking 
+	cs.ts += c.stake //Total Staking
 }
 
 //숫자 > 해시 > 숫자
@@ -196,11 +197,10 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	for queue.front != queue.rear {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF + int64(TS))
+		result[account] = big.NewInt(DIF + int64(cs.ts))
 		DIF -= DIF_R
 	}
 
-	TS = uint64(0)
 	//fmt.Println(DIF)
 
 	return &result
