@@ -181,7 +181,7 @@ func SetupGenesisBlockWithOverride(db berithdb.Database, genesis *Genesis, const
 	}
 
 	// Get the existing chain configuration.
-	fmt.Println(stored.Hex())
+	//fmt.Println(stored.Hex())
 	newcfg := genesis.configOrDefault(stored)
 	if constantinopleOverride != nil {
 		newcfg.ConstantinopleBlock = constantinopleOverride
