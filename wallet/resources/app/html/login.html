@@ -115,7 +115,7 @@
                 let isSetBerithbase = await miner.setBerithbase(address);
                 if (isSetBerithbase == "true") {
                     sessionStorage.setItem('account', address);
-                    //location.href = "main.html?Address=" + obj.Address;
+                    sessionStorage.setItem('loginId' ,$('#loginID').val() )
                     location.href ="main.html"
                 } else {
                     console.error("Something went wrong while setting Berithbase!!!")

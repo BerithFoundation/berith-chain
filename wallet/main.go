@@ -80,9 +80,7 @@ func start_ui(){
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 						}
 						//startPolling()
-
 						break
-
 					}
 				}
 			}()

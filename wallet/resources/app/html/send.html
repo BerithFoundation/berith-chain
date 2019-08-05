@@ -21,25 +21,12 @@
 <link rel="import" href="../static/common.html">
     <div class="wrap">
         <header class="header">
-            <h1><a class="logo" href="#">베리드 월렛</a></h1>
-            <div class="nav">
-                <ul>
-                    <li>선출될 확률 : <em>35%</em></li>
-                    <li>참여 수 : <em>300</em></li>
-                </ul>
-                <a class="btn_export" href="#!">Export</a>
-                <a class="btn_contact" href="#!">Contact</a>
-                <a class="btn_setting" href="#!">Setting</a>
-            </div>
+            <div id = "headerForm" > </div>
         </header><!-- e://header -->
         
         <div class="contents_wrap">
             <div class="gnb">
-                <ul class="gnb_menu"><!-- 버튼 선택 시 on 추가 -->  
-                    <li><a class="btn_mywallet" href="main.html">My Wallet</a></li>
-                    <li class="on"><a class="btn_send" href="#!">Send</a></li>
-                    <li><a class="btn_transaction" href="#!">Transactions</a></li>
-                </ul>
+                <div id = "leftForm"> </div>
                 <span class="logout"><a class="btn_logout" href="login.html">로그아웃</a></span>
             </div><!-- e://gnb -->
             <div class="container">
@@ -142,6 +129,8 @@
 
             </div><!-- e://container -->
         </div>
+        <div id = contactPop> </div>
+        <div id = mySettingPop> </div>
     </div><!-- e://wrap -->
 
     <script type="text/javascript">
@@ -153,6 +142,10 @@
         }
         var add
         $(document).ready(function(){
+            $('#headerForm').load('header.html')
+            $('#leftForm').load('left.html')
+            $("#contactPop").load("contactList.html");
+            $('#mySettingPop').load('mySetting.html');
             add = getParameterByName("addr")
             console.log("snedPage addr ::" + add )
             $('#sendAddr').val(add)
