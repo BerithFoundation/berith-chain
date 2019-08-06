@@ -20,6 +20,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"bytes"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"math/big"
 
@@ -103,6 +104,12 @@ type Account struct {
 	CodeHash []byte
 	StakeBalance *big.Int //brt staking balance
 	RewardBalance *big.Int //reward balance
+	BehindBalance []Behind //behind balance
+}
+
+type Behind struct {
+	Number *big.Int
+	Balance *big.Int
 }
 
 // newObject creates a state object.
@@ -118,6 +125,9 @@ func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 	}
 	if data.RewardBalance == nil {
 		data.RewardBalance = new(big.Int)
+	}
+	if data.BehindBalance == nil {
+		data.BehindBalance = make([]Behind, 0)
 	}
 
 
@@ -434,6 +444,58 @@ func (c *stateObject) AddStakeBalance(amount *big.Int) {
 	c.SetStaking(new(big.Int).Add(c.StakeBalance(), amount))
 }
 
+func (c *stateObject) AddBehindBalance(number ,amount *big.Int) {
+	// EIP158: We must check emptiness for the objects such that the account
+	// clearing (0,0,0 objects) can take effect.
+	if amount.Sign() == 0 {
+		if c.empty() {
+			c.touch()
+		}
+
+		return
+	}
+	c.SetBehind(number, amount)
+}
+
+func (self *stateObject) SetBehind(number, amount *big.Int) {
+
+	ch := behindChange{}
+	ch.account = &self.address
+
+	behind := Behind{}
+	behind.Number = number
+	behind.Balance = amount
+
+	ch.prev = append(ch.prev, behind)
+	self.db.journal.append(ch)
+
+	self.setBehind(append(self.data.BehindBalance, behind))
+}
+
+func (self *stateObject) setBehind(behind []Behind) {
+	self.data.BehindBalance = behind
+}
+
+func (self *stateObject) BehindBalance() []Behind {
+	return self.data.BehindBalance
+}
+
+func (self *stateObject) GetFirstBehindBalance() (Behind, error){
+	behind := self.data.BehindBalance
+	if behind == nil {
+		return Behind{}, errors.New("nil behind")
+	}
+	if len(behind) == 0 {
+		return Behind{}, errors.New("nil behind")
+	}
+
+	return behind[0], nil
+}
+
+func (self *stateObject) RemoveFirstBehindBalance() {
+	behind := self.data.BehindBalance
+	self.setBehind(behind[1:])
+}
 
 //[Berith] set Reward Balance
 func (self *stateObject) SetReward(amount *big.Int) {

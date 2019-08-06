@@ -14,7 +14,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"sync"
@@ -35,7 +34,9 @@ import (
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	lru "github.com/hashicorp/golang-lru"
+	"github.com/gookit/color"
+
+	"github.com/hashicorp/golang-lru"
 )
 
 const (
@@ -44,7 +45,7 @@ const (
 	inmemorySignatures = 4096    // Number of recent block signatures to keep in memory
 
 	//stakingInterval = 10
-	wiggleTime      = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
 var (
@@ -72,18 +73,6 @@ var (
 	// that is not part of the local blockchain.
 	errUnknownBlock = errors.New("unknown block")
 
-	// errInvalidCheckpointBeneficiary is returned if a checkpoint/epoch transition
-	// block has a beneficiary set to non-zeroes.
-	errInvalidCheckpointBeneficiary = errors.New("beneficiary in checkpoint block non-zero")
-
-	// errInvalidVote is returned if a nonce value is something else that the two
-	// allowed constants of 0x00..0 or 0xff..f.
-	errInvalidVote = errors.New("vote nonce not 0x00..0 or 0xff..f")
-
-	// errInvalidCheckpointVote is returned if a checkpoint/epoch transition block
-	// has a vote nonce set to non-zeroes.
-	errInvalidCheckpointVote = errors.New("vote nonce in checkpoint block non-zero")
-
 	// errMissingVanity is returned if a block's extra-data section is shorter than
 	// 32 bytes, which is required to store the signer vanity.
 	errMissingVanity = errors.New("extra-data 32 byte vanity prefix missing")
@@ -100,10 +89,6 @@ var (
 	// invalid list of signers (i.e. non divisible by 20 bytes).
 	errInvalidCheckpointSigners = errors.New("invalid signer list on checkpoint block")
 
-	// errMismatchingCheckpointSigners is returned if a checkpoint block contains a
-	// list of signers different than the one the local node calculated.
-	errMismatchingCheckpointSigners = errors.New("mismatching signer list on checkpoint block")
-
 	// errInvalidMixDigest is returned if a block's mix digest is non-zero.
 	errInvalidMixDigest = errors.New("non-zero mix digest")
 
@@ -112,10 +97,6 @@ var (
 
 	// errInvalidDifficulty is returned if the difficulty of a block neither 1 or 2.
 	errInvalidDifficulty = errors.New("invalid difficulty")
-
-	// errWrongDifficulty is returned if the difficulty of a block doesn't match the
-	// turn of the signer.
-	errWrongDifficulty = errors.New("wrong difficulty")
 
 	// ErrInvalidTimestamp is returned if the timestamp of a block is lower than
 	// the previous block's timestamp + the minimum block period.
@@ -128,11 +109,9 @@ var (
 	// errUnauthorizedSigner is returned if a header is signed by a non-authorized entity.
 	errUnauthorizedSigner = errors.New("unauthorized signer")
 
-	// errRecentlySigned is returned if a header is signed by an authorized entity
-	// that already signed a header recently, thus is temporarily not allowed to.
-	errRecentlySigned = errors.New("recently signed")
+	errNoData = errors.New("no data")
 
-	errStakeValueError = errors.New("stake value Failure")
+	errStakingList = errors.New("not found staking list")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -486,47 +465,49 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] stakingList 처리 로직 추가
-
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
-		return nil, err
+		return nil, errStakingList
 	}
 
+	font := color.Yellow
+	if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
+		font = color.Green
+	}
 	stakingList.Print()
-	fmt.Println("##############[FINALIZE]##############")
-	fmt.Println("NUMBER : ", header.Number.String())
-	fmt.Println("HASH : ", header.Hash().Hex())
-	fmt.Println("COINBASE : ", header.Coinbase.Hex())
-	fmt.Println("DIFFICULTY : ", header.Difficulty.String())
-	fmt.Println("######################################")
+	font.Println("##############[FINALIZE]##############")
+	font.Println("NUMBER : ", header.Number.String())
+	font.Println("HASH : ", header.Hash().Hex())
+	font.Println("COINBASE : ", header.Coinbase.Hex())
+	font.Println("DIFFICULTY : ", header.Difficulty.String())
+	font.Println("UNCLES : ", header.UncleHash.Hex())
+	font.Println("######################################")
 
 	if header.Coinbase != common.HexToAddress("0") {
-		//Epoch 이후에 처리
-		if header.Number.Uint64() > c.config.Epoch {
-			//Diff
+		//Diff
+		var signers signers
+		signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+		if err != nil {
+			return nil, errUnauthorizedSigner
+		}
 
-			var signers signers
-			signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-			if err != nil {
-				return nil, err
-			}
+		signerMap := signers.signersMap()
+		if _, ok := signerMap[header.Coinbase]; !ok {
+			return nil, errUnauthorizedSigner
+		}
 
-			signerMap := signers.signersMap()
-			if _, ok := signerMap[header.Coinbase]; !ok {
-				return nil, errUnauthorizedSigner
-			}
-
-			parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-			predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
-			if predicted.Cmp(header.Difficulty) != 0 {
-				return nil, errInvalidDifficulty
-			}
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
+		font = color.Blue
+		font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
+		if predicted.Cmp(header.Difficulty) != 0 {
+			return nil, errInvalidDifficulty
 		}
 	}
 
 	err = c.setStakingListWithTxs(state, chain, stakingList, txs, header)
 	if err != nil {
-		return nil, err
+		return nil, errStakingList
 	}
 
 	//Reward 보상
@@ -616,17 +597,11 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 }
 func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 
-
-
 	target := parent
 	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(int64(c.config.Epoch)))
 	for target.Number.Cmp(big.NewInt(0)) > 0 && target.Number.Cmp(targetNumber) > 0 {
 		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
-	fmt.Println("==================[DIFFICULTY]=================")
-	fmt.Println("HASH : ", target.Hash().Hex())
-	fmt.Println("NUMBER : ", target.Number.String())
-	fmt.Println("COMPARE : ", target.Number.Cmp(big.NewInt(0)))
 	if target.Number.Cmp(big.NewInt(0)) <= 0 {
 		return big.NewInt(1234)
 	}
@@ -638,8 +613,6 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 	}
 
 	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
-	list.Print()
-	fmt.Println("DIFFICULTY : ", diff.String())
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
@@ -691,8 +664,21 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header) {
+	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
 
-	state.AddRewardBalance(header.Coinbase, getReward(config, header))
+	behind, err := state.GetFirstBehindBalance(header.Coinbase)
+	if err != nil {
+		return
+	}
+
+	target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
+	if header.Number.Cmp(target) == -1{
+		return
+	}
+
+	//bihind --> reword
+	state.AddRewardBalance(header.Coinbase, behind.Balance)
+	state.RemoveFirstBehindBalance(header.Coinbase)
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
@@ -787,6 +773,10 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 	for i := 0; i < len(blocks)/2; i++ {
 		blocks[i], blocks[len(blocks)-1-i] = blocks[len(blocks)-1-i], blocks[i]
+	}
+
+	if len(blocks) > 0 {
+		list.ClearTable()
 	}
 
 	list = list.Copy()
@@ -974,21 +964,10 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 
 }
 
-func (c *BSRR) roundJoinRatio(stakingList *staking.StakingList, address common.Address) (int, error) {
-	users := (*stakingList).GetRoundJoinRatio()
-	if users == nil {
-		return 0, errors.New("not reward ratio")
-	}
+func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
+	roi := (*stakingList).GetJoinRatio(address, blockNumber, c.config.Period)
 
-	if len(*users) == 0 {
-		return 0, errors.New("not reward ratio")
-	}
-
-	p := (*users)[address]
-
-	//rs[address] = (p + 1) /10000
-	//rs[address] = p
-	return p, nil
+	return roi, nil
 }
 
 func reward(number float64) float64 {

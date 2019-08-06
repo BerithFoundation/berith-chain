@@ -1137,7 +1137,13 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 	// Peek the error for the first block to decide the directing import logic
 	it := newInsertIterator(chain, results, bc.Validator())
 
+	//체인에서 블록데이터 가져옴
 	block, err := it.next()
+
+	//블록 Body Validation
+
+
+
 	switch {
 	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
@@ -1203,9 +1209,18 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		// Process block using the parent state as reference point.
 		t0 := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)
+
 		t1 := time.Now()
 		if err != nil {
-			bc.reportBlock(block, receipts, err)
+			switch err.Error() {
+			case "unauthorized signer":
+			case "not found staking list":
+			case "invalid difficulty" :
+				bc.reportFinalizeError(block, err)
+				break
+			default:
+				bc.reportBlock(block, receipts, err)
+			}
 			return it.index, events, coalescedLogs, err
 		}
 		// Validate the state using the default validator
@@ -1579,6 +1594,12 @@ Error: %v
 ##############################
 `, bc.chainConfig, block.Number(), block.Hash(), receiptString, err))
 }
+
+
+func (bc *BlockChain) reportFinalizeError(block *types.Block, err error){
+	log.Error(fmt.Sprintf("Number: %v, Hash: 0x%x, Error: %v", block.Number(), block.Hash(), err))
+}
+
 
 // InsertHeaderChain attempts to insert the given header chain in to the local
 // chain, possibly creating a reorg. If an error is returned, it will return the

@@ -22,6 +22,14 @@ berith/history
 cmd/berith/debug
 node_modules
 
+wallet/Berith/*
+wallet/vendor/
+wallet/output/
+berith/keystore
+berith/history
+berith/berith
+cmd/berith/password.txt
+
 #*
 .#*
 *#

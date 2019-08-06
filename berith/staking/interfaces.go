@@ -19,11 +19,12 @@ type StakingList interface {
 	Copy() StakingList
 	Len() int
 	Print()
-	GetRoundJoinRatio() *map[common.Address]int
+	GetJoinRatio(address common.Address, blockNumber, period uint64) float64
 	SetMiner(address common.Address)
 	InitMiner()
 	GetMiners() map[common.Address]bool
 	Sort()
+	ClearTable()
 	GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool)
 	ToArray() []common.Address
 }

@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
-	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/rpc"
 
@@ -143,6 +142,7 @@ func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.
 	if state == nil || err != nil {
 		return nil, err
 	}
+
 	return (*hexutil.Big)(state.GetRewardBalance(address)), state.Error()
 }
 
@@ -183,8 +183,17 @@ func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArg
 // SendStaking creates a transaction for user staking
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
+
+	state, _, err := s.backend.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return common.Hash{}, err
+	}
+	stakedAmount := state.GetStakeBalance(args.From)
+	stakingAmount := args.Value.ToInt()
+	totalStakingAmount := new(big.Int).Add(stakingAmount,stakedAmount)
+
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
-		if args.Value.ToInt().Cmp(config.Bsrr.StakeMinimum) <= -1 {
+		if totalStakingAmount.Cmp(config.Bsrr.StakeMinimum) <= -1 {
 			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, big.NewInt(1e+18))
 
 			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
@@ -262,12 +271,27 @@ func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.A
 	return (*hexutil.Big)(state.GetStakeBalance(address)), state.Error()
 }
 
-func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account, error) {
+
+type AccountInfo struct {
+	Balance  *big.Int
+	StakeBalance *big.Int //brt staking balance
+	RewardBalance *big.Int //reward balance
+}
+
+func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*AccountInfo, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
 	}
-	return state.GetAccountInfo(address), state.Error()
+
+	account := state.GetAccountInfo(address)
+	info := &AccountInfo{
+		Balance: account.Balance,
+		StakeBalance: account.StakeBalance,
+		RewardBalance: account.RewardBalance,
+	}
+
+	return info, state.Error()
 }
 
 func (s *PrivateBerithAPI) UpdateAccount(ctx context.Context, address common.Address, passphrase, newPassphrase string) error {
