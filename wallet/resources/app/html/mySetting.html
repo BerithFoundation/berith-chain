@@ -53,7 +53,7 @@
                         </p>
                     </div>
                     <div class="inp_group  " id ="changePwdGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                        <h5>비밀번호</h5>
+                        <h5>변경 비밀번호</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
                                 <input class="inp" id = "changePwd" type="text"  />
@@ -66,7 +66,7 @@
                         </p>
                     </div>
                     <div class="inp_group " id = "changePwdGroup2" ><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                        <h5>비밀번호 확인</h5>
+                        <h5>변경 비밀번호 확인</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
                                 <input class="inp" id = "changePwd2" type="text"  />
@@ -81,15 +81,19 @@
                 </div>
             </div>
             <div class="pop_footer">
-                <a class="btn red " id = "fnChangeBtn" onclick="fnPwdChange()">확인</a><!-- input 입력시 on -->
+                <a class="btn red " id = "fnChangeBtn" onclick="fnPwdChangeConfirm()">확인</a><!-- input 입력시 on -->
             </div>
         </div><!-- e://pop_wrap  -->
 
-
+        <div id = "pwdChangeConfirmPop"></div>
     </div>
     <script type="text/javascript">
         let openYn = 0
         let updateAdd = sessionStorage.getItem('account');
+        let loginId = sessionStorage.getItem('loginId')
+        $(document).ready(function () {
+           $('#pwdChangeConfirmPop').load("pwdChangeConfirm.html");
+        });
         $('#originPwd').focus(function () {
             $('#originPwdGroup').addClass('active del')
         });
@@ -157,21 +161,26 @@
             }
 
         }
-        async function fnPwdChange() {
+        async function fnPwdChangeConfirm() {
             var vali = $('#fnChangeBtn').attr('class')
             var vali2 = vali.includes('on')
             var vali3 = validateFields()
-            console.log("vali ::: " + vali)
-            console.log("vali2 ::: " + vali2)
-            console.log("vali3 ::: " + vali3)
             if(!vali2 || !vali3){
                 return
             }
             var originPwd = $('#originPwd').val()
             var changePwd = $('#changePwd').val()
-            let apiResult = await database.checkLogin()
-            // berith.updateAccount(updateAdd , originPwd , changePwd)
-            console.log("Add  : " + updateAdd + " ,  originPwd : " + originPwd + "  ,  changePwd : " + changePwd )
+            let apiResult = await database.checkLogin(loginId,originPwd)
+            var obj = apiResult.payload
+            console.log( " real Pwd : " + obj.Password + " , inpuPwd : " + originPwd)
+            if( originPwd != obj.Password) {
+                $('#originPwdGroup').addClass('error')
+                $('.error_txt').html("현재 비밀번호가 일치하지않습니다.")
+                return
+            }else{
+                $('#originPwdGroup').removeClass('error')
+                openPwdChangeConfirmPop(updateAdd , originPwd , changePwd)
+            }
         }
         function validateFields() {
             var originPwd = $('#originPwd').val()
@@ -209,6 +218,7 @@
             $('#changePwdGroup2').removeClass('error')
             return true
         }
+
     </script>
 </body>
 

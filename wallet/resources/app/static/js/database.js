@@ -90,6 +90,19 @@ let database = {
             }) // settimeout
         }) // promise
     },
+    updateMember : function (memberName , memberPwd) {
+        let message = {"name" : "callDB"}
+        message.payload = {
+            "api" : "updateMember",
+            "args" : [memberName , memberPwd]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message , function (message) {
+            asticode.loader.hide()
+            var obj = message.payload
+            console.log("obj :::  " + obj)
+        });
+    },
     insertMember : function (memberName , memberPwd) {
         let message = {"name" : "callDB"}
         message.payload = {

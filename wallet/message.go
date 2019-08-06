@@ -172,6 +172,19 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		}
 		return member, nil
 		break
+	case "updateMember":
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[0]), &mem)
+		if err != nil {
+			return "err" , err
+		}
+		mem.Password = key[1]
+		err = WalletDB.Insert([]byte(key[0]) , mem)
+		if err != nil {
+			return nil , err
+		}
+		return mem, nil
+		break
 	case "insertMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)

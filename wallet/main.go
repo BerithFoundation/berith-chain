@@ -113,16 +113,13 @@ func startPolling(){
 				astilog.Error(errors.Wrap(err, "polling failed"))
 			}
 
+			// 현재 Account 확인 coinbase
+			// Block 검사 Tx 있는지 확인
+			//
+
+
 			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
 				astilog.Error(errors.Wrap(err, "polling failed"))
-			}
-			//coinbase 조회
-			val2, err2 := callNodeApi("berith_coinbase" , nil)
-			if err2 != nil {
-				astilog.Error(errors.Wrap(err2, "coinbase null"))
-			}
-			if err2 := bootstrap.SendMessage(w, "coinbase", val2); err2 != nil {
-				astilog.Error(errors.Wrap(err2, "coinbase null"))
 			}
 
 			time.Sleep(3 * time.Second)
