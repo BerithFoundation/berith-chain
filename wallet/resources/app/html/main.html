@@ -139,7 +139,7 @@
                 results = regex.exec(location.search);
             return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
-        var add
+
         async function onPageload() {
             let account = sessionStorage.getItem('account');
             $('#myAdd').text(account);
@@ -176,7 +176,7 @@
         function qrCreate() {
             $('#qrPop').removeClass('hide')
             $('#qrPop').addClass('view')
-            qrcode.qrgen(add)
+            qrcode.qrgen(sessionStorage.getItem('account'))
         }
         function qrPopClose() {
             $("#qrcode").empty();
