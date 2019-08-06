@@ -28,7 +28,7 @@ let personal = {
         result = await sendMessage("callApi", "personal_hasAddress", [address]);
         return result.payload;
     },
-    unlockAccount: function () {
+    /*unlockAccount: function () {
         let message = {"name": "callApi"};
         message.payload = {
             "api" : "personal_unlockAccount",
@@ -39,7 +39,18 @@ let personal = {
             asticode.loader.hide();
             $('#unlockAccount').val(message.payload)
         })
+    },*/
+
+
+    unlockAccount : async function (account, password, time) {
+        result = await sendMessage("callApi", "personal_unlockAccount", [account, password, time]);
+        return result.payload;
     },
+
+
+
+
+
     lockAccount: function () {
         let message = {"name": "callApi"};
         message.payload = {

@@ -69,7 +69,7 @@ let berith = {
     getBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload)
-        var val  =parseInt(obj, 16);
+        var val = await hexToDecimal(obj);
         return val;
     },
 
@@ -146,7 +146,7 @@ let berith = {
         })
     },
 
-    stakeTransaction: function (stakeAmount ) {
+    /*stakeTransaction: function (stakeAmount ) {
         var valueData = hexConvert.getTxValue(stakeAmount).value
         var valueData2 = "0x"+valueData
         let message = {"name": "callApi"};
@@ -159,6 +159,13 @@ let berith = {
             asticode.loader.hide();
             $('#stakeResult').val(message.payload)
         })
+    },*/
+
+    stake : async function (stakeAmount) {
+        var valueData = toHex(stakeAmount);
+        var valueData2 = "0x"+valueData;
+        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData } ]);
+        return result;
     },
 
     rewardToBalance: function (rtbAmount ) {

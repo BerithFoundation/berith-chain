@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
@@ -28,14 +27,18 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	api := info["api"]
 	args := info["args"].([]interface{})
 
+	astilog.Debugf("Message type: %s", m.Name)
+
 	switch m.Name {
-	/*case "init":
-		ch <- NodeMsg{
+	case "init":
+
+
+		/*ch <- NodeMsg{
 			t: "init",
 			v: nil,
 			stack: nil,
-		}
-		break*/
+		}*/
+		break
 	case "callApi":
 		payload, err = callNodeApi(api, args...)
 		break
@@ -53,6 +56,11 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		payload = nil
 		break
 	}
+
+	if err!=nil {
+		astilog.Error(err.Error())
+	}
+	astilog.Debugf("Payload: %s", payload)
 	return
 }
 
@@ -87,7 +95,12 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	}
 	err := client.Call(&result, api.(string), p...)
 
-	var val string
+	if (err!= nil) {
+		return err.Error(), err
+	}
+	return string(result), err
+
+	/*var val string
 	switch err := err.(type) {
 	case nil:
 		if result == nil {
@@ -100,9 +113,9 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 		return val, err
 	default:
 		return val, err
-	}
+	}*/
 
-	return val, err
+	//return val, err
 }
 
 func callDB ( api interface{}, args... interface{}) ( interface{}, error){

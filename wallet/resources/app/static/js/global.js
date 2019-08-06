@@ -1,5 +1,4 @@
-
-var account
+//var account
 var mainBalance
 var blockNumber
 var stakeBalance
@@ -28,5 +27,11 @@ async function sendMessage(methodType, methodName, args) {
         });
     });
     return messagePromise;
+}
+
+async function hexToDecimal(value) {
+    let decimalValue = toDecimal(value);
+    console.log(decimalValue);
+    return decimalValue;
 }
 
