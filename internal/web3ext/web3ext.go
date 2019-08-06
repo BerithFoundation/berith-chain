@@ -148,8 +148,8 @@ web3._extend({
 			params: 1
 		}),
 		new web3._extend.Method({
-			name: 'getRoundJoinRatio',
-			call: 'bsrr_getRoundJoinRatio',
+			name: 'getJoinRatio',
+			call: 'bsrr_getJoinRatio',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
