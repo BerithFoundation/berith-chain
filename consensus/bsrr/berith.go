@@ -474,7 +474,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
 		font = color.Green
 	}
-	stakingList.Print()
+	//stakingList.Print()
 	font.Println("##############[FINALIZE]##############")
 	font.Println("NUMBER : ", header.Number.String())
 	font.Println("HASH : ", header.Hash().Hex())
@@ -483,10 +483,15 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	font.Println("UNCLES : ", header.UncleHash.Hex())
 	font.Println("######################################")
 
+
+
 	if header.Coinbase != common.HexToAddress("0") {
-		//Diff
 		var signers signers
-		signers, err = c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+		//Diff
+		epoch := chain.Config().Bsrr.Epoch
+		targetNumber := header.Number.Uint64() - epoch
+
+		signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
 		if err != nil {
 			return nil, errUnauthorizedSigner
 		}
@@ -511,7 +516,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	}
 
 	//Reward 보상
-	accumulateRewards(chain.Config(), state, header)
+	c.accumulateRewards(chain, state, header)
 
 	//상태값 적용
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
@@ -552,7 +557,10 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
-	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+	epoch := chain.Config().Bsrr.Epoch
+	targetNumber := header.Number.Uint64() - epoch
+	signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
+	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
 	}
@@ -663,27 +671,47 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 // AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
-func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header) {
+func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.StateDB, header *types.Header) {
+
+	config := chain.Config()
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
 
-	behind, err := state.GetFirstBehindBalance(header.Coinbase)
+	//과거 시점의 블록 생성자 가져온다.
+	targetNumber := header.Number.Uint64() - config.Bsrr.SlashRound
+	signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
 	if err != nil {
 		return
 	}
+	
+	//all node block result
+	for _, addr := range signers {
+		behind, err := state.GetFirstBehindBalance(addr)
+		if err != nil {
+			continue
+		}
 
-	target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
-	if header.Number.Cmp(target) == -1{
-		return
+		target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
+		if header.Number.Cmp(target) == -1 {
+			continue
+		}
+
+		if behind.Balance.Cmp(new(big.Int).SetInt64(int64(0))) != 1 {
+			continue
+		}
+
+		//bihind --> reword
+		state.AddRewardBalance(addr, behind.Balance)
+		state.RemoveFirstBehindBalance(addr)
 	}
-
-	//bihind --> reword
-	state.AddRewardBalance(header.Coinbase, behind.Balance)
-	state.RemoveFirstBehindBalance(header.Coinbase)
 }
 
 //[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
-	signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
+
+	epoch := chain.Config().Bsrr.Epoch
+	targetNumber := header.Number.Uint64() - epoch
+	signers, err := c.getSigners(chain, header.Number.Uint64(), targetNumber, header.Hash())
+	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
 	}
@@ -926,7 +954,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
-func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash common.Hash) (signers, error) {
+func (c *BSRR) getSigners(chain consensus.ChainReader, number, targetNumber uint64, hash common.Hash) (signers, error) {
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
 	for i := 0; i < len(signers); i++ {
@@ -934,7 +962,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, number uint64, hash commo
 	}
 
 	target := chain.GetHeader(hash, number)
-	targetNumber := number - c.config.Epoch
+	//targetNumber := number - c.config.Epoch
 
 	if targetNumber <= 0 {
 		return signers, nil
