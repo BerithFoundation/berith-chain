@@ -93,18 +93,6 @@
         }
     }
 
-    function getWholePart(value) {
-        return (value + "").split(".")[0];
-    }
-
-    function getDecimalPart(value) {
-        let decimalPart = (value + "").split(".")[1];
-        if (!decimalPart) {
-            decimalPart = 0;
-        }
-        return decimalPart;
-    }
-
     function togglePopUp(popUpId) {
         let selector = "#"+popUpId;
         if ($(selector).hasClass("view")) {

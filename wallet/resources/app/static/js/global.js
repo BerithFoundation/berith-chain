@@ -11,6 +11,10 @@ var totalBalance
 // var stakeAccount
 
 async function sendMessage(methodType, methodName, args) {
+
+
+
+
     let messagePromise = new Promise(function (resolve) {
         let message = {"name": methodType};
         message.payload = {
@@ -19,10 +23,10 @@ async function sendMessage(methodType, methodName, args) {
         }
         asticode.loader.show()
 
-        // console.log("Request: ", JSON.stringify(message))
+        //console.log("Request: ", JSON.stringify(message));
         astilectron.sendMessage(message, function (response) {
             asticode.loader.hide();
-            // console.log("Response: ", JSON.stringify(response))
+            //console.log("Response: ", JSON.stringify(response));
             resolve(response);
         });
     });
@@ -60,5 +64,17 @@ async function hexToDecimal(value) {
     let decimalValue = toDecimal(value);
     console.log(decimalValue);
     return decimalValue;
+}
+
+function getWholePart(value) {
+    return (value + "").split(".")[0];
+}
+
+function getDecimalPart(value) {
+    let decimalPart = (value + "").split(".")[1];
+    if (!decimalPart) {
+        decimalPart = 0;
+    }
+    return decimalPart;
 }
 

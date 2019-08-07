@@ -19,6 +19,42 @@
 </head>
     
 <body>
+<link rel="import" href="../static/common.html">
+<script src="../static/js/api/berith.js"></script>
+<script type="text/javascript">
+    let account = sessionStorage.getItem('account');
+    async function onPageload() {
+        let rewardBalance = await berith.getRewardBalance(account);
+        let rewardBalanceContent = "<em>"+getWholePart(rewardBalance)+"</em><em>"+getDecimalPart(rewardBalance)+"</em> BER";
+        $('#rewardBalance').html(rewardBalanceContent);
+
+        let stakeBalance = await berith.getStakeBalance(account);
+        let stakeBalanceContent = "<em>"+getWholePart(stakeBalance)+"</em><em>"+getDecimalPart(stakeBalance)+"</em> BER";
+        $('#stakeBalance').html(stakeBalanceContent);
+
+        //$("#stakedBalance").val(stakeBalance); // input field
+    }
+
+    async function withdrawAll() {
+        let rewardBalance = await berith.getRewardBalance(account);
+        $('#withdrawalAmount').find('input[type=text]:first').val(rewardBalance);
+    }
+
+    async function next() {
+        let withdrawalAmount = $('#withdrawalAmount').find('input[type=text]:first').val();
+        let result = await berith.rewardToBalance(withdrawalAmount);
+        if (result.name == "error") {
+            alert("Something went wrong");
+        } else {
+            alert("Request submitted for a withdrawal");
+            $('#withdrawalAmount').find('input[type=text]:first').val("");
+        }
+    }
+</script>
+
+
+
+
     <div class="wrap">
         <header class="header">
             <h1><a class="logo" href="#">베리드 월렛</a></h1>
@@ -51,12 +87,12 @@
                     </div>
                     <div class="txt_wrap">
                         <strong>Reward Balance</strong>
-                        <p class="coin red"><em>35194782642</em><em>10289718</em> BER</p>
+                        <p class="coin red" id="rewardBalance"></p>
                     </div>
                     <hr/>
                     <div class="txt_wrap">
                         <strong>Stake Balance</strong> 
-                        <p class="coin"><em>12597398925</em><em>13280284</em> BER</p>
+                        <p class="coin" id="stakeBalance"></p>
                     </div>
                     <hr/>
 
@@ -64,7 +100,7 @@
                 
                 <div class="content">
                     <h4>정보입력</h4>
-                    <div class="inp_group active del error"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <div class="inp_group active del " id="withdrawalAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                         <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
                         <div class="row_group">
                             <div class="box_inp">
@@ -74,7 +110,7 @@
                                 <a class="del" href="#!">삭제</a>
                             </div>
                             <div class="btn_inp">
-                                <a class="btn white medium2" href="#!">모두 보내기</a>
+                                <a class="btn white medium2" href="#!" onclick="withdrawAll()">모두 보내기</a>
                             </div>
                         </div>
                         <p class="error_txt">
@@ -83,7 +119,7 @@
                     </div><!-- e://inp_group -->
                     <div class="row_group">
                         <div class="con_box input">
-                            <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                            <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                                 <h5>기본수수료</h5>
                                 <div class="box_inp">
                                     <span class="inp_wrap">
@@ -95,7 +131,7 @@
                                     소수점은 한번만 입력해 주세요.
                                 </p>
                             </div>
-                            <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                            <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                                 <h5>수수료가격</h5>
                                 <div class="box_inp">
                                     <span class="inp_wrap">
@@ -120,7 +156,7 @@
                         </div>
                     </div>
                     <div class="btn_area right">
-                        <a class="btn red medium on" href="#!">다음</a>
+                        <a class="btn red medium on" href="#!" onclick="next()">다음</a>
                     </div>
 
                 </div><!-- e://content -->

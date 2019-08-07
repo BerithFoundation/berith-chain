@@ -21,6 +21,32 @@
 </head>
     
 <body>
+<link rel="import" href="../static/common.html">
+<script src="../static/js/api/berith.js"></script>
+<script type="text/javascript">
+    let account = sessionStorage.getItem('account');
+    async function onPageload() {
+        let mainBalance = await berith.getBalance(account);
+        let mainBalanceContent = "<em>"+getWholePart(mainBalance)+"</em><em>"+getDecimalPart(mainBalance)+"</em> BER";
+        $('#mainBalance').html(mainBalanceContent);
+
+        let stakeBalance = await berith.getStakeBalance(account);
+        let stakeBalanceContent = "<em>"+getWholePart(stakeBalance)+"</em><em>"+getDecimalPart(stakeBalance)+"</em> BER";
+        $('#stakeBalance').html(stakeBalanceContent);
+
+        $("#stakedBalance").val(stakeBalance); // input field
+    }
+
+    async function next() {
+        let result = await berith.stopStaking();
+        if (result.name == "error") {
+            alert("Something went wrong");
+        } else {
+            alert("Request submitted for stop staking");
+        }
+    }
+</script>
+
     <div class="wrap">
         <header class="header">
             <h1><a class="logo" href="#">베리드 월렛</a></h1>
@@ -53,12 +79,12 @@
                     </div>
                     <div class="txt_wrap">
                         <strong>Stake Balance</strong>
-                        <p class="coin red"><em>35194782642</em><em>10289718</em> BER</p>
+                        <p class="coin red" id="stakeBalance"></p>
                     </div>
                     <hr/>
                     <div class="txt_wrap">
                         <strong>Main Balance</strong>
-                        <p class="coin"><em>12597398925</em><em>13280284</em> BER</p>
+                        <p class="coin" id="mainBalance"></p>
                     </div>
                     <hr/>
 
@@ -71,14 +97,14 @@
                         <div class="row_group">
                             <div class="box_inp">
                                 <span class="inp_wrap">
-                                    <input class="inp" type="text" value="12597397398925.13280284" readonly/>
+                                    <input id="stakedBalance" class="inp" type="text" value="" readonly/>
                                 </span>
                             </div>
                         </div>
                     </div><!-- e://inp_group -->
                     <div class="row_group">
                         <div class="con_box input">
-                            <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                            <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                                 <h5>기본수수료</h5>
                                 <div class="box_inp">
                                     <span class="inp_wrap">
@@ -90,7 +116,7 @@
                                     소수점은 한번만 입력해 주세요.
                                 </p>
                             </div>
-                            <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                            <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                                 <h5>수수료가격</h5>
                                 <div class="box_inp">
                                     <span class="inp_wrap">
@@ -115,7 +141,7 @@
                         </div>
                     </div>
                     <div class="btn_area right">
-                        <a class="btn red medium on" href="#!">다음</a>
+                        <a class="btn red medium on" href="#!" onclick="next()">다음</a>
                     </div>
 
                 </div><!-- e://content -->

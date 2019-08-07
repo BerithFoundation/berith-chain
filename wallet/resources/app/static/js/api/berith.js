@@ -126,7 +126,7 @@ let berith = {
 */
     getRewardBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getRewardBalance", [address,"latest"]);
-        var obj = JSON.parse(result.payload)
+        var obj = JSON.parse(result.payload);
         var val  =parseInt(obj, 16);
         return val;
     },
@@ -168,7 +168,12 @@ let berith = {
         return result;
     },
 
-    rewardToBalance: function (rtbAmount ) {
+    stopStaking : async function () {
+        result = await sendMessage("callApi", "berith_stopStaking", [{from: account}]);
+        return result;
+    },
+
+    /*rewardToBalance: function (rtbAmount ) {
         var valueData = hexConvert.getTxValue(rtbAmount).value
         var valueData2 = "0x"+valueData
         let message = {"name": "callApi"};
@@ -181,8 +186,18 @@ let berith = {
             asticode.loader.hide();
             $('#rtbResult').val(message.payload)
         })
+    },*/
+
+    rewardToBalance: async function (rtbAmount) {
+        var valueData = hexConvert.getTxValue(rtbAmount).value;
+        var valueData2 = "0x"+valueData;
+        result = await sendMessage("callApi", "berith_rewardToBalance", [{from : account , value: valueData2 }]);
+        return result;
     },
-    rewardToStake: function (rtsAmount ) {
+
+
+
+    /*rewardToStake: function (rtsAmount ) {
         var valueData = hexConvert.getTxValue(rtsAmount).value
         var valueData2 = "0x"+valueData
         let message = {"name": "callApi"};
@@ -196,7 +211,17 @@ let berith = {
             asticode.loader.hide();
             $('#rtsResult').val(message.payload)
         })
+    },*/
+
+    rewardToStake: async function (rtsAmount) {
+        var valueData = hexConvert.getTxValue(rtsAmount).value;
+        var valueData2 = "0x"+valueData;
+        result = await sendMessage("callApi", "berith_rewardToStake", [{from : account , value: valueData2 }]);
+        return result;
     },
+
+
+
 
     pendingTransactions: function ( ) {
         let message = {"name": "callApi"};

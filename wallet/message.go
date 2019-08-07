@@ -27,7 +27,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	api := info["api"]
 	args := info["args"].([]interface{})
 
-	astilog.Debugf("Message type: %s", m.Name)
+	astilog.Debugf("Message type: %s, Method: %s", m.Name, api.(string))
 
 	switch m.Name {
 	case "init":
@@ -65,6 +65,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 }
 
 func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
+	var apiName = api.(string)
 	var result json.RawMessage
 	p := make([]interface{}, 0)
 	for _, item := range args{
@@ -72,24 +73,11 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 			break
 		}
 		// 트랜잭션시
-		if api.(string) == "berith_sendTransaction" {
+		if apiName == "berith_sendTransaction" || apiName == "berith_stake" || apiName == "berith_rewardToBalance"  || apiName == "berith_rewardToStake" || apiName == "berith_stopStaking"   {
 			temp := reflect.ValueOf(item).Interface()
 			itemMap:= temp.(map[string]interface{})
-			argTemp := map[string]interface{}{
-				"from" : reflect.ValueOf(itemMap["from"]).String(),
-				"to" : reflect.ValueOf(itemMap["to"]).String(),
-				"value" : reflect.ValueOf(itemMap["value"]).String(),
-			}
-			p = append(p, argTemp)
-		}else if api.(string) == "berith_stake" || api.(string) == "berith_rewardToBalance"  || api.(string) == "berith_rewardToStake"{
-			temp := reflect.ValueOf(item).Interface()
-			itemMap:= temp.(map[string]interface{})
-			argTemp := map[string]interface{}{
-				"from" : reflect.ValueOf(itemMap["from"]).String(),
-				"value" : reflect.ValueOf(itemMap["value"]).String(),
-			}
-			p = append(p, argTemp)
-		}else{
+			p = append(p, itemMap)
+		} else{
 			p = append(p , item)
 		}
 	}
