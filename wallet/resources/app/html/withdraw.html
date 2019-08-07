@@ -1,38 +1,100 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="utf-8">
-    <title>Berith PC Wallet</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
-    <meta name="subject" content="" />
-    <meta name="application-name" content="">
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <meta name="copyright" content="Copyrights (c) " />
-    <meta name="robots" content="ALL" />
-    <meta name="robots" content="index,follow" />
+<div class="container">
+    <div class="aside">
+        <h2>WITHDRAW</h2>
+        <div class="box_state">
+            <span><em class="large">Reward</em>Balance</span>
+            <span><em class="large">Stake</em>Balance</span>
+        </div>
+        <div class="txt_wrap">
+            <strong>Reward Balance</strong>
+            <p class="coin red" id="rewardBalance"></p>
+        </div>
+        <hr/>
+        <div class="txt_wrap">
+            <strong>Stake Balance</strong>
+            <p class="coin" id="stakeBalance"></p>
+        </div>
+        <hr/>
 
-    <link rel="stylesheet" href="../static/css/style.css" />
-    <link rel="shortcut icon" href="../images/common/berith_pa.ico"> 
-    
-</head>
-    
-<body>
-<link rel="import" href="../static/common.html">
-<script src="../static/js/api/berith.js"></script>
+    </div><!-- e://aside -->
+
+    <div class="content">
+        <h4>정보입력</h4>
+        <div class="inp_group active del " id="withdrawalAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
+            <div class="row_group">
+                <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text"/>
+                                </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <div class="btn_inp">
+                    <a class="btn white medium2" href="#!" onclick="withdrawAll()">모두 보내기</a>
+                </div>
+            </div>
+            <p class="error_txt">
+                소수점은 한번만 입력해 주세요.
+            </p>
+        </div><!-- e://inp_group -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>기본수수료</h5>
+                    <div class="box_inp">
+                                    <span class="inp_wrap">
+                                        <input class="inp" type="text"/>
+                                    </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                        소수점은 한번만 입력해 주세요.
+                    </p>
+                </div>
+                <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>수수료가격</h5>
+                    <div class="box_inp">
+                                    <span class="inp_wrap">
+                                        <input class="inp" type="text"/>
+                                    </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                        소수점은 한번만 입력해 주세요.
+                    </p>
+                </div>
+            </div>
+            <div class="con_box info">
+                <div class="box_info">
+                    <p class="txt">
+                        <strong>TX 비용 = 기본수수료 X 수수료가격</strong>
+                        <span>수수료가격이 높을수록 거래가 빠르게 진행되지만, <br/>
+                                    더 비싼 비용을 지불해야 합니다. </span>
+                        <span>수수료는 <b>Main Balance</b>에서 계산됩니다.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="btn_area right">
+            <a class="btn red medium on" href="#!" onclick="next()">다음</a>
+        </div>
+
+    </div><!-- e://content -->
+    <div w3-include-html="bottom.html"></div>
+</div><!-- e://container -->
+
+
 <script type="text/javascript">
-    let account = sessionStorage.getItem('account');
-    async function onPageload() {
+    onWithdrawLoad();
+
+    async function onWithdrawLoad() {
         let rewardBalance = await berith.getRewardBalance(account);
-        let rewardBalanceContent = "<em>"+getWholePart(rewardBalance)+"</em><em>"+getDecimalPart(rewardBalance)+"</em> BER";
+        let rewardBalanceContent = "<em>" + getWholePart(rewardBalance) + "</em><em>" + getDecimalPart(rewardBalance) + "</em> BER";
         $('#rewardBalance').html(rewardBalanceContent);
 
         let stakeBalance = await berith.getStakeBalance(account);
-        let stakeBalanceContent = "<em>"+getWholePart(stakeBalance)+"</em><em>"+getDecimalPart(stakeBalance)+"</em> BER";
+        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BER";
         $('#stakeBalance').html(stakeBalanceContent);
-
-        //$("#stakedBalance").val(stakeBalance); // input field
     }
 
     async function withdrawAll() {
@@ -52,111 +114,3 @@
     }
 </script>
 
-
-
-
-    <div class="wrap">
-        <header class="header">
-            <div w3-include-html="header.html"></div>
-        </header><!-- e://header -->
-        
-        <div class="contents_wrap">
-            <div class="gnb">
-                <ul class="gnb_menu"><!-- 버튼 선택 시 on 추가 -->
-                    <li class="on"><a class="btn_mywallet" href="main.html">My Wallet</a></li>
-                    <li><a class="btn_send" href="#!">Send</a></li>
-                    <li><a class="btn_transaction" href="#!">Transactions</a></li>
-                </ul>
-                <span class="logout"><a class="btn_logout" href="#!">로그아웃</a></span>
-            </div><!-- e://gnb -->
-            <div class="container">
-                <div class="aside">
-                    <h2>WITHDRAW</h2>
-                    <div class="box_state">
-                        <span><em class="large">Reward</em>Balance</span>
-                        <span><em class="large">Stake</em>Balance</span>
-                    </div>
-                    <div class="txt_wrap">
-                        <strong>Reward Balance</strong>
-                        <p class="coin red" id="rewardBalance"></p>
-                    </div>
-                    <hr/>
-                    <div class="txt_wrap">
-                        <strong>Stake Balance</strong> 
-                        <p class="coin" id="stakeBalance"></p>
-                    </div>
-                    <hr/>
-
-                </div><!-- e://aside -->
-                
-                <div class="content">
-                    <h4>정보입력</h4>
-                    <div class="inp_group active del " id="withdrawalAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                        <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
-                        <div class="row_group">
-                            <div class="box_inp">
-                                <span class="inp_wrap">
-                                    <input class="inp" type="text" />
-                                </span>
-                                <a class="del" href="#!">삭제</a>
-                            </div>
-                            <div class="btn_inp">
-                                <a class="btn white medium2" href="#!" onclick="withdrawAll()">모두 보내기</a>
-                            </div>
-                        </div>
-                        <p class="error_txt">
-                            소수점은 한번만 입력해 주세요.
-                        </p>
-                    </div><!-- e://inp_group -->
-                    <div class="row_group">
-                        <div class="con_box input">
-                            <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                                <h5>기본수수료</h5>
-                                <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text" />
-                                    </span>
-                                    <a class="del" href="#!">삭제</a>
-                                </div>
-                                <p class="error_txt">
-                                    소수점은 한번만 입력해 주세요.
-                                </p>
-                            </div>
-                            <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                                <h5>수수료가격</h5>
-                                <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text" />
-                                    </span>
-                                    <a class="del" href="#!">삭제</a>
-                                </div>
-                                <p class="error_txt">
-                                    소수점은 한번만 입력해 주세요.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="con_box info">
-                            <div class="box_info">
-                                <p class="txt">
-                                    <strong>TX 비용 = 기본수수료 X 수수료가격</strong>
-                                    <span>수수료가격이 높을수록 거래가 빠르게 진행되지만, <br/>
-                                    더 비싼 비용을 지불해야 합니다. </span>
-                                    <span>수수료는 <b>Main Balance</b>에서 계산됩니다.</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="btn_area right">
-                        <a class="btn red medium on" href="#!" onclick="next()">다음</a>
-                    </div>
-
-                </div><!-- e://content -->
-                <div w3-include-html="bottom.html"></div>
-            </div><!-- e://container -->
-        </div>
-    </div><!-- e://wrap -->
-
-
-</body>
-
-</html>

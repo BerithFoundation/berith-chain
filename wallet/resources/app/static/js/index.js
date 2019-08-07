@@ -8,11 +8,10 @@ let index = {
         // Wait for astilectron to be ready
         document.addEventListener('astilectron-ready', async function() {
             index.listen();
-
             let responseValue = await sendMessage("init", "", [])
             console.log(responseValue)
-            onPageload(); // all pages should include this method to guarantee a successful page load.
-            includeHTML(); // for templating
+            //onPageload(); // all pages should include this method to guarantee a successful page load.
+            loadAppContents();
         });
     },
     listen: function() {

@@ -36,7 +36,7 @@
                 </div>
                 <div class="inp_group"><!-- <비밀번호변경> 버튼 선택 시 hide -->
                     <h5>계정 정보 변경</h5>
-                    <div class="btn_area left"><a class="btn_chg_pw" onclick="openPwdChange()">비밀번호 변경</a></div>
+                    <div class="btn_area left"><a class="btn_chg_pw" onclick="togglePopUp('pwdChange')">비밀번호 변경</a></div>
                 </div>
                 <div class="change_pw hide" id = "pwdChange"><!-- default hide -->
                     <div class="inp_group " id = "originPwdGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
@@ -88,9 +88,9 @@
         <div id = "pwdChangeConfirmPop"></div>
     </div>
     <script type="text/javascript">
-        let openYn = 0
-        let updateAdd = sessionStorage.getItem('account');
-        let loginId = sessionStorage.getItem('loginId')
+        //let openYn = 0
+        //let updateAdd = sessionStorage.getItem('account');
+        //let loginId = sessionStorage.getItem('loginId')
         $(document).ready(function () {
            $('#pwdChangeConfirmPop').load("pwdChangeConfirm.html");
         });
@@ -179,7 +179,7 @@
                 return
             }else{
                 $('#originPwdGroup').removeClass('error')
-                openPwdChangeConfirmPop(updateAdd , originPwd , changePwd)
+                openPwdChangeConfirmPop(account , originPwd , changePwd)
             }
         }
         function validateFields() {

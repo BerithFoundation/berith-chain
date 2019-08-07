@@ -120,8 +120,8 @@
 
                     await personal.unlockAccount(address,password,0);
                     sessionStorage.setItem('account', address);
-                    sessionStorage.setItem('loginId' ,$('#loginID').val() )
-                    location.href ="main.html"
+                    sessionStorage.setItem('loginId' ,$('#loginID').val());
+                    location.href ="index.html"
                 } else {
                     console.error("Something went wrong while setting Berithbase!!!")
                 }
