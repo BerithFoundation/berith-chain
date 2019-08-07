@@ -12,8 +12,8 @@ let index = {
             let responseValue = await sendMessage("init", "", [])
             console.log(responseValue)
             onPageload(); // all pages should include this method to guarantee a successful page load.
-
-        })
+            includeHTML(); // for templating
+        });
     },
     listen: function() {
         //폴링 리시브등록?
