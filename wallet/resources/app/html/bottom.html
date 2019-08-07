@@ -1,0 +1,23 @@
+
+    <div class="sync_bar " id = "progressSync"><!--hide -->
+        <strong>Synchronizing…</strong>
+        <span class="progress">
+                <span class="progress_bar" style="width:45%"></span>
+            </span>
+        <span class="progress_info">45%</span>
+    </div>
+
+<script type="text/javascript">
+    function sendGoApi(){
+        astilectron.onMessage(function(message) {
+            switch (message.name) {
+                case "polling" :
+                    syncingData(message.payload)
+                    break
+            }
+        });
+    }
+    function syncingData(data) {
+        console.log( "footer:: " +data)
+    }
+</script>

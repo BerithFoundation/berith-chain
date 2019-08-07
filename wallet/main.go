@@ -112,11 +112,8 @@ func startPolling(){
 			if err != nil {
 				astilog.Error(errors.Wrap(err, "polling failed"))
 			}
-
 			// 현재 Account 확인 coinbase
 			// Block 검사 Tx 있는지 확인
-			//
-
 
 			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
 				astilog.Error(errors.Wrap(err, "polling failed"))

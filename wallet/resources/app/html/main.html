@@ -23,12 +23,12 @@
 <script src="../static/js/api/berith.js"></script>
     <div class="wrap">
         <header class="header">
-            <div id = "headerForm" > </div>
+            <div w3-include-html="header.html"></div>
         </header><!-- e://header -->
         
         <div class="contents_wrap">
             <div class="gnb">
-                <div id = "leftForm"> </div>
+                <div w3-include-html="left.html"></div>
             </div><!-- e://gnb -->
             <div class="container main">
                 <div class="aside">
@@ -92,13 +92,7 @@
                         <a class="btn_main" href="add.html">Add</a>
                     </div> 
                 </div><!-- e://content -->
-                <div class="sync_bar "><!--hide -->  
-                    <strong>Synchronizing…</strong>
-                    <span class="progress">
-                        <span class="progress_bar" style="width:45%"></span>
-                    </span>
-                    <span class="progress_info">45%</span>
-                </div>
+                <div w3-include-html="bottom.html"></div>
             </div><!-- e://container -->
         </div>
         <!--contact Pop -->
@@ -126,12 +120,9 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#headerForm').load('header.html')
-            $('#leftForm').load('left.html')
             $("#contactPop").load("contactList.html");
             $("#contactAddPop").load("contactAdd.html");
             $('#mySetting').load('mySetting.html');
-            //$("#contactUpdate")
         });
         function getParameterByName(name) {
             name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -158,6 +149,7 @@
 
             totalBalance = mainBalance + stakeBalance + rewardBalance;
             $('#totBalance').text(totalBalance);
+            includeHTML();
         };
 
         function copyToClipboard(element) {

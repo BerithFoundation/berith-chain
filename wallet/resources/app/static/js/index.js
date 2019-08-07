@@ -7,15 +7,8 @@ let index = {
 
         // Wait for astilectron to be ready
         document.addEventListener('astilectron-ready', async function() {
-            // Listen
             index.listen();
 
-            let message = {"name": "init"};
-            /*asticode.loader.show()
-            astilectron.sendMessage(message, function(message) {
-                // Init
-                asticode.loader.hide();
-            })*/
             let responseValue = await sendMessage("init", "", [])
             console.log(responseValue)
             onPageload(); // all pages should include this method to guarantee a successful page load.
@@ -33,7 +26,10 @@ let index = {
                     asticode.loader.hide();
                     break;
                 case "polling":
-                    $('#polling').val(message.payload)
+                    // $('#polling').val(message.payload)
+                    // syncingData(message.payload)
+                    // syncingData(message.payload)
+                    // console.log("footer ::: " + message.payload)
                     break;
                 case "coinbase":
                     berith.coinbase()
