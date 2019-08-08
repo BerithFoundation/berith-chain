@@ -26,8 +26,8 @@ var MainnetBootnodes = []string{
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
 // Ropsten test network.
 var TestnetBootnodes = []string{
-	"enode://8142df22d4ca164db41f0cb6a66f439332ec8d9a799dbd1a5bbc990ca585fbc283dc949edb8a0962942accb0c361a1171dc16dd46abefd17b7dc8ef19e6894e8@13.125.92.15:4555",
-	"enode://0f146ca27cbe111f38ecf82b93a87718c37c2f4ed0e0b9d31b015d6e0253d12710221a63a68b298951638d61909f794e9da23272c08730d909fb666137524c1d@13.209.204.31:4555",
+	"enode://8142df22d4ca164db41f0cb6a66f439332ec8d9a799dbd1a5bbc990ca585fbc283dc949edb8a0962942accb0c361a1171dc16dd46abefd17b7dc8ef19e6894e8@13.125.92.15:4455",
+	"enode://0f146ca27cbe111f38ecf82b93a87718c37c2f4ed0e0b9d31b015d6e0253d12710221a63a68b298951638d61909f794e9da23272c08730d909fb666137524c1d@13.209.204.31:4455",
 }
 
 // DiscoveryV5Bootnodes are the enode URLs of the P2P bootstrap nodes for the
