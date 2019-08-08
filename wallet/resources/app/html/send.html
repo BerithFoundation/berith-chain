@@ -3,7 +3,7 @@
         <h2>SEND</h2>
         <div class="txt_wrap">
             <strong>Main Balance</strong>
-            <p class="coin red"><em>35194782642</em><em>10289718</em> BER</p>
+            <p class="coin red" id="mainBalance"></p>
         </div>
         <hr/>
 
@@ -21,24 +21,24 @@
                     <a class="del" href="#!">삭제</a>
                 </div>
                 <div class="btn_inp">
-                    <a class="btn blue medium2 contact" href="#!">Contact</a>
+                    <a class="btn blue medium2 contact" href="#!" onclick="openContactList();">Contact</a>
                 </div>
             </div>
             <p class="error_txt" id="err1">
 
             </p>
         </div><!-- e://inp_group -->
-        <div class="inp_group active del error"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+        <div class="inp_group active del" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
                                 <span class="inp_wrap">
-                                    <input class="inp" type="text" value="54895.02158742"/>
+                                    <input class="inp" type="text" value=""/>
                                 </span>
                     <a class="del" href="#!">삭제</a>
                 </div>
                 <div class="btn_inp">
-                    <a class="btn white medium2" href="#!">모두 보내기</a>
+                    <a class="btn white medium2" href="#!" onclick="sendAll();">모두 보내기</a>
                 </div>
             </div>
             <p class="error_txt" id="err2">
@@ -47,7 +47,7 @@
         </div><!-- e://inp_group -->
         <div class="row_group">
             <div class="con_box input">
-                <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
                                     <span class="inp_wrap">
@@ -59,7 +59,7 @@
                         소수점은 한번만 입력해 주세요.
                     </p>
                 </div>
-                <div class="inp_group error "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                                     <span class="inp_wrap">
@@ -84,20 +84,44 @@
             </div>
         </div>
         <div class="btn_area right">
-            <a class="btn red medium on" href="#!">다음</a>
+            <a class="btn red medium on" href="#!" onclick="send()">다음</a>
         </div>
 
     </div><!-- e://content -->
 </div><!-- e://container -->
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $('#headerForm').load('header.html')
-        $('#leftForm').load('left.html')
-        $("#contactPop").load("contactList.html");
-        $('#mySettingPop').load('mySetting.html');
-        add = getParameterByName("addr")
-        console.log("snedPage addr ::" + account)
-        $('#sendAddr').val(account)
-    });
+
+
+    onSendLoad();
+    async function onSendLoad() {
+        let mainBalance = await berith.getBalance(account);
+        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
+        $('#mainBalance').html(mainBalanceContent);
+    }
+
+    async function sendAll() {
+        let mainBalance = await berith.getBalance(account);
+        $('#sendAmount').find('input[type=text]:first').val(mainBalance);
+    }
+
+    async function send() {
+        let receiversAddress = $("#sendAddr").val();
+        let amount = $('#sendAmount').find('input[type=text]:first').val();
+        let result = await berith.sendTransaction(amount,receiversAddress);
+        if (result.name == "error") {
+            alert("Something went wrong!");
+        } else {
+            alert("Transaction submitted successfully");
+            // clearing fields
+            $("#sendAddr").val("");
+            $('#sendAmount').find('input[type=text]:first').val("");
+        }
+
+    }
+
+    function populateAddressField(receiverAddress) {
+        $("#sendAddr").val("");
+        $("#sendAddr").val(receiverAddress);
+    }
 </script>

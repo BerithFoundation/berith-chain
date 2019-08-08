@@ -257,9 +257,18 @@
             }, 1000);
         }
         function movePageSend(value) {
-            var addNum = value.attr('id')
+            /*var addNum = value.attr('id')
             var addr = $('#addr'+addNum).text()
-            location.href = "send.html?addr="+addr
+            location.href = "send.html?addr="+addr*/
+
+            var addNum = value.attr('id');
+            var addr = $('#addr'+addNum).text();
+            loadMainContentWithCallBack("send.html", function() {
+                closeContactList();
+                populateAddressField(addr); // Defined in 'send.html'
+            });
+
+
         }
     </script>
 </body>

@@ -131,7 +131,7 @@ let berith = {
         return val;
     },
 
-    sendTransaction: function (sendAmount , sendAccount) {
+    /*sendTransaction: function (sendAmount , sendAccount) {
         var valueData = hexConvert.getTxValue(sendAmount).value
         var valueData2 = "0x"+valueData
         let message = {"name": "callApi"};
@@ -144,6 +144,13 @@ let berith = {
             asticode.loader.hide();
             $('#sendResult').val(message.payload)
         })
+    },*/
+
+
+    sendTransaction: async function (sendAmount , receiverAccount) {
+        let valueData2 = toHex(sendAmount);
+        result = await sendMessage("callApi", "berith_sendTransaction", [{from : account , to :receiverAccount , value: valueData2 } ]);
+        return result;
     },
 
     /*stakeTransaction: function (stakeAmount ) {

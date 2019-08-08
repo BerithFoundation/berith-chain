@@ -41,6 +41,11 @@ function loadMainContent(htmlName) {
     $( "#main-content" ).load( htmlName);
 }
 
+function loadMainContentWithCallBack(htmlName, callBackFunction) {
+    $( "#main-content" ).load( htmlName, callBackFunction);
+}
+
+
 async function hexToDecimal(value) {
     let decimalValue = toDecimal(value);
     console.log(decimalValue);
