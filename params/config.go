@@ -25,8 +25,8 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0xbef7ec0b3eb11220f7789b39c44375c9fd1d04406bf0653a7c4d4c57ac806e78")
-	TestnetGenesisHash = common.HexToHash("0xbef7ec0b3eb11220f7789b39c44375c9fd1d04406bf0653a7c4d4c57ac806e78")
+	MainnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
 )
 
 var (
@@ -65,7 +65,7 @@ var (
 			Epoch:        360,
 			Rewards:      common.StringToBig("10000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   1000,
+			SlashRound:   500,
 		},
 	}
 

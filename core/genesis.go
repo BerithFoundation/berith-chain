@@ -181,7 +181,7 @@ func SetupGenesisBlockWithOverride(db berithdb.Database, genesis *Genesis, const
 	}
 
 	// Get the existing chain configuration.
-	//fmt.Println(stored.Hex())
+	fmt.Println(stored.Hex())
 	newcfg := genesis.configOrDefault(stored)
 	if constantinopleOverride != nil {
 		newcfg.ConstantinopleBlock = constantinopleOverride
@@ -329,7 +329,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		Nonce: 0x00,
 		Timestamp:  0x00,
 		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000078c2b0dfde452677ccd0cd00465e7cca0e3c53530000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
-		GasLimit:   94000000,
+		GasLimit:   104000000,
 		Difficulty: big.NewInt(1),
 		Mixhash: common.BytesToHash(hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000")),
 		Coinbase: common.HexToAddress("0x0000000000000000000000000000000000000000"),
