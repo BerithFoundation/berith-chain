@@ -148,19 +148,18 @@
             $('#mySettingPop').removeClass('view');
             $('#mySettingPop').addClass('hide');
         }
-        function openPwdChange() {
-            if (openYn == 0 ){
-                $('#pwdChange').removeClass('hide')
-                $('#pwdChange').addClass('view')
-                openYn =1
-            }else {
-                $('#pwdChange').removeClass('view')
-                $('#pwdChange').addClass('hide')
-                $('#fnChangeBtn').removeClass('on')
-                openYn =0
-            }
-
-        }
+        // function openPwdChange() {
+        //     if (openYn == 0 ){
+        //         $('#pwdChange').removeClass('hide')
+        //         $('#pwdChange').addClass('view')
+        //         openYn =1
+        //     }else {
+        //         $('#pwdChange').removeClass('view')
+        //         $('#pwdChange').addClass('hide')
+        //         $('#fnChangeBtn').removeClass('on')
+        //         openYn =0
+        //     }
+        // }
         async function fnPwdChangeConfirm() {
             var vali = $('#fnChangeBtn').attr('class')
             var vali2 = vali.includes('on')

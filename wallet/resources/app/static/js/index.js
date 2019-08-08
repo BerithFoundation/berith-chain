@@ -7,6 +7,7 @@ let index = {
 
         // Wait for astilectron to be ready
         document.addEventListener('astilectron-ready', async function() {
+            // includeHTML(); // for templating
             index.listen();
             let responseValue = await sendMessage("init", "", [])
             console.log(responseValue)
@@ -25,10 +26,7 @@ let index = {
                     asticode.loader.hide();
                     break;
                 case "polling":
-                    // $('#polling').val(message.payload)
-                    // syncingData(message.payload)
-                    // syncingData(message.payload)
-                    // console.log("footer ::: " + message.payload)
+                    syncingData(message.payload)
                     break;
                 case "coinbase":
                     berith.coinbase()

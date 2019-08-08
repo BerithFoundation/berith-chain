@@ -44,22 +44,23 @@
         </div>
     </div>
     <script type="text/javascript" >
-        let changeAdd , originPwd , changePwd
+        // let changeAdd , originPwd , changePwd
         function openPwdChangeConfirmPop(add , pwd , cPwd) {
             $('#pwdChangeConfirm').removeClass('hide')
             $('#pwdChangeConfirm').addClass('view')
-            changeAdd = add
-            originPwd = pwd
-            changePwd = cPwd
+
         }
         function closePwdChangeConfirmPop() {
             $('#pwdChangeConfirm').removeClass('view')
             $('#pwdChangeConfirm').addClass('hide')
         }
         function fnPwdChange() {
-            berith.updateAccount(changeAdd , originPwd , changePwd)
-            database.updateMember(loginId , changePwd)
-            // console.log("Add  : " + changeAdd + " ,  originPwd : " + originPwd + "  ,  changePwd : " + changePwd )
+            var pwd = $('#originPwd').val()
+            var cPwd = $('#changePwd').val()
+            // console.log("Add  : " + account + " ,  originPwd : " + pwd + "  ,  changePwd : " + cPwd )
+            berith.updateAccount(account ,pwd, cPwd )
+            database.updateMember(loginId , cPwd)
+
         }
         // var deleteAddr
         // function openContactDelete(value) {

@@ -1,0 +1,69 @@
+
+    <div class="wrap">
+        <!-- 콘텐츠 영역 --> 
+    </div><!-- e://wrap -->
+
+    <div class="ly_pop hide" id = "export" ><!-- view/hide -->
+        <div class="bg_dimmed"></div>
+        <div class="pop_wrap">
+            <div class="pop_header">
+                <h5>지갑정보 입력</h5>
+                <a class="btn_close" href="#!">close</a>
+            </div>
+            <div class="pop_body">
+                <p class="pop_con_top">
+                    Keystore File 복원을 위해<br/>
+                    지갑명과 비밀번호를 입력해 주세요.
+                </p>
+                <div class="inp_group active del"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>지갑명</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" />
+                        </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                        오류메시지 영역
+                    </p>
+                </div>
+                <div class="inp_group error"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>비밀번호</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="password" /><!-- type: password/text -->
+                            <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                        </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                        오류메시지 영역.
+                    </p>
+                </div>
+            </div>
+            <div class="pop_footer">
+                <a class="btn red " href="#!">다음</a><!-- 입력 필드 입력시 on 추가 -->    
+            </div>
+        </div><!-- e://pop_wrap  -->
+    </div>
+
+
+    <div class="alert_pop hide"><!-- view/hide -->
+        <div class="al_wrap">
+            <div class="al_body">
+                <p>
+                    비밀번호가 맞지 않습니다. <br/>
+                    다시 입력해 주세요. 
+                </p>
+            </div>
+            <div class="al_footer">
+                <a class="btn red on" href="#!">확인</a>
+            </div>
+        </div>
+    </div>
+    <script type = "text/javascript">
+        function openExport() {
+            $('#export').removeClass('hide')
+            $('#export').addClass('view')
+        }
+    </script>

@@ -8,16 +8,7 @@
     </div>
 
 <script type="text/javascript">
-    function sendGoApi(){
-        astilectron.onMessage(function(message) {
-            switch (message.name) {
-                case "polling" :
-                    syncingData(message.payload)
-                    break
-            }
-        });
-    }
-    function syncingData(data) {
-        console.log( "footer:: " +data)
+    function syncingData(data){
+        console.log("data  : "+data)
     }
 </script>
