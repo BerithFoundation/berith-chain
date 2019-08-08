@@ -64,6 +64,7 @@
 
     <script type = "text/javascript">
 
+        onPageload();
         function onPageload() {
             $('.login').keypress(function (e) {
                 if (e.keyCode == '13')
@@ -101,12 +102,12 @@
                     $('#pwdGroup').addClass('error')
                     $('.error_txt').html("비밀번호가 일치하지 않습니다.")
                 } else {
-                    handlSuccessfulLogin(obj);
+                    handleSuccessfulLogin(obj);
                 }
             }
         }
 
-        async function handlSuccessfulLogin(obj) {
+        async function handleSuccessfulLogin(obj) {
 
             let password = obj.Password;
             let address = obj.Address;
