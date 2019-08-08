@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/BerithFoundation/berith-chain/core/state"
 	"strconv"
 
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -278,20 +279,20 @@ type AccountInfo struct {
 	RewardBalance *big.Int //reward balance
 }
 
-func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*AccountInfo, error) {
+func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
 	}
 
 	account := state.GetAccountInfo(address)
-	info := &AccountInfo{
-		Balance: account.Balance,
-		StakeBalance: account.StakeBalance,
-		RewardBalance: account.RewardBalance,
-	}
+	//info := &AccountInfo{
+	//	Balance: account.Balance,
+	//	StakeBalance: account.StakeBalance,
+	//	RewardBalance: account.RewardBalance,
+	//}
 
-	return info, state.Error()
+	return account, state.Error()
 }
 
 func (s *PrivateBerithAPI) UpdateAccount(ctx context.Context, address common.Address, passphrase, newPassphrase string) error {

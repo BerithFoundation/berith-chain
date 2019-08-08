@@ -1221,7 +1221,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 			default:
 				bc.reportBlock(block, receipts, err)
 			}
-			return it.index, events, coalescedLogs, err
+			//return it.index, events, coalescedLogs, err
 		}
 		// Validate the state using the default validator
 		if err := bc.Validator().ValidateState(block, parent, state, receipts, usedGas); err != nil {
