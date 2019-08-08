@@ -16,15 +16,6 @@ var toBigNumber = function(number) {
     return new BigNumber(number.toString(10), 10);
 };
 
-var isBigNumber = function (object) {
-    return object instanceof BigNumber ||
-        (object && object.constructor && object.constructor.name === 'BigNumber');
-};
-
-var isString = function (object) {
-    return typeof object === 'string' ||
-        (object && object.constructor && object.constructor.name === 'String');
-};
 
 var toHex = function (val) {
     /*jshint maxcomplexity: 8 */
@@ -51,14 +42,30 @@ var toHex = function (val) {
     return fromDecimal(val);
 };
 
-var isBoolean = function (object) {
-    return typeof object === 'boolean';
+/**
+ * Should be called to get hex representation (prefixed by 0x) of ascii string
+ *
+ * @method fromAscii
+ * @param {String} string
+ * @param {Number} optional padding
+ * @returns {String} hex representation of input string
+ */
+var fromAscii = function(str) {
+    var hex = "";
+    for(var i = 0; i < str.length; i++) {
+        var code = str.charCodeAt(i);
+        var n = code.toString(16);
+        hex += n.length < 2 ? '0' + n : n;
+    }
+
+    return "0x" + hex;
 };
+
+
 
 var fromDecimal = function (value) {
     var number = toBigNumber(value);
     var result = number.toString(16);
-
     return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
 };
 

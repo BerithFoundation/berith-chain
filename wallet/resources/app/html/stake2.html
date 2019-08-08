@@ -1,35 +1,33 @@
-<div id="confirmationPopup" class="ly_pop hide"><!-- view/hide -->
-    <div class="bg_dimmed"></div>
-    <div class="pop_wrap">
-        <div class="pop_header">
-            <h5>STAKE 전송 확인</h5>
-            <a class="btn_close" href="#!" onclick="togglePopUp('confirmationPopup');">close</a>
-        </div>
-        <div class="pop_body">
-            <p class="pop_con_top">
-                Main Balance를 Stake Balance로<br/>
-                전송하시겠습니까?
-            </p>
-            <table class="pop_table">
-                <tbody>
-                <tr>
-                    <th>보낼 수량</th>
-                    <td><em class="red"><p id="stakeAmtForConfirmation"></p></em></td>
-                </tr>
-                <tr>
-                    <th>기본수수료</th>
-                    <td>21000</td>
-                </tr>
-                <tr>
-                    <th>수수료가격</th>
-                    <td>21000</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="pop_footer">
-            <a class="btn white on" href="#!" onclick="togglePopUp('confirmationPopup');">취소</a>
-            <a class="btn red on" href="#!" onclick="stake()">확인</a>
-        </div>
-    </div><!-- e://pop_wrap  -->
-</div>
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>STAKE 전송 확인</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('confirmationPopup');">close</a>
+    </div>
+    <div class="pop_body">
+        <p class="pop_con_top">
+            Main Balance를 Stake Balance로<br/>
+            전송하시겠습니까?
+        </p>
+        <table class="pop_table">
+            <tbody>
+            <tr>
+                <th>보낼 수량</th>
+                <td><em class="red"><p id="stakeAmtForConfirmation"></p></em></td>
+            </tr>
+            <tr>
+                <th>기본수수료</th>
+                <td>21000</td>
+            </tr>
+            <tr>
+                <th>수수료가격</th>
+                <td>21000</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pop_footer">
+        <a class="btn white on" href="#!" onclick="togglePopUp('confirmationPopup');">취소</a>
+        <a class="btn red on" href="#!" onclick="stake()">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->

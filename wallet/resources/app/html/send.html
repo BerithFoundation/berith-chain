@@ -25,10 +25,10 @@
                 </div>
             </div>
             <p class="error_txt" id="err1">
-
+                소수점은 한번만 입력해 주세요.
             </p>
         </div><!-- e://inp_group -->
-        <div class="inp_group active del" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+        <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <p class="error_txt" id="err2">
-
+                소수점은 한번만 입력해 주세요.
             </p>
         </div><!-- e://inp_group -->
         <div class="row_group">
@@ -92,7 +92,6 @@
 
 <script type="text/javascript">
 
-
     onSendLoad();
     async function onSendLoad() {
         let mainBalance = await berith.getBalance(account);
@@ -106,9 +105,13 @@
     }
 
     async function send() {
+        let validationResult = await isValidated();
+        if (!validationResult) {
+            return;
+        }
         let receiversAddress = $("#sendAddr").val();
         let amount = $('#sendAmount').find('input[type=text]:first').val();
-        let result = await berith.sendTransaction(amount,receiversAddress);
+        let result = await berith.sendTransaction(amount, receiversAddress);
         if (result.name == "error") {
             alert("Something went wrong!");
         } else {
@@ -117,11 +120,49 @@
             $("#sendAddr").val("");
             $('#sendAmount').find('input[type=text]:first').val("");
         }
-
     }
 
     function populateAddressField(receiverAddress) {
         $("#sendAddr").val("");
         $("#sendAddr").val(receiverAddress);
+    }
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        let isValidAddress = await validateAddress();
+        let isValidAmount =  await validateAmount();
+        return isValidAddress && isValidAmount;
+    }
+
+    async function validateAmount() {
+        let amountField = $('#sendAmount').find('input[type=text]:first');
+        let amount = amountField.val();
+
+        if (isDecimalNumber(amount)) {
+            let mainBalance = await berith.getBalance(account);
+            if (parseInt(amount) > parseInt(mainBalance)) {
+                console.error("input amount is more than the available balance");
+                $("#sendAmount").addClass("error");
+                return false;
+            } else {
+                $("#sendAmount").removeClass("error");
+            }
+        } else {
+            console.error("not a valid amount");
+            $("#sendAmount").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
+    async function validateAddress() {
+        let receiverAddress = $('#sendAddr').val();
+        if (!isAddress(receiverAddress)) {
+            $('#sendAddr').parent().parent().parent().parent().addClass("error");
+            return false;
+        } else {
+            $('#sendAddr').parent().parent().parent().parent().removeClass("error");
+        }
+        return true;
     }
 </script>

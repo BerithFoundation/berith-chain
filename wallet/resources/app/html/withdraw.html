@@ -20,7 +20,7 @@
 
     <div class="content">
         <h4>정보입력</h4>
-        <div class="inp_group active del " id="withdrawalAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+        <div class="inp_group " id="withdrawalAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
@@ -86,7 +86,6 @@
 
 <script type="text/javascript">
     onWithdrawLoad();
-
     async function onWithdrawLoad() {
         let rewardBalance = await berith.getRewardBalance(account);
         let rewardBalanceContent = "<em>" + getWholePart(rewardBalance) + "</em><em>" + getDecimalPart(rewardBalance) + "</em> BER";
@@ -103,14 +102,49 @@
     }
 
     async function next() {
-        let withdrawalAmount = $('#withdrawalAmount').find('input[type=text]:first').val();
-        let result = await berith.rewardToBalance(withdrawalAmount);
-        if (result.name == "error") {
-            alert("Something went wrong");
-        } else {
-            alert("Request submitted for a withdrawal");
-            $('#withdrawalAmount').find('input[type=text]:first').val("");
+        let validationResult = await isValidated();
+        if (!validationResult) {
+            return;
         }
+
+        let withdrawalAmount = $('#withdrawalAmount').find('input[type=text]:first').val();
+            let result = await berith.rewardToBalance(withdrawalAmount);
+            if (result.name == "error") {
+                alert("Something went wrong");
+            } else {
+                alert("Request submitted for a withdrawal");
+                $('#withdrawalAmount').find('input[type=text]:first').val("");
+            }
     }
+
+
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        let isValidAmount =  await validateAmount();
+        return isValidAmount;
+    }
+
+    async function validateAmount() {
+        let amountField = $('#withdrawalAmount').find('input[type=text]:first');
+        let amount = amountField.val();
+
+        if (isDecimalNumber(amount)) {
+            let rewardBalance = await berith.getRewardBalance(account);
+            if (parseInt(amount) > parseInt(rewardBalance)) {
+                console.error("input amount is more than the available balance");
+                $("#withdrawalAmount").addClass("error");
+                return false;
+            } else {
+                $("#withdrawalAmount").removeClass("error");
+            }
+        } else {
+            console.error("not a valid amount");
+            $("#withdrawalAmount").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
 </script>
 

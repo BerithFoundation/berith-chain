@@ -20,7 +20,7 @@
 
     <div class="content">
         <h4>정보입력</h4>
-        <div id="stakeAmount" class="inp_group active del"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+        <div id="stakeAmount" class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
@@ -78,85 +78,21 @@
         <div class="btn_area right">
             <a class="btn red medium on" href="#!" onclick="confirmation();">다음</a>
         </div>
-
     </div><!-- e://content -->
 
 </div><!-- e://container -->
 
 
-<div id="confirmationPopup" class="ly_pop hide"><!-- view/hide -->
-    <div class="bg_dimmed"></div>
-    <div class="pop_wrap">
-        <div class="pop_header">
-            <h5>STAKE 전송 확인</h5>
-            <a class="btn_close" href="#!" onclick="togglePopUp('confirmationPopup');">close</a>
-        </div>
-        <div class="pop_body">
-            <p class="pop_con_top">
-                Main Balance를 Stake Balance로<br/>
-                전송하시겠습니까?
-            </p>
-            <table class="pop_table">
-                <tbody>
-                <tr>
-                    <th>보낼 수량</th>
-                    <td><em class="red"><p id="stakeAmtForConfirmation"></p></em></td>
-                </tr>
-                <tr>
-                    <th>기본수수료</th>
-                    <td>21000</td>
-                </tr>
-                <tr>
-                    <th>수수료가격</th>
-                    <td>21000</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="pop_footer">
-            <a class="btn white on" href="#!" onclick="togglePopUp('confirmationPopup');">취소</a>
-            <a class="btn red on" href="#!" onclick="stake()">확인</a>
-        </div>
-    </div><!-- e://pop_wrap  -->
+<div id="confirmationPopup" class="ly_pop hide"><!-- view/hide -->>
 </div>
-
-<div id="successPopup" class="ly_pop hide"><!-- view/hide -->
-    <div class="bg_dimmed"></div>
-    <div class="pop_wrap">
-        <div class="pop_header">
-            <h5>전송요청 완료</h5>
-            <a class="btn_close" href="#!" onclick="togglePopUp('successPopup');">close</a>
-        </div>
-        <div class="pop_body">
-            <p class="pop_con_top">
-                전송요청이 완료되었습니다.
-                <span id="stakingDate" class="date">2019.04.18 15:00:00</span>
-            </p>
-            <table class="pop_table">
-                <tbody>
-                <tr>
-                    <th>보낼 수량</th>
-                    <td><em class="red"><p id="successfullyStakedAmount"></p></em></td>
-                </tr>
-                <tr>
-                    <th>기본수수료</th>
-                    <td>21000</td>
-                </tr>
-                <tr>
-                    <th>수수료가격</th>
-                    <td>21000</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="pop_footer">
-            <a class="btn red on" href="#!" onclick="togglePopUp('successPopup');">확인</a>
-        </div>
-    </div><!-- e://pop_wrap  -->
+<div id="successPopup"class="ly_pop hide"><!-- view/hide -->
 </div>
 
 
 <script type="text/javascript">
+    $("#confirmationPopup").load("stake2.html");
+    $("#successPopup").load("stake3.html");
+
     onStakeLoad();
     async function onStakeLoad() {
         let mainBalance = await berith.getBalance(account);
@@ -181,36 +117,6 @@
         }
     }
 
-    async function isValidated() {
-        return (await validateStakeAmount());
-    }
-
-    function isDecimalNumber(value) {
-        let decimalNumberRegex = /^\d+(\.\d+)?$/;
-        return decimalNumberRegex.test(String(value));
-    }
-
-    async function validateStakeAmount() {
-        let stakeAmountField = $('#stakeAmount').find('input[type=text]:first');
-        let stakeAmount = stakeAmountField.val();
-
-        if (isDecimalNumber(stakeAmount)) {
-            let mainBalance = await berith.getBalance(account);
-            if (parseInt(stakeAmount) > parseInt(mainBalance)) {
-                console.log("input stake amount is more than the available balance");
-                $("#stakeAmount").addClass("error");
-                return false;
-            } else {
-                $("#stakeAmount").removeClass("error");
-            }
-        } else {
-            console.log("not a valid amount");
-            $("#stakeAmount").addClass("error");
-            return false;
-        }
-        return true;
-    }
-
     async function stake() {
         let stakeAmount = $('#stakeAmount').find('input[type=text]:first').val();
         let result = await berith.stake(stakeAmount);
@@ -228,4 +134,31 @@
             togglePopUp("successPopup");
         }
     }
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        return (await validateStakeAmount());
+    }
+
+    async function validateStakeAmount() {
+        let stakeAmountField = $('#stakeAmount').find('input[type=text]:first');
+        let stakeAmount = stakeAmountField.val();
+
+        if (isDecimalNumber(stakeAmount)) {
+            let mainBalance = await berith.getBalance(account);
+            if (parseInt(stakeAmount) > parseInt(mainBalance)) {
+                console.error("input stake amount is more than the available balance");
+                $("#stakeAmount").addClass("error");
+                return false;
+            } else {
+                $("#stakeAmount").removeClass("error");
+            }
+        } else {
+            console.error("not a valid amount");
+            $("#stakeAmount").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
 </script>

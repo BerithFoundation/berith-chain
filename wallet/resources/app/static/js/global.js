@@ -38,11 +38,17 @@ function loadAppContents() {
 }
 
 function loadMainContent(htmlName) {
-    $( "#main-content" ).load( htmlName);
+    $( "#main-content" ).load( htmlName, function() {
+        registerEvents();
+    });
+
 }
 
 function loadMainContentWithCallBack(htmlName, callBackFunction) {
-    $( "#main-content" ).load( htmlName, callBackFunction);
+    $( "#main-content" ).load( htmlName, function() {
+        registerEvents();
+        callBackFunction();
+    });
 }
 
 
@@ -62,16 +68,5 @@ function getDecimalPart(value) {
         decimalPart = 0;
     }
     return decimalPart;
-}
-
-function togglePopUp(popUpId) {
-    let selector = "#" + popUpId;
-    if ($(selector).hasClass("view")) {
-        $(selector).removeClass("view");
-        $(selector).addClass("hide");
-    } else {
-        $(selector).removeClass("hide");
-        $(selector).addClass("view");
-    }
 }
 

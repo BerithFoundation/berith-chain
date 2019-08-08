@@ -196,8 +196,8 @@ let berith = {
     },*/
 
     rewardToBalance: async function (rtbAmount) {
-        var valueData = hexConvert.getTxValue(rtbAmount).value;
-        var valueData2 = "0x"+valueData;
+        //var valueData = hexConvert.getTxValue(rtbAmount).value;
+        var valueData2 = toHex(rtbAmount);
         result = await sendMessage("callApi", "berith_rewardToBalance", [{from : account , value: valueData2 }]);
         return result;
     },
@@ -221,8 +221,8 @@ let berith = {
     },*/
 
     rewardToStake: async function (rtsAmount) {
-        var valueData = hexConvert.getTxValue(rtsAmount).value;
-        var valueData2 = "0x"+valueData;
+        // /var valueData = hexConvert.getTxValue(rtsAmount).value;
+        var valueData2 = toHex(rtsAmount);
         result = await sendMessage("callApi", "berith_rewardToStake", [{from : account , value: valueData2 }]);
         return result;
     },

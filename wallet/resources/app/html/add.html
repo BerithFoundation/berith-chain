@@ -20,7 +20,7 @@
 
     <div class="content">
         <h4>정보입력</h4>
-        <div class="inp_group active del " id="amountToAdd"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+        <div class="inp_group " id="amountToAdd"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
@@ -104,6 +104,11 @@
     }
 
     async function next() {
+        let validationResult = await isValidated();
+        if (!validationResult) {
+            return;
+        }
+
         let amountToAdd = $('#amountToAdd').find('input[type=text]:first').val();
         let result = await berith.rewardToStake(amountToAdd);
         if (result.name == "error") {
@@ -113,4 +118,35 @@
             $('#amountToAdd').find('input[type=text]:first').val("");
         }
     }
+
+
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        let isValidAmount =  await validateAmount();
+        return isValidAmount;
+    }
+
+    async function validateAmount() {
+        let amountField = $('#amountToAdd').find('input[type=text]:first');
+        let amount = amountField.val();
+
+        if (isDecimalNumber(amount)) {
+            let rewardBalance = await berith.getRewardBalance(account);
+            if (parseInt(amount) > parseInt(rewardBalance)) {
+                console.error("input amount is more than the available balance");
+                $("#amountToAdd").addClass("error");
+                return false;
+            } else {
+                $("#amountToAdd").removeClass("error");
+            }
+        } else {
+            console.error("not a valid amount");
+            $("#amountToAdd").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
+
 </script>

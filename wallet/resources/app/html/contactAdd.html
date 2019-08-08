@@ -128,13 +128,13 @@
             var keys = Object.keys(obj);
             if( name == ""){
                 $('#contactAddNameGroup').addClass('error')
-                $('#err1').html("저장할 이름을 입력하세요.")
+                $('.error_txt').html("저장할 이름을 입력하세요.")
                 $('#contactAddName').focus()
                 return false
             }
             if( add == ""){
                 $('#contactAddAddressGroup').addClass('error')
-                $('#err2').html("주소를 입력하세요.")
+                $('.error_txt').html("주소를 입력하세요.")
                 $('#contactAddAddress').focus()
                 return false
             }
@@ -143,14 +143,14 @@
                 if (name == obj[keys[i]]){
                     console.log("same Name !!! ")
                     $('#contactAddNameGroup').addClass('error')
-                    $('#err1').html("이미 존재하는 이름 입니다.")
+                    $('.error_txt').html("이미 존재하는 이름 입니다.")
                     $('#contactAddName').focus()
                     return false
                 }
                 if( add == keys[i]) {
                     console.log("same add !!! ")
                     $('#contactAddAddressGroup').addClass('error')
-                    $('#err2').html("이미 존재하는 주소 입니다.")
+                    $('.error_txt').html("이미 존재하는 주소 입니다.")
                     $('#contactAddAddress').focus()
                     return false
                 }
