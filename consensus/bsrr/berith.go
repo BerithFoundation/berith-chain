@@ -483,15 +483,13 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	font.Println("UNCLES : ", header.UncleHash.Hex())
 	font.Println("######################################")
 
-
-
 	if header.Coinbase != common.HexToAddress("0") {
 		var signers signers
 		//Diff
 		epoch := chain.Config().Bsrr.Epoch
 		targetNumber := header.Number.Uint64() - epoch
 
-		signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
+		signers, err := c.getSigners(chain, header.Number.Uint64()-1, targetNumber, header.ParentHash)
 		if err != nil {
 			return nil, errUnauthorizedSigner
 		}
@@ -559,7 +557,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	// Bail out if we're unauthorized to sign a block
 	epoch := chain.Config().Bsrr.Epoch
 	targetNumber := header.Number.Uint64() - epoch
-	signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
+	signers, err := c.getSigners(chain, header.Number.Uint64()-1, targetNumber, header.ParentHash)
 	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
@@ -571,7 +569,9 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
-
+	if block.Difficulty().Cmp(big.NewInt(staking.DIF_MAX)) < 0 {
+		delay += 5 * time.Second
+	}
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -678,11 +678,11 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 
 	//과거 시점의 블록 생성자 가져온다.
 	targetNumber := header.Number.Uint64() - config.Bsrr.SlashRound
-	signers, err := c.getSigners(chain, header.Number.Uint64() - 1, targetNumber, header.ParentHash)
+	signers, err := c.getSigners(chain, header.Number.Uint64()-1, targetNumber, header.ParentHash)
 	if err != nil {
 		return
 	}
-	
+
 	//all node block result
 	for _, addr := range signers {
 		behind, err := state.GetFirstBehindBalance(addr)

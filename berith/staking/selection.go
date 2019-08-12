@@ -12,17 +12,17 @@ import (
 )
 
 var (
-	DIF_MAX   = int64(5000000)
-	DIF_MIN   = int64(10000)
+	DIF_MAX = int64(5000000)
+	DIF_MIN = int64(10000)
 )
 
 type Candidate struct {
-	address common.Address //address
-	stake   uint64         //stake balance
-	block   uint64         //block number -- Contribution
-	reward  uint64         //reward balance
-	val     uint64		   //sum
-	advStake		uint64		   //advStake
+	address  common.Address //address
+	stake    uint64         //stake balance
+	block    uint64         //block number -- Contribution
+	reward   uint64         //reward balance
+	val      uint64         //sum
+	advStake uint64         //advStake
 }
 
 func (c *Candidate) GetStake() uint64 {
@@ -58,7 +58,7 @@ type Candidates struct {
 	//selections map[uint64]Candidate
 	selections []Candidate
 	total      uint64 //Total Staking  + Adv
-	ts uint64//Total Staking Value
+	ts         uint64 //Total Staking Value
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
@@ -67,12 +67,12 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 		period:     period,
 		selections: make([]Candidate, 0),
 		total:      0,
-		ts : 	0,
+		ts:         0,
 	}
 }
 
 func (cs *Candidates) Add(c Candidate) {
-	adv := uint64(c.GetAdvantage(cs.number, cs.period) * 10) + 10
+	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
 	c.advStake = c.stake * adv
 	cs.total += c.advStake
 	c.val = cs.total
@@ -181,7 +181,6 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	}
 	result := make(map[common.Address]*big.Int)
 
-
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
 
@@ -197,7 +196,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	for queue.front != queue.rear {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF + int64(cs.ts))
+		result[account] = big.NewInt(DIF)
 		DIF -= DIF_R
 	}
 
@@ -206,13 +205,12 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	return &result
 }
 
-
 //ROI 산출
 func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	stake := uint64(0)
 	for _, c := range cs.selections {
 		if c.address == address {
-			stake =  c.advStake
+			stake = c.advStake
 			break
 		}
 	}
