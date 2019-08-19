@@ -102,7 +102,12 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 	if header == nil {
 		return nil, errUnknownBlock
 	}
-	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), header.Hash())
+
+
+	epoch := api.bsrr.config.Epoch
+	targetNumber := header.Number.Uint64() - epoch
+
+	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), targetNumber, header.Hash())
 
 	if err != nil {
 		return nil, err
@@ -131,7 +136,9 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 		return nil, errUnknownBlock
 	}
 
-	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), header.Hash())
+	epoch := api.bsrr.config.Epoch
+	targetNumber := header.Number.Uint64() - epoch
+	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), targetNumber, header.Hash())
 	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 	if err != nil {
 		return nil, err
@@ -186,7 +193,9 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 		return nil, errUnknownBlock
 	}
 
-	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), header.Hash())
+	epoch := api.bsrr.config.Epoch
+	targetNumber := header.Number.Uint64() - epoch
+	signers, err := api.bsrr.getSigners(api.chain, header.Number.Uint64(), targetNumber, header.Hash())
 	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 	if err != nil {
 		return nil, err
