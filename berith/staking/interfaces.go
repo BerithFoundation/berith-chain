@@ -25,7 +25,7 @@ type StakingList interface {
 	GetMiners() map[common.Address]bool
 	Sort()
 	ClearTable()
-	GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool)
+	GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool)
 	ToArray() []common.Address
 }
 

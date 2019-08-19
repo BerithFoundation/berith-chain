@@ -18,7 +18,7 @@ type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
 	miners     map[common.Address]bool
-	table      map[common.Address]*big.Int
+	table      map[common.Address]VoteResult
 	target     common.Hash
 }
 type stkInfo struct {
@@ -57,21 +57,24 @@ func (list *StakingMap) GetMiners() map[common.Address]bool {
 	return list.miners
 }
 
-func (list *StakingMap) GetDifficulty(addr common.Address, blockNumber, period uint64) (*big.Int, bool) {
+func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool) {
 	flag := false
 	if len(list.table) <= 0 {
 		flag = true
 		list.selectSigner(blockNumber, period)
 	}
 	if len(list.table) <= 0 {
-		return big.NewInt(1234), false
+		return big.NewInt(1234), 1, false
 	}
 
 	result, ok := list.table[addr]
 	if !ok {
-		result = big.NewInt(0)
+		result = VoteResult{
+			score: big.NewInt(0),
+			rank:  MAX_MINERS + 1,
+		}
 	}
-	return result, flag
+	return result.score, result.rank, flag
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
@@ -189,7 +192,7 @@ func (list *StakingMap) Sort() {
 
 func (list *StakingMap) ClearTable() {
 	list.sortedList = make([]common.Address, 0)
-	list.table = make(map[common.Address]*big.Int)
+	list.table = make(map[common.Address]VoteResult)
 }
 
 func (list *StakingMap) selectSigner(blockNumber, period uint64) {
@@ -285,7 +288,7 @@ func Decode(rlpData []byte) (StakingList, error) {
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
-		table:      make(map[common.Address]*big.Int),
+		table:      make(map[common.Address]VoteResult),
 		target:     common.Hash{},
 	}
 	if err := json.Unmarshal(byteArr[0], &result.storage); err != nil {
@@ -316,6 +319,6 @@ func New() StakingList {
 		storage:    make(map[common.Address]stkInfo),
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
-		table:      make(map[common.Address]*big.Int),
+		table:      make(map[common.Address]VoteResult),
 	}
 }
