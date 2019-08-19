@@ -196,7 +196,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	for queue.front != queue.rear {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF)
+		result[account] = big.NewInt(DIF + int64(cs.ts))
 		DIF -= DIF_R
 	}
 
