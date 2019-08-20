@@ -11,6 +11,10 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
+const (
+	MAX_MINERS = 22
+)
+
 var (
 	DIF_MAX = int64(5000000)
 	DIF_MIN = int64(10000)
@@ -100,7 +104,10 @@ type Range struct {
 	start int
 	end   int
 }
-
+type VoteResult struct {
+	Score *big.Int `json:"score"`
+	Rank  int      `json:"rank"`
+}
 type Queue struct {
 	storage []Range
 	size    int
@@ -172,14 +179,14 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	}
 }
 
-func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult {
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
 		size:    len(cs.selections) + 1,
 		front:   0,
 		rear:    0,
 	}
-	result := make(map[common.Address]*big.Int)
+	result := make(map[common.Address]VoteResult)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
@@ -192,12 +199,15 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 		start: 0,
 		end:   len(cs.selections),
 	})
-
-	for queue.front != queue.rear {
+	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF + int64(cs.ts))
+		result[account] = VoteResult{
+			Score: big.NewInt(DIF + int64(cs.ts)),
+			Rank:  count,
+		}
 		DIF -= DIF_R
+
 	}
 
 	//fmt.Println(DIF)

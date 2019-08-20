@@ -29,6 +29,10 @@ berith/keystore
 berith/history
 berith/berith
 cmd/berith/password.txt
+vendor/bazil.org
+vendor/github.com
+vendor/golang.org
+vendor/gopkg.in
 
 #*
 .#*

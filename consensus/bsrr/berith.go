@@ -46,6 +46,7 @@ const (
 
 	//stakingInterval = 10
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+
 )
 
 var (
@@ -62,6 +63,9 @@ var (
 
 	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
 	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
+
+	delays = []int{0, 2, 3, 5}
+	groups = []int{1, 4, 11, 22}
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -431,7 +435,13 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	header.Nonce = parent.Nonce
 
 	// Set the correct difficulty
-	header.Difficulty = c.CalcDifficulty(chain, number-1, parent)
+	diff, rank := c.calcDifficultyAndRank(c.signer, chain, number-1, parent)
+
+	if rank > staking.MAX_MINERS {
+		return errUnauthorizedSigner
+	}
+
+	header.Difficulty = diff
 
 	//[BERITH] 블록번호가 Epoch으로 나누어 떨어지는 경우 nonce값을 현재 블록의 번호로 변경한다.
 	if number%c.config.Epoch == 0 {
@@ -500,7 +510,10 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		}
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-		predicted := c.calcDifficulty(header.Coinbase, chain, 0, parent)
+		predicted, rank := c.calcDifficultyAndRank(header.Coinbase, chain, 0, parent)
+		if rank > staking.MAX_MINERS {
+			return nil, errUnauthorizedSigner
+		}
 		font = color.Blue
 		font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
@@ -558,6 +571,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	epoch := chain.Config().Bsrr.Epoch
 	targetNumber := header.Number.Uint64() - epoch
 	signers, err := c.getSigners(chain, header.Number.Uint64()-1, targetNumber, header.ParentHash)
+
 	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return err
@@ -569,6 +583,27 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return consensus.ErrUnknownAncestor
+	}
+	_, rank := c.calcDifficultyAndRank(header.Coinbase, chain, 0, parent)
+
+	additionalDelay := -1
+
+	for i := 0; i < len(groups); i++ {
+		if rank <= groups[i] {
+			additionalDelay = delays[i]
+			break
+		}
+	}
+
+	if additionalDelay == -1 {
+		return errUnauthorizedSigner
+	}
+
+	delay += time.Duration(additionalDelay) * time.Second
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -598,9 +633,10 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
-	return c.calcDifficulty(c.signer, chain, time, parent)
+	diff, _ := c.calcDifficultyAndRank(c.signer, chain, time, parent)
+	return diff
 }
-func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
+func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) (*big.Int, int) {
 
 	target := parent
 	targetNumber := new(big.Int).Sub(parent.Number, big.NewInt(int64(c.config.Epoch)))
@@ -608,16 +644,16 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 		target = chain.GetHeader(target.ParentHash, target.Number.Uint64()-1)
 	}
 	if target.Number.Cmp(big.NewInt(0)) <= 0 {
-		return big.NewInt(1234)
+		return big.NewInt(1234), 1
 	}
 
 	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
 
 	if err != nil {
-		return big.NewInt(0)
+		return big.NewInt(0), staking.MAX_MINERS + 1
 	}
 
-	diff, reordered := list.GetDifficulty(signer, target.Number.Uint64(), c.config.Period)
+	diff, rank, reordered := list.GetDifficultyAndRank(signer, target.Number.Uint64(), c.config.Period)
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
@@ -627,7 +663,7 @@ func (c *BSRR) calcDifficulty(signer common.Address, chain consensus.ChainReader
 		}
 	}
 
-	return diff
+	return diff, rank
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
