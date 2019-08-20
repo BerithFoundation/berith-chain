@@ -70,11 +70,11 @@ func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber, p
 	result, ok := list.table[addr]
 	if !ok {
 		result = VoteResult{
-			score: big.NewInt(0),
-			rank:  MAX_MINERS + 1,
+			Score: big.NewInt(0),
+			Rank:  MAX_MINERS + 1,
 		}
 	}
-	return result.score, result.rank, flag
+	return result.Score, result.Rank, flag
 }
 
 //GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
@@ -146,9 +146,9 @@ func (list *StakingMap) Print() {
 	for _, v := range list.sortedList {
 		fmt.Println(v.Hex())
 	}
-	// fmt.Println("====== MINERS ======")
-	// for k, v := range list.miners {
-	// 	fmt.Println("[", k.Hex(), ",", v, "]")
+	// fmt.Println("====== TABLE ======")
+	// for k, v := range list.table {
+	// 	fmt.Println("[", k.Hex(), ",", v.Rank, ",", v.Score.String(), "]")
 	// }
 }
 

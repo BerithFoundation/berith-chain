@@ -105,8 +105,8 @@ type Range struct {
 	end   int
 }
 type VoteResult struct {
-	score *big.Int
-	rank  int
+	Score *big.Int `json:"score"`
+	Rank  int      `json:"rank"`
 }
 type Queue struct {
 	storage []Range
@@ -203,8 +203,8 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
 		result[account] = VoteResult{
-			score: big.NewInt(DIF + int64(cs.ts)),
-			rank:  count,
+			Score: big.NewInt(DIF + int64(cs.ts)),
+			Rank:  count,
 		}
 		DIF -= DIF_R
 

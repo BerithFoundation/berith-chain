@@ -29,7 +29,7 @@ func (stk StakingInfo) Reward() *big.Int        { return stk.reward }
 func Test1(t *testing.T) {
 	cache, _ := lru.NewARC(10)
 	db := new(stakingdb.StakingDB)
-	db.CreateDB("/Users/swk/test.ldb", staking.Decode, staking.Encode, staking.New)
+	db.CreateDB("C:\\Users\\ibizsoftware\\testdb\\db", staking.Decode, staking.Encode, staking.New)
 	list := db.NewStakingList()
 	for i := int64(0); i < 5; i++ {
 		val, _ := new(big.Int).SetString("100000000000000000000000", 10)
@@ -41,8 +41,8 @@ func Test1(t *testing.T) {
 		})
 	}
 	list.Sort()
-	diff, reordered := list.GetDifficulty(common.BigToAddress(big.NewInt(1)), 10, 10)
-	fmt.Println(diff, reordered)
+	diff, rank, reordered := list.GetDifficultyAndRank(common.BigToAddress(big.NewInt(1)), 10, 10)
+	fmt.Println(diff.String(), rank, reordered)
 	list.Print()
 	encoded, _ := rlp.EncodeToBytes(list)
 	cache.Add("stk", encoded)
