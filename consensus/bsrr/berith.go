@@ -47,8 +47,6 @@ const (
 	//stakingInterval = 10
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 
-	minDelay            = -6
-	numberOfMinerGroups = 4
 )
 
 var (
@@ -65,6 +63,9 @@ var (
 
 	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
 	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
+
+	delays = []int{0, 2, 3, 5}
+	groups = []int{1, 4, 11, 22}
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -588,15 +589,17 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	}
 	_, rank := c.calcDifficultyAndRank(header.Coinbase, chain, 0, parent)
 
-	start, end := 0, 1
+	additionalDelay := -1
 
-	for i := 0; i < numberOfMinerGroups; i++ {
-		if rank >= start && rank < end {
-			n := time.Duration(minDelay + numberOfMinerGroups - i)
-			delay = delay + n*time.Second
+	for i := 0; i < len(groups); i++ {
+		if rank <= groups[i] {
+			additionalDelay = delays[i]
+			break
 		}
-		start = end
-		end = end * 4
+	}
+
+	if additionalDelay == -1 {
+		return errUnauthorizedSigner
 	}
 
 	// Sign all the things!
@@ -645,7 +648,7 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 	list, err := c.getStakingList(chain, target.Number.Uint64(), target.Hash())
 
 	if err != nil {
-		return big.NewInt(0), 31
+		return big.NewInt(0), staking.MAX_MINERS + 1
 	}
 
 	diff, rank, reordered := list.GetDifficultyAndRank(signer, target.Number.Uint64(), c.config.Period)

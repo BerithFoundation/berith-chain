@@ -11,10 +11,13 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
+const (
+	MAX_MINERS = 22
+)
+
 var (
-	DIF_MAX    = int64(5000000)
-	DIF_MIN    = int64(10000)
-	MAX_MINERS = 30
+	DIF_MAX = int64(5000000)
+	DIF_MIN = int64(10000)
 )
 
 type Candidate struct {
