@@ -39,6 +39,36 @@
 			"revisionTime": "2018-01-16T20:38:02Z"
 		},
 		{
+			"checksumSHA1": "HaHoarMacvSVPfBqWXej4C6CqfY=",
+			"path": "github.com/akavel/rsrc/binutil",
+			"revision": "b9f6b78f792dc3dddaf295854d968f5b6fdcdba1",
+			"revisionTime": "2019-03-03T07:55:59Z"
+		},
+		{
+			"checksumSHA1": "dtgjJcofdIgS8GBtrt06DRmW4yY=",
+			"path": "github.com/akavel/rsrc/coff",
+			"revision": "b9f6b78f792dc3dddaf295854d968f5b6fdcdba1",
+			"revisionTime": "2019-03-03T07:55:59Z"
+		},
+		{
+			"checksumSHA1": "JtveBLBPdNBKHme+gL4lYszk4io=",
+			"path": "github.com/akavel/rsrc/ico",
+			"revision": "b9f6b78f792dc3dddaf295854d968f5b6fdcdba1",
+			"revisionTime": "2019-03-03T07:55:59Z"
+		},
+		{
+			"checksumSHA1": "Za8jmXws/g+kfYQd+3KNGr7xojg=",
+			"path": "github.com/akavel/rsrc/internal",
+			"revision": "b9f6b78f792dc3dddaf295854d968f5b6fdcdba1",
+			"revisionTime": "2019-03-03T07:55:59Z"
+		},
+		{
+			"checksumSHA1": "SQix5rPN4lvk9tNY7dS4dFKgUpQ=",
+			"path": "github.com/akavel/rsrc/rsrc",
+			"revision": "b9f6b78f792dc3dddaf295854d968f5b6fdcdba1",
+			"revisionTime": "2019-03-03T07:55:59Z"
+		},
+		{
 			"checksumSHA1": "9Niiu1GNhWUrXnGZrl8AU4EzbVE=",
 			"path": "github.com/allegro/bigcache",
 			"revision": "bff00e20c68d9f136477d62d182a7dc917bae0ca",
@@ -55,6 +85,78 @@
 			"path": "github.com/aristanetworks/goarista/monotime",
 			"revision": "ea17b1a17847fb6e4c0a91de0b674704693469b0",
 			"revisionTime": "2017-02-10T01:56:32Z"
+		},
+		{
+			"checksumSHA1": "JuiLuX2xD5NXFDEk7czikfO6pGQ=",
+			"path": "github.com/asticode/go-astilectron",
+			"revision": "df875a09e6cc116f65786427ac8fc955e4420d31",
+			"revisionTime": "2019-08-13T12:17:36Z"
+		},
+		{
+			"checksumSHA1": "i5fw8mOQqqmk6QrMh3ye71SAevY=",
+			"path": "github.com/asticode/go-astilectron-bundler",
+			"revision": "155c2a10bbb1791fbafe89a9b64be05c64f16c81",
+			"revisionTime": "2019-04-26T17:22:05Z"
+		},
+		{
+			"checksumSHA1": "MPFztnit6q6Fqhvl2ymBU1TX8l4=",
+			"path": "github.com/asticode/go-astilog",
+			"revision": "952ff13d3f86d732b19bb4ffb9cd19e2455ce26a",
+			"revisionTime": "2019-06-08T12:53:16Z"
+		},
+		{
+			"checksumSHA1": "jNpin4QsCcCj1E3/eU96igGWj48=",
+			"path": "github.com/asticode/go-astitools/archive",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "t87fzVjCAsE6NUkiTTLHZAGXc5c=",
+			"path": "github.com/asticode/go-astitools/context",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "bh5YOn6suNC/3/SDAHkYcbxy7F4=",
+			"path": "github.com/asticode/go-astitools/exec",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "aUMPEKYx1LQAowo3svuxcL6vMB4=",
+			"path": "github.com/asticode/go-astitools/http",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "dbpu8CLbw5gLRcLUdjd1U3XO2vw=",
+			"path": "github.com/asticode/go-astitools/io",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "OaUqgWajlJu+DVcQl/lcnBn+I34=",
+			"path": "github.com/asticode/go-astitools/os",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "DI6iT2cpAJj8D9iKXctTa/kyb54=",
+			"path": "github.com/asticode/go-astitools/regexp",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "zfjS4OGgcSTR3wTuYKhZGYbbTJ0=",
+			"path": "github.com/asticode/go-astitools/url",
+			"revision": "0f20aa45eac296858dffc3733514265c7947d65d",
+			"revisionTime": "2019-08-09T10:12:51Z"
+		},
+		{
+			"checksumSHA1": "uj8t733wrYAzKMjjn9G76QZvltg=",
+			"path": "github.com/asticode/go-bindata",
+			"revision": "a0ff2567cfb70903282db057e799fd826784d41d",
+			"revisionTime": "2015-10-23T09:11:02Z"
 		},
 		{
 			"checksumSHA1": "gZQ6HheWahvZzIc3phBnOwoWHjE=",
@@ -177,6 +279,12 @@
 			"revisionTime": "2017-02-15T23:32:05Z"
 		},
 		{
+			"checksumSHA1": "IncLTmcTdeYxjeJGfQkb0XwE3Q4=",
+			"path": "github.com/gookit/color",
+			"revision": "0d2830e8bbf6f69593e6d4a74fa5052b440745a0",
+			"revisionTime": "2019-08-16T10:18:40Z"
+		},
+		{
 			"checksumSHA1": "d9PxF1XQGLMJZRct2R8qVM/eYlE=",
 			"path": "github.com/hashicorp/golang-lru",
 			"revision": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6",
@@ -272,6 +380,12 @@
 			"revision": "d815e0c1a2e2082a287a2806bc90bc8fc7b276a9",
 			"revisionTime": "2018-11-28T19:21:57Z",
 			"tree": true
+		},
+		{
+			"checksumSHA1": "Z7rkupTQRAZzzTCqDLiSbNR70to=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e",
+			"revisionTime": "2019-02-26T22:47:05Z"
 		},
 		{
 			"checksumSHA1": "7hln62oZPZmyqEmgXaybf9WxQ7A=",
@@ -441,6 +555,18 @@
 			"path": "github.com/rs/xhandler",
 			"revision": "ed27b6fd65218132ee50cd95f38474a3d8a2cd12",
 			"revisionTime": "2016-06-18T19:32:21Z"
+		},
+		{
+			"checksumSHA1": "3JiX/H0oCwHlle35UHZLvkbLoQA=",
+			"path": "github.com/sam-kamerer/go-plister",
+			"revision": "30eae28cab5bef0e3c6876f2af87a5127b30c12c",
+			"revisionTime": "2019-03-22T01:50:50Z"
+		},
+		{
+			"checksumSHA1": "IWfAPYugIKPX+hIJqSkWEuo8sQw=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "de736cf91b921d56253b4010270681d33fdf7cb5",
+			"revisionTime": "2019-08-07T10:34:36Z"
 		},
 		{
 			"checksumSHA1": "Hg2k/0kEWuB+2N5dJAWDB+C4mp4=",
@@ -729,6 +855,12 @@
 			"path": "golang.org/x/net/context",
 			"revision": "a6577fac2d73be281a500b310739095313165611",
 			"revisionTime": "2017-03-08T20:54:49Z"
+		},
+		{
+			"checksumSHA1": "aFpql3G+Nw8zkzfqLWQJNZC8pu0=",
+			"path": "golang.org/x/net/context/ctxhttp",
+			"revision": "74dc4d7220e7acc4e100824340f3e66577424772",
+			"revisionTime": "2019-08-11T06:12:18Z"
 		},
 		{
 			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",

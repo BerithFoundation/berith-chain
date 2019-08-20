@@ -11,18 +11,22 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
+const (
+	MAX_MINERS = 22
+)
+
 var (
-	DIF_MAX   = int64(5000000)
-	DIF_MIN   = int64(10000)
+	DIF_MAX = int64(5000000)
+	DIF_MIN = int64(10000)
 )
 
 type Candidate struct {
-	address common.Address //address
-	stake   uint64         //stake balance
-	block   uint64         //block number -- Contribution
-	reward  uint64         //reward balance
-	val     uint64		   //sum
-	advStake		uint64		   //advStake
+	address  common.Address //address
+	stake    uint64         //stake balance
+	block    uint64         //block number -- Contribution
+	reward   uint64         //reward balance
+	val      uint64         //sum
+	advStake uint64         //advStake
 }
 
 func (c *Candidate) GetStake() uint64 {
@@ -58,7 +62,7 @@ type Candidates struct {
 	//selections map[uint64]Candidate
 	selections []Candidate
 	total      uint64 //Total Staking  + Adv
-	ts uint64//Total Staking Value
+	ts         uint64 //Total Staking Value
 }
 
 func NewCandidates(number uint64, period uint64) *Candidates {
@@ -67,12 +71,12 @@ func NewCandidates(number uint64, period uint64) *Candidates {
 		period:     period,
 		selections: make([]Candidate, 0),
 		total:      0,
-		ts : 	0,
+		ts:         0,
 	}
 }
 
 func (cs *Candidates) Add(c Candidate) {
-	adv := uint64(c.GetAdvantage(cs.number, cs.period) * 10) + 10
+	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
 	c.advStake = c.stake * adv
 	cs.total += c.advStake
 	c.val = cs.total
@@ -100,7 +104,10 @@ type Range struct {
 	start int
 	end   int
 }
-
+type VoteResult struct {
+	Score *big.Int `json:"score"`
+	Rank  int      `json:"rank"`
+}
 type Queue struct {
 	storage []Range
 	size    int
@@ -172,15 +179,14 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	}
 }
 
-func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
+func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult {
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
 		size:    len(cs.selections) + 1,
 		front:   0,
 		rear:    0,
 	}
-	result := make(map[common.Address]*big.Int)
-
+	result := make(map[common.Address]VoteResult)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
@@ -193,12 +199,15 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 		start: 0,
 		end:   len(cs.selections),
 	})
-
-	for queue.front != queue.rear {
+	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
-		result[account] = big.NewInt(DIF + int64(cs.ts))
+		result[account] = VoteResult{
+			Score: big.NewInt(DIF + int64(cs.ts)),
+			Rank:  count,
+		}
 		DIF -= DIF_R
+
 	}
 
 	//fmt.Println(DIF)
@@ -206,13 +215,12 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]*big.Int {
 	return &result
 }
 
-
 //ROI 산출
 func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	stake := uint64(0)
 	for _, c := range cs.selections {
 		if c.address == address {
-			stake =  c.advStake
+			stake = c.advStake
 			break
 		}
 	}
