@@ -602,6 +602,8 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 
+	delay += time.Duration(additionalDelay) * time.Second
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
