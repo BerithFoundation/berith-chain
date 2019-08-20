@@ -64,8 +64,8 @@ var (
 	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
 	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 
-	delays = []int{0, 2, 3, 5}
-	groups = []int{1, 4, 11, 22}
+	delays = []int{0, 1, 2, 3}
+	groups = []int{3, 8, 15, 22}
 )
 
 // Various error messages to mark blocks invalid. These should be private to
