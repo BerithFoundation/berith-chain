@@ -1120,7 +1120,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var formatOutputAddress = function (param) {
             var value = param.staticPart();
-            return "0x" + value.slice(value.length - 40, value.length);
+            return "Bx" + value.slice(value.length - 40, value.length);
         };
 
         module.exports = {
@@ -1830,7 +1830,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
         module.exports = function (value, options) {
             if (options && options.encoding === 'hex') {
-                if (value.length > 2 && value.substr(0, 2) === '0x') {
+                if (value.length > 2 && (value.substr(0, 2) === '0x' || value.substr(0, 2) === 'Bx')) {
                     value = value.substr(2);
                 }
                 value = CryptoJS.enc.Hex.parse(value);
@@ -2267,7 +2267,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var isChecksumAddress = function (address) {
             // Check each case
-            address = address.replace('0x','');
+            address = address.replace('Bx','');
             var addressHash = sha3(address.toLowerCase());
 
             for (var i = 0; i < 40; i++ ) {
@@ -2291,9 +2291,9 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var toChecksumAddress = function (address) {
             if (typeof address === 'undefined') return '';
 
-            address = address.toLowerCase().replace('0x','');
+            address = address.toLowerCase().replace('Bx','');
             var addressHash = sha3(address);
-            var checksumAddress = '0x';
+            var checksumAddress = 'Bx';
 
             for (var i = 0; i < address.length; i++ ) {
                 // If ith character is 9 to f then make it uppercase
@@ -2319,10 +2319,10 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
             }
 
             if (/^[0-9a-f]{40}$/.test(address)) {
-                return '0x' + address;
+                return 'Bx' + address;
             }
 
-            return '0x' + padLeft(toHex(address).substr(2), 40);
+            return 'Bx' + padLeft(toHex(address).substr(2), 40);
         };
 
         /**
@@ -2586,7 +2586,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
 
         Web3.prototype.sha3 = function(string, options) {
-            return '0x' + sha3(string, options);
+            return 'Bx' + sha3(string, options);
         };
 
         /**
