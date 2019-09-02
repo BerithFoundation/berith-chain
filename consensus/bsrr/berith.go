@@ -9,6 +9,15 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 	  copyrights by ibizsoftware 2018 - 2019
 */
 
+/**
+[BERITH]
+- 합의 알고리즘 인터페이스 구현체로 Berith 합의 절차를 여기서 처리함
+- 해더 검증및 바디 데이터 검증을 함
+- 바디 데이터 검증
+  BC 체크, 그룹체크, 우선순위 검증
+- 바디의 Tx를 확인 하여 Staking DB 에 기록 하고 선출
+**/
+
 package bsrr
 
 import (
@@ -682,6 +691,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		return big.NewInt(0)
 	}
 
+	//공식이 10초 단위 이기때문
 	d := float64(config.Bsrr.Period) / 10
 	n := float64(number) * d
 
@@ -926,12 +936,21 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		if msg.Target() == types.Stake {
 			value.Add(value, msg.Value())
 			//add point
+			prev_stake := state.GetStakeBalance(header.Coinbase)
+			add_stake := msg.Value()
+			now_block := header.Number
+			stake_block := info.BlockNumber()
+			period := c.config.Period
+
+			result := staking.CalcPoint(prev_stake, add_stake, now_block, stake_block, period)
+			state.SetPoint(header.Coinbase, big.NewInt(int64(result)))
 		}
 
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
 			value.Set(big.NewInt(0))
 			//reset point
+			state.SetPoint(header.Coinbase, big.NewInt(0))
 		}
 
 		blockNumber := number
