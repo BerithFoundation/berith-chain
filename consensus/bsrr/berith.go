@@ -925,11 +925,13 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		//Stake
 		if msg.Target() == types.Stake {
 			value.Add(value, msg.Value())
+			//add point
 		}
 
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
 			value.Set(big.NewInt(0))
+			//reset point
 		}
 
 		blockNumber := number

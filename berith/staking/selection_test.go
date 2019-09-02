@@ -40,8 +40,8 @@ func TestVoting2(t *testing.T) {
 	idx := 1
 	for key, val := range *bc {
 		fmt.Print("SIGNER "+strconv.Itoa(idx)+"::  ", common.Bytes2Hex(key.Bytes()))
-		fmt.Println(" SCORE :: ", val.score.String())
-		fmt.Println(" RANK :: ", val.rank)
+		fmt.Println(" SCORE :: ", val.Score.String())
+		fmt.Println(" RANK :: ", val.Rank)
 		idx++
 	}
 
