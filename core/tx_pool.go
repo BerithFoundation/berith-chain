@@ -604,14 +604,6 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		}
 	}
 
-	if tx.Base() == types.Reward{
-		balance := pool.currentState.GetBalance(from)
-		cost := tx.MainFee()
-		if balance.Cmp(cost) < 0 {
-			return ErrInsufficientFunds
-		}
-	}
-
 	if tx.Base() == types.Stake{
 		balance := pool.currentState.GetBalance(from)
 		cost := tx.MainFee()

@@ -91,9 +91,9 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int, base types
 		return db.GetBalance(addr).Cmp(amount) >= 0
 	} else if base == types.Stake {
 		return db.GetStakeBalance(addr).Cmp(amount) >= 0
-	} else {
-		return db.GetRewardBalance(addr).Cmp(amount) >= 0
 	}
+
+	return db.GetBalance(addr).Cmp(amount) >= 0
 }
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
@@ -132,13 +132,6 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, 
 		if target == types.Main {
 			//스테이크 풀시
 			db.RemoveStakeBalance(sender)
-		}
-		break
-	case types.Reward:
-		if target == types.Main {
-			db.RewardToMain(sender, amount, target)
-		} else if target == types.Stake {
-			db.RewardToStake(sender, amount, target)
 		}
 		break
 	}

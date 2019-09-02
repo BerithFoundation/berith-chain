@@ -362,49 +362,33 @@ func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 		Root:emptyCode,
 		CodeHash: nil,
 		StakeBalance: nil,
-		RewardBalance: nil}
+		Point: nil}
 }
 
 
 
 
-// [Berith] SetStaking adds SetReward
-func (self *StateDB) SetReward(addr common.Address, amount *big.Int) {
+// [Berith] Set Selection Point
+func (self *StateDB) SetPoint(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.SetReward(amount)
+		stateObject.SetPoint(amount)
 	}
 }
 
-
-// [Berith] RewardToMain
-func (self *StateDB) RewardToMain(addr common.Address, amount *big.Int, target types.JobWallet) {
+// [Berith] Add Point
+func (self *StateDB) AddPoint(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.RewardToMain(amount, target)
-	}
-}
-// [Berith] RewardToStake
-func (self *StateDB) RewardToStake(addr common.Address, amount *big.Int, target types.JobWallet) {
-	stateObject := self.GetOrNewStateObject(addr)
-	if stateObject != nil {
-		stateObject.RewardToStake(amount, target)
+		stateObject.AddPoint(amount)
 	}
 }
 
-// [Berith] AddRewardBalance
-func (self *StateDB) AddRewardBalance(addr common.Address, amount *big.Int) {
-	stateObject := self.GetOrNewStateObject(addr)
-	if stateObject != nil {
-		stateObject.AddRewardBalance(amount)
-	}
-}
-
-// [Berith] GetRewardBalance
-func (self *StateDB) GetRewardBalance(addr common.Address) *big.Int {
+// [Berith] Get Point
+func (self *StateDB) GetPoint(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
-		return stateObject.RewardBalance()
+		return stateObject.GetPoint()
 	}
 	return common.Big0
 }

@@ -81,7 +81,7 @@ func (api *API) GetState(number *rpc.BlockNumber) (string, error) {
 		result += "\n\t\t\tNONCE : " + string(info.Nonce) + ", "
 		result += "\n\t\t\tROOT : " + info.Root.Hex() + ", "
 		result += "\n\t\t\tMAIN : " + info.Balance.String() + ", "
-		result += "\n\t\t\tREWARD : " + info.RewardBalance.String() + ", "
+		result += "\n\t\t\tPOINT : " + info.Point.String() + ", "
 		result += "\n\t\t\tSTAKE : " + info.StakeBalance.String()
 		result += "\n\t\t}, "
 	}

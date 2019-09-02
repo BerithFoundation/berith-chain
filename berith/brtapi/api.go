@@ -138,47 +138,13 @@ type WalletTxArgs struct {
 	Nonce    *hexutil.Uint64 `json:"nonce"`
 }
 
-func (s *PrivateBerithAPI) GetRewardBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
+func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
 	}
 
-	return (*hexutil.Big)(state.GetRewardBalance(address)), state.Error()
-}
-
-// RewardToStake
-func (s *PrivateBerithAPI) RewardToStake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	sendTx := new(SendTxArgs)
-
-	sendTx.From = args.From
-	sendTx.To = &args.From
-	sendTx.Value = args.Value
-	sendTx.base = types.Reward
-	sendTx.target = types.Stake
-	sendTx.Gas = args.Gas
-	sendTx.GasPrice = args.GasPrice
-	sendTx.Nonce = args.Nonce
-
-	return s.sendTransaction(ctx, *sendTx)
-}
-
-// RewardToStake
-func (s *PrivateBerithAPI) RewardToBalance(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	sendTx := new(SendTxArgs)
-
-	sendTx.From = args.From
-	sendTx.To = &args.From
-	sendTx.Value = args.Value
-	sendTx.base = types.Reward
-	sendTx.target = types.Main
-	sendTx.Gas = args.Gas
-	sendTx.GasPrice = args.GasPrice
-	sendTx.Nonce = args.Nonce
-
-	return s.sendTransaction(ctx, *sendTx)
+	return (*hexutil.Big)(state.GetPoint(address)), state.Error()
 }
 
 // SendStaking creates a transaction for user staking
