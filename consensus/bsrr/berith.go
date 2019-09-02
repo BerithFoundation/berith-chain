@@ -683,14 +683,14 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	}
 
 	d := float64(config.Bsrr.Period) / 10
-	n := float64(number) / d
+	n := float64(number) * d
 
 	var z float64 = 0
-	if n <= 3.15*math.Pow(10, 6) {
+	if n <= 3150000 {
 		z = 5
 	}
 
-	re := 26 - math.Round(n/(7.37*math.Pow(10, 6)))*0.5 + z
+	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
 	if re <= 0 {
 		re = 0
 
@@ -732,8 +732,9 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 			continue
 		}
 
-		//bihind --> reword
-		state.AddRewardBalance(addr, behind.Balance)
+		//bihind --> main
+		state.AddBalance(addr, behind.Balance)
+
 		state.RemoveFirstBehindBalance(addr)
 	}
 }
@@ -929,11 +930,6 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		//Unstake
 		if msg.Base() == types.Stake && msg.Target() == types.Main {
 			value.Set(big.NewInt(0))
-		}
-
-		//transfer reward balance
-		if msg.Base() == types.Reward {
-			reward.Sub(reward, msg.Value())
 		}
 
 		blockNumber := number

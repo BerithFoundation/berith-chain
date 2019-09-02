@@ -138,7 +138,7 @@ type (
 	}
 
 	//brt staking change struct
-	rewardChange struct {
+	pointChange struct {
 		account *common.Address
 		prev    *big.Int
 	}
@@ -258,11 +258,11 @@ func (ch stakingChange) dirtied() *common.Address {
 	return ch.account
 }
 
-func (ch rewardChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setReward(ch.prev)
+func (ch pointChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setPoint(ch.prev)
 }
 
-func (ch rewardChange) dirtied() *common.Address {
+func (ch pointChange) dirtied() *common.Address {
 	return ch.account
 }
 

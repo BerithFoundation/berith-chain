@@ -17,7 +17,6 @@
 package state
 
 import (
-	"github.com/BerithFoundation/berith-chain/core/types"
 	"bytes"
 	"fmt"
 	"github.com/pkg/errors"
@@ -103,7 +102,7 @@ type Account struct {
 	Root     common.Hash // merkle root of the storage trie
 	CodeHash []byte
 	StakeBalance *big.Int //brt staking balance
-	RewardBalance *big.Int //reward balance
+	Point *big.Int //selection Point
 	BehindBalance []Behind //behind balance
 }
 
@@ -123,8 +122,8 @@ func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 	if data.StakeBalance == nil {
 		data.StakeBalance = new(big.Int)
 	}
-	if data.RewardBalance == nil {
-		data.RewardBalance = new(big.Int)
+	if data.Point == nil {
+		data.Point = new(big.Int)
 	}
 	if data.BehindBalance == nil {
 		data.BehindBalance = make([]Behind, 0)
@@ -497,24 +496,24 @@ func (self *stateObject) RemoveFirstBehindBalance() {
 	self.setBehind(behind[1:])
 }
 
-//[Berith] set Reward Balance
-func (self *stateObject) SetReward(amount *big.Int) {
-	self.db.journal.append(rewardChange{
+//[Berith] set Selection Point
+func (self *stateObject) SetPoint(amount *big.Int) {
+	self.db.journal.append(pointChange{
 		account: &self.address,
 		prev:    new(big.Int).Set(amount),
 	})
-	self.setReward(amount)
+	self.setPoint(amount)
 }
 
-func (self *stateObject) setReward(amount *big.Int) {
-	self.data.RewardBalance = amount
+func (self *stateObject) setPoint(amount *big.Int) {
+	self.data.Point = amount
 }
 
-func (self *stateObject) RewardBalance() *big.Int {
-	return self.data.RewardBalance
+func (self *stateObject) GetPoint() *big.Int {
+	return self.data.Point
 }
 
-func (c *stateObject) AddRewardBalance(amount *big.Int) {
+func (c *stateObject) AddPoint(amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.
 	if amount.Sign() == 0 {
@@ -524,50 +523,7 @@ func (c *stateObject) AddRewardBalance(amount *big.Int) {
 
 		return
 	}
-	c.SetReward(new(big.Int).Add(c.RewardBalance(), amount))
-}
-
-
-func (c *stateObject) RewardToMain(amount *big.Int, target types.JobWallet){
-	rewardBalance := c.RewardBalance()
-	if rewardBalance.Sign() == 0 {
-		return
-	}
-
-	if rewardBalance.Sign() < amount.Sign() {
-		return
-	}
-
-	calcResult := big.NewInt(0)
-
-	calcResult = new(big.Int).Sub(rewardBalance, amount)
-	if calcResult.Cmp(big.NewInt(0)) < 0 {
-		return
-	}
-	c.SetReward(calcResult)
-	c.AddBalance(amount)
-}
-
-
-func (c *stateObject) RewardToStake(amount *big.Int, target types.JobWallet){
-	rewardBalance := c.RewardBalance()
-	if rewardBalance.Sign() == 0 {
-		return
-	}
-
-	if rewardBalance.Sign() < amount.Sign() {
-		return
-	}
-
-	calcResult := big.NewInt(0)
-
-	calcResult = new(big.Int).Sub(rewardBalance, amount)
-	if calcResult.Cmp(big.NewInt(0)) < 0 {
-		return
-	}
-
-	c.SetReward(calcResult)
-	c.AddStakeBalance(amount)
+	c.SetPoint(new(big.Int).Add(c.GetPoint(), amount))
 }
 
 //

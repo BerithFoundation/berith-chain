@@ -5,7 +5,6 @@ type JobWallet uint8
 const (
 	Main = 1 + iota
 	Stake
-	Reward
 )
 
 
@@ -25,8 +24,6 @@ func ConvertJobWallet(s string) JobWallet {
 		return Main
 	case "stake":
 		return Stake
-	case "reward":
-		return Reward
 	default:
 		return Main
 	}
