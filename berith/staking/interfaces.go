@@ -12,9 +12,6 @@ import (
 스테이킹 리스트 인터페이스
 */
 type StakingList interface {
-	SetTarget(target common.Hash)
-	GetTarget() common.Hash
-	GetInfoWithIndex(idx int) (StakingInfo, error)
 	GetInfo(address common.Address) (StakingInfo, error)
 	SetInfo(info StakingInfo) error
 	Delete(address common.Address) error
@@ -24,9 +21,6 @@ type StakingList interface {
 	Len() int
 	Print()
 	GetJoinRatio(address common.Address, blockNumber, period uint64) float64
-	SetMiner(address common.Address)
-	InitMiner()
-	GetMiners() map[common.Address]bool
 	Sort()
 	ClearTable()
 	GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool)
@@ -43,6 +37,7 @@ type StakingInfo interface {
 	BlockNumber() *big.Int
 	Reward() *big.Int
 }
+
 /*
 [BERITH]
 스테이킹 리스트 데이터 베이스 인터페이스

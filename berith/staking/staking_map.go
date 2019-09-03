@@ -3,7 +3,6 @@ package staking
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -13,50 +12,39 @@ import (
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
-//StakingMap map implements StakingList
+//[BERITH]
+//StakingMap StakingList 인터페이스를 맵형태로 구현한 구조체
 type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
 	miners     map[common.Address]bool
 	table      map[common.Address]VoteResult
-	target     common.Hash
-}
-type stkInfo struct {
-	StkAddress     common.Address `json:"address"`
-	StkValue       *big.Int       `json:"value"`
-	StkBlockNumber *big.Int       `json:"blocknumber"`
-	StkReward      *big.Int       `json:"reward"`
 }
 
+//[BERITH]
+//토큰을 예치한 계정의 정보를 나타내는 구조체
+type stkInfo struct {
+	StkAddress     common.Address `json:"address"`     //토큰을 예치한 계정
+	StkValue       *big.Int       `json:"value"`       //예치한 토큰의 수량
+	StkBlockNumber *big.Int       `json:"blocknumber"` //토큰을 예치한 시점의 블록번호
+	StkReward      *big.Int       `json:"reward"`      // 삭제예정
+}
+
+//[BERITH]
+//stkInfo 구조체의 Getter 메서드
 func (s stkInfo) Address() common.Address { return s.StkAddress }
 func (s stkInfo) Value() *big.Int         { return s.StkValue }
 func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
 func (s stkInfo) Reward() *big.Int        { return s.StkReward }
 
-func (list *StakingMap) SetTarget(target common.Hash) {
-	list.target = target
-}
-
-func (list *StakingMap) GetTarget() common.Hash {
-	return list.target
-}
-
+//[BERITH]
+//Len 목록의 길이를 반환하는 메서드
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
 }
 
-func (list *StakingMap) SetMiner(address common.Address) {
-	list.miners[address] = true
-}
-
-func (list *StakingMap) InitMiner() {
-	list.miners = make(map[common.Address]bool)
-}
-
-func (list *StakingMap) GetMiners() map[common.Address]bool {
-	return list.miners
-}
-
+//[BERITH]
+// 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
 func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool) {
 	flag := false
 	if len(list.table) <= 0 {
@@ -77,16 +65,8 @@ func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber, p
 	return result.Score, result.Rank, flag
 }
 
-//GetInfoWithIndex is function to get "staking info" that is matched with index from parameter
-func (list *StakingMap) GetInfoWithIndex(index int) (StakingInfo, error) {
-	if index < 0 || len(list.sortedList) < index {
-		return stkInfo{}, errors.New("invalid index")
-	}
-	address := list.sortedList[index]
-	return list.storage[address], nil
-}
-
-//GetInfo is function to get "staking info" that is matched with address from parameter
+//[BERITH]
+//GetInfo 특정 계정의 "StakingInfo" 를 반환하는 메서드
 func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 	info, ok := list.storage[address]
 
@@ -106,7 +86,8 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 	}, nil
 }
 
-//SetInfo is function to set "staking info"
+//[BERITH]
+//SetInfo 목록에 "StakingInfo" 를 등록하는 메서드
 func (list *StakingMap) SetInfo(info StakingInfo) error {
 
 	if info.Value().Cmp(big.NewInt(0)) < 1 && info.Reward().Cmp(big.NewInt(0)) < 1 {
@@ -123,11 +104,14 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 	return nil
 }
 
+//[BERITH]
+//ToArray StakingMap의 내용을 배열형태로 반환하는 메서드
 func (list *StakingMap) ToArray() []common.Address {
 	return list.sortedList
 }
 
-//Delete is function to delete address from the staking list
+//[BERITH]
+//Delete 특정 계정의 "StakingInfo" 를 삭제하는 메서드
 func (list *StakingMap) Delete(address common.Address) error {
 	if _, ok := list.storage[address]; ok {
 		delete(list.storage, address)
@@ -135,10 +119,10 @@ func (list *StakingMap) Delete(address common.Address) error {
 	return nil
 }
 
-// Print is function to print stakingList info
+//[BERITH]
+//Print StakingMap에 대한 로그를 콘솔화면에 출력하는 메서드
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
-	fmt.Println("TARGET :", list.target.Hex())
 	for k, v := range list.storage {
 		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
 	}
@@ -152,20 +136,22 @@ func (list *StakingMap) Print() {
 	// }
 }
 
-//EncodeRLP is function to encode
+//[BERITH]
+//EncodeRLP StakingMap 구조체를 RLP 인코딩 하기 위한 메서드
 func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
-	var byteArr [5][]byte
+	var byteArr [4][]byte
 
 	byteArr[0], _ = json.Marshal(list.storage)
 	byteArr[1], _ = json.Marshal(list.miners)
-	byteArr[2] = list.target[:]
-	byteArr[3], _ = json.Marshal(list.table)
-	byteArr[4], _ = json.Marshal(list.sortedList)
+	byteArr[2], _ = json.Marshal(list.table)
+	byteArr[3], _ = json.Marshal(list.sortedList)
 	//rlpVal[1], _ = json.Marshal(list.sortedList)
 	return rlp.Encode(w, byteArr)
 }
 
+//[BERITH]
+//Sort 목록을 정렬하기 위한 메서드
 func (list *StakingMap) Sort() {
 
 	if len(list.sortedList) > 0 {
@@ -195,6 +181,8 @@ func (list *StakingMap) ClearTable() {
 	list.table = make(map[common.Address]VoteResult)
 }
 
+//[BERITH]
+//selectSigner 전체 목록중에서 블록을 생성할 유저를 선별한 결과를 반환하는 메서드
 func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 	if len(list.sortedList) <= 0 {
@@ -226,6 +214,8 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 }
 
+//[BERITH]
+//GetJoinRatio 특정계정이 블록을 생성할 확률을 반환하는 메서드
 func (list *StakingMap) GetJoinRatio(address common.Address, blockNumber, period uint64) float64 {
 	cs := NewCandidates(blockNumber, period)
 
@@ -242,6 +232,8 @@ func (list *StakingMap) GetJoinRatio(address common.Address, blockNumber, period
 	return roi
 }
 
+//[BERITH]
+//infoForSort 목록을 정렬할 때, 사용되는 배열
 type infoForSort []stkInfo
 
 func (info infoForSort) Len() int { return len(info) }
@@ -256,28 +248,37 @@ func (info infoForSort) Less(i, j int) bool {
 }
 func (info infoForSort) Swap(i, j int) { info[i], info[j] = info[j], info[i] }
 
+//[BERITH]
+//Copy 구조체를 복사하여 반환하는 메서드
 func (list *StakingMap) Copy() StakingList {
 	return &StakingMap{
 		storage:    list.storage,
 		sortedList: list.sortedList,
 		miners:     list.miners,
-		target:     list.target,
 		table:      list.table,
 	}
 }
 
+//[BERITH]
+//Encode StakingMap 구조체를 RLP 인코딩한 바이트값을 반환하는 메서드
 func (list *StakingMap) Encode() ([]byte, error) {
 	return rlp.EncodeToBytes(list)
 }
 
+//[BERITH]
+//Decode 바이트 배열을 디코딩하여 StakingMap 구조체를 반환하는 메서드
 func (list *StakingMap) Decode(rlpData []byte) (StakingList, error) {
 	return Decode(rlpData)
 }
 
+//[BERITH]
+//Encode StakingMap 구조체를 입력받아 RLP 인코딩한 바이트값을 반환하는 함수
 func Encode(stakingList StakingList) ([]byte, error) {
 	return rlp.EncodeToBytes(stakingList)
 }
 
+//[BERITH]
+//Decode 바이트 배열을 디코딩하여 StakingMap 구조체를 반환하는 함수
 func Decode(rlpData []byte) (StakingList, error) {
 	var byteArr [5][]byte
 	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
@@ -289,7 +290,6 @@ func Decode(rlpData []byte) (StakingList, error) {
 		sortedList: make([]common.Address, 0),
 		miners:     make(map[common.Address]bool),
 		table:      make(map[common.Address]VoteResult),
-		target:     common.Hash{},
 	}
 	if err := json.Unmarshal(byteArr[0], &result.storage); err != nil {
 		return nil, err
@@ -299,13 +299,11 @@ func Decode(rlpData []byte) (StakingList, error) {
 		return nil, err
 	}
 
-	result.target = common.BytesToHash(byteArr[2])
-
-	if err := json.Unmarshal(byteArr[3], &result.table); err != nil {
+	if err := json.Unmarshal(byteArr[2], &result.table); err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(byteArr[4], &result.sortedList); err != nil {
+	if err := json.Unmarshal(byteArr[3], &result.sortedList); err != nil {
 		return nil, err
 	}
 
@@ -313,7 +311,8 @@ func Decode(rlpData []byte) (StakingList, error) {
 
 }
 
-//New is function to create new instance
+//[BERITH]
+//New 새로운 StakinMap 구조체를 생성하는 함수
 func New() StakingList {
 	return &StakingMap{
 		storage:    make(map[common.Address]stkInfo),

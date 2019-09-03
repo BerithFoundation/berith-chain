@@ -207,6 +207,8 @@ type BSRR struct {
 	fakeDiff bool // Skip difficulty verifications
 }
 
+//[BERITH]
+//New 새로운 BSRR 구조체를 만드는 함수
 func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	conf := config
 	if conf.Epoch == 0 {
@@ -253,6 +255,8 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 
 }
 
+//[BERITH]
+//NewCliqueWithStakingDB StakingDB를 받아 새로운 BSRR 구조체를 생성하는 함수
 func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
@@ -483,7 +487,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	//[Berith] stakingList 처리 로직 추가
+	//[Berith] 부모블록의 StakingList를 얻어온다.
 	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, errStakingList
@@ -493,7 +497,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
 		font = color.Green
 	}
-	//stakingList.Print()
+
 	font.Println("##############[FINALIZE]##############")
 	font.Println("NUMBER : ", header.Number.String())
 	font.Println("HASH : ", header.Hash().Hex())
@@ -530,6 +534,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		}
 	}
 
+	//[BERITH] 전달받은 블록의 트랜잭션을 정보를 토대로 StateDB의 데이터를 수정한다.
 	err = c.setStakingListWithTxs(state, chain, stakingList, txs, header)
 	if err != nil {
 		return nil, errStakingList
@@ -538,7 +543,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	//Reward 보상
 	c.accumulateRewards(chain, state, header)
 
-	//상태값 적용
+	//[BERITH] 수정된 StateDB의 데이터를 commit한다.
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -596,8 +601,9 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
 	}
-	_, rank := c.calcDifficultyAndRank(header.Coinbase, chain, 0, parent)
 
+	//[BERITH] 블록 생성 순위에 따라 블록 전파 속도를 조절한다.
+	_, rank := c.calcDifficultyAndRank(header.Coinbase, chain, 0, parent)
 	additionalDelay := -1
 
 	for i := 0; i < len(groups); i++ {
@@ -607,6 +613,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		}
 	}
 
+	//[BERITH] 블록 생성 조건을 충족하지 못한 계정의 블록전파를 막는다.
 	if additionalDelay == -1 {
 		return errUnauthorizedSigner
 	}
@@ -645,6 +652,8 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	diff, _ := c.calcDifficultyAndRank(c.signer, chain, time, parent)
 	return diff
 }
+
+//[BERITH] 특정 유저가 블록을 생성할 때의 난이도, 순위를 반환하는 메서드
 func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, parent *types.Header) (*big.Int, int) {
 
 	target := parent
@@ -749,51 +758,6 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	}
 }
 
-//[BERITH] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
-func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
-
-	epoch := chain.Config().Bsrr.Epoch
-	targetNumber := header.Number.Uint64() - epoch
-	signers, err := c.getSigners(chain, header.Number.Uint64(), targetNumber, header.Hash())
-	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	if err != nil {
-		return err
-	}
-
-	signerMap := make(map[common.Address]bool)
-
-	for _, val := range signers {
-		signerMap[val] = true
-	}
-
-	miners := list.GetMiners()
-
-	for k, _ := range signerMap {
-		_, ok := miners[k]
-		if !ok {
-			if state != nil {
-				state.AddBalance(k, state.GetStakeBalance(k))
-				state.SetStaking(k, big.NewInt(0))
-			}
-			info, err := list.GetInfo(k)
-			if err != nil {
-				return err
-			}
-			list.SetInfo(&stakingInfo{
-				address:     info.Address(),
-				value:       big.NewInt(0),
-				blockNumber: info.BlockNumber(),
-				reward:      info.Reward(),
-			})
-		}
-	}
-
-	list.InitMiner()
-
-	return nil
-
-}
-
 //[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
 func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
 	var (
@@ -804,7 +768,9 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	prevNum := number
 	prevHash := hash
 
+	//[BERITH] 입력받은 블록에서 가장가까운 StakingList를 찾는다.
 	for list == nil {
+		//[BERITH] cache에 저장된 StakingList를 찾은 경우
 		if val, ok := c.cache.Get(hash); ok {
 			bytes := val.([]byte)
 			var err error
@@ -816,12 +782,13 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			break
 		}
 
+		//[BERITH] StakingList가 저장되지 않은 경우
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
-			list.SetTarget(prevHash)
 			break
 		}
 
+		//[BERITH] DB에 저장된 StakingList를 찾은 경우
 		if prevNum%c.config.Epoch == 0 {
 			var err error
 			list, err = c.stakingDB.GetStakingList(prevHash.Hex())
@@ -882,9 +849,6 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
-		if block.NumberU64()%c.config.Epoch == 0 {
-			stakingList.SetTarget(block.Hash())
-		}
 	}
 
 	return nil
@@ -1004,6 +968,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
+//[BERITH] 입력받은 블록넘버에, 블록생성이 가능한 계정의 목록을 반환하는 메서드.
 func (c *BSRR) getSigners(chain consensus.ChainReader, number, targetNumber uint64, hash common.Hash) (signers, error) {
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
