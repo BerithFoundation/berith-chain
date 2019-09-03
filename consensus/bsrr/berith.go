@@ -73,8 +73,8 @@ var (
 	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
 	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 
-	delays = []int{0, 1, 2, 3}
-	groups = []int{3, 8, 15, 22}
+	delays = []int{0, 3}
+	groups = []int{1, 5}
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -896,6 +896,10 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		value := new(big.Int).Set(info.Value())
 		reward := new(big.Int).Set(info.Reward())
 
+		//[BERITH] 2019-09-03
+		//마지막 Staking의 블록번호가 저장되도록 수정
+		blockNumber := info.BlockNumber()
+
 		//Stake
 		if msg.Target() == types.Stake {
 			value.Add(value, msg.Value())
@@ -905,6 +909,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			now_block := header.Number
 			stake_block := info.BlockNumber()
 			period := c.config.Period
+			blockNumber = number
 
 			result := staking.CalcPoint(prev_stake, add_stake, now_block, stake_block, period)
 			state.SetPoint(header.Coinbase, big.NewInt(int64(result)))
@@ -915,11 +920,6 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			value.Set(big.NewInt(0))
 			//reset point
 			state.SetPoint(header.Coinbase, big.NewInt(0))
-		}
-
-		blockNumber := number
-		if info.BlockNumber().Cmp(blockNumber) > 0 {
-			blockNumber = info.BlockNumber()
 		}
 
 		input := stakingInfo{
