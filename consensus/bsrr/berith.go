@@ -749,51 +749,6 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	}
 }
 
-//[BERITH] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
-func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
-
-	epoch := chain.Config().Bsrr.Epoch
-	targetNumber := header.Number.Uint64() - epoch
-	signers, err := c.getSigners(chain, header.Number.Uint64(), targetNumber, header.Hash())
-	//signers, err := c.getSigners(chain, header.Number.Uint64()-1, header.ParentHash)
-	if err != nil {
-		return err
-	}
-
-	signerMap := make(map[common.Address]bool)
-
-	for _, val := range signers {
-		signerMap[val] = true
-	}
-
-	miners := list.GetMiners()
-
-	for k, _ := range signerMap {
-		_, ok := miners[k]
-		if !ok {
-			if state != nil {
-				state.AddBalance(k, state.GetStakeBalance(k))
-				state.SetStaking(k, big.NewInt(0))
-			}
-			info, err := list.GetInfo(k)
-			if err != nil {
-				return err
-			}
-			list.SetInfo(&stakingInfo{
-				address:     info.Address(),
-				value:       big.NewInt(0),
-				blockNumber: info.BlockNumber(),
-				reward:      info.Reward(),
-			})
-		}
-	}
-
-	list.InitMiner()
-
-	return nil
-
-}
-
 //[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
 func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
 	var (
@@ -818,7 +773,6 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
-			list.SetTarget(prevHash)
 			break
 		}
 
@@ -882,9 +836,6 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
-		if block.NumberU64()%c.config.Epoch == 0 {
-			stakingList.SetTarget(block.Hash())
-		}
 	}
 
 	return nil
