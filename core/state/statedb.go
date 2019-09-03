@@ -317,7 +317,7 @@ func (self *StateDB) HasSuicided(addr common.Address) bool {
  * SETTERS
  */
 
-// [Berith] SetStaking adds StakeBalance
+// [BERITH] SetStaking adds StakeBalance
 func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -325,7 +325,7 @@ func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
 	}
 }
 
-// [Berith] GetStakeBalance
+// [BERITH] GetStakeBalance
 func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
@@ -368,7 +368,7 @@ func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 
 
 
-// [Berith] Set Selection Point
+// [BERITH] Set Selection Point
 func (self *StateDB) SetPoint(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -376,7 +376,7 @@ func (self *StateDB) SetPoint(addr common.Address, amount *big.Int) {
 	}
 }
 
-// [Berith] Add Point
+// [BERITH] Add Point
 func (self *StateDB) AddPoint(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -384,7 +384,7 @@ func (self *StateDB) AddPoint(addr common.Address, amount *big.Int) {
 	}
 }
 
-// [Berith] Get Point
+// [BERITH] Get Point
 func (self *StateDB) GetPoint(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
@@ -393,7 +393,7 @@ func (self *StateDB) GetPoint(addr common.Address) *big.Int {
 	return common.Big0
 }
 
-// [Berith] Behind Balance
+// [BERITH] Behind Balance
 func (self *StateDB) AddBehindBalance(addr common.Address, number, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {

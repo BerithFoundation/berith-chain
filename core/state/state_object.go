@@ -403,7 +403,7 @@ func (self *stateObject) Value() *big.Int {
 }
 
 
-//[Berith] set staking balance
+//[BERITH] set staking balance
 func (self *stateObject) SetStaking(amount *big.Int) {
 	self.db.journal.append(stakingChange{
 		account: &self.address,
@@ -496,7 +496,7 @@ func (self *stateObject) RemoveFirstBehindBalance() {
 	self.setBehind(behind[1:])
 }
 
-//[Berith] set Selection Point
+//[BERITH] set Selection Point
 func (self *stateObject) SetPoint(amount *big.Int) {
 	self.db.journal.append(pointChange{
 		account: &self.address,

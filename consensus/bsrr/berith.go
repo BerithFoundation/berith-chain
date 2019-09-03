@@ -239,7 +239,7 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
-	//[Berith] 캐쉬 인스턴스 생성및 사이즈 지정
+	//[BERITH] 캐쉬 인스턴스 생성및 사이즈 지정
 	cache, _ := lru.NewARC(inmemorySigners)
 
 	return &BSRR{
@@ -749,7 +749,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	}
 }
 
-//[Berith] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
+//[BERITH] 제 차례에 블록을 쓰지 못한 마이너의 staking을 해제함
 func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header, list staking.StakingList, state *state.StateDB) error {
 
 	epoch := chain.Config().Bsrr.Epoch
@@ -794,7 +794,7 @@ func (c *BSRR) slashBadSigner(chain consensus.ChainReader, header *types.Header,
 
 }
 
-//[Berith] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
+//[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
 func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
 	var (
 		list   staking.StakingList
@@ -874,7 +874,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 
 }
 
-//[Berith] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
+//[BERITH] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
 func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block) error {
 	if len(blocks) == 0 {
 		return nil
@@ -902,7 +902,7 @@ func (info stakingInfo) Value() *big.Int         { return info.value }
 func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
 func (info stakingInfo) Reward() *big.Int        { return info.reward }
 
-//[Berith] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
+//[BERITH] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
 func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
 	number := header.Number
 	for _, tx := range txs {

@@ -62,7 +62,11 @@ type LesServer interface {
 	SetBloomBitsIndexer(bbIndexer *core.ChainIndexer)
 }
 
-// Berith implements the Berith full node service.
+/*
+[BERITH]
+Berith implements the Berith full node service.
+풀노드 구조체
+*/
 type Berith struct {
 	config      *Config
 	chainConfig *params.ChainConfig
@@ -97,6 +101,8 @@ type Berith struct {
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and berithbase)
 
+	//[BERITH]
+	//스테이킹 디비
 	stakingDB *stakingdb.StakingDB
 }
 
@@ -241,6 +247,11 @@ func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database
 
 // APIs return the collection of RPC services the berith package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
+/*
+[BERITH]
+각 서비스 구현체 등록
+서비스 : miner, admin, berith...등등
+*/
 func (s *Berith) APIs() []rpc.API {
 	apis := berithapi.GetAPIs(s.APIBackend)
 	apis = append(apis, brtapi.GetAPIs(s.APIBackend, s.miner)...)

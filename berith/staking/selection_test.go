@@ -8,6 +8,10 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
+/*
+[BERITH]
+선출 로직 테스트
+*/
 func TestVoting2(t *testing.T) {
 
 	//rand.Seed(100)
