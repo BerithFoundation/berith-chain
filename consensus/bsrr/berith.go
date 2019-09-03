@@ -768,7 +768,9 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 	prevNum := number
 	prevHash := hash
 
+	//[BERITH] 입력받은 블록에서 가장가까운 StakingList를 찾는다.
 	for list == nil {
+		//[BERITH] cache에 저장된 StakingList를 찾은 경우
 		if val, ok := c.cache.Get(hash); ok {
 			bytes := val.([]byte)
 			var err error
@@ -780,11 +782,13 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 			break
 		}
 
+		//[BERITH] StakingList가 저장되지 않은 경우
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakingList()
 			break
 		}
 
+		//[BERITH] DB에 저장된 StakingList를 찾은 경우
 		if prevNum%c.config.Epoch == 0 {
 			var err error
 			list, err = c.stakingDB.GetStakingList(prevHash.Hex())
@@ -964,6 +968,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
+//[BERITH] 입력받은 블록넘버에, 블록생성이 가능한 계정의 목록을 반환하는 메서드.
 func (c *BSRR) getSigners(chain consensus.ChainReader, number, targetNumber uint64, hash common.Hash) (signers, error) {
 	checkpoint := chain.GetHeaderByNumber(0)
 	signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
