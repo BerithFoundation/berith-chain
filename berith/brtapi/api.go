@@ -37,6 +37,10 @@ type PrivateBerithAPI struct {
 }
 
 // SendTxArgs represents the arguments to sumbit a new transaction into the transaction pool.
+/*
+[BERITH]
+기존 트렌젝션 구조체에 base, target 을 넣어 tx 타입을 지정한다.
+*/
 type SendTxArgs struct {
 	From     common.Address  `json:"from"`
 	To       *common.Address `json:"to"`

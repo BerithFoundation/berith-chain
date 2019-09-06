@@ -596,8 +596,12 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if pool.currentState.GetNonce(from) > tx.Nonce() {
 		return ErrNonceTooLow
 	}
-	// Transactor should have enough funds to cover the costs
-	// cost == V + GP * GL
+
+	/*
+	[BERITH]
+	Remote 상의 Tx 도 처리 하기 위해 TxPool 에서 타입 및 Tx 검증
+	cost == V + GP * GL
+	*/
 	if tx.Base() == types.Main {
 		if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
 			return ErrInsufficientFunds
@@ -620,7 +624,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrIntrinsicGas
 	}
 
-	//[BERITH] 악의 적인 Stake 를 막기 위함. (여기에 걸린다면 소스를 수정 했다고 봐야함)
+	/*
+	[BERITH]
+	악의 적인 Stake 를 막기 위함. (여기에 걸린다면 소스를 수정 했다고 봐야함)
+	- Genesis 에 적힌 최소 스테이킹 수량 체크
+	*/
 	stakedAmount := pool.currentState.GetStakeBalance(*tx.To())
 	totalStakingAmount := tx.Value().Add(tx.Value(), stakedAmount)
 	minimum := pool.chainconfig.Bsrr.StakeMinimum
