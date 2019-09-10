@@ -68,6 +68,7 @@ BC 선출을 하기 위해 Staker 를 등록하기 위한 함수
 func (cs *Candidates) Add(c Candidate) {
 	cs.total += c.point
 	c.val = cs.total
+	fmt.Printf("%s : [%d,%d,%d]\n", c.address.String(), cs.total, cs.ts, c.point)
 	cs.selections = append(cs.selections, c)
 }
 
