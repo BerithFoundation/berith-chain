@@ -10,12 +10,12 @@ package staking
 import (
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/gookit/color"
 )
 
 const (
@@ -137,7 +137,17 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	if r.end-r.start <= 1 {
 		return cs.selections[r.start].address
 	}
-	color.Green.Println(r.max, r.min)
+	println("########################################")
+	println("########################################")
+	println("########################################")
+	println("########################################")
+	fmt.Printf("[%d,%d]\n", r.max, r.min)
+	println("########################################")
+	println("########################################")
+	println("########################################")
+	println("########################################")
+	println("########################################")
+
 	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
 
 	start := r.start
