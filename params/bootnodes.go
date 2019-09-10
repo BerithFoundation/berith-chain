@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-Berith library. If not, see <http://www.gnu.org/licenses/>.
 
+/*
+[BERITH]
+부트노드 에 대한 정보를 적는 곳
+*/
+
 package params
 
 // MainnetBootnodes are the enode URLs of the P2P bootstrap nodes running on
