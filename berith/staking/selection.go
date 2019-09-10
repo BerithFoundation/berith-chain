@@ -31,38 +31,13 @@ var (
 선출을 위해 Staking 한 계정들의 정보를 담는 구조체
 */
 type Candidate struct {
-	address  common.Address //계정 주소
-	stake    uint64         //stake balance
-	block    uint64         //block number -- Contribution (staking 한 블록 넘버)
-	reward   uint64         //reward balance
-	val      uint64         //total staking balance
-	advStake uint64         //advantage staking balance
+	address common.Address //계정 주소
+	point   uint64         //계정의 포인트 (내가 뽑힐 확률 : 나의 포인트 / 전체 유저의 포인트)
+	val     uint64         //블록 생성자 선출을 위해 사용되는 값
 }
 
-func (c *Candidate) GetStake() uint64 {
-	return c.stake
-}
-
-func (c *Candidate) GetReward() uint64 {
-	return c.reward
-}
-
-func (c *Candidate) GetBlockNumber() float64 {
-	return float64(c.block)
-}
-
-//Stake 기간 Adv를 구한다.
-func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
-	p := float64(30) / float64(period) //30초 기준의 공식이기때문에
-	y := 1.2 * float64(p)
-	div := y * math.Pow(10, 6) //10의6승
-
-	adv := (float64(number) - c.GetBlockNumber()) / div
-	if adv >= 1 {
-		return 1
-	} else {
-		return adv
-	}
+func (c *Candidate) GetPoint() uint64 {
+	return c.point
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -71,17 +46,13 @@ func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
 
 */
 type Candidates struct {
-	number     uint64
-	period     uint64
 	selections []Candidate
 	total      uint64 //Total Staking  + Adv
-	ts         uint64 //Total Staking Value
+	ts         uint64
 }
 
-func NewCandidates(number uint64, period uint64) *Candidates {
+func NewCandidates() *Candidates {
 	return &Candidates{
-		number:     number,
-		period:     period,
 		selections: make([]Candidate, 0),
 		total:      0,
 		ts:         0,
@@ -94,13 +65,9 @@ BC 선출을 하기 위해 Staker 를 등록하기 위한 함수
 이후에 호출 될 함수는 BlockCreator 함수이다.
 */
 func (cs *Candidates) Add(c Candidate) {
-	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
-	c.advStake = c.stake * adv
-	cs.total += c.advStake
+	cs.total += c.point
 	c.val = cs.total
 	cs.selections = append(cs.selections, c)
-
-	cs.ts += c.stake //Total Staking
 }
 
 /*
@@ -259,7 +226,7 @@ func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	stake := uint64(0)
 	for _, c := range cs.selections {
 		if c.address == address {
-			stake = c.advStake
+			stake = c.point
 			break
 		}
 	}

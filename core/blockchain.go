@@ -600,6 +600,7 @@ func (bc *BlockChain) HasState(hash common.Hash) bool {
 func (bc *BlockChain) HasBlockAndState(hash common.Hash, number uint64) bool {
 	// Check first that the block itself is known
 	block := bc.GetBlock(hash, number)
+
 	if block == nil {
 		return false
 	}
@@ -1142,8 +1143,6 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 	//블록 Body Validation
 
-
-
 	switch {
 	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
@@ -1215,7 +1214,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 			switch err.Error() {
 			case "unauthorized signer":
 			case "not found staking list":
-			case "invalid difficulty" :
+			case "invalid difficulty":
 				bc.reportFinalizeError(block, err)
 				break
 			default:
@@ -1595,11 +1594,9 @@ Error: %v
 `, bc.chainConfig, block.Number(), block.Hash(), receiptString, err))
 }
 
-
-func (bc *BlockChain) reportFinalizeError(block *types.Block, err error){
+func (bc *BlockChain) reportFinalizeError(block *types.Block, err error) {
 	log.Error(fmt.Sprintf("Number: %v, Hash: 0x%x, Error: %v", block.Number(), block.Hash(), err))
 }
-
 
 // InsertHeaderChain attempts to insert the given header chain in to the local
 // chain, possibly creating a reorg. If an error is returned, it will return the
