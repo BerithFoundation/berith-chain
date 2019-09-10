@@ -195,7 +195,7 @@ func (list *StakingMap) selectSigner(blockNumber uint64, states *state.StateDB) 
 
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
-		cs.Add(Candidate{info.Address(), new(big.Int).Div(states.GetPoint(info.Address()), big.NewInt(1e+18)).Uint64(), 0})
+		cs.Add(Candidate{info.Address(), states.GetPoint(info.Address()).Uint64(), 0})
 		cs.ts += new(big.Int).Div(states.GetStakeBalance(info.Address()), big.NewInt(1e+18)).Uint64()
 	}
 
