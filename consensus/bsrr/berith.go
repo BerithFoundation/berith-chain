@@ -953,8 +953,8 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			value.Add(value, msg.Value())
 			//add point
 			if state != nil {
-				prev_stake := state.GetStakeBalance(header.Coinbase)
-				add_stake := msg.Value()
+				prev_stake := new(big.Int).Div(state.GetStakeBalance(msg.From()), big.NewInt(1e+18))
+				add_stake := new(big.Int).Div(msg.Value(), big.NewInt(1e+18))
 				now_block := header.Number
 				stake_block := info.BlockNumber()
 				period := c.config.Period
