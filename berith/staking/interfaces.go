@@ -3,6 +3,8 @@ package staking
 import (
 	"math/big"
 
+	"github.com/BerithFoundation/berith-chain/core/state"
+
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
@@ -20,10 +22,10 @@ type StakingList interface {
 	Copy() StakingList
 	Len() int
 	Print()
-	GetJoinRatio(address common.Address, blockNumber, period uint64) float64
+	GetJoinRatio(address common.Address, blockNumber uint64, states *state.StateDB) float64
 	Sort()
 	ClearTable()
-	GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool)
+	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool)
 	ToArray() []common.Address
 }
 
@@ -35,7 +37,6 @@ type StakingInfo interface {
 	Address() common.Address
 	Value() *big.Int
 	BlockNumber() *big.Int
-	Reward() *big.Int
 }
 
 /*

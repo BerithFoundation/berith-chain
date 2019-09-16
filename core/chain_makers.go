@@ -282,3 +282,4 @@ func (cr *fakeChainReader) GetHeaderByHash(hash common.Hash) *types.Header      
 func (cr *fakeChainReader) GetHeader(hash common.Hash, number uint64) *types.Header { return nil }
 func (cr *fakeChainReader) GetBlock(hash common.Hash, number uint64) *types.Block   { return nil }
 func (cr *fakeChainReader) StateAt(root common.Hash) (*state.StateDB, error)        { return nil, nil }
+func (cr *fakeChainReader) HasBlockAndState(hash common.Hash, number uint64) bool   { return false }

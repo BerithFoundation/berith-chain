@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/trie"
 	lru "github.com/hashicorp/golang-lru"
 )

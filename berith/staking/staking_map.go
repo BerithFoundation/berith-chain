@@ -8,6 +8,8 @@ import (
 	"math/big"
 	"sort"
 
+	"github.com/BerithFoundation/berith-chain/core/state"
+
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
@@ -27,7 +29,7 @@ type stkInfo struct {
 	StkAddress     common.Address `json:"address"`     //토큰을 예치한 계정
 	StkValue       *big.Int       `json:"value"`       //예치한 토큰의 수량
 	StkBlockNumber *big.Int       `json:"blocknumber"` //토큰을 예치한 시점의 블록번호
-	StkReward      *big.Int       `json:"reward"`      // 삭제예정
+
 }
 
 //[BERITH]
@@ -35,7 +37,6 @@ type stkInfo struct {
 func (s stkInfo) Address() common.Address { return s.StkAddress }
 func (s stkInfo) Value() *big.Int         { return s.StkValue }
 func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
-func (s stkInfo) Reward() *big.Int        { return s.StkReward }
 
 //[BERITH]
 //Len 목록의 길이를 반환하는 메서드
@@ -45,11 +46,11 @@ func (list *StakingMap) Len() int {
 
 //[BERITH]
 // 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
-func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber, period uint64) (*big.Int, int, bool) {
+func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool) {
 	flag := false
 	if len(list.table) <= 0 {
 		flag = true
-		list.selectSigner(blockNumber, period)
+		list.selectSigner(blockNumber, states)
 	}
 	if len(list.table) <= 0 {
 		return big.NewInt(1234), 1, false
@@ -75,14 +76,12 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 			StkAddress:     address,
 			StkValue:       big.NewInt(0),
 			StkBlockNumber: big.NewInt(0),
-			StkReward:      big.NewInt(0),
 		}, nil
 	}
 	return &stkInfo{
 		StkAddress:     address,
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
-		StkReward:      info.Reward(),
 	}, nil
 }
 
@@ -90,7 +89,7 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 //SetInfo 목록에 "StakingInfo" 를 등록하는 메서드
 func (list *StakingMap) SetInfo(info StakingInfo) error {
 
-	if info.Value().Cmp(big.NewInt(0)) < 1 && info.Reward().Cmp(big.NewInt(0)) < 1 {
+	if info.Value().Cmp(big.NewInt(0)) < 1 {
 		delete(list.storage, info.Address())
 		return nil
 	}
@@ -99,7 +98,6 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 		StkAddress:     info.Address(),
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
-		StkReward:      info.Reward(),
 	}
 	return nil
 }
@@ -124,7 +122,7 @@ func (list *StakingMap) Delete(address common.Address) error {
 func (list *StakingMap) Print() {
 	fmt.Println("==== Staking List ====")
 	for k, v := range list.storage {
-		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "| reward : ", new(big.Int).Div(v.Reward(), big.NewInt(1000000000000000000)), "]")
+		fmt.Println("** [key : ", k.Hex(), " | value : ", v.Value().String(), "| blockNumber : ", v.BlockNumber().String(), "]")
 	}
 	fmt.Println("==== sortedList ====")
 	for _, v := range list.sortedList {
@@ -183,7 +181,7 @@ func (list *StakingMap) ClearTable() {
 
 //[BERITH]
 //selectSigner 전체 목록중에서 블록을 생성할 유저를 선별한 결과를 반환하는 메서드
-func (list *StakingMap) selectSigner(blockNumber, period uint64) {
+func (list *StakingMap) selectSigner(blockNumber uint64, states *state.StateDB) {
 
 	if len(list.sortedList) <= 0 {
 		list.Sort()
@@ -193,17 +191,12 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 		return
 	}
 
-	cs := NewCandidates(blockNumber, period)
+	cs := NewCandidates()
 
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
-		reward := info.StkReward
-		if reward == nil {
-			reward = big.NewInt(0)
-		}
-		value := new(big.Int).Div(info.Value(), big.NewInt(1e+18)).Uint64()
-		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0, 0})
-
+		cs.Add(Candidate{info.Address(), states.GetPoint(info.Address()).Uint64(), 0})
+		cs.ts += new(big.Int).Div(states.GetStakeBalance(info.Address()), big.NewInt(1e+18)).Uint64()
 	}
 
 	list.table = *cs.BlockCreator(blockNumber)
@@ -216,17 +209,12 @@ func (list *StakingMap) selectSigner(blockNumber, period uint64) {
 
 //[BERITH]
 //GetJoinRatio 특정계정이 블록을 생성할 확률을 반환하는 메서드
-func (list *StakingMap) GetJoinRatio(address common.Address, blockNumber, period uint64) float64 {
-	cs := NewCandidates(blockNumber, period)
+func (list *StakingMap) GetJoinRatio(address common.Address, blockNumber uint64, states *state.StateDB) float64 {
+	cs := NewCandidates()
 
 	for _, addr := range list.sortedList {
 		info := list.storage[addr]
-		reward := info.StkReward
-		if reward == nil {
-			reward = big.NewInt(0)
-		}
-		value := new(big.Int).Div(info.Value(), big.NewInt(1e+18)).Uint64()
-		cs.Add(Candidate{info.Address(), value, info.BlockNumber().Uint64(), reward.Uint64(), 0, 0})
+		cs.Add(Candidate{info.Address(), states.GetPoint(info.Address()).Uint64(), 0})
 	}
 	roi := cs.getJoinRatio(address)
 	return roi
@@ -280,7 +268,7 @@ func Encode(stakingList StakingList) ([]byte, error) {
 //[BERITH]
 //Decode 바이트 배열을 디코딩하여 StakingMap 구조체를 반환하는 함수
 func Decode(rlpData []byte) (StakingList, error) {
-	var byteArr [5][]byte
+	var byteArr [4][]byte
 	if err := rlp.DecodeBytes(rlpData, &byteArr); err != nil {
 		return nil, err
 	}

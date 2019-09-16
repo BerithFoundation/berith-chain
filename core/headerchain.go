@@ -109,6 +109,8 @@ func NewHeaderChain(chainDb berithdb.Database, config *params.ChainConfig, engin
 	return hc, nil
 }
 
+func (hc *HeaderChain) HasBlockAndState(hash common.Hash, number uint64) bool { return false }
+
 // GetBlockNumber retrieves the block number belonging to the given hash
 // from the cache or database
 func (hc *HeaderChain) GetBlockNumber(hash common.Hash) *uint64 {
