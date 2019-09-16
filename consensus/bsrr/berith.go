@@ -959,8 +959,9 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 				stake_block := info.BlockNumber()
 				period := c.config.Period
 
-				result := staking.CalcPoint(prev_stake, add_stake, now_block, stake_block, period)
-				state.SetPoint(msg.From(), big.NewInt(int64(result)))
+				result := staking.CalcPointBigint(prev_stake, add_stake, now_block, stake_block, period)
+				state.SetPoint(header.Coinbase, result)
+				//state.SetPoint(header.Coinbase, big.NewInt(int64(result)))
 			}
 		}
 
@@ -1047,6 +1048,10 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 
 }
 
+/*
+[BERITH]
+선출확율 반환 함수
+*/
 func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64, states *state.StateDB) (float64, error) {
 	roi := (*stakingList).GetJoinRatio(address, blockNumber, states)
 

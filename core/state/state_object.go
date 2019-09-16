@@ -96,6 +96,13 @@ func (s *stateObject) empty() bool {
 
 // Account is the Berith consensus representation of accounts.
 // These objects are stored in the main account trie.
+/*
+[BERITH]
+어카운트 구조체
+StakeBalance 추가
+BehindBalance 추가
+Selection Point 추가
+*/
 type Account struct {
 	Nonce    uint64
 	Balance  *big.Int
@@ -106,12 +113,22 @@ type Account struct {
 	BehindBalance []Behind //behind balance
 }
 
+/*
+[BERITH]
+내부 컴펌처리를 하기위한 Balance
+Behind Balance 구조체
+*/
 type Behind struct {
 	Number *big.Int
 	Balance *big.Int
 }
 
 // newObject creates a state object.
+/*
+[BERITH]
+stateObject 객체를 만드는 함수
+Account 의 초기화 처리
+*/
 func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 	if data.Balance == nil {
 		data.Balance = new(big.Int)
@@ -403,7 +420,10 @@ func (self *stateObject) Value() *big.Int {
 }
 
 
-//[BERITH] set staking balance
+/*
+[BERITH]
+set staking balance
+*/
 func (self *stateObject) SetStaking(amount *big.Int) {
 	self.db.journal.append(stakingChange{
 		account: &self.address,
@@ -416,9 +436,18 @@ func (self *stateObject) setStaking(amount *big.Int) {
 	self.data.StakeBalance = amount
 }
 
+/*
+[BERITH]
+StakeBalance Value 를 반환
+*/
 func (self *stateObject) StakeBalance() *big.Int {
 	return self.data.StakeBalance
 }
+
+/*
+[BERITH]
+StakeBalance 를 초기화 하는 함수
+*/
 func (c *stateObject) RemoveStakeBalance() {
 	stakeBalance := c.StakeBalance()
 	if stakeBalance.Sign() == 0 {
@@ -430,6 +459,10 @@ func (c *stateObject) RemoveStakeBalance() {
 	c.AddBalance(stakeBalance)
 }
 
+/*
+[BERITH]
+StakeBalance 를 추가 하는 함수
+*/
 func (c *stateObject) AddStakeBalance(amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.
@@ -443,6 +476,11 @@ func (c *stateObject) AddStakeBalance(amount *big.Int) {
 	c.SetStaking(new(big.Int).Add(c.StakeBalance(), amount))
 }
 
+/*
+[BERITH]
+BehindBalance 값은 배열
+배열에 블록넘버 와 코인수량 을 포함한 Behind 객체를 추가 하는 함수
+*/
 func (c *stateObject) AddBehindBalance(number ,amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.
@@ -475,10 +513,19 @@ func (self *stateObject) setBehind(behind []Behind) {
 	self.data.BehindBalance = behind
 }
 
+/*
+[BERITH]
+BehindBalance 객체를 반환 하는 함수
+*/
 func (self *stateObject) BehindBalance() []Behind {
 	return self.data.BehindBalance
 }
 
+/*
+[BERITH]
+BehindBalance 배열에서 0번째를 반환 하는 함수
+FIFO 처리하기 위한 함수
+*/
 func (self *stateObject) GetFirstBehindBalance() (Behind, error){
 	behind := self.data.BehindBalance
 	if behind == nil {
@@ -491,12 +538,20 @@ func (self *stateObject) GetFirstBehindBalance() (Behind, error){
 	return behind[0], nil
 }
 
+/*
+[BERITH]
+BehindBalance 배열에서 0번째 값을 삭제 하기 위한 함수
+FIFO 처리 하기 위한 함수
+*/
 func (self *stateObject) RemoveFirstBehindBalance() {
 	behind := self.data.BehindBalance
 	self.setBehind(behind[1:])
 }
 
-//[BERITH] set Selection Point
+/*
+[BERITH]
+Selection Point 의 값을 대입해주는 함수
+*/
 func (self *stateObject) SetPoint(amount *big.Int) {
 	self.db.journal.append(pointChange{
 		account: &self.address,
@@ -509,10 +564,18 @@ func (self *stateObject) setPoint(amount *big.Int) {
 	self.data.Point = amount
 }
 
+/*
+[BERITH]
+Selection Point 를 반환 하는 함수
+*/
 func (self *stateObject) GetPoint() *big.Int {
 	return self.data.Point
 }
 
+/*
+[BERITH]
+Selection Point 값에 해당 amount 값을 추가 해주는 함수
+*/
 func (c *stateObject) AddPoint(amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.
@@ -526,7 +589,10 @@ func (c *stateObject) AddPoint(amount *big.Int) {
 	c.SetPoint(new(big.Int).Add(c.GetPoint(), amount))
 }
 
-//
+/*
+[BERITH]
+Account 정보를 반환 하는 함수
+*/
 func (self *stateObject) AccountInfo() Account {
 	return self.data
 }
