@@ -959,8 +959,9 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 				stake_block := info.BlockNumber()
 				period := c.config.Period
 
-				result := staking.CalcPoint(prev_stake, add_stake, now_block, stake_block, period)
-				state.SetPoint(header.Coinbase, big.NewInt(int64(result)))
+				result := staking.CalcPointBigint(prev_stake, add_stake, now_block, stake_block, period)
+				state.SetPoint(header.Coinbase, result)
+				//state.SetPoint(header.Coinbase, big.NewInt(int64(result)))
 			}
 		}
 

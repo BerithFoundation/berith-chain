@@ -22,17 +22,17 @@ func TestVoting2(t *testing.T) {
 
 	number := uint64(10000)
 	//epoch := uint64(20)
-	perioid := uint64(10)
+	//perioid := uint64(10)
 	loop := 100
 
-	cs := NewCandidates(number, perioid)
+	cs := NewCandidates()
 
 	for i := 0; i < loop; i++ {
-
+		point := uint64(30000000)
 		value := uint64(10000000)
 
 		//stake := new(big.Int).Mul(big.NewInt(10000000 + (int64(i) * 1)), big.NewInt(1e+18)
-		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), value, 1, 0, 0, 0}
+		c := Candidate{common.BytesToAddress([]byte(strconv.Itoa(i))), point, value}
 		cs.Add(c)
 	}
 	bc := cs.BlockCreator(number)
