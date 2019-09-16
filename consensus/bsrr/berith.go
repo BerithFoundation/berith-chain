@@ -1053,17 +1053,6 @@ func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Add
 	return roi, nil
 }
 
-func reward(number float64) float64 {
-	up := 5.5 * 100 * math.Pow(10, 7.2)
-	down := number + math.Pow(10, 7.6)
-
-	y := up/down - 60.0
-
-	if y < 0 {
-		return float64(0)
-	}
-	return y
-}
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
 // controlling the signer voting.
