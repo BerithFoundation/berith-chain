@@ -23,7 +23,6 @@ package bsrr
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"sync"
@@ -451,10 +450,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 
 	if !exist {
-		fmt.Println("##############[CALC_DIFF]###################")
-		fmt.Println("NUMBER ==>> ", target.Number.String())
-		fmt.Println("HASH ==>> ", target.Hash().Hex())
-		fmt.Println("ROOT ==>> ", target.Root.Hex())
 		return consensus.ErrUnknownAncestor
 	}
 
@@ -589,11 +584,6 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 	if number == 0 {
 		return errUnknownBlock
 	}
-
-	fmt.Println("##############[SEAL]###################")
-	fmt.Println("NUMBER ==>> ", header.Number.String())
-	fmt.Println("HASH ==>> ", header.Hash().Hex())
-	fmt.Println("ROOT ==>> ", header.Root.Hex())
 
 	// For 0-period chains, refuse to seal empty blocks (no reward but would spin sealing)
 	if c.config.Period == 0 && len(block.Transactions()) == 0 {
@@ -1057,7 +1047,6 @@ func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Add
 
 	return roi, nil
 }
-
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
 // controlling the signer voting.

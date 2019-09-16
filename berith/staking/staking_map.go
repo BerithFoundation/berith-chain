@@ -197,7 +197,6 @@ func (list *StakingMap) selectSigner(blockNumber uint64, states *state.StateDB) 
 		info := list.storage[addr]
 		cs.Add(Candidate{info.Address(), states.GetPoint(info.Address()).Uint64(), 0})
 		cs.ts += new(big.Int).Div(states.GetStakeBalance(info.Address()), big.NewInt(1e+18)).Uint64()
-		fmt.Printf("ADD ====>>>>> [%s,%s,%d]", info.Address().Hex(), states.GetPoint(info.Address()).String(), blockNumber)
 	}
 
 	list.table = *cs.BlockCreator(blockNumber)

@@ -10,7 +10,6 @@ package staking
 import (
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -68,7 +67,6 @@ BC 선출을 하기 위해 Staker 를 등록하기 위한 함수
 func (cs *Candidates) Add(c Candidate) {
 	cs.total += c.point
 	c.val = cs.total
-	fmt.Printf("%s : [%d,%d,%d]\n", c.address.String(), cs.total, cs.ts, c.point)
 	cs.selections = append(cs.selections, c)
 }
 
@@ -138,17 +136,6 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	if r.end-r.start <= 1 {
 		return cs.selections[r.start].address
 	}
-	println("########################################")
-	println("########################################")
-	println("########################################")
-	println("########################################")
-	fmt.Printf("[%d,%d]\n", r.max, r.min)
-	println("########################################")
-	println("########################################")
-	println("########################################")
-	println("########################################")
-	println("########################################")
-
 	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
 
 	start := r.start
