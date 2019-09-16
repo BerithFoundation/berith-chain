@@ -16,7 +16,7 @@ func TestCalcPoint(t *testing.T) {
 	new_block := big.NewInt(7200021)
 	stake_block := big.NewInt(20)
 	perioid := uint64(10)
-	result := CalcPoint(prev_stake, add_stake, new_block, stake_block, perioid)
+	result := CalcPointUint(prev_stake, add_stake, new_block, stake_block, perioid)
 
 	fmt.Println(result)
 }
@@ -31,7 +31,7 @@ func TestCalcPoint2(t *testing.T) {
 	new_block := big.NewInt(7200021)
 	stake_block := big.NewInt(20)
 	perioid := uint64(10)
-	result := CalcPoint(prev_stake, add_stake, new_block, stake_block, perioid)
+	result := CalcPointBigint(prev_stake, add_stake, new_block, stake_block, perioid)
 
 	fmt.Println(result)
 }
