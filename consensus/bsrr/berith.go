@@ -1051,8 +1051,8 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 [BERITH]
 선출확율 반환 함수
 */
-func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64) (float64, error) {
-	roi := (*stakingList).GetJoinRatio(address, blockNumber, c.config.Period)
+func (c *BSRR) getJoinRatio(stakingList *staking.StakingList, address common.Address, blockNumber uint64, states *state.StateDB) (float64, error) {
+	roi := (*stakingList).GetJoinRatio(address, blockNumber, states)
 
 	return roi, nil
 }
