@@ -970,7 +970,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			value.Set(big.NewInt(0))
 			//reset point
 			if state != nil {
-				state.SetPoint(header.Coinbase, big.NewInt(0))
+				state.SetPoint(msg.From(), big.NewInt(0))
 			}
 		}
 
@@ -983,22 +983,22 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 		list.SetInfo(input)
 	}
 
-	info, err := list.GetInfo(header.Coinbase)
+	// info, err := list.GetInfo(header.Coinbase)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	if info.Value().Cmp(big.NewInt(0)) > 0 {
+	// if info.Value().Cmp(big.NewInt(0)) > 0 {
 
-		input := stakingInfo{
-			address:     info.Address(),
-			value:       info.Value(),
-			blockNumber: info.BlockNumber(),
-		}
+	// 	input := stakingInfo{
+	// 		address:     info.Address(),
+	// 		value:       info.Value(),
+	// 		blockNumber: info.BlockNumber(),
+	// 	}
 
-		list.SetInfo(input)
-	}
+	// 	list.SetInfo(input)
+	// }
 
 	// list.SetMiner(header.Coinbase)
 	// sr := c.config.SlashRound
