@@ -14,6 +14,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // handleMessages handles messages
@@ -26,18 +27,16 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	}
 	api := info["api"]
 	args := info["args"].([]interface{})
-
-	astilog.Debugf("Message type: %s, Method: %s", m.Name, api.(string))
-
 	switch m.Name {
+
 	case "init":
-
-
-		/*ch <- NodeMsg{
-			t: "init",
-			v: nil,
-			stack: nil,
-		}*/
+		break
+	case "polling":
+		//ch2 <- 1
+		startPolling()
+		break
+	case  "stopPolling" :
+		ch2 <- 0
 		break
 	case "callApi":
 		payload, err = callNodeApi(api, args...)
@@ -87,23 +86,6 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 		return err.Error(), err
 	}
 	return string(result), err
-
-	/*var val string
-	switch err := err.(type) {
-	case nil:
-		if result == nil {
-
-		} else {
-			val = string(result)
-			return val, err
-		}
-	case rpc.Error:
-		return val, err
-	default:
-		return val, err
-	}*/
-
-	//return val, err
 }
 
 func callDB ( api interface{}, args... interface{}) ( interface{}, error){
@@ -119,7 +101,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	switch api.(string) {
 	case "selectContact" :
 		contact := make(walletdb.Contact,0)
-		err := WalletDB.Select([]byte(acc), &contact)
+		err := WalletDB.Select([]byte("c"+acc), &contact)
 		if err != nil {
 			return nil, err
 		}
@@ -137,9 +119,9 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		break
 	case "insertContact":
 		contact := make(walletdb.Contact, 0)
-		WalletDB.Select([]byte(acc), &contact)
+		WalletDB.Select([]byte("c"+acc), &contact)
 		contact[common.HexToAddress(key[0])] = key[1]
-		err := WalletDB.Insert([]byte(acc) , contact)
+		err := WalletDB.Insert([]byte("c"+acc) , contact)
 		if err != nil {
 			return nil, err
 		}
@@ -147,9 +129,9 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		break
 	case "updateContact":
 		contact := make(walletdb.Contact, 0)
-		WalletDB.Select([]byte(acc), &contact)
+		WalletDB.Select([]byte("c"+acc), &contact)
 		delete(contact, common.HexToAddress(key[0]))
-		err := WalletDB.Insert([]byte(acc) , contact)
+		err := WalletDB.Insert([]byte("c"+acc) , contact)
 		if err != nil {
 			return nil , err
 		}
@@ -186,6 +168,48 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		}
 		return mem, nil
 		break
+	case "selectTxInfo":
+		txMaster := make(walletdb.TxHistoryMaster , 0)
+		err := WalletDB.Select([]byte("t"+acc) , &txMaster)
+		if err != nil {
+			return nil , err
+		}
+		txDetails := make([]walletdb.TxHistory,0)
+		for _ , val := range txMaster {
+			var txDetail walletdb.TxHistory
+			err2 := WalletDB.Select([]byte(val) , &txDetail)
+			if err2 != nil {
+				return nil , err
+			}
+			txDetails=append(txDetails,txDetail)
+		}
+		return txDetails , nil
+		break
+	case "insertTxInfo":
+		var tempTxInfo walletdb.TxHistory
+		err := WalletDB.Select([]byte(key[0]), &tempTxInfo)
+		if err == nil{
+			return "err" ,err
+		}
+		txMaster := make(walletdb.TxHistoryMaster , 0)
+		WalletDB.Select([]byte("t"+acc), &txMaster)
+		txMaster[key[0]] = key[0]
+		err = WalletDB.Insert([]byte("t"+acc), txMaster)
+		if err != nil {
+			return nil ,err
+		}
+		txinfo := walletdb.TxHistory{
+			TxAddress: common.HexToAddress(key[1]),
+			TxType: key[2],
+			TxAmount: key[3],
+			Txtime: time.Now().Format(time.RFC3339),
+		}
+		err = WalletDB.Insert([]byte(key[0]), txinfo)
+		if err != nil {
+			return nil , err
+		}
+		return txinfo, nil
+		break
 	case "insertMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)
@@ -208,6 +232,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		}
 		return member, nil
 		break
+
 	case "checkLogin":
 		var member walletdb.Member
 

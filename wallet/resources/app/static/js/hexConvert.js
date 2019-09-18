@@ -33,7 +33,7 @@ let hexConvert = {
             txValue = BigInt(f.toString() + "000000000000000000").toString(16);
 
         }
-        console.log("txValue ::: " + txValue)
+        // console.log("txValue ::: " + txValue)
         rs.result = true;
         rs.value = txValue;
 

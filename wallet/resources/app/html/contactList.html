@@ -156,7 +156,7 @@
                         contents[vv] += '<td class="addr" id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
                         contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
                         contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'" onclick="openContactUpdate($(this))">Edit</a></td>'
-                        contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td'
+                        contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td>'
                         contents[vv] += '</tr>'
                     }else {
                         if( radioVal == "userName" && obj[keys[i]].includes(text)) {
@@ -167,7 +167,7 @@
                             contents[vv] += '<td class="addr"  id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
                             contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
                             contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'"  onclick="openContactUpdate($(this))">Edit</a></td>'
-                            contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td'
+                            contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td>'
                             contents[vv] += '</tr>'
                         }else if(radioVal == "userAdd" && keys[i].includes(text)){
                             var vv = parseInt(cnt / 5)
@@ -177,7 +177,7 @@
                             contents[vv] += '<td class="addr" id  id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'
                             contents[vv] += '<td class="send"><a class="btn small send" id = "'+cnt+'" onclick="movePageSend($(this))">Send</a></td>'
                             contents[vv] += '<td class="edit"><a class="icon edit" id = "'+cnt+'"  onclick="openContactUpdate($(this))">Edit</a></td>'
-                            contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td'
+                            contents[vv] += '<td class="del"><a class="icon del" id ="'+cnt+'" onclick="openContactDelete($(this))">Delete</a></td>'
                             contents[vv] += '</tr>'
                         }
                     }

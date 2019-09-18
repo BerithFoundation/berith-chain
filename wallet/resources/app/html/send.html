@@ -25,7 +25,7 @@
                 </div>
             </div>
             <p class="error_txt" id="err1">
-                소수점은 한번만 입력해 주세요.
+                주소를 입력하세요.
             </p>
         </div><!-- e://inp_group -->
         <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <p class="error_txt" id="err2">
-                소수점은 한번만 입력해 주세요.
+                수량을 입력하세요.
             </p>
         </div><!-- e://inp_group -->
         <div class="row_group">
@@ -51,24 +51,22 @@
                     <h5>기본수수료</h5>
                     <div class="box_inp">
                                     <span class="inp_wrap">
-                                        <input class="inp" type="text" value="21000"/>
+                                        <input class="inp" type="text" readonly="true" value="21000"/>
                                     </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
                     </p>
                 </div>
                 <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                                     <span class="inp_wrap">
-                                        <input class="inp" type="text" value="21000"/>
+                                        <input class="inp" type="text" readonly="true" value="21000"/>
                                     </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
                     </p>
                 </div>
             </div>
@@ -84,13 +82,21 @@
             </div>
         </div>
         <div class="btn_area right">
-            <a class="btn red medium on" href="#!" onclick="send()">다음</a>
+            <a class="btn red medium on" href="#!" onclick="confirmation()">다음</a>
         </div>
 
     </div><!-- e://content -->
 </div><!-- e://container -->
 
+<div id = "confirmationPopup" class = "ly_pop hide"></div>
+<div id = "sendInputPwdPopup" class="ly_pop hide"></div>
+<div id = "successPopup" class = "ly_pop hide"></div>
+
 <script type="text/javascript">
+    $("#confirmationPopup").load("send2.html");
+    $("#sendInputPwdPopup").load("send3.html");
+
+    $("#successPopup").load("send4.html");
 
     onSendLoad();
     async function onSendLoad() {
@@ -104,18 +110,33 @@
         $('#sendAmount').find('input[type=text]:first').val(mainBalance);
     }
 
-    async function send() {
-        let validationResult = await isValidated();
-        if (!validationResult) {
-            return;
+    async function confirmation(){
+        if(await  isValidated()) {
+            let sendAmount = $('#sendAmount').find('input[type=text]:first').val();
+            let receiversAddress = $("#sendAddr").val();
+            $("#sendAmtForConfirmation").text(sendAmount);
+            $("#sendAddForConfirmation").text(receiversAddress);
+            togglePopUp("confirmationPopup");
         }
+    }
+
+    async function send() {
+        // let validationResult = await isValidated();
+        // if (!validationResult) {
+        //     return;
+        // }
         let receiversAddress = $("#sendAddr").val();
         let amount = $('#sendAmount').find('input[type=text]:first').val();
+        // console.log("amount : " + amount)
+        // return;
         let result = await berith.sendTransaction(amount, receiversAddress);
         if (result.name == "error") {
             alert("Something went wrong!");
         } else {
-            alert("Transaction submitted successfully");
+            // alert("Transaction submitted successfully");
+            $("#sendSuccessAmt").text(amount);
+            $("#sendSuccessAdd").text(receiversAddress);
+            togglePopUp("successPopup");
             // clearing fields
             $("#sendAddr").val("");
             $('#sendAmount').find('input[type=text]:first').val("");

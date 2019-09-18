@@ -15,7 +15,16 @@ type Member struct {
 	Password   string
 }
 
+type TxHistory struct {
+	TxAddress common.Address
+	TxType string
+	TxAmount string
+	Txtime string
+	TxState string
+}
+
 type Contact map[common.Address]string
+type TxHistoryMaster map[string]string
 
 func (c Contact) EncodeRLP(w io.Writer) error {
 	result := make([]string,0)
@@ -25,6 +34,15 @@ func (c Contact) EncodeRLP(w io.Writer) error {
 	}
 	return rlp.Encode(w, result)
 }
+func (c TxHistoryMaster) EncodeRLP(w io.Writer) error {
+	result := make([]string,0)
+
+	for k, v := range c {
+		result = append(result, k+":"+v)
+	}
+	return rlp.Encode(w, result)
+}
+
 
 func (c Contact) DecodeRLP(r *rlp.Stream) error {
 	arr := make([]string, 0)
@@ -44,6 +62,25 @@ func (c Contact) DecodeRLP(r *rlp.Stream) error {
 	}
 	return nil
 }
+func (c TxHistoryMaster) DecodeRLP(r *rlp.Stream) error {
+	arr := make([]string, 0)
+
+	err := r.Decode(&arr)
+
+	if err != nil {
+		return err
+	}
+
+	for _, v := range arr {
+		inner := strings.Split(v, ":")
+		key := inner[0]
+		val := inner[1]
+
+		c[key] = val
+	}
+	return nil
+}
+
 
 
 type Transactions struct {
@@ -83,3 +120,12 @@ func (db *WalletDB) Select(key []byte, holder interface{}) error {
 
 	return rlp.DecodeBytes(data, holder)
 }
+//func (db *WalletDB) Select2(key []byte, holder interface{}) error {
+//	data, err := db.db.Get(key)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return rlp.DecodeBytes(data, holder)
+//}
+

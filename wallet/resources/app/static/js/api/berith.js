@@ -43,135 +43,42 @@ let berith = {
         })
     },
 
-    /*
-    getBalance: function (address) {
-        return new Promise(resolve => {
-            setTimeout(()=> {
-                let message = {"name": "callApi"};
-                message.payload = {
-                    "api": "berith_getBalance",
-                    "args": [address, "latest"]
-                }
-                asticode.loader.show()
-                astilectron.sendMessage(message, function (message) {
-                    asticode.loader.hide();
-                    var obj = JSON.parse(message.payload)
-                    var val  =parseInt(obj, 16);
-                    mainBalance = val
-                    resolve(mainBalance)
-                }) // astilectron
-            }) // settimeout
-        }) // promise
-    },
-    */
-
-
     getBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload)
-        var val = await hexToDecimal(obj);
+        var val = await hexToDecimal(obj) / 1000000000000000000;
         return val;
     },
-
-    /*
-    getStakeBalance: function (address) {
-        return new Promise(resolve => {
-            setTimeout(()=> {
-                let message = {"name": "callApi"};
-                message.payload = {
-                    "api" : "berith_getStakeBalance",
-                    "args" : [address,"latest" ]
-                }
-                asticode.loader.show()
-                astilectron.sendMessage(message, function(message) {
-                    asticode.loader.hide();
-                    var obj =JSON.parse(message.payload)
-                    var val = parseInt(obj,16)
-                    stakeBalance = val
-                    resolve(stakeBalance)
-                }) // astilectron
-            }) // settimeout
-        }) // promise
-    },*/
 
     getStakeBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getStakeBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload)
-        var val  =parseInt(obj, 16);
+        var val  =await hexToDecimal(obj) / 1000000000000000000;
+        // var val  =parseInt(obj, 16);
         return val;
     },
 
-    /*
-    getRewardBalance: function (address) {
-        return new Promise(resolve => {
-            setTimeout(()=> {
-                let message = {"name": "callApi"};
-                message.payload = {
-                    "api" : "berith_getRewardBalance",
-                    "args" : [address,"latest" ]
-                }
-                asticode.loader.show()
-                astilectron.sendMessage(message, function(message) {
-                    asticode.loader.hide();
-                    var obj =JSON.parse(message.payload)
-                    var val = parseInt(obj,16)
-                    rewardBalance = val
-                    // totalBalance = mainBalance + stakeBalance + rewardBalance
-                    // console.log( "totBalance ::: " + totalBalance)
-                    resolve(rewardBalance)
-                })
-            }) // settimeout
-        }) // promise
-    },
-*/
     getRewardBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getRewardBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload);
-        var val  =parseInt(obj, 16);
+        var val  =await hexToDecimal(obj) / 1000000000000000000;
+        // var val  =parseInt(obj, 16);
         return val;
     },
 
-    /*sendTransaction: function (sendAmount , sendAccount) {
+    sendTransaction: async function (sendAmount , receiverAccount) {
         var valueData = hexConvert.getTxValue(sendAmount).value
         var valueData2 = "0x"+valueData
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_sendTransaction",
-            "args" : [{from : account , to :sendAccount , value: valueData2 } ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#sendResult').val(message.payload)
-        })
-    },*/
-
-
-    sendTransaction: async function (sendAmount , receiverAccount) {
-        let valueData2 = toHex(sendAmount);
+        // let valueData2 = toHex(sendAmount);
         result = await sendMessage("callApi", "berith_sendTransaction", [{from : account , to :receiverAccount , value: valueData2 } ]);
         return result;
     },
 
-    /*stakeTransaction: function (stakeAmount ) {
-        var valueData = hexConvert.getTxValue(stakeAmount).value
-        var valueData2 = "0x"+valueData
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_stake",
-            "args" : [{from : account , value: valueData2 } ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#stakeResult').val(message.payload)
-        })
-    },*/
-
     stake : async function (stakeAmount) {
-        var valueData = toHex(stakeAmount);
+        // var valueData = toHex(stakeAmount);
+        var valueData = hexConvert.getTxValue(stakeAmount).value
         var valueData2 = "0x"+valueData;
-        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData } ]);
+        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData2 } ]);
         return result;
     },
 
@@ -256,17 +163,37 @@ let berith = {
             console.log("updateAccount ::: " + message.payload)
         })
     },
-
-    exportKeystore: function () {
-        let message = {"name": "exportKeystore"};
-        let password = $('#exportPassword').val()
-
-        if (!password) {
-            alert("Enter password to export keystore")
-            return
-        }
+    startPolling : function () {
+        let message = { "name" :  "polling"};
         message.payload = {
-            "args" : [password]
+            "args" : []
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+        });
+    },
+    stopPolling : function () {
+        let message = { "name" :  "stopPolling"};
+        message.payload = {
+            "args" : []
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+        });
+    },
+
+    exportKeystore: function (pwd) {
+        let message = {"name": "exportKeystore"};
+        // let password = $('#exportPassword').val()
+        //
+        // if (!pwd) {
+        //     alert("Enter password to export keystore")
+        //     return
+        // }
+        message.payload = {
+            "args" : [pwd]
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
@@ -274,7 +201,7 @@ let berith = {
             var blob=new Blob([bytes], {type: "application/zip"});
             var link=document.createElement('a');
             link.href=window.URL.createObjectURL(blob);
-            link.download="berith-keystore.data";
+            link.download="berith-keystore.zip";
             link.click();
             asticode.loader.hide();
         })

@@ -7,11 +7,9 @@ let index = {
 
         // Wait for astilectron to be ready
         document.addEventListener('astilectron-ready', async function() {
-            // includeHTML(); // for templating
             index.listen();
             let responseValue = await sendMessage("init", "", [])
-            console.log(responseValue)
-            //onPageload(); // all pages should include this method to guarantee a successful page load.
+            // console.log("responseValue : " + responseValue)
             loadAppContents();
         });
     },
@@ -25,9 +23,12 @@ let index = {
                 case "notify_hide":
                     asticode.loader.hide();
                     break;
-                case "polling":
+                case "syncing":
                     syncingData(message.payload)
                     break;
+                case "getBlockInfo":
+                    blockInfo(message.payload)
+                    break
                 case "coinbase":
                     berith.coinbase()
                     break;

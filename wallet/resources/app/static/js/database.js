@@ -22,6 +22,10 @@ let database = {
             }) // settimeout
         }) // promise
     },
+    selectTxInfo : async function(txAccount){
+        result = await sendMessage("callDB" , "selectTxInfo" , [txAccount])
+        return result
+    },
     checkLogin : async function (memberName, memberPwd) {
         result = await sendMessage("callDB", "checkLogin", [memberName, memberPwd]);
         return result;
@@ -49,6 +53,24 @@ let database = {
             contents += '<td><input type="text" value="'+obj.Password+'"></td>'
             contents += '</tr>'
             $('#memberData').append(contents)
+        })
+    },
+    insertTxInfo : function(blockNumber , txAdd , txType , txAmount ) {
+        let message = {"name" : "callDB"}
+
+        message.payload = {
+            "api" : "insertTxInfo",
+            "args" : [blockNumber ,txAdd , txType ,txAmount]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message , function (message) {
+            asticode.loader.hide()
+            if( message == null || message == ""){
+                return
+            }
+            var obj = message.payload
+            console.log( "insertTxInfo ::: " + obj)
+            // resolve(obj)
         })
     },
     insertContact : function (contactAdd , contactName) {
@@ -149,5 +171,6 @@ let database = {
             }
         });
     }
+
 
 }

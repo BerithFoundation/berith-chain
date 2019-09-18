@@ -63,17 +63,10 @@ let personal = {
             $('#lockAccount').val(message.payload)
         })
     },
-    getPrivateKey: function (getPrivateAdd , getPrivatePwd ) {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "personal_privateKey",
-            "args" : [getPrivateAdd,getPrivatePwd ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#getPrivateResult').val(message.payload)
-        })
+    // 개인키 조회 api
+    getPrivateKey:async function (getPrivateAdd , getPrivatePwd ) {
+        result = await sendMessage("callApi", "personal_privateKey" , [getPrivateAdd,getPrivatePwd])
+        return result
     },
     importRawKey : function (importRawKeyAdd , importRawKeyPwd) {
         let message = {"name": "callApi"};

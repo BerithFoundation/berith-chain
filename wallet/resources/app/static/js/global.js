@@ -1,5 +1,6 @@
 var account;
 var loginId;
+var loginPwd;
 var mainBalance
 var blockNumber
 var stakeBalance
@@ -54,7 +55,7 @@ function loadMainContentWithCallBack(htmlName, callBackFunction) {
 
 async function hexToDecimal(value) {
     let decimalValue = toDecimal(value);
-    console.log(decimalValue);
+    // console.log(decimalValue);
     return decimalValue;
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,7 @@ var (
 	node_testnet = flag.String("testnet", "", "testnet")
 	node_console = flag.String("console", "", "console")
 	node_datadir = flag.String("datadir", "", "datadir")
+	node_verbosity = flag.String("verbosity", "", "verbosity")
 	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
 	w       *astilectron.Window
 	WalletDB *walletdb.WalletDB
@@ -31,6 +33,7 @@ var (
 	stack *node.Node
 
 	ch = make(chan NodeMsg)
+	ch2 = make(chan int)
 )
 
 type NodeMsg struct {
@@ -80,6 +83,13 @@ func start_ui(){
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 						}
+						w.On(astilectron.EventNameWindowEventClosed, func(e astilectron.Event) (deleteListener bool) {
+							if stack == nil {
+								return false
+							}
+							stack.Stop()
+							return true
+						})
 						//startPolling()
 						break
 					}
@@ -108,17 +118,42 @@ func start_ui(){
 func startPolling(){
 	go func() {
 		for {
-			// polling 로직
-			val, err := callNodeApi("berith_syncing", nil)
+			//동기화 여부
+			//var stopYn int
+			//stopYn = <- ch2
+			//if stopYn == 0 {
+			//	break
+			//}
+			//miner,Merr :=callNodeApi("miner_start", nil)
+			//if Merr != nil {
+			//	astilog.Error(errors.Wrap(Merr, "mining failed"))
+			//}
+			//fmt.Println("miner : " , miner)
+			sync, err := callNodeApi("berith_syncing", nil)
 			if err != nil {
-				astilog.Error(errors.Wrap(err, "polling failed"))
+				astilog.Error(errors.Wrap(err, "syncing failed"))
 			}
-			// 현재 Account 확인 coinbase
-			// Block 검사 Tx 있는지 확인
 
-			if err := bootstrap.SendMessage(w, "polling", val); err != nil {
-				astilog.Error(errors.Wrap(err, "polling failed"))
+			// 동기화 완료시 최신 블록 조회
+			if sync == "false"  {
+				blockNum, err2 := callNodeApi("berith_blockNumber")
+				if err2 != nil{
+					astilog.Error(errors.Wrap(err, "blockNumber Failed"))
+				}
+				blockNum = strings.ReplaceAll(blockNum , "\"","")
+				blockInfo , err3 := callNodeApi("berith_getBlockByNumber" , blockNum ,true)
+				if err3 != nil {
+					astilog.Error(errors.Wrap(err, "getBlockByNumber Failed"))
+				}
+				if err := bootstrap.SendMessage(w, "getBlockInfo", blockInfo ); err != nil {
+					astilog.Error(errors.Wrap(err, "getBlockInfo failed"))
+				}
 			}
+
+			if err := bootstrap.SendMessage(w, "syncing", sync); err != nil {
+				astilog.Error(errors.Wrap(err, "syncing failed"))
+			}
+
 
 			time.Sleep(3 * time.Second)
 		}

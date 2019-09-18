@@ -22,12 +22,15 @@
 <script src="../static/js/qrGen.js"></script>
 <script src="../static/js/hexConvert.js"></script>
 <script src="../static/js/index.js"></script>
+<script src="../static/js/api/berith.js"></script>
+<script src="../static/js/api/miner.js"></script>
 <script type = "text/javascript">
     index.init();
+
 </script>
 <script src="../static/js/validation.js"></script>
 <script src="../static/js/ui.js"></script>
-<script src="../static/js/api/berith.js"></script>
+<script src="../static/js/api/personal.js"></script>
 
 
 <div class="wrap">
@@ -37,8 +40,8 @@
 
     <div class="contents_wrap">
         <div id="left-content"></div>
-        <div id="main-content"></div>
-        <div id="footer-content"></div>
+        <div id="main-content" style="height: 100%"></div>
+        <div id="footer-content" ></div>
     </div>
 
 
@@ -46,4 +49,8 @@
 </div><!-- e://wrap -->
 
 </body>
+<script type = "text/javascript">
+    // let pollingValue =  sendMessage("polling","", [])
+    // console.log( "pollingValue : " + pollingValue)
+</script>
 </html>

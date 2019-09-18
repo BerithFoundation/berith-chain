@@ -84,12 +84,11 @@
     onMainContentLoad();
 
     async function onMainContentLoad() {
-        $("#contactPop").load("contactList.html");
-        $("#contactAddPop").load("contactAdd.html");
-        $('#mySetting').load('mySetting.html');
+        miner.miningStart()
 
         account = sessionStorage.getItem('account'); // setting global variable value
         loginId = sessionStorage.getItem('loginId');
+        loginPwd = sessionStorage.getItem('loginPwd');
 
         $('#myAdd').text(account);
         $('#loginName').text(loginId);
