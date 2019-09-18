@@ -1,3 +1,8 @@
+/*
+[BERITH]
+web3.js 를 수정 할시 Hex 값으로 변경처리를 위한 테스트 코드
+실제로 이코드로 나온 Hex 값을 bindata.go 에 적용 해야 함
+*/
 package deps
 
 import (

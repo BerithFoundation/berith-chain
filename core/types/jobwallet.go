@@ -1,3 +1,7 @@
+/*
+[BERITH]
+Tx 타입을 지정하기 위한 열거형
+*/
 package types
 
 type JobWallet uint8
@@ -5,18 +9,16 @@ type JobWallet uint8
 const (
 	Main = 1 + iota
 	Stake
-	Reward
 )
 
 
 var values = [...]string {
 	"main",
 	"stake",
-	"reward",
 }
 
 func (m JobWallet) String() string {
-	return values[(m-1)%3]
+	return values[(m-1)%2]
 }
 
 func ConvertJobWallet(s string) JobWallet {
@@ -25,8 +27,6 @@ func ConvertJobWallet(s string) JobWallet {
 		return Main
 	case "stake":
 		return Stake
-	case "reward":
-		return Reward
 	default:
 		return Main
 	}

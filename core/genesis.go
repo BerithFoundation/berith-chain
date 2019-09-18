@@ -181,6 +181,7 @@ func SetupGenesisBlockWithOverride(db berithdb.Database, genesis *Genesis, const
 	}
 
 	// Get the existing chain configuration.
+	fmt.Println(stored.Hex())
 	newcfg := genesis.configOrDefault(stored)
 	if constantinopleOverride != nil {
 		newcfg.ConstantinopleBlock = constantinopleOverride
@@ -305,6 +306,7 @@ func GenesisBlockForTesting(db berithdb.Database, addr common.Address, balance *
 }
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
+//[BERITH] 메인넷 제네시스
 func DefaultGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.MainnetChainConfig,
@@ -322,6 +324,7 @@ func DefaultGenesisBlock() *Genesis {
 }
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
+//[BERITH] 테스트넷 제네시스
 func DefaultTestnetGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.TestnetChainConfig,

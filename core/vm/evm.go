@@ -398,7 +398,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		evm.StateDB.SetNonce(address, 1)
 	}
 	//evm.Transfer(evm.StateDB, caller.Address(), address, value)
-	//[Berith]
+	//[BERITH]
 	evm.Transfer(evm.StateDB, caller.Address(), address, value, types.Main, types.Main)
 
 	// initialise a new contract and set the code that is to be used by the

@@ -57,6 +57,7 @@ const (
 )
 
 // RPC packet types
+//[BERITH] 핑패킷 를 수정하여 eth 접근을 막는다.
 const (
 	pingPacket = iota + 11 // zero is 'reserved'
 	pongPacket

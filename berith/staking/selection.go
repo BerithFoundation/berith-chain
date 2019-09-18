@@ -1,18 +1,24 @@
+/**
+[BERITH]
+선출 연산을 담당 하는 go파일
+
+
+*/
+
 package staking
 
 import (
 	"crypto/sha256"
+	"errors"
 	"math"
 	"math/big"
 	"math/rand"
-
-	"github.com/pkg/errors"
 
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
 const (
-	MAX_MINERS = 22
+	MAX_MINERS = 6
 )
 
 var (
@@ -20,72 +26,55 @@ var (
 	DIF_MIN = int64(10000)
 )
 
+/**
+[BERITH]
+선출을 위해 Staking 한 계정들의 정보를 담는 구조체
+*/
 type Candidate struct {
-	address  common.Address //address
-	stake    uint64         //stake balance
-	block    uint64         //block number -- Contribution
-	reward   uint64         //reward balance
-	val      uint64         //sum
-	advStake uint64         //advStake
+	address common.Address //계정 주소
+	point   uint64         //계정의 포인트 (내가 뽑힐 확률 : 나의 포인트 / 전체 유저의 포인트)
+	val     uint64         //블록 생성자 선출을 위해 사용되는 값
 }
 
-func (c *Candidate) GetStake() uint64 {
-	return c.stake
-}
-
-func (c *Candidate) GetReward() uint64 {
-	return c.reward
-}
-
-func (c *Candidate) GetBlockNumber() float64 {
-	return float64(c.block)
-}
-
-//Stake 기간 Adv를 구한다.
-func (c *Candidate) GetAdvantage(number uint64, period uint64) float64 {
-	p := float64(30) / float64(period) //30초 기준의 공식이기때문에
-	y := 1.2 * float64(p)
-	div := y * math.Pow(10, 6) //10의6승
-
-	adv := (float64(number) - c.GetBlockNumber()) / div
-	if adv >= 1 {
-		return 1
-	} else {
-		return adv
-	}
+func (c *Candidate) GetPoint() uint64 {
+	return c.point
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+/**
+[BERITH]
+
+*/
 type Candidates struct {
-	number uint64
-	period uint64
-	//selections map[uint64]Candidate
 	selections []Candidate
 	total      uint64 //Total Staking  + Adv
-	ts         uint64 //Total Staking Value
+	ts         uint64
 }
 
-func NewCandidates(number uint64, period uint64) *Candidates {
+func NewCandidates() *Candidates {
 	return &Candidates{
-		number:     number,
-		period:     period,
 		selections: make([]Candidate, 0),
 		total:      0,
 		ts:         0,
 	}
 }
 
+/*
+[BERITH]
+BC 선출을 하기 위해 Staker 를 등록하기 위한 함수
+이후에 호출 될 함수는 BlockCreator 함수이다.
+*/
 func (cs *Candidates) Add(c Candidate) {
-	adv := uint64(c.GetAdvantage(cs.number, cs.period)*10) + 10
-	c.advStake = c.stake * adv
-	cs.total += c.advStake
+	cs.total += c.point
 	c.val = cs.total
 	cs.selections = append(cs.selections, c)
-
-	cs.ts += c.stake //Total Staking
 }
 
-//숫자 > 해시 > 숫자
+/*
+[BERITH]
+블록 넘버를 해시로 바꾸고 그것을 강제로 int64로 변경 하는 함수
+결과 값을 Seed 로 쓴다.
+*/
 func (cs Candidates) GetSeed(number uint64) int64 {
 
 	bt := []byte{byte(number)}
@@ -108,6 +97,11 @@ type VoteResult struct {
 	Score *big.Int `json:"score"`
 	Rank  int      `json:"rank"`
 }
+
+/*
+[BERITH]
+랜덤값으로 binarySearch 하기 위한 원형큐 구조체
+*/
 type Queue struct {
 	storage []Range
 	size    int
@@ -134,11 +128,14 @@ func (q *Queue) dequeue() (Range, error) {
 	return result, nil
 }
 
+/**
+[BERITH]
+Random 값을 폭단위로 binarySearch 한다.
+*/
 func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	if r.end-r.start <= 1 {
 		return cs.selections[r.start].address
 	}
-
 	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
 
 	start := r.start
@@ -179,6 +176,11 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	}
 }
 
+/*
+[BERITH]
+BC 선출을 하기 위한 함수
+선출된 BC map 을 리턴 한다.
+*/
 func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult {
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
@@ -215,12 +217,15 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 	return &result
 }
 
-//ROI 산출
+/*
+[BERITH]
+예상 BC 선출 비율을 계산하는 함수
+*/
 func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	stake := uint64(0)
 	for _, c := range cs.selections {
 		if c.address == address {
-			stake = c.advStake
+			stake = c.point
 			break
 		}
 	}

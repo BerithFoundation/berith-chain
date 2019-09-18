@@ -25,23 +25,24 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
-	TestnetGenesisHash = common.HexToHash("0xcf5f314fcc4840d0bbfd26c5b7237acd2916443f68be08a49b974fe0295bd1a1")
+	MainnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
 )
 
+//[BERITH] Config Setting
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		ChainID:        big.NewInt(105),
+		ChainID:        big.NewInt(106),
 		HomesteadBlock: big.NewInt(0),
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
-			Period:  10,
-			Epoch:   10,
-			Rewards: common.StringToBig("20"),
+			Period:       10,
+			Epoch:        360,
+			Rewards:      common.StringToBig("20000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   100,
+			SlashRound:   1000,
 		},
 	}
 
@@ -56,16 +57,16 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:        big.NewInt(205),
+		ChainID:        big.NewInt(206),
 		HomesteadBlock: big.NewInt(0),
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:       5,
-			Epoch:        50,
-			Rewards:      common.StringToBig("60"),
+			Epoch:        40,
+			Rewards:      common.StringToBig("20000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   100,
+			SlashRound:   500,
 		},
 	}
 

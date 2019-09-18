@@ -71,7 +71,7 @@ type Message interface {
 	Gas() uint64
 	Value() *big.Int
 	//Staking() bool
-	//[Berith]
+	//[BERITH]
 	Base() types.JobWallet
 	Target() types.JobWallet
 
@@ -219,7 +219,7 @@ func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWa
 		st.state.SetNonce(msg.From(), st.state.GetNonce(sender.Address())+1)
 		//ret, st.gas, vmerr = evm.Call(sender, st.to(), st.data, st.gas, st.value)
 
-		// [Berith] staking value false
+		// [BERITH] staking value false
 		ret, st.gas, vmerr = evm.Call(sender, st.to(), st.data, st.gas, st.value, base, target)
 	}
 	if vmerr != nil {
@@ -232,7 +232,7 @@ func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWa
 		}
 	}
 	st.refundGas()
-	// [Berith] Gas Fee
+	// [BERITH] Gas Fee
 	st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 
 	return ret, st.gasUsed(), vmerr != nil, err

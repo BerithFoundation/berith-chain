@@ -67,14 +67,13 @@ type StateDB interface {
 
 	SetStaking(common.Address, *big.Int)
 	GetStakeBalance(common.Address) *big.Int
+	AddStakeBalance(common.Address, *big.Int)
 	RemoveStakeBalance(common.Address)
 
-	SetReward(addr common.Address, amount *big.Int)
-	GetRewardBalance(common.Address) *big.Int
-	AddStakeBalance(common.Address, *big.Int)
-	AddRewardBalance(addr common.Address, amount *big.Int)
-	RewardToMain(addr common.Address, amount *big.Int, target types.JobWallet)
-	RewardToStake(addr common.Address, amount *big.Int, target types.JobWallet)
+	//Selection Point
+	SetPoint(addr common.Address, amount *big.Int)
+	GetPoint(common.Address) *big.Int
+	AddPoint(addr common.Address, amount *big.Int)
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM
