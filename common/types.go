@@ -243,16 +243,34 @@ func (a *Address) SetBytes(b []byte) {
 
 // MarshalText returns the hex representation of a.
 func (a Address) MarshalText() ([]byte, error) {
-	return hexutil.Bytes(a[:]).MarshalText()
+	b := a[:]
+	result := make([]byte, len(b)*2+2)
+	copy(result, `Bx`)
+	hex.Encode(result[2:], b)
+	return result, nil
 }
 
 // UnmarshalText parses a hash in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
+	if len(input) > 1 {
+		if (input[0] == 'b' || input[0] == 'B') && (input[1] == 'x' || input[1] == 'X') {
+			input[0] = '0'
+		} else {
+			return fmt.Errorf("berith address without Bx prefix")
+		}
+	}
 	return hexutil.UnmarshalFixedText("Address", input, a[:])
 }
 
 // UnmarshalJSON parses a hash in hex syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
+	if len(input) > 2 {
+		if (input[1] == 'b' || input[1] == 'B') && (input[2] == 'x' || input[2] == 'X') {
+			input[1] = '0'
+		} else {
+			return fmt.Errorf("berith address without Bx prefix")
+		}
+	}
 	return hexutil.UnmarshalFixedJSON(addressT, input, a[:])
 }
 
