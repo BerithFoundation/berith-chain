@@ -1791,6 +1791,8 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
             'Uber'
         ];
 
+        var BER_ADDR_PREFIX = "Bx"
+
         module.exports = {
             ETH_PADDING: 32,
             ETH_SIGNATURE_LENGTH: 4,
@@ -2294,7 +2296,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
             address = address.toLowerCase().replace('bx','');
             var addressHash = sha3(address);
-            var checksumAddress = 'bx';
+            var checksumAddress = BER_ADDR_PREFIX
 
             for (var i = 0; i < address.length; i++ ) {
                 // If ith character is 9 to f then make it uppercase
@@ -3922,11 +3924,11 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var inputAddressFormatter = function (address) {
             var iban = new Iban(address);
             if (iban.isValid() && iban.isDirect()) {
-                return 'Bx' + iban.address();
+                return BER_ADDR_PREFIX + iban.address();
             } else if (utils.isStrictAddress(address)) {
                 return address;
             } else if (utils.isAddress(address)) {
-                return 'Bx' + address;
+                return BER_ADDR_PREFIX + address;
             }
             throw new Error('invalid address');
         };

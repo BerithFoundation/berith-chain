@@ -36,6 +36,8 @@ const (
 	HashLength = 32
 	// AddressLength is the expected length of the address
 	AddressLength = 20
+
+	AddressPrefix = "Bx"
 )
 
 var (
@@ -45,6 +47,18 @@ var (
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
 type Hash [HashLength]byte
+
+//CheckBerithfix 주소의 Prefix가 제대로 입력되었는지 확인하는 함수[BERITH]
+func CheckBerithPrefix(str string, start int) bool {
+	if len(str) > start+2 {
+		lower := strings.ToLower(AddressPrefix)
+		upper := strings.ToUpper(AddressPrefix)
+		if (str[start] == lower[0] || str[start] == upper[0]) && (str[start+1] == lower[1] || str[start+1] == upper[1]) {
+			return true
+		}
+	}
+	return false
+}
 
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
@@ -218,7 +232,7 @@ func (a Address) Hex() string {
 			result[i] -= 32
 		}
 	}
-	return " Bx" + string(result)
+	return AddressPrefix + string(result)
 }
 
 // String implements fmt.Stringer.
@@ -245,7 +259,7 @@ func (a *Address) SetBytes(b []byte) {
 func (a Address) MarshalText() ([]byte, error) {
 	b := a[:]
 	result := make([]byte, len(b)*2+2)
-	copy(result, `Bx`)
+	copy(result, AddressPrefix)
 	hex.Encode(result[2:], b)
 	return result, nil
 }
@@ -253,10 +267,10 @@ func (a Address) MarshalText() ([]byte, error) {
 // UnmarshalText parses a hash in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
 	if len(input) > 1 {
-		if (input[0] == 'b' || input[0] == 'B') && (input[1] == 'x' || input[1] == 'X') {
-			input[0] = '0'
+		if CheckBerithPrefix(string(input), 0) {
+			input = []byte(strings.Replace(string(input), AddressPrefix, "0x", -1))
 		} else {
-			return fmt.Errorf("berith address without Bx prefix")
+			return fmt.Errorf("berith address without \"%s\" prefix", AddressPrefix)
 		}
 	}
 	return hexutil.UnmarshalFixedText("Address", input, a[:])
@@ -265,10 +279,10 @@ func (a *Address) UnmarshalText(input []byte) error {
 // UnmarshalJSON parses a hash in hex syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
 	if len(input) > 2 {
-		if (input[1] == 'b' || input[1] == 'B') && (input[2] == 'x' || input[2] == 'X') {
-			input[1] = '0'
+		if CheckBerithPrefix(string(input), 1) {
+			input = []byte(strings.Replace(string(input), AddressPrefix, "0x", -1))
 		} else {
-			return fmt.Errorf("berith address without Bx prefix")
+			return fmt.Errorf("berith address without \"%s\" prefix", AddressPrefix)
 		}
 	}
 	return hexutil.UnmarshalFixedJSON(addressT, input, a[:])
