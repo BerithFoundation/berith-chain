@@ -37,6 +37,11 @@ cmd/berith/password.txt
 .project
 .settings
 
+# used by the Makefile
+/build/_workspace/
+/build/bin/
+/berith*.zip
+
 # IdeaIDE
 .idea
 
