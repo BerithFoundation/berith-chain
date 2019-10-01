@@ -126,6 +126,11 @@
             return
 
         } else {
+            let miningYn = await berith.mining()
+            console.log("miningYn :::: " + miningYn)
+            if( miningYn == "false"){
+                miner.miningStart()
+            }
             let date = new Date();
             $("#stakingDate").text(date.toISOString()); //TODO:: spit time and date
             $("#successfullyStakedAmount").text($('#stakeAmount').find('input[type=text]:first').val());

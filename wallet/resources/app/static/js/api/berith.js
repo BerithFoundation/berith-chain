@@ -86,6 +86,10 @@ let berith = {
         result = await sendMessage("callApi", "berith_stopStaking", [{from: account}]);
         return result;
     },
+    mining : async function(){
+        result = await sendMessage("callApi", "berith_mining", []);
+        return result.payload;
+    },
 
     /*rewardToBalance: function (rtbAmount ) {
         var valueData = hexConvert.getTxValue(rtbAmount).value
