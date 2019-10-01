@@ -42,8 +42,8 @@ import (
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/BerithFoundation/berith-chain/swarm/spancontext"
-	"github.com/BerithFoundation/berith-chain/swarm/tracing"
+	"github.com/ethersphere/swarm/spancontext"
+	"github.com/ethersphere/swarm/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
