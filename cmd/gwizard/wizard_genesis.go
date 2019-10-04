@@ -1,3 +1,4 @@
+// Modifications Copyright 2018 The berith Authors
 // Copyright 2017 The go-ethereum Authors
 // This file is part of go-ethereum.
 //
@@ -17,7 +18,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -51,41 +51,36 @@ func (w *wizard) makeGenesis() {
 		},
 	}
 
-	// In the case of clique, configure the consensus parameters
+	// In the case of bsrr, configure the consensus parameters
 	genesis.Difficulty = big.NewInt(1)
 	genesis.Config.Bsrr = &params.BSRRConfig{
-		Period: 30,
-		Epoch:  300,
-		Rewards:  big.NewInt(500),
+		Period:       30,
+		Epoch:        300,
+		Rewards:      big.NewInt(500),
 		StakeMinimum: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
-		SlashRound: uint64(1),
+		SlashRound:   uint64(1),
 	}
 
 	fmt.Println()
 	fmt.Println("What is network name?")
 	w.network = w.readDefaultString("Genesis")
+	w.conf.path = w.network
 
 	fmt.Println()
 	fmt.Println("How many seconds should blocks take? (default = 15)")
 	genesis.Config.Bsrr.Period = uint64(w.readDefaultInt(15))
 
-	// We also need the initial list of signers
+	// We also need the initial signer during epoch i.e from 0 to epoch
 	fmt.Println()
-	fmt.Println("Which accounts are allowed to seal (First Block Creator)?")
-
+	fmt.Println("Which account is allowed to seal during epoch period(First Block Creator)? (advisable at least one)")
 	var signers []common.Address
-	if address := w.readAddress(); address != nil {
-		signers = append(signers, *address)
-	}
-
-
-	// Sort the signers and embed into the extra-data section
-	for i := 0; i < len(signers); i++ {
-		for j := i + 1; j < len(signers); j++ {
-			if bytes.Compare(signers[i][:], signers[j][:]) > 0 {
-				signers[i], signers[j] = signers[j], signers[i]
-			}
+	for {
+		address := w.readAddress()
+		if address != nil {
+			signers = append(signers, *address)
+			break
 		}
+		log.Error("Invalid address, please retry")
 	}
 
 	genesis.ExtraData = make([]byte, 32+len(signers)*common.AddressLength+65)
@@ -93,12 +88,18 @@ func (w *wizard) makeGenesis() {
 		copy(genesis.ExtraData[32+i*common.AddressLength:], signer[:])
 	}
 
-
-	//Set First BC Balance
-	if address := &signers[0]; address != nil {
-		genesis.Alloc[*address] = core.GenesisAccount{
-			Balance: new(big.Int).Lsh(big.NewInt(1), 256-7), // 2^256 / 128 (allow many pre-funds without balance overflows)
+	// Consensus all set, just ask for initial funds and go
+	fmt.Println()
+	fmt.Println("Which accounts should be pre-funded? (advisable at least one)")
+	for {
+		// Read the address of the account to fund
+		if address := w.readAddress(); address != nil {
+			genesis.Alloc[*address] = core.GenesisAccount{
+				Balance: new(big.Int).Lsh(big.NewInt(1), 256-7), // 2^256 / 128 (allow many pre-funds without balance overflows)
+			}
+			continue
 		}
+		break
 	}
 
 	// Query the user for some custom extras
@@ -106,9 +107,16 @@ func (w *wizard) makeGenesis() {
 	fmt.Println("Specify your chain/network ID if you want an explicit one (default = random)")
 	genesis.Config.ChainID = new(big.Int).SetUint64(uint64(w.readDefaultInt(rand.Intn(65536))))
 
+	// All done.
+	log.Info("Configured new genesis block")
 	w.conf.Genesis = genesis
-	w.conf.flush()
+	// Did not dumps config because we didn't manage configures.
+	// w.conf.flush()
 
+	// Save whatever genesis configuration we currently have
+	fmt.Println()
+	fmt.Printf("Which folder to save the genesis specs into? (default = current)\n")
+	fmt.Printf("  Will create %s.json,  %s-harmony.json\n", w.network, w.network)
 
 	folder := w.readDefaultString(".")
 	if err := os.MkdirAll(folder, 0755); err != nil {
@@ -117,9 +125,9 @@ func (w *wizard) makeGenesis() {
 	}
 	out, _ := json.MarshalIndent(w.conf.Genesis, "", "  ")
 
-	// Export the native genesis spec used by puppeth and Geth
+	// Export the native genesis spec
 	json := filepath.Join(folder, fmt.Sprintf("%s.json", w.network))
-	if err := ioutil.WriteFile((json), out, 0644); err != nil {
+	if err := ioutil.WriteFile(json, out, 0644); err != nil {
 		log.Error("Failed to save genesis file", "err", err)
 		return
 	}
@@ -128,8 +136,6 @@ func (w *wizard) makeGenesis() {
 	// Export the genesis spec used by Harmony (formerly EthereumJ
 	saveGenesis(folder, w.network, "harmony", w.conf.Genesis)
 }
-
-
 
 // saveGenesis JSON encodes an arbitrary genesis spec into a pre-defined file.
 func saveGenesis(folder, network, client string, spec interface{}) {

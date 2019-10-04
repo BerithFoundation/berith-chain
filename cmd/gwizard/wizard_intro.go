@@ -1,3 +1,4 @@
+// Modifications Copyright 2018 The berith Authors
 // Copyright 2017 The go-ethereum Authors
 // This file is part of go-ethereum.
 //
@@ -28,15 +29,15 @@ func makeWizard() *wizard {
 		conf: config{
 			Servers: make(map[string][]byte),
 		},
-		in:       bufio.NewReader(os.Stdin),
+		in: bufio.NewReader(os.Stdin),
 	}
 }
 
 // run displays some useful infos to the user, starting on the journey of
 // setting up a new or managing an existing Ethereum private network.
-func (w *wizard)run() {
+func (w *wizard) run() {
 	fmt.Println("+-----------------------------------------------------------+")
-	fmt.Println("| Welcome to Berith Genesis Wizard							|")
+	fmt.Println("| Welcome to Berith Genesis Wizard							 |")
 	fmt.Println("+-----------------------------------------------------------+")
 	fmt.Println()
 

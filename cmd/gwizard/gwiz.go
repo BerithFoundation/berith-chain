@@ -1,3 +1,4 @@
+// Modifications Copyright 2018 The berith Authors
 // Copyright 2017 The go-ethereum Authors
 // This file is part of go-ethereum.
 //
@@ -14,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// puppeth is a command to assemble and maintain private networks.
+// gwizard is a command to assemble and maintain private networks.
 package main
 
 import (
@@ -60,8 +61,6 @@ func runWizard(c *cli.Context) error {
 	if strings.Contains(network, " ") || strings.Contains(network, "-") || strings.ToLower(network) != network {
 		log.Crit("No spaces, hyphens or capital letters allowed in network name")
 	}
-	w := makeWizard()
-	w.run()
+	makeWizard().run()
 	return nil
 }
-

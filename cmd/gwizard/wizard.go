@@ -1,3 +1,4 @@
+// Modifications Copyright 2018 The berith Authors
 // Copyright 2017 The go-ethereum Authors
 // This file is part of go-ethereum.
 //
@@ -69,10 +70,10 @@ func (c config) flush() {
 }
 
 type wizard struct {
-	network 	string
-	conf    config // Configurations from previous runs
-	in   *bufio.Reader // Wrapper around stdin to allow reading user input
-	lock sync.Mutex    // Lock to protect configs during concurrent service discovery
+	network string
+	conf    config        // Configurations from previous runs
+	in      *bufio.Reader // Wrapper around stdin to allow reading user input
+	lock    sync.Mutex    // Lock to protect configs during concurrent service discovery
 }
 
 // read reads a single line from stdin, trimming if from spaces.
@@ -281,7 +282,7 @@ func (w *wizard) readPassword() string {
 func (w *wizard) readAddress() *common.Address {
 	for {
 		// Read the address from the user
-		fmt.Printf("> 0x")
+		fmt.Printf("> %s", common.AddressPrefix)
 		text, err := w.in.ReadString('\n')
 		if err != nil {
 			log.Crit("Failed to read user input", "err", err)
