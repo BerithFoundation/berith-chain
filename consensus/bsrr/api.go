@@ -121,20 +121,18 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-
+	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
 	signers, err := api.bsrr.getSigners(api.chain, target)
-
 	if err != nil {
 		return nil, err
 	}
 
 	signersMap := signers.signersMap()
-
 	result := make([]common.Address, 0)
 	for k, _ := range signersMap {
 		result = append(result, k)
@@ -167,8 +165,8 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-
+	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}
@@ -222,14 +220,13 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, consensus.ErrUnknownAncestor
 	}
 
-	target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-
+	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return 0, consensus.ErrUnknownAncestor
 	}
 
 	states, err := api.chain.StateAt(target.Root)
-
 	if err != nil {
 		return 0, err
 	}
@@ -254,8 +251,8 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-
+	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}

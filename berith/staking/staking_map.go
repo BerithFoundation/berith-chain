@@ -47,9 +47,9 @@ func (list *StakingMap) Len() int {
 //[BERITH]
 // 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
 func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool) {
-	flag := false
+	reordered := false
 	if len(list.table) <= 0 {
-		flag = true
+		reordered = true
 		list.selectSigner(blockNumber, states)
 	}
 	if len(list.table) <= 0 {
@@ -60,10 +60,10 @@ func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber ui
 	if !ok {
 		result = VoteResult{
 			Score: big.NewInt(0),
-			Rank:  MAX_MINERS + 1,
+			Rank:  -1,
 		}
 	}
-	return result.Score, result.Rank, flag
+	return result.Score, result.Rank, reordered
 }
 
 //[BERITH]

@@ -43,6 +43,7 @@ var (
 			Rewards:      common.StringToBig("20000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
 			SlashRound:   1000,
+			ForkFactor:   1.0,
 		},
 	}
 
@@ -67,6 +68,7 @@ var (
 			Rewards:      common.StringToBig("20000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
 			SlashRound:   500,
+			ForkFactor:   1.0,
 		},
 	}
 
@@ -120,11 +122,12 @@ type ChainConfig struct {
 	Bsrr *BSRRConfig `json:"bsrr,omitempty"`
 }
 type BSRRConfig struct {
-	Period       uint64   `json:"period"`
-	Epoch        uint64   `json:"epoch"`
-	Rewards      *big.Int `json:"rewards"`
-	StakeMinimum *big.Int `json:"stakeminimum"`
-	SlashRound   uint64   `json:"slashRound"`
+	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
+	Epoch        uint64   `json:"epoch"`        // Epoch length to determine stakeholder
+	Rewards      *big.Int `json:"rewards"`      // Start block number of mining reward
+	StakeMinimum *big.Int `json:"stakeminimum"` // Minimum of stake in WEI
+	SlashRound   uint64   `json:"slashRound"`   // Reward after block proceed
+	ForkFactor   float64  `json:"forkfactor"`   // Number of mining candidates given stake holders
 }
 
 func (b *BSRRConfig) String() string {
