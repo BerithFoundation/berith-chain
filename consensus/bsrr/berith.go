@@ -898,13 +898,13 @@ type stakingInfo struct {
 	address     common.Address
 	value       *big.Int
 	blockNumber *big.Int
-	reward      *big.Int
+	penalty int // 블록생성 못한 경우에 벌점 부여하는 필드
 }
 
 func (info stakingInfo) Address() common.Address { return info.address }
 func (info stakingInfo) Value() *big.Int         { return info.value }
 func (info stakingInfo) BlockNumber() *big.Int   { return info.blockNumber }
-func (info stakingInfo) Reward() *big.Int        { return info.reward }
+func (info stakingInfo) Penalty() int 	          { return info.penalty }
 
 //[BERITH] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
 func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.ChainReader, list staking.StakingList, txs []*types.Transaction, header *types.Header) error {
@@ -969,6 +969,7 @@ func (c *BSRR) setStakingListWithTxs(state *state.StateDB, chain consensus.Chain
 			address:     msg.From(),
 			value:       value,
 			blockNumber: blockNumber,
+			penalty: info.Penalty(),
 		}
 
 		list.SetInfo(input)
