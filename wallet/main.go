@@ -48,6 +48,7 @@ func init(){
 func main() {
 	start_ui()
 }
+// db , 일렉트론 초기설정 후 wallet 프로그램 실행 함수
 func start_ui(){
 	// Init
 	flag.Parse()
@@ -115,6 +116,7 @@ func start_ui(){
 	}
 }
 
+// 동기화 여부 , 최신블록넘버  반복조회 함수
 func startPolling(){
 	go func() {
 		for {

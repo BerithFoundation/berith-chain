@@ -12,6 +12,7 @@ var totalBalance
 // var stakeAmount
 // var stakeAccount
 
+// meessage.go 와 통신하는 함수
 async function sendMessage(methodType, methodName, args) {
     let messagePromise = new Promise(function (resolve) {
         let message = {"name": methodType};
@@ -31,6 +32,7 @@ async function sendMessage(methodType, methodName, args) {
     return messagePromise;
 }
 
+// spa 구조 선언하는 함수
 function loadAppContents() {
     $( "#header-content" ).load( "header.html");
     $( "#left-content" ).load( "left.html");

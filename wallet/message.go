@@ -18,6 +18,7 @@ import (
 )
 
 // handleMessages handles messages
+// js api랑 통신하는 함수
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	var info map[string]interface{}
 	err = json.Unmarshal(m.Payload, &info)
@@ -63,6 +64,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	return
 }
 
+// cli 관련 api 처리하는 함수
 func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	var apiName = api.(string)
 	var result json.RawMessage
@@ -87,7 +89,7 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	}
 	return string(result), err
 }
-
+// db 관련 api 처리하는 함수
 func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 	key := make([]string, 0)
 	for _, item := range args{
@@ -246,7 +248,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 
 	return nil ,nil
 }
-
+// 개인키 내보내기 함수 
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName:= "keystore.zip"
 
@@ -279,7 +281,7 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 
 	return body, nil
 }
-
+// 개인키 삽입 함수
 func importKeystore(args []interface{}) (error)  {
 
 	dir, err := stack.FetchKeystoreDir()
