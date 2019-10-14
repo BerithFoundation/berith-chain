@@ -43,6 +43,8 @@ var (
 			Rewards:      common.StringToBig("20000"),
 			StakeMinimum: common.StringToBig("100000000000000000000000"),
 			SlashRound:   1000,
+			MaxPenalty:    5 ,
+			PunishPeriod: 360,
 		},
 	}
 
@@ -125,6 +127,8 @@ type BSRRConfig struct {
 	Rewards      *big.Int `json:"rewards"`
 	StakeMinimum *big.Int `json:"stakeminimum"`
 	SlashRound   uint64   `json:"slashRound"`
+	MaxPenalty int `json:"maxPenalty"`
+	PunishPeriod uint64 `json:"punishPeriod"`
 }
 
 func (b *BSRRConfig) String() string {
