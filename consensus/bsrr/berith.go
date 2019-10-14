@@ -888,6 +888,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
+		// 페널티 부여
 	}
 
 	return nil

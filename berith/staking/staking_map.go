@@ -20,7 +20,7 @@ type StakingMap struct {
 	storage    map[common.Address]stkInfo
 	sortedList []common.Address
 	miners     map[common.Address]bool
-	table      map[common.Address]VoteResult
+	table      map[common.Address]VoteResult //선발결과
 }
 
 //[BERITH]
@@ -29,6 +29,7 @@ type stkInfo struct {
 	StkAddress     common.Address `json:"address"`     //토큰을 예치한 계정
 	StkValue       *big.Int       `json:"value"`       //예치한 토큰의 수량
 	StkBlockNumber *big.Int       `json:"blocknumber"` //토큰을 예치한 시점의 블록번호
+	StkPenalty     int            `json:"penalty"`     // 블록을 생성 하지 못한 것에 대한 벌점
 
 }
 
@@ -37,6 +38,7 @@ type stkInfo struct {
 func (s stkInfo) Address() common.Address { return s.StkAddress }
 func (s stkInfo) Value() *big.Int         { return s.StkValue }
 func (s stkInfo) BlockNumber() *big.Int   { return s.StkBlockNumber }
+func (s stkInfo) Penalty() int            { return s.StkPenalty }
 
 //[BERITH]
 //Len 목록의 길이를 반환하는 메서드
@@ -76,12 +78,14 @@ func (list *StakingMap) GetInfo(address common.Address) (StakingInfo, error) {
 			StkAddress:     address,
 			StkValue:       big.NewInt(0),
 			StkBlockNumber: big.NewInt(0),
+			StkPenalty:     0,
 		}, nil
 	}
 	return &stkInfo{
 		StkAddress:     address,
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
+		StkPenalty:     info.Penalty(),
 	}, nil
 }
 
@@ -98,6 +102,7 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 		StkAddress:     info.Address(),
 		StkValue:       info.Value(),
 		StkBlockNumber: info.BlockNumber(),
+		StkPenalty:     info.Penalty(),
 	}
 	return nil
 }

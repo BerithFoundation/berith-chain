@@ -37,6 +37,7 @@ type StakingInfo interface {
 	Address() common.Address
 	Value() *big.Int
 	BlockNumber() *big.Int
+	Penalty() int
 }
 
 /*
