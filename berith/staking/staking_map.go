@@ -48,11 +48,11 @@ func (list *StakingMap) Len() int {
 
 //[BERITH]
 // 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
-func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool) {
+func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB, maxPenalty int) (*big.Int, int, bool) {
 	flag := false
 	if len(list.table) <= 0 {
 		flag = true
-		list.selectSigner(blockNumber, states)
+		list.selectSigner(blockNumber, states, maxPenalty)
 	}
 	if len(list.table) <= 0 {
 		return big.NewInt(1234), 1, false
@@ -155,7 +155,7 @@ func (list *StakingMap) EncodeRLP(w io.Writer) error {
 
 //[BERITH]
 //Sort 목록을 정렬하기 위한 메서드
-func (list *StakingMap) Sort() {
+func (list *StakingMap) Sort(maxPenalty int) {
 
 	if len(list.sortedList) > 0 {
 		return
@@ -163,7 +163,7 @@ func (list *StakingMap) Sort() {
 
 	kv := make(infoForSort, 0)
 	for _, v := range list.storage {
-		if v.Value().Cmp(big.NewInt(0)) > 0 {
+		if v.Value().Cmp(big.NewInt(0)) > 0 && v.Penalty() < maxPenalty {
 			kv = append(kv, v)
 		}
 	}
@@ -172,7 +172,6 @@ func (list *StakingMap) Sort() {
 	sortedList := make([]common.Address, 0)
 
 	for _, info := range kv {
-
 		sortedList = append(sortedList, info.Address())
 	}
 
@@ -186,10 +185,10 @@ func (list *StakingMap) ClearTable() {
 
 //[BERITH]
 //selectSigner 전체 목록중에서 블록을 생성할 유저를 선별한 결과를 반환하는 메서드
-func (list *StakingMap) selectSigner(blockNumber uint64, states *state.StateDB) {
+func (list *StakingMap) selectSigner(blockNumber uint64, states *state.StateDB, maxPenalty int) {
 
 	if len(list.sortedList) <= 0 {
-		list.Sort()
+		list.Sort(maxPenalty)
 	}
 
 	if len(list.sortedList) <= 0 {
