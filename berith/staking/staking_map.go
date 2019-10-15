@@ -45,7 +45,23 @@ func (s stkInfo) Penalty() int            { return s.StkPenalty }
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
 }
+// 현재 계정으로 rank 찾는함수
+func (list *StakingMap) FindPenaltyNode (addr common.Address) int{
+	if len(list.table) <= 0 {
+		return 1
+	}
+	result , ok := list.table[addr]
 
+	if !ok {
+		//result = VoteResult{
+		//	Score:big.NewInt(0),
+		//	Rank: MAX_MINERS +1,
+		//}
+		rank := result.Rank
+		return rank
+	}
+	return 1
+}
 //[BERITH]
 // 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
 func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool) {
@@ -106,6 +122,10 @@ func (list *StakingMap) SetInfo(info StakingInfo) error {
 	}
 	return nil
 }
+
+//[BERITH]
+// 현재 생성된 블록의 랭크를 가져와서 상위 랭크의 노드를 찾는 메서드
+
 
 //[BERITH]
 //ToArray StakingMap의 내용을 배열형태로 반환하는 메서드
@@ -314,3 +334,15 @@ func New() StakingList {
 		table:      make(map[common.Address]VoteResult),
 	}
 }
+
+//func FindPenaltyNode(addr common.Address)  {
+////
+////}
+//func  (list *StakingMap)FindPenaltyNode(addr common.Address) StakingList{
+//	return &StakingMap{
+//		storage:    list.storage,
+//		sortedList: list.sortedList,
+//		miners:     list.miners,
+//		table:      list.table,
+//	}
+//}

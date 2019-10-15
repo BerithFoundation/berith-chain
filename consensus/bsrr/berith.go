@@ -676,7 +676,7 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	diff, _ := c.calcDifficultyAndRank(c.signer, chain, time, target)
 	return diff
 }
-
+// 조상가져오는 함수 ??
 func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.Header) (*types.Header, bool) {
 	target := header
 	targetNumber := new(big.Int).Sub(header.Number, big.NewInt(n))
@@ -885,10 +885,12 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.Stak
 	if len(blocks) == 0 {
 		return nil
 	}
-
+	//parent := chain.GetHeader(header)
+	//target, _ := c.getAncestor(chain, int64(c.config.Epoch), parent)
+	//c.findPenaltyNode()
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
-		// 페널티 부여
+		stakingList.FindPenaltyNode(c.signer)
 	}
 
 	return nil
