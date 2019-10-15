@@ -23,9 +23,9 @@ type StakingList interface {
 	Len() int
 	Print()
 	GetJoinRatio(address common.Address, blockNumber uint64, states *state.StateDB) float64
-	Sort()
+	Sort(maxPenalty int)
 	ClearTable()
-	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool)
+	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB, maxPenalty int) (*big.Int, int, bool)
 	ToArray() []common.Address
 	FindPenaltyNode(addr common.Address) int
 }

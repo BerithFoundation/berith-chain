@@ -706,7 +706,7 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 		return big.NewInt(0), staking.MAX_MINERS + 1
 	}
 
-	diff, rank, reordered := list.GetDifficultyAndRank(signer, target.Number.Uint64(), states)
+	diff, rank, reordered := list.GetDifficultyAndRank(signer, target.Number.Uint64(), states, c.config.MaxPenalty)
 	if reordered {
 		bytes, _ := list.Encode()
 		c.cache.Add(target.Hash(), bytes)
@@ -864,7 +864,7 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 		return nil, err
 	}
 
-	list.Sort()
+	list.Sort(c.config.MaxPenalty)
 
 	bytes, err := list.Encode()
 	if err != nil {
@@ -1030,7 +1030,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 		return nil, errors.New("Failed to get staking list")
 	}
 
-	list.Sort()
+	list.Sort(c.config.MaxPenalty)
 
 	result := list.ToArray()
 
