@@ -45,23 +45,23 @@ func (s stkInfo) Penalty() int            { return s.StkPenalty }
 func (list *StakingMap) Len() int {
 	return len(list.sortedList)
 }
-// 현재 계정으로 rank 찾는함수
-func (list *StakingMap) FindPenaltyNode (addr common.Address) int{
-	if len(list.table) <= 0 {
-		return 1
+// 현재 블록을 생성한 노드보다 순위가 높은 노드의 벌점 부여 함수
+func (list *StakingMap) PenaltyAdd (rank int) {
+	for key, val := range list.table {
+		if val.Rank  < rank {
+			fmt.Print("first :: " , list.storage[key].StkPenalty)
+			list.storage[key] = stkInfo{
+				StkAddress:     key,
+				StkValue: list.storage[key].StkValue,
+				StkBlockNumber: list.storage[key].StkBlockNumber,
+				StkPenalty:    list.storage[key].StkPenalty+1 ,
+			}
+			fmt.Print("second :: " , list.storage[key].StkPenalty)
+		}
 	}
-	result , ok := list.table[addr]
-
-	if !ok {
-		//result = VoteResult{
-		//	Score:big.NewInt(0),
-		//	Rank: MAX_MINERS +1,
-		//}
-		rank := result.Rank
-		return rank
-	}
-	return 1
 }
+
+
 //[BERITH]
 // 특정 계정이 블록을 생성할 때의 난이도와, 순위를 반환하는 메서드
 func (list *StakingMap) GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB, maxPenalty int) (*big.Int, int, bool) {

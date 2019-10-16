@@ -494,7 +494,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] 부모블록의 StakingList를 얻어온다.
-	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash)
+	stakingList, err := c.getStakingList(chain, header.Number.Uint64()-1, header.ParentHash )
 	if err != nil {
 		return nil, errStakingList
 	}
@@ -798,7 +798,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 }
 
 //[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
-func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.StakingList, error) {
+func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash common.Hash ) (staking.StakingList, error) {
 	var (
 		list   staking.StakingList
 		blocks []*types.Block
@@ -881,16 +881,23 @@ func (c *BSRR) getStakingList(chain consensus.ChainReader, number uint64, hash c
 }
 
 //[BERITH] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block) error {
+func (c *BSRR) checkBlocks(chain consensus.ChainReader, stakingList staking.StakingList, blocks []*types.Block ) error {
 	if len(blocks) == 0 {
 		return nil
 	}
 	//parent := chain.GetHeader(header)
 	//target, _ := c.getAncestor(chain, int64(c.config.Epoch), parent)
 	//c.findPenaltyNode()
+	//parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+
+	//target, _ := c.getAncestor(chain, int64(c.config.Epoch), parent)
+
 	for _, block := range blocks {
 		c.setStakingListWithTxs(nil, chain, stakingList, block.Transactions(), block.Header())
-		stakingList.FindPenaltyNode(c.signer)
+		//stakingList.FindPenaltyNode(block.Coinbase())
+		state,_  := chain.StateAt(block.Hash())
+		_,rank , _ := stakingList.GetDifficultyAndRank(block.Coinbase() ,block.NumberU64(),state , c.config.MaxPenalty )
+		stakingList.PenaltyAdd(rank)
 	}
 
 	return nil

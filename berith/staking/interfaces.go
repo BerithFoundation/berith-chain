@@ -27,7 +27,9 @@ type StakingList interface {
 	ClearTable()
 	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB, maxPenalty int) (*big.Int, int, bool)
 	ToArray() []common.Address
-	FindPenaltyNode(addr common.Address) int
+	//FindPenaltyNode(addr common.Address) int
+	//PenaltyAdd() StakingList
+	PenaltyAdd(rank int)
 }
 
 /*
@@ -39,7 +41,6 @@ type StakingInfo interface {
 	Value() *big.Int
 	BlockNumber() *big.Int
 	Penalty() int
-
 }
 
 /*
