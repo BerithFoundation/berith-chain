@@ -17,7 +17,6 @@ import (
 	"strings"
 )
 
-
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	switch m.Name {
@@ -30,7 +29,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	case "callApi":
 		var info map[string]interface{}
 		err = json.Unmarshal(m.Payload, &info)
-		if err != nil{
+		if err != nil {
 			payload = nil
 			break
 		}
@@ -42,13 +41,13 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	case "callDB":
 		var info map[string]interface{}
 		err = json.Unmarshal(m.Payload, &info)
-		if err != nil{
+		if err != nil {
 			payload = nil
 			break
 		}
 		api := info["api"]
 		args := info["args"].([]interface{})
-		payload , err = callDB(api , args...)
+		payload, err = callDB(api, args...)
 		break
 	case "exportKeystore":
 		var info map[string]interface{}
@@ -77,33 +76,33 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	return
 }
 
-func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
+func callNodeApi(api interface{}, args ...interface{}) (string, error) {
 	var result json.RawMessage
 	p := make([]interface{}, 0)
-	for _, item := range args{
+	for _, item := range args {
 		if item == nil {
 			break
 		}
 		// 트랜잭션시
 		if api.(string) == "berith_sendTransaction" {
 			temp := reflect.ValueOf(item).Interface()
-			itemMap:= temp.(map[string]interface{})
+			itemMap := temp.(map[string]interface{})
 			argTemp := map[string]interface{}{
-				"from" : reflect.ValueOf(itemMap["from"]).String(),
-				"to" : reflect.ValueOf(itemMap["to"]).String(),
-				"value" : reflect.ValueOf(itemMap["value"]).String(),
+				"from":  reflect.ValueOf(itemMap["from"]).String(),
+				"to":    reflect.ValueOf(itemMap["to"]).String(),
+				"value": reflect.ValueOf(itemMap["value"]).String(),
 			}
 			p = append(p, argTemp)
-		}else if api.(string) == "berith_stake" || api.(string) == "berith_rewardToBalance"  || api.(string) == "berith_rewardToStake"{
+		} else if api.(string) == "berith_stake" || api.(string) == "berith_rewardToBalance" || api.(string) == "berith_rewardToStake" {
 			temp := reflect.ValueOf(item).Interface()
-			itemMap:= temp.(map[string]interface{})
+			itemMap := temp.(map[string]interface{})
 			argTemp := map[string]interface{}{
-				"from" : reflect.ValueOf(itemMap["from"]).String(),
-				"value" : reflect.ValueOf(itemMap["value"]).String(),
+				"from":  reflect.ValueOf(itemMap["from"]).String(),
+				"value": reflect.ValueOf(itemMap["value"]).String(),
 			}
 			p = append(p, argTemp)
-		}else{
-			p = append(p , item)
+		} else {
+			p = append(p, item)
 		}
 	}
 	err := client.Call(&result, api.(string), p...)
@@ -125,19 +124,20 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 
 	return val, err
 }
-func callDB ( api interface{}, args... interface{}) ( interface{}, error){
+func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 	key := make([]string, 0)
-	for _, item := range args{
-		 key  = append(key, item.(string))
+	for _, item := range args {
+		key = append(key, item.(string))
 	}
-	acc ,err := callNodeApi("berith_coinbase", nil)
-	acc = strings.ReplaceAll(acc , "\"","")
+	acc, err := callNodeApi("berith_coinbase", nil)
+	// acc = strings.ReplaceAll(acc , "\"","")
+	acc = strings.Replace(acc, "\"", "", -1)
 	if err != nil {
 		astilog.Error(errors.Wrap(err, "insert error"))
 	}
 	switch api.(string) {
-	case "selectContact" :
-		contact := make(walletdb.Contact,0)
+	case "selectContact":
+		contact := make(walletdb.Contact, 0)
 		err := WalletDB.Select([]byte(acc+"-contact"), &contact)
 		if err != nil {
 			return nil, err
@@ -158,50 +158,49 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte(acc), &contact)
 		contact[common.HexToAddress(key[0])] = key[1]
-		err := WalletDB.Insert([]byte(acc+"-contact") , contact)
+		err := WalletDB.Insert([]byte(acc+"-contact"), contact)
 		if err != nil {
 			return nil, err
 		}
-		return  nil , nil
+		return nil, nil
 		break
 	case "insertMember":
 		member := walletdb.Member{
-			Address: common.HexToAddress(acc),
-			ID : key[0],
+			Address:  common.HexToAddress(acc),
+			ID:       key[0],
 			Password: key[1],
 		}
 		member.PrivateKey[0] = 12
-		err = WalletDB.Insert([]byte(acc+"-member") , member)
+		err = WalletDB.Insert([]byte(acc+"-member"), member)
 		if err != nil {
-			return nil , err
+			return nil, err
 		}
 		break
 
 	}
 
-	return nil ,nil
+	return nil, nil
 }
 
-
 func exportKeystore(args []interface{}) (interface{}, error) {
-	tempFileName:= "keystore.zip"
+	tempFileName := "keystore.zip"
 
 	dir, err := stack.FetchKeystoreDir()
-	if (err!=nil) {
+	if err != nil {
 		return nil, err
 	}
 	log.Info("Found keystore dir: ", dir)
-	password:= args[0].(string)
+	password := args[0].(string)
 	targetPath := dir + string(os.PathSeparator) + tempFileName
-	er := ZipSecure(dir,targetPath,password)
+	er := ZipSecure(dir, targetPath, password)
 	if er != nil {
-		return nil,er
+		return nil, er
 	}
-	log.Info("Successfully created temp file, "+tempFileName+", at: " +dir)
+	log.Info("Successfully created temp file, " + tempFileName + ", at: " + dir)
 
 	zippedFile, err := os.Open(targetPath)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(zippedFile)
@@ -211,29 +210,27 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 
 	zippedFile.Close()
 	os.Remove(targetPath)
-	log.Info("Removed temp file, "+tempFileName+", from: " +dir)
+	log.Info("Removed temp file, " + tempFileName + ", from: " + dir)
 
 	return body, nil
 }
 
-
-func importKeystore(args []interface{}) (error)  {
+func importKeystore(args []interface{}) error {
 
 	dir, err := stack.FetchKeystoreDir()
-	if (err!=nil) {
+	if err != nil {
 		return err
 	}
 	log.Info("Found keystore dir: ", dir)
 
-	inputFilePath:= args[0].(string)
-	password:= args[1].(string)
+	inputFilePath := args[0].(string)
+	password := args[1].(string)
 	log.Debug("Input keystore file path: ", dir)
 
-	er := UnzipSecure(inputFilePath,dir,password)
+	er := UnzipSecure(inputFilePath, dir, password)
 	if er != nil {
 		return er
 	}
 	log.Info("Successfully imported keystore folder")
 	return err
 }
-
