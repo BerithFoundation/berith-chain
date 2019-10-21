@@ -22,6 +22,9 @@ type TxHistory struct {
 	TxAmount string // tx value 값
 	Txtime string // tx 시간
 	TxState string // tx 상태
+	Hash common.Hash  // 트랜잭션 hash 값
+	GasLimit string  // 기본수수료
+	GasPrice string  // 수수료 가격
 }
 
 // 주소록 table ( key 는 저장 주소값 )

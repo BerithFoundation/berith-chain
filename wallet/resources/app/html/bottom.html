@@ -39,21 +39,18 @@
         }
     }
      function blockInfo(data) {
-         // console.log( "bloc kInfo : " +account)
-         // var keys = Object.keys(obj)
-         // for ( var i in keys) {
-         //     console.log("key :: " + keys[i] + " value :: " + obj[keys[i]] )
-         // }
-        var value , txType
+        var value , txType , gasLimit , gasPrice , hash
         var obj = JSON.parse(data)
         var result = obj.transactions
         var blockNumber = obj.number
         var Raccount = [account]
-        // console.log("result : " + result + " , Raccount " + Raccount[0])
         if ( result != ""){
             result.forEach((v) => {
                 Raccount.some((i) => {
                     value = v.value
+                    hash = v.hash
+                    gasLimit = v.gas
+                    gasPrice = v.gasPrice
                     // console.log( "from : " + v.from + " to : " + v.to)
                     if (i == v.from || i == v.to){
                         if( i != v.from && i == v.to && v.target == 1 && v.base == 1 ){
@@ -71,14 +68,12 @@
                                 txType = "5" // rewardToMain (withdraw)
                             }
                         }
-                        console.log( "blockNumber : " + blockNumber + "/ account : " + account + "/ txType : " + txType + "/ value : "+ value)
-                        database.insertTxInfo(blockNumber, account , txType , value )
+                        // console.log( "blockNumber : " + blockNumber + "/ account : " + account + "/ txType : " + txType + "/ value : "+ value)
+                        database.insertTxInfo(blockNumber, account , txType , value  , hash , gasLimit , gasPrice)
                         return ( i == v.from || i == v.to)
                     }
                 })
             })
-        }else{
-            console.log("NO NO NO NO ")
         }
     }
 </script>

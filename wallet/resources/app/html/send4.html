@@ -21,16 +21,23 @@
             </tr>
             <tr>
                 <th>기본수수료</th>
-                <td>21000</td>
+                <td><p id = "sendGasLimitSuccess"></p></td>
             </tr>
             <tr>
                 <th>수수료가격</th>
-                <td>21000</td>
+                <td><p id = "sendGasPriceSucess"></p></td>
             </tr>
             </tbody>
         </table>
     </div>
     <div class="pop_footer">
-        <a class="btn red on" href="#!" onclick="togglePopUp('successPopup')">확인</a>
+        <a class="btn red on" href="#!" onclick="closeAllPop()">확인</a>
     </div>
 </div><!-- e://pop_wrap  -->
+<script type="text/javascript" >
+    function closeAllPop() {
+        togglePopUp('successPopup')
+        togglePopUp('sendInputPwdPopup')
+        togglePopUp('confirmationPopup')
+    }
+</script>

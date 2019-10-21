@@ -50,9 +50,9 @@
                 <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text" readonly="true" value="21000"/>
-                                    </span>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id="sendGasLimit" value="21000"/>
+                        </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
@@ -61,9 +61,9 @@
                 <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text" readonly="true" value="21000"/>
-                                    </span>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "sendGasPrice" value="21000"/>
+                        </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
@@ -95,10 +95,10 @@
 <script type="text/javascript">
     $("#confirmationPopup").load("send2.html");
     $("#sendInputPwdPopup").load("send3.html");
-
     $("#successPopup").load("send4.html");
 
     onSendLoad();
+
     async function onSendLoad() {
         let mainBalance = await berith.getBalance(account);
         let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
@@ -114,28 +114,37 @@
         if(await  isValidated()) {
             let sendAmount = $('#sendAmount').find('input[type=text]:first').val();
             let receiversAddress = $("#sendAddr").val();
+
+            let sendGasLimit = $('#sendGasLimit').val();
+            let sendGasPrice = $('#sendGasPrice').val();
+
+            if( sendGasLimit == "") {sendGasLimit = 21000}
+            if( sendGasPrice == "") {sendGasPrice = 21000}
+
             $("#sendAmtForConfirmation").text(sendAmount);
             $("#sendAddForConfirmation").text(receiversAddress);
+            $("#sendGasLimitConfirmation").text(sendGasLimit)
+            $("#sendGasPriceConfirmation").text(sendGasPrice)
             togglePopUp("confirmationPopup");
         }
     }
 
     async function send() {
-        // let validationResult = await isValidated();
-        // if (!validationResult) {
-        //     return;
-        // }
         let receiversAddress = $("#sendAddr").val();
         let amount = $('#sendAmount').find('input[type=text]:first').val();
-        // console.log("amount : " + amount)
-        // return;
-        let result = await berith.sendTransaction(amount, receiversAddress);
+
+        let sendGasLimit = $('#sendGasLimit').val();
+        let sendGasPrice = $('#sendGasPrice').val();
+
+        let result = await berith.sendTransaction(amount, receiversAddress, sendGasLimit, sendGasPrice);
         if (result.name == "error") {
-            alert("Something went wrong!");
+            alert("전송에 실패하였습니다.");
         } else {
             // alert("Transaction submitted successfully");
             $("#sendSuccessAmt").text(amount);
             $("#sendSuccessAdd").text(receiversAddress);
+            $("#sendGasLimitSuccess").text(sendGasLimit)
+            $("#sendGasPriceSucess").text(sendGasPrice)
             togglePopUp("successPopup");
             // clearing fields
             $("#sendAddr").val("");

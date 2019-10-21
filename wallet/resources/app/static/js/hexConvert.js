@@ -1,5 +1,5 @@
 let hexConvert = {
-    getTxValue: function(value){
+    getTxValue: function(value ){
 
     var rs = {
         result : false,
@@ -23,11 +23,12 @@ let hexConvert = {
             var len = dot.length;
 
             var temp = value.toString().replace(".", "");
-            for(var i = 0; i< 18 - len; i++){
-                temp += "0";
-            }
-            txValue = BigInt(temp).toString(16);
-
+            // if( valueYn = 'Y'){
+                for(var i = 0; i< 18 - len; i++){
+                    temp += "0";
+                }
+            // }
+                txValue = BigInt(temp).toString(16);
         } else {
 
             txValue = BigInt(f.toString() + "000000000000000000").toString(16);

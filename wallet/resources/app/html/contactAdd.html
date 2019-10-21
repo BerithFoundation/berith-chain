@@ -109,9 +109,14 @@
                 console.log("val fail")
                 return
             }
+            console.log(" 주소록 추가 주소 ::: " + contactAddAddress)
             var obj = await database.insertContact(contactAddAddress, contactAddName)
             console.log("add success ::" + obj)
             if(  obj != null){
+                var keys = Object.keys(obj)
+                for ( var i in keys) {
+                   console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
+                }
                 $('#popAdd').removeClass('hide')
                 $('#popAdd').addClass('view')
                 setTimeout(function () {
@@ -139,7 +144,7 @@
                 return false
             }
             for ( var i in keys) {
-                // console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
+                console.log("val !!! add : " +keys[i]+ " , name : "  + obj[keys[i]])
                 if (name == obj[keys[i]]){
                     console.log("same Name !!! ")
                     $('#contactAddNameGroup').addClass('error')

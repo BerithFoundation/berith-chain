@@ -151,6 +151,7 @@
                     if( searchYn == "n") {
                         var vv = parseInt(cnt / 5)
                         cnt++;
+                        console.log( " name ::: " + obj[keys[i]]  + ", addr ::" + keys[i] )
                         contents[vv] += '<tr>'
                         contents[vv] += '<td class="name">'+obj[keys[i]]+'</td>'
                         contents[vv] += '<td class="addr" id = "addr'+cnt+'">'+keys[i]+'<a class="icon copy" onclick="copyTextContact($(this).parent())"></a></td>'

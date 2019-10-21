@@ -204,7 +204,10 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 			TxAddress: common.HexToAddress(key[1]),
 			TxType: key[2],
 			TxAmount: key[3],
-			Txtime: time.Now().Format(time.RFC3339),
+			Txtime: time.Now().Format("2006-01-02 15:04:05"),
+			Hash: common.HexToHash(key[4]),
+			GasLimit: key[5],
+			GasPrice: key[6],
 		}
 		err = WalletDB.Insert([]byte(key[0]), txinfo)
 		if err != nil {

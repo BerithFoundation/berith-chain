@@ -15,6 +15,7 @@ import (
 )
 
 
+
 // Vars
 var (
 	AppName string
@@ -53,7 +54,6 @@ func start_ui(){
 	// Init
 	flag.Parse()
 	astilog.FlagInit()
-	WalletDB ,_ = walletdb.NewWalletDB("/Users/kimmegi/test.ldb")
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
@@ -80,6 +80,8 @@ func start_ui(){
 					case "client":
 						client = nodeChannel.v.(*rpc.Client)
 						stack = nodeChannel.stack.(*node.Node)
+						dir , _ := stack.FetchKeystoreDir()
+						WalletDB ,_ = walletdb.NewWalletDB(dir+"/test.ldb")
 						ctx = context.TODO()
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))

@@ -8,8 +8,8 @@
             <li id = "Receive"><a onclick="searchTransacionList('Receive')">Receive</a></li>
             <li id = "Break"><a onclick="searchTransacionList('Break')">Break</a></li>
             <li id = "Stake"><a onclick="searchTransacionList('Stake')">Stake</a></li>
-            <li id = "Add"><a onclick="searchTransacionList('Add')">Add</a></li>
-            <li id = "Withdraw"><a onclick="searchTransacionList('Withdraw')">Withdraw</a></li>
+            <!--<li id = "Add"><a onclick="searchTransacionList('Add')">Add</a></li> -->
+            <!--<li id = "Withdraw"><a onclick="searchTransacionList('Withdraw')">Withdraw</a></li> -->
         </ul>
     </div>
     <div class="content">
@@ -34,7 +34,7 @@
                 </div>
             </div>-->
         </div>
-        <table class="list_table transction_data">
+        <table class="list_table transction_data" id = "txTable">
             <colgroup>
                 <col width="250"/><col width="200"/><col /><col width="200"/>
             </colgroup>
@@ -56,11 +56,28 @@
 
     </div><!-- e://content -->
 </div><!-- e://container -->
+<div id = "txListDetailPopup" class="ly_pop hide"></div>
+
 <script type="text/javascript" >
+    $("#txListDetailPopup").load("transactionDetail.html");
+
     onTransactionListLoad();
     var txListContents = new Array()
     async function searchTransacionList(searchType){
         var obj2 = await database.selectTxInfo(account)
+        console.log( "obj2 ::: " + obj2)
+        if( obj2 == undefined) {
+            console.log( "in if ")
+            txListContents[0] += '<tr class="no_data ">'
+            txListContents[0] += '<td colspan="4"><i class="icon"></i>검색 결과가 없습니다.</td>'
+            txListContents[0] += '</tr>'
+            $('#txListData').append(txListContents[0])
+            $('#allListCnt').html(0)
+            $('#searchListCnt').html(0)
+            return
+        }
+        console.log( "out if")
+        // if ( obj2 == undefined)
         var obj = obj2.payload
         var cnt = 0
         var pageCnt = 0
@@ -77,7 +94,7 @@
                     if(i.TxType == "0"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr>'
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Send</span></td>'
                         txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
@@ -92,7 +109,7 @@
                     if(i.TxType == "1 "){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr>'
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Receive</span></td>'
                         txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
@@ -107,7 +124,7 @@
                     if(i.TxType == "2"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr>'
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Stake</span></td>'
                         txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
@@ -122,39 +139,9 @@
                     if(i.TxType == "3"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr>'
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Break</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
-                        txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
-                    }
-                })
-                break
-            case "Add" :
-                tabMenu.removeClass('on')
-                $('#tabMenu').children('#Add').addClass('on')
-                obj.forEach((i) => {
-                    if(i.TxType == "4"){
-                        var vv =parseInt(cnt / 10)
-                        cnt ++
-                        txListContents[vv] += '<tr>'
-                        txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
-                        txListContents[vv] += '<td class="type"><span class="gray">Add</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
-                        txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
-                    }
-                })
-                break
-            case "Withdraw" :
-                tabMenu.removeClass('on')
-                $('#tabMenu').children('#Withdraw').addClass('on')
-                obj.forEach((i) => {
-                    if(i.TxType == "5"){
-                        var vv =parseInt(cnt / 10)
-                        cnt ++
-                        txListContents[vv] += '<tr>'
-                        txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
-                        txListContents[vv] += '<td class="type"><span class="gray">Withdraw</span></td>'
                         txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
                         txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                     }
@@ -166,7 +153,7 @@
                 obj.forEach((i) => {
                     var vv =parseInt(cnt / 10)
                     cnt ++
-                    txListContents[vv] += '<tr>'
+                    txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.Hash + '\')"> '
                     txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                     switch (i.TxType) {
                         case "0":
@@ -180,12 +167,6 @@
                             break;
                         case "3":
                             txListContents[vv] += '<td class="type"><span class="gray">Break</span></td>'
-                            break;
-                        case "4":
-                            txListContents[vv] += '<td class="type"><span class="gray">Add</span></td>'
-                            break;
-                        case "5":
-                            txListContents[vv] += '<td class="type"><span class="gray">Withdraw</span></td>'
                             break;
                     }
                     txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
@@ -250,6 +231,7 @@
         $('#txListData').empty()
         $('#txListData').append(txListContents[obj2-1])
     }
+
     function nextPageTr() {
         var obj = $('#trListPaging').children('.active').text()
         if ( obj == pageCnt) {
@@ -262,6 +244,44 @@
             $('#txListData').empty()
             $('#txListData').append(txListContents[obj])
         }
+    }
+    // // $('#tableTr').onclick = function () {
+    // //
+    // // }
+    // $("#txTable tr").click(function() {
+    //
+    //     var str = ""
+    //     var tdArr = new Array();    // 배열 선언
+    //
+    //
+    //     // 현재 클릭된 Row(<tr>)
+    //     var tr = $(this);
+    //     var td = tr.children();
+    //
+    // }
+    function openDetailPopup(type , time, hash){
+        // console.log('openDetailPopup!!!!')
+        console.log('hash!!! : ' + hash)
+        switch (type) {
+            case 0:
+                $('#txDetailState').attr("class","white")
+                $('#txDetailState').html("Send")
+                break
+            case 1:
+                $('#txDetailState').attr("class","white")
+                $('#txDetailState').html("Receive")
+                break
+            case 2:
+                $('#txDetailState').attr("class","gray")
+                $('#txDetailState').html("Stake")
+                break
+            case 3:
+                $('#txDetailState').attr("class","gray")
+                $('#txDetailState').html("Break")
+                break
+        }
+        $('#txDetailDate').html(time)
+        togglePopUp("txListDetailPopup")
     }
 </script>
 

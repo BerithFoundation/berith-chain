@@ -42,9 +42,9 @@
                 <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text"/>
-                                    </span>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "stakeGasLimit" value = "21000"/>
+                        </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
@@ -54,9 +54,9 @@
                 <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text"/>
-                                    </span>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "stakeGasPrice" value = "21000"/>
+                        </span>
                         <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
@@ -112,14 +112,20 @@
     async function confirmation() {
         if (await isValidated()) {
             let stakeAmount = $('#stakeAmount').find('input[type=text]:first').val();
+            let stakeGasLimit = $('#stakeGasLimit').val()
+            let stakeGasPrice = $('#stakeGasPrice').val()
             $("#stakeAmtForConfirmation").text(stakeAmount);
+            $('#stakeGasLimitConfirmation').text(stakeGasLimit)
+            $('#stakeGasPriceConfirmation').text(stakeGasPrice)
             togglePopUp("confirmationPopup");
         }
     }
 
     async function stake() {
         let stakeAmount = $('#stakeAmount').find('input[type=text]:first').val();
-        let result = await berith.stake(stakeAmount);
+        let stakeGasLimit = $('#stakeGasLimit').val()
+        let stakeGasPrice = $('#stakeGasPrice').val()
+        let result = await berith.stake(stakeAmount ,stakeGasLimit , stakeGasPrice);
         togglePopUp("confirmationPopup");
         if (result.name == "error") {
             alert(result.payload);
@@ -127,14 +133,15 @@
 
         } else {
             let miningYn = await berith.mining()
-            console.log("miningYn :::: " + miningYn)
+            // console.log("miningYn :::: " + miningYn)
             if( miningYn == "false"){
                 miner.miningStart()
             }
             let date = new Date();
             $("#stakingDate").text(date.toISOString()); //TODO:: spit time and date
             $("#successfullyStakedAmount").text($('#stakeAmount').find('input[type=text]:first').val());
-
+            $('#stakeGasLimitSuccess').text(stakeGasLimit)
+            $('#stakeGasPriceSuccess').text(stakeGasPrice)
             $('#stakeAmount').find('input[type=text]:first').val("");
             togglePopUp("successPopup");
         }

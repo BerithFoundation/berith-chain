@@ -66,19 +66,26 @@ let berith = {
         return val;
     },
 
-    sendTransaction: async function (sendAmount , receiverAccount) {
+    sendTransaction: async function (sendAmount , receiverAccount , gasLimit , gasPrice) {
         var valueData = hexConvert.getTxValue(sendAmount).value
         var valueData2 = "0x"+valueData
-        // let valueData2 = toHex(sendAmount);
-        result = await sendMessage("callApi", "berith_sendTransaction", [{from : account , to :receiverAccount , value: valueData2 } ]);
+        var gasLimitValue  = parseInt(gasLimit).toString(16)
+        var gasPriceValue = parseInt(gasPrice).toString(16)
+        var gasLimitValue2  = "0x"+gasLimitValue
+        var gasPriceValue2  = "0x"+gasPriceValue
+        console.log( "gasLimitV ::: " +  gasLimitValue2 +"  , gasPriceV ::: " + gasPriceValue2)
+        result = await sendMessage("callApi", "berith_sendTransaction", [{from : account , to :receiverAccount , value: valueData2 , gas :gasLimitValue2 , gasPrice: gasPriceValue2 } ]);
         return result;
     },
 
-    stake : async function (stakeAmount) {
-        // var valueData = toHex(stakeAmount);
+    stake : async function (stakeAmount , gasLimit, gasPrice) {
         var valueData = hexConvert.getTxValue(stakeAmount).value
         var valueData2 = "0x"+valueData;
-        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData2 } ]);
+        var gasLimitValue  = parseInt(gasLimit).toString(16)
+        var gasPriceValue = parseInt(gasPrice).toString(16)
+        var gasLimitValue2  = "0x"+gasLimitValue
+        var gasPriceValue2  = "0x"+gasPriceValue
+        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData2 ,gas :gasLimitValue2 , gasPrice: gasPriceValue2  } ]);
         return result;
     },
 
