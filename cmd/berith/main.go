@@ -14,12 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-
 package main
 
 import (
-	"github.com/BerithFoundation/berith-chain/berith"
 	"fmt"
+	"github.com/BerithFoundation/berith-chain/berith"
 	"math"
 	"os"
 	godebug "runtime/debug"

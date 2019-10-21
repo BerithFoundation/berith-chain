@@ -31,11 +31,16 @@ import (
 )
 
 // Lengths of hashes and addresses in bytes.
+// Prefix of addresses.
 const (
 	// HashLength is the expected length of the hash
 	HashLength = 32
 	// AddressLength is the expected length of the address
 	AddressLength = 20
+	// AddressPrefix is prefix of the address
+	AddressPrefix = "Bx"
+	// AddressPrefixLength is the expected length of the address prefix
+	AddressPrefixLength = len(AddressPrefix)
 )
 
 var (
@@ -45,6 +50,34 @@ var (
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
 type Hash [HashLength]byte
+
+//CheckBerithfix 주소의 Prefix가 제대로 입력되었는지 확인하는 함수[BERITH]
+func CheckBerithPrefix(str string, start int) bool {
+	if len(str) > start+2 {
+		lower := strings.ToLower(AddressPrefix)
+		upper := strings.ToUpper(AddressPrefix)
+		if (str[start] == lower[0] || str[start] == upper[0]) && (str[start+1] == lower[1] || str[start+1] == upper[1]) {
+			return true
+		}
+	}
+	return false
+}
+
+// HasAddressPrefix verifies whether a string starts with AddressPrefix or not.
+func HasAddressPrefix(s string) bool {
+	if len(s) < AddressPrefixLength {
+		return false
+	}
+	return strings.EqualFold(AddressPrefix, s[:AddressPrefixLength])
+}
+
+// RemoveAddressPrefix returns a address without prefix given address string.
+func RemoveAddressPrefix(s string) string {
+	if HasAddressPrefix(s) {
+		return s[AddressPrefixLength:]
+	}
+	return s
+}
 
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
@@ -218,7 +251,7 @@ func (a Address) Hex() string {
 			result[i] -= 32
 		}
 	}
-	return " Bx" + string(result)
+	return AddressPrefix + string(result)
 }
 
 // String implements fmt.Stringer.
@@ -243,16 +276,35 @@ func (a *Address) SetBytes(b []byte) {
 
 // MarshalText returns the hex representation of a.
 func (a Address) MarshalText() ([]byte, error) {
-	return hexutil.Bytes(a[:]).MarshalText()
+	b := a[:]
+	result := make([]byte, len(b)*2+2)
+	copy(result, AddressPrefix)
+	hex.Encode(result[2:], b)
+	return result, nil
 }
 
 // UnmarshalText parses a hash in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
+	if len(input) > 1 {
+		inputStr := string(input)
+		if !HasAddressPrefix(inputStr) {
+			return fmt.Errorf("berith address without \"%s\" prefix", AddressPrefix)
+		}
+		input = []byte("0x" + inputStr[2:])
+	}
 	return hexutil.UnmarshalFixedText("Address", input, a[:])
 }
 
 // UnmarshalJSON parses a hash in hex syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
+	if len(input) > 2 {
+		inputStr := string(input)
+		// TODO : must have addr prefix ?
+		if !HasAddressPrefix(inputStr[1:]) {
+			return fmt.Errorf("berith address without \"%s\" prefix", AddressPrefix)
+		}
+		input = []byte(inputStr[:1] + "0x" + inputStr[3:])
+	}
 	return hexutil.UnmarshalFixedJSON(addressT, input, a[:])
 }
 
@@ -301,6 +353,9 @@ func NewMixedcaseAddress(addr Address) MixedcaseAddress {
 
 // NewMixedcaseAddressFromString is mainly meant for unit-testing
 func NewMixedcaseAddressFromString(hexaddr string) (*MixedcaseAddress, error) {
+	if HasAddressPrefix(hexaddr) {
+		hexaddr = "0x" + RemoveAddressPrefix(hexaddr)
+	}
 	if !IsHexAddress(hexaddr) {
 		return nil, fmt.Errorf("Invalid address")
 	}
@@ -310,7 +365,11 @@ func NewMixedcaseAddressFromString(hexaddr string) (*MixedcaseAddress, error) {
 
 // UnmarshalJSON parses MixedcaseAddress
 func (ma *MixedcaseAddress) UnmarshalJSON(input []byte) error {
-	if err := hexutil.UnmarshalFixedJSON(addressT, input, ma.addr[:]); err != nil {
+	//if err := hexutil.UnmarshalFixedJSON(addressT, input, ma.addr[:]); err != nil {
+	//	return err
+	//}
+	// [BERITH] Unmarshal directly because berith address has no hex prefix
+	if err := ma.addr.UnmarshalJSON(input); err != nil {
 		return err
 	}
 	return json.Unmarshal(input, &ma.original)

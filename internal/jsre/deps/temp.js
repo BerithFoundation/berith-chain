@@ -1791,6 +1791,8 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
             'Uber'
         ];
 
+        var BER_ADDR_PREFIX = "Bx"
+
         module.exports = {
             ETH_PADDING: 32,
             ETH_SIGNATURE_LENGTH: 4,
@@ -2235,7 +2237,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          * @return {Boolean}
          */
         var isStrictAddress = function (address) {
-            return /^0x[0-9a-f]{40}$/i.test(address);
+            return /^[Bb]x[0-9a-f]{40}$/i.test(address);
         };
 
         /**
@@ -2246,10 +2248,10 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          * @return {Boolean}
          */
         var isAddress = function (address) {
-            if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
+            if (!/^([Bb]x)?[0-9a-f]{40}$/i.test(address)) {
                 // check if it has the basic requirements of an address
                 return false;
-            } else if (/^(0x)?[0-9a-f]{40}$/.test(address) || /^(0x)?[0-9A-F]{40}$/.test(address)) {
+            } else if (/^([Bb]x)?[0-9a-f]{40}$/.test(address) || /^([Bb]x)?[0-9A-F]{40}$/.test(address)) {
                 // If it's all small caps or all all caps, return true
                 return true;
             } else {
@@ -2267,7 +2269,8 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var isChecksumAddress = function (address) {
             // Check each case
-            address = address.replace('0x','');
+            address = address.replace('Bx','');
+            address = address.replace('bx','');
             var addressHash = sha3(address.toLowerCase());
 
             for (var i = 0; i < 40; i++ ) {
@@ -2291,9 +2294,9 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var toChecksumAddress = function (address) {
             if (typeof address === 'undefined') return '';
 
-            address = address.toLowerCase().replace('0x','');
+            address = address.toLowerCase().replace('bx','');
             var addressHash = sha3(address);
-            var checksumAddress = '0x';
+            var checksumAddress = BER_ADDR_PREFIX
 
             for (var i = 0; i < address.length; i++ ) {
                 // If ith character is 9 to f then make it uppercase
@@ -3921,11 +3924,11 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var inputAddressFormatter = function (address) {
             var iban = new Iban(address);
             if (iban.isValid() && iban.isDirect()) {
-                return '0x' + iban.address();
+                return BER_ADDR_PREFIX + iban.address();
             } else if (utils.isStrictAddress(address)) {
                 return address;
             } else if (utils.isAddress(address)) {
-                return '0x' + address;
+                return BER_ADDR_PREFIX + address;
             }
             throw new Error('invalid address');
         };

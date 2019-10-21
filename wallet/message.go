@@ -40,10 +40,12 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		ch2 <- 0
 		break
 	case "callApi":
+
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
 		payload , err = callDB(api , args...)
+
 		break
 	case "exportKeystore":
 		args := info["args"].([]interface{})
@@ -64,16 +66,19 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	return
 }
 
+
 // cli 관련 api 처리하는 함수
 func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	var apiName = api.(string)
+
 	var result json.RawMessage
 	p := make([]interface{}, 0)
-	for _, item := range args{
+	for _, item := range args {
 		if item == nil {
 			break
 		}
 		// 트랜잭션시
+
 		if apiName == "berith_sendTransaction" || apiName == "berith_stake" || apiName == "berith_rewardToBalance"  || apiName == "berith_rewardToStake" || apiName == "berith_stopStaking"   {
 			temp := reflect.ValueOf(item).Interface()
 			itemMap:= temp.(map[string]interface{})
@@ -89,21 +94,26 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
 	}
 	return string(result), err
 }
+
 // db 관련 api 처리하는 함수
 func callDB ( api interface{}, args... interface{}) ( interface{}, error){
+
 	key := make([]string, 0)
-	for _, item := range args{
-		 key  = append(key, item.(string))
+	for _, item := range args {
+		key = append(key, item.(string))
 	}
-	acc ,err := callNodeApi("berith_coinbase", nil)
-	acc = strings.ReplaceAll(acc , "\"","")
+	acc, err := callNodeApi("berith_coinbase", nil)
+	// acc = strings.ReplaceAll(acc , "\"","")
+	acc = strings.Replace(acc, "\"", "", -1)
 	if err != nil {
 		astilog.Error(errors.Wrap(err, "insert error"))
 	}
 	switch api.(string) {
+
 	case "selectContact" :
 		contact := make(walletdb.Contact,0)
 		err := WalletDB.Select([]byte("c"+acc), &contact)
+
 		if err != nil {
 			return nil, err
 		}
@@ -123,6 +133,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte("c"+acc), &contact)
 		contact[common.HexToAddress(key[0])] = key[1]
+
 		err := WalletDB.Insert([]byte("c"+acc) , contact)
 		if err != nil {
 			return nil, err
@@ -214,6 +225,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 			return nil , err
 		}
 		return txinfo, nil
+
 		break
 	case "insertMember":
 		var mem walletdb.Member
@@ -226,14 +238,18 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		privateKey , err := callNodeApi("personal_privateKey",newAcc , key[1] )
 		privateKey = strings.ReplaceAll(privateKey , "\"","")
 		member := walletdb.Member{
+
 			Address: common.HexToAddress(newAcc),
 			ID : key[0],
+
 			Password: key[1],
 			PrivateKey: privateKey,
 		}
+
 		err = WalletDB.Insert([]byte(key[0]) , member)
+
 		if err != nil {
-			return nil , err
+			return nil, err
 		}
 		return member, nil
 		break
@@ -249,28 +265,30 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		break
 	}
 
-	return nil ,nil
+	return nil, nil
 }
+
 // 개인키 내보내기 함수 
+
 func exportKeystore(args []interface{}) (interface{}, error) {
-	tempFileName:= "keystore.zip"
+	tempFileName := "keystore.zip"
 
 	dir, err := stack.FetchKeystoreDir()
-	if (err!=nil) {
+	if err != nil {
 		return nil, err
 	}
 	log.Info("Found keystore dir: ", dir)
-	password:= args[0].(string)
+	password := args[0].(string)
 	targetPath := dir + string(os.PathSeparator) + tempFileName
-	er := ZipSecure(dir,targetPath,password)
+	er := ZipSecure(dir, targetPath, password)
 	if er != nil {
-		return nil,er
+		return nil, er
 	}
-	log.Info("Successfully created temp file, "+tempFileName+", at: " +dir)
+	log.Info("Successfully created temp file, " + tempFileName + ", at: " + dir)
 
 	zippedFile, err := os.Open(targetPath)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(zippedFile)
@@ -280,28 +298,29 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 
 	zippedFile.Close()
 	os.Remove(targetPath)
-	log.Info("Removed temp file, "+tempFileName+", from: " +dir)
+	log.Info("Removed temp file, " + tempFileName + ", from: " + dir)
 
 	return body, nil
 }
+
 // 개인키 삽입 함수
 func importKeystore(args []interface{}) (error)  {
 
+
 	dir, err := stack.FetchKeystoreDir()
-	if (err!=nil) {
+	if err != nil {
 		return err
 	}
 	log.Info("Found keystore dir: ", dir)
 
-	inputFilePath:= args[0].(string)
-	password:= args[1].(string)
+	inputFilePath := args[0].(string)
+	password := args[1].(string)
 	log.Debug("Input keystore file path: ", dir)
 
-	er := UnzipSecure(inputFilePath,dir,password)
+	er := UnzipSecure(inputFilePath, dir, password)
 	if er != nil {
 		return er
 	}
 	log.Info("Successfully imported keystore folder")
 	return err
 }
-

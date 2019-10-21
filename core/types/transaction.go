@@ -50,8 +50,8 @@ type txdata struct {
 	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
 	Amount       *big.Int        `json:"value"    gencodec:"required"`
 	Payload      []byte          `json:"input"    gencodec:"required"`
-	Base      JobWallet            `json:"base"  gencodec:"required"` //[Berith] 작업 주체  ex) 스테이킹시 : Main
-	Target      JobWallet             `json:"target"  gencodec:"required"` //[Berith] 작업타겟 ex) 스테이킹시 : Stake
+	Base         JobWallet       `json:"base"  gencodec:"required"`   //[Berith] 작업 주체  ex) 스테이킹시 : Main
+	Target       JobWallet       `json:"target"  gencodec:"required"` //[Berith] 작업타겟 ex) 스테이킹시 : Stake
 
 	// Signature values
 	V *big.Int `json:"v" gencodec:"required"`
@@ -92,8 +92,8 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		Recipient:    to,
 		Payload:      data,
 		Amount:       new(big.Int),
-		Base:		  base,
-		Target: 	  target,
+		Base:         base,
+		Target:       target,
 		GasLimit:     gasLimit,
 		Price:        new(big.Int),
 		V:            new(big.Int),
@@ -184,8 +184,8 @@ func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Pri
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool   { return true }
-func (tx *Transaction) Base() JobWallet      { return tx.data.Base } //[Berith] Tx JobWallet Base
-func (tx *Transaction) Target() JobWallet      { return tx.data.Target } //[Berith] Tx JobWallet Target
+func (tx *Transaction) Base() JobWallet    { return tx.data.Base }   //[Berith] Tx JobWallet Base
+func (tx *Transaction) Target() JobWallet  { return tx.data.Target } //[Berith] Tx JobWallet Target
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -234,8 +234,8 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		amount:     tx.data.Amount,
 		data:       tx.data.Payload,
 		checkNonce: true,
-		base:    tx.data.Base,
-		target:    tx.data.Target,
+		base:       tx.data.Base,
+		target:     tx.data.Target,
 	}
 
 	var err error
@@ -407,8 +407,8 @@ type Message struct {
 	gasPrice   *big.Int
 	data       []byte
 	checkNonce bool
-	base 	   JobWallet
-	target 	   JobWallet
+	base       JobWallet
+	target     JobWallet
 }
 
 func NewMessage(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, checkNonce bool) Message {
@@ -432,7 +432,7 @@ func (m Message) Gas() uint64          { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
-//[Berith]
-func (m Message) Base() JobWallet { return m.base }
-func (m Message) Target() JobWallet { return m.target }
 
+//[Berith]
+func (m Message) Base() JobWallet   { return m.base }
+func (m Message) Target() JobWallet { return m.target }

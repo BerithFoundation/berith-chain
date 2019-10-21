@@ -167,7 +167,7 @@ var (
 	GCModeFlag = cli.StringFlag{
 		Name:  "gcmode",
 		Usage: `Blockchain garbage collection mode ("full", "archive")`,
-		Value: "full",
+		Value: "archive",
 	}
 	LightServFlag = cli.IntFlag{
 		Name:  "lightserv",
@@ -785,6 +785,10 @@ func makeDatabaseHandles() int {
 // MakeAddress converts an account specified directly as a hex encoded string or
 // a key index in the key store to an internal account representation.
 func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error) {
+	// Remove address prefix if exist, because prefix ist not hex prefix(0x) [BERITH]
+	if common.HasAddressPrefix(account) {
+		account = account[len(common.AddressPrefix):]
+	}
 	// If the specified account is a valid address, return it
 	if common.IsHexAddress(account) {
 		return accounts.Account{Address: common.HexToAddress(account)}, nil

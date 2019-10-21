@@ -19,7 +19,6 @@ package build
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -37,7 +36,6 @@ var DryRunFlag = flag.Bool("n", false, "dry run, don't execute commands")
 // MustRun executes the given command and exits the host process for
 // any error.
 func MustRun(cmd *exec.Cmd) {
-	fmt.Println(">>>", strings.Join(cmd.Args, " "))
 	if !*DryRunFlag {
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout

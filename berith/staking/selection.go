@@ -195,12 +195,13 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 
 	rand.Seed(cs.GetSeed(number))
 
-	queue.enqueue(Range{
+	_ = queue.enqueue(Range{
 		min:   0,
 		max:   cs.total,
 		start: 0,
 		end:   len(cs.selections),
 	})
+
 	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
@@ -209,11 +210,9 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 			Rank:  count,
 		}
 		DIF -= DIF_R
-
 	}
 
 	//fmt.Println(DIF)
-
 	return &result
 }
 

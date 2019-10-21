@@ -30,6 +30,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
+	"github.com/quorum/swarm/services/swap/swap"
 	"io/ioutil"
 	"math/big"
 	"os"
