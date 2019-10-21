@@ -40,12 +40,10 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		ch2 <- 0
 		break
 	case "callApi":
-
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
 		payload , err = callDB(api , args...)
-
 		break
 	case "exportKeystore":
 		args := info["args"].([]interface{})

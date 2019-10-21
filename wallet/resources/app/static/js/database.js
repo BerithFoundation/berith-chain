@@ -30,7 +30,6 @@ let database = {
         result = await sendMessage("callDB", "checkLogin", [memberName, memberPwd]);
         return result;
     },
-
     selectMember : function () {
         let message = {"name" : "callDB"}
         message.payload = {
