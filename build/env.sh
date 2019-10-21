@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ ! -f "build/env.sh" ]]; then
+if [ ! -f "build/env.sh" ]; then
     echo "$0 must be run from the root of the repository."
     exit 2
 fi
@@ -12,7 +12,7 @@ workspace="${PWD}/build/_workspace"
 root="${PWD}"
 berithDir="${workspace}/src/github.com/BerithFoundation"
 projectName="berith-chain"
-if [[ ! -L "${berithDir}/${projectName}" ]]; then
+if [ ! -L "${berithDir}/${projectName}" ]; then
     mkdir -p "${berithDir}"
     cd "${berithDir}"
     ln -s ../../../../../. ${projectName}
