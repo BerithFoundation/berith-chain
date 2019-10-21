@@ -684,6 +684,12 @@ web3._extend({
 			params: 2,
 			inputFormatter: [null, null]
 		}),
+		new web3._extend.Method({
+			name: 'hasAddress',
+			call: 'personal_hasAddress',
+			params: 1,			
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
 	],
 	properties: [
 		new web3._extend.Property({

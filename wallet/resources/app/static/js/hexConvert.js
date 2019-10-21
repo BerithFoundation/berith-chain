@@ -1,5 +1,5 @@
 let hexConvert = {
-    getTxValue: function(value){
+    getTxValue: function(value ){
 
     var rs = {
         result : false,
@@ -23,17 +23,18 @@ let hexConvert = {
             var len = dot.length;
 
             var temp = value.toString().replace(".", "");
-            for(var i = 0; i< 18 - len; i++){
-                temp += "0";
-            }
-            txValue = BigInt(temp).toString(16);
-
+            // if( valueYn = 'Y'){
+                for(var i = 0; i< 18 - len; i++){
+                    temp += "0";
+                }
+            // }
+                txValue = BigInt(temp).toString(16);
         } else {
 
             txValue = BigInt(f.toString() + "000000000000000000").toString(16);
 
         }
-        console.log("txValue ::: " + txValue)
+        // console.log("txValue ::: " + txValue)
         rs.result = true;
         rs.value = txValue;
 
@@ -44,5 +45,21 @@ let hexConvert = {
         rs.error = err;
         return rs
     }
+    },
+    pad :function (n, width) {
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join('0') + n;
+    },
+
+    HexToValueString: function (hex){
+        var t = hexToDec(hex);
+
+        var big = BigInt(t.toString());
+
+        var t2 = big.dividedToIntegerBy("1e18"); //0
+
+        var m = big.mod("1e18"); //127
+
+        return t2 + "." + this.pad(m.toString(), 18);
     }
 }

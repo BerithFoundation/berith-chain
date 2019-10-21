@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>Berith PC Wallet</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+    <meta name="subject" content="" />
+    <meta name="application-name" content="">
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="copyright" content="Copyrights (c) " />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+
+    <script src="../static/js/api/miner.js"></script>
+    <script src="../static/js/api/personal.js"></script>
+
+</head>
+    
+<body>
+    <link rel="import" href="../static/common.html">
+    <script src="../static/js/api/berith.js"></script>
+
+    <div class="wrap">
+        <div class="login">
+            <div class="login_header">
+                <h1 class="logo">berith wallet</h1>
+            </div>
+            <div class="inp_group" id = "idGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <h5>지갑명</h5>
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" id = "loginID" type="text"  />
+                    </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <p class="error_txt">
+                </p>
+            </div>
+            <div class="inp_group" id = "pwdGroup"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <h5>비밀번호</h5>
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" id = "loginPwd" type="password" /><!-- type: password/text -->
+                        <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                    </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <p class="error_txt">
+                </p>
+            </div>
+            <div class="btn_area">
+                <a class="btn full red on" onclick=fnLogin() >로그인</a><!-- on -->
+            </div>
+            <div class="btn_area">
+                <a class="btn white" href="createAccount.html">지갑 생성</a>
+                <a class="btn white" href="keystoreRestore.html">Keystore File 복원</a>
+            </div>
+            
+                
+        </div>
+    </div><!-- e://wrap -->
+
+    <script type = "text/javascript">
+
+        onPageload();
+        function onPageload() {
+            $('.login').keypress(function (e) {
+                if (e.keyCode == '13')
+                    fnLogin()
+            });
+            console.log( "start !! ")
+
+            $('#loginID').focus(function () {
+                $('#idGroup').addClass('active del')
+            });
+            $('#loginID').blur(function () {
+                $('#idGroup').removeClass('active del')
+            });
+            $('#loginPwd').focus(function () {
+                $('#pwdGroup').addClass('active del')
+            });
+            $('#loginPwd').blur(function () {
+                $('#pwdGroup').removeClass('active del')
+            });
+        }
+
+
+        async function  fnLogin(){
+            var loginId = $('#loginID').val()
+            var loginPwd = $('#loginPwd').val()
+            if (validateFields(loginId,loginPwd)) {
+                let apiResult = await database.checkLogin(loginId, loginPwd);
+                if (apiResult == undefined) {
+                    console.log("no exists !!! ")
+                    $('#idGroup').addClass('error')
+                    $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
+                }
+                var obj = apiResult.payload
+                if(loginPwd != obj.Password) {
+                    $('#pwdGroup').addClass('error')
+                    $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+                } else {
+                    handleSuccessfulLogin(obj);
+                }
+            }
+        }
+
+        async function handleSuccessfulLogin(obj) {
+
+            let password = obj.Password;
+            let address = obj.Address;
+            $('#idGroup').removeClass('error')
+            $('#pwdGroup').removeClass('error')
+            console.log("address :: " + address)
+            let hasAddress = await personal.hasAddress(address)
+            console.log("hasAddress :: " + hasAddress)
+            if (hasAddress == "true") {
+                let isSetBerithbase = await miner.setBerithbase(address);
+                if (isSetBerithbase == "true") {
+
+                    await personal.unlockAccount(address,password,0);
+                    sessionStorage.setItem('account', address);
+                    sessionStorage.setItem('loginId' ,$('#loginID').val());
+                    sessionStorage.setItem('loginPwd' ,$('#loginPwd').val() )
+                    location.href ="index.html"
+                } else {
+                    console.error("Something went wrong while setting Berithbase!!!")
+                }
+            } else {
+                console.log("ffffffff")
+                $('#idGroup').addClass('error')
+                $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
+                    "Keystore File 복원을 진행해 주세요.\n")
+            }
+        }
+
+        function validateFields(loginId, loginPwd) {
+            if(loginId == ""){
+                $('#idGroup').addClass('error')
+                $('.error_txt').html("아이디를 입력하세요.")
+                $('#loginID').focus()
+                return false ;
+            }
+            if(loginPwd == ""){
+                $('#idGroup').removeClass('error')
+                $('#pwdGroup').addClass('error')
+                $('.error_txt').html("비밀번호를 입력하세요.")
+                $('#loginPwd').focus()
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+</body>
+</html>

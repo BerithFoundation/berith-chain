@@ -20,6 +20,7 @@ wallet/output/
 berith/keystore
 berith/history
 cmd/berith/debug
+node_modules
 
 wallet/Berith/*
 wallet/vendor/

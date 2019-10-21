@@ -1,0 +1,50 @@
+
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>TRANSACTIONS DETAILS</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('txListDetailPopup')">close</a>
+    </div>
+    <div class="pop_body">
+        <div class="pop_con_top transction_data">
+            <p class="title type">
+                <span id = "txDetailState">Break</span><!-- white/gray -->
+            </p>
+            <p class="state">
+                <span class="success red"><i class="icon"></i>전송 완료</span><!-- request blue / fail gray / success red-->
+                <span class="date" id = "txDetailDate" >2019.04.18 15:00:00</span>
+            </p>
+        </div>
+        <table class="pop_table">
+            <tbody>
+                <tr>
+                    <th>수량</th>
+                    <td><em class="red">54895.02158742 BER</em></td>
+                </tr>
+                <tr>
+                    <th>TxHash</th>
+                    <td><a href="#!">0x0640c6df1186eb7ec7c9e9c0bffcdd6cf6188271ea9780c60d75e7b379571537</a></td>
+                </tr>
+                <tr>
+                    <th>Block Height</th>
+                    <td>4682975</td>
+                </tr>
+                <tr>
+                    <th>기본수수료</th>
+                    <td>21000</td>
+                </tr>
+                <tr>
+                    <th>수수료가격</th>
+                    <td>21000</td>
+                </tr>
+                <tr>
+                    <th>실제 사용 수수료</th>
+                    <td><em> BER</em></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pop_footer">
+        <a class="btn red on" href="#!" onclick="togglePopUp('txListDetailPopup')">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->

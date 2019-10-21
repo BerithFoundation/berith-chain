@@ -1,0 +1,29 @@
+
+<h1><a class="logo" href="#">베리드 월렛</a></h1>
+<div class="nav">
+    <ul>
+        <!--<li>선출될 확률 : <em>35%</em></li> -->
+        <!--<li >참여 수 : <em>300</em></li> -->
+    </ul>
+    <a class="btn_export" onclick="openExport()">Export</a>
+    <a class="btn_contact" onclick="openContactList()">Contact</a>
+    <a class="btn_setting" onclick="openMySetting()">Setting</a>
+
+</div>
+<!--contact Pop -->
+<div id = contactPop> </div>
+<!--contact Add Pop  -->
+<div id = contactAddPop ></div>
+<!--mySetting Pop  -->
+<div id = mySetting> </div>
+<!--export Pop  -->
+<div id = exportPop></div>
+
+<script type="text/javascript">
+
+    $("#contactPop").load("contactList.html");
+    $("#contactAddPop").load("contactAdd.html");
+    $('#mySetting').load('mySetting.html');
+    $('#exportPop').load('export.html');
+
+</script>

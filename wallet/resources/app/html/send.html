@@ -1,0 +1,198 @@
+<div class="container">
+    <div class="aside">
+        <h2>SEND</h2>
+        <div class="txt_wrap">
+            <strong>Main Balance</strong>
+            <p class="coin red" id="mainBalance"></p>
+        </div>
+        <hr/>
+
+    </div><!-- e://aside -->
+
+    <div class="content">
+        <h4>정보입력</h4>
+        <div class="inp_group"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>받는 주소</h5>
+            <div class="row_group">
+                <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text" id="sendAddr"/>
+                                </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <div class="btn_inp">
+                    <a class="btn blue medium2 contact" href="#!" onclick="openContactList();">Contact</a>
+                </div>
+            </div>
+            <p class="error_txt" id="err1">
+                주소를 입력하세요.
+            </p>
+        </div><!-- e://inp_group -->
+        <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
+            <div class="row_group">
+                <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text" value=""/>
+                                </span>
+                    <a class="del" href="#!">삭제</a>
+                </div>
+                <div class="btn_inp">
+                    <a class="btn white medium2" href="#!" onclick="sendAll();">모두 보내기</a>
+                </div>
+            </div>
+            <p class="error_txt" id="err2">
+                수량을 입력하세요.
+            </p>
+        </div><!-- e://inp_group -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>기본수수료</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id="sendGasLimit" value="21000"/>
+                        </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                    </p>
+                </div>
+                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>수수료가격</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "sendGasPrice" value="21000"/>
+                        </span>
+                        <a class="del" href="#!">삭제</a>
+                    </div>
+                    <p class="error_txt">
+                    </p>
+                </div>
+            </div>
+            <div class="con_box info">
+                <div class="box_info">
+                    <p class="txt">
+                        <strong>TX 비용 = 기본수수료 X 수수료가격</strong>
+                        <span>수수료가격이 높을수록 거래가 빠르게 진행되지만, <br/>
+                                    더 비싼 비용을 지불해야 합니다. </span>
+                        <span>수수료는 <b>Main Balance</b>에서 계산됩니다.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="btn_area right">
+            <a class="btn red medium on" href="#!" onclick="confirmation()">다음</a>
+        </div>
+
+    </div><!-- e://content -->
+</div><!-- e://container -->
+
+<div id = "confirmationPopup" class = "ly_pop hide"></div>
+<div id = "sendInputPwdPopup" class="ly_pop hide"></div>
+<div id = "successPopup" class = "ly_pop hide"></div>
+
+<script type="text/javascript">
+    $("#confirmationPopup").load("send2.html");
+    $("#sendInputPwdPopup").load("send3.html");
+    $("#successPopup").load("send4.html");
+
+    onSendLoad();
+
+    async function onSendLoad() {
+        let mainBalance = await berith.getBalance(account);
+        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
+        $('#mainBalance').html(mainBalanceContent);
+    }
+
+    async function sendAll() {
+        let mainBalance = await berith.getBalance(account);
+        $('#sendAmount').find('input[type=text]:first').val(mainBalance);
+    }
+
+    async function confirmation(){
+        if(await  isValidated()) {
+            let sendAmount = $('#sendAmount').find('input[type=text]:first').val();
+            let receiversAddress = $("#sendAddr").val();
+
+            let sendGasLimit = $('#sendGasLimit').val();
+            let sendGasPrice = $('#sendGasPrice').val();
+
+            if( sendGasLimit == "") {sendGasLimit = 21000}
+            if( sendGasPrice == "") {sendGasPrice = 21000}
+
+            $("#sendAmtForConfirmation").text(sendAmount);
+            $("#sendAddForConfirmation").text(receiversAddress);
+            $("#sendGasLimitConfirmation").text(sendGasLimit)
+            $("#sendGasPriceConfirmation").text(sendGasPrice)
+            togglePopUp("confirmationPopup");
+        }
+    }
+
+    async function send() {
+        let receiversAddress = $("#sendAddr").val();
+        let amount = $('#sendAmount').find('input[type=text]:first').val();
+
+        let sendGasLimit = $('#sendGasLimit').val();
+        let sendGasPrice = $('#sendGasPrice').val();
+
+        let result = await berith.sendTransaction(amount, receiversAddress, sendGasLimit, sendGasPrice);
+        if (result.name == "error") {
+            alert("전송에 실패하였습니다.");
+        } else {
+            // alert("Transaction submitted successfully");
+            $("#sendSuccessAmt").text(amount);
+            $("#sendSuccessAdd").text(receiversAddress);
+            $("#sendGasLimitSuccess").text(sendGasLimit)
+            $("#sendGasPriceSucess").text(sendGasPrice)
+            togglePopUp("successPopup");
+            // clearing fields
+            $("#sendAddr").val("");
+            $('#sendAmount').find('input[type=text]:first').val("");
+        }
+    }
+
+    function populateAddressField(receiverAddress) {
+        $("#sendAddr").val("");
+        $("#sendAddr").val(receiverAddress);
+    }
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        let isValidAddress = await validateAddress();
+        let isValidAmount =  await validateAmount();
+        return isValidAddress && isValidAmount;
+    }
+
+    async function validateAmount() {
+        let amountField = $('#sendAmount').find('input[type=text]:first');
+        let amount = amountField.val();
+
+        if (isDecimalNumber(amount)) {
+            let mainBalance = await berith.getBalance(account);
+            if (parseInt(amount) > parseInt(mainBalance)) {
+                console.error("input amount is more than the available balance");
+                $("#sendAmount").addClass("error");
+                return false;
+            } else {
+                $("#sendAmount").removeClass("error");
+            }
+        } else {
+            console.error("not a valid amount");
+            $("#sendAmount").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
+    async function validateAddress() {
+        let receiverAddress = $('#sendAddr').val();
+        if (!isAddress(receiverAddress)) {
+            $('#sendAddr').parent().parent().parent().parent().addClass("error");
+            return false;
+        } else {
+            $('#sendAddr').parent().parent().parent().parent().removeClass("error");
+        }
+        return true;
+    }
+</script>

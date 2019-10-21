@@ -11,7 +11,24 @@ let personal = {
             $('#newAccount').val(message.payload)
         })
     },
-    unlockAccount: function () {
+    /*hasAddress: function (address) {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "personal_hasAddress",
+            "args" : [address]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            var obj = message.payload
+            return obj;
+        })
+    },*/
+    hasAddress : async function (address) {
+        result = await sendMessage("callApi", "personal_hasAddress", [address]);
+        return result.payload;
+    },
+    /*unlockAccount: function () {
         let message = {"name": "callApi"};
         message.payload = {
             "api" : "personal_unlockAccount",
@@ -22,31 +39,49 @@ let personal = {
             asticode.loader.hide();
             $('#unlockAccount').val(message.payload)
         })
-    },
-    lockAccount: function () {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "personal_lockAccount",
-            "args" : [account ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#unlockAccount').val(message.payload)
-        })
-    },
-    lockAccount: function () {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "personal_lockAccount",
-            "args" : [account ]
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            $('#unlockAccount').val(message.payload)
-        })
-    }
+    },*/
 
-    //personal_importRawKey
+
+    unlockAccount : async function (account, password, time) {
+        result = await sendMessage("callApi", "personal_unlockAccount", [account, password, time]);
+        return result.payload;
+    },
+
+
+
+
+
+    lockAccount: function () {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "personal_lockAccount",
+            "args" : [account ]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            $('#lockAccount').val(message.payload)
+        })
+    },
+    // 개인키 조회 api
+    getPrivateKey:async function (getPrivateAdd , getPrivatePwd ) {
+        result = await sendMessage("callApi", "personal_privateKey" , [getPrivateAdd,getPrivatePwd])
+        return result
+    },
+    importRawKey : function (importRawKeyAdd , importRawKeyPwd) {
+        let message = {"name": "callApi"};
+        message.payload = {
+            "api" : "personal_importRawKey",
+            "args" : [importRawKeyAdd,importRawKeyPwd ]
+        }
+        asticode.loader.show()
+        astilectron.sendMessage(message, function(message) {
+            asticode.loader.hide();
+            var obj =message.payload
+            var obj2 = JSON.parse(obj)
+            console.log( "obj ::: " + obj)
+            console.log( "obj2 ::: " + obj2)
+            location.href="keystoreRestore2.html?importRawKey="+importRawKeyAdd+"&pwd="+importRawKeyPwd+"&add="+obj2;
+        })
+    },
 }

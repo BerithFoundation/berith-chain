@@ -6,17 +6,12 @@ let index = {
         asticode.notifier.init();
 
         // Wait for astilectron to be ready
-        document.addEventListener('astilectron-ready', function() {
-            // Listen
+        document.addEventListener('astilectron-ready', async function() {
             index.listen();
-        })
-
-        let message = {"name": "init"};
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            // Init
-            asticode.loader.hide();
-        })
+            let responseValue = await sendMessage("init", "", [])
+            // console.log("responseValue : " + responseValue)
+            loadAppContents();
+        });
     },
     listen: function() {
         //폴링 리시브등록?
@@ -28,9 +23,12 @@ let index = {
                 case "notify_hide":
                     asticode.loader.hide();
                     break;
-                case "polling":
-                    $('#polling').val(message.payload)
+                case "syncing":
+                    syncingData(message.payload)
                     break;
+                case "getBlockInfo":
+                    blockInfo(message.payload)
+                    break
                 case "coinbase":
                     berith.coinbase()
                     break;
@@ -40,4 +38,4 @@ let index = {
     nextPage : function () {
         location.href="http://google.com"
     },
-};
+}

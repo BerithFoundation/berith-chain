@@ -1,0 +1,149 @@
+<div class="container main">
+    <div class="aside">
+        <h2 id="loginName">MY WALLET</h2>
+        <div class="txt_wrap">
+            <strong>My Address</strong>
+            <p class="addr" id="myAdd"></p>
+            <span><a class="copy" onclick="copyToClipboard('#myAdd')">복사</a><a class="qr" onclick="qrCreate()">qr</a></span>
+        </div>
+        <hr/>
+        <!--
+        <ul class="info">
+            <li><strong>Stake</strong>
+                <spna>Main Balance<i class="arrow"></i>Stake Balance</spna>
+            </li>
+            <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
+            <li><strong>Add</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
+            <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Main Balance</span></li>
+        </ul>-->
+        <div class="one_sec_wrap hide" id="popCopy"><!-- view/hide -->
+            <div class="bg"></div>
+            <p class="complete">복사 완료</p>
+        </div>
+
+    </div><!-- e://aside -->
+
+    <div class="content">
+        <div class="top_area">
+            <div class="txt_wrap">
+                <strong>Total Balance</strong>
+                <p class="coin"><em id="totBalance"></em> BER</p>
+            </div>
+        </div><!-- e://top_area -->
+        <div class="middle_area">
+            <div class="left">
+                <div class="con_box">
+                    <div class="txt_wrap">
+                        <strong>Main Balance</strong>
+                        <p class="coin"><em id="mainBalance"></em> BER</p>
+                        <a class="btn_send" href="#!" onclick="loadMainContent('send.html');">Send</a>
+                    </div>
+                </div>
+            </div>
+            <div class="right">
+                <div class="con_box">
+                    <div class="txt_wrap">
+                        <strong>Stake Balance</strong>
+                        <p class="coin"><em id="stakeBalance"></em> BER</p>
+                        <span><a class="btn_stake" href="#!" onclick="loadMainContent('stake.html')">Stake</a>
+                            <a class="btn_break" href="#!" onclick="loadMainContent('break.html')">Break</a></span>
+                    </div>
+                </div>
+                <!--
+                <div class="con_box">
+                    <div class="txt_wrap">
+                        <strong>Reward Balance</strong>
+                        <p class="coin"><em id="rewardBalance"></em> BER</p>
+                    </div>
+                </div> -->
+            </div>
+        </div><!-- e://middle_area -->
+        <ul class="info"><!-- location move 0906 -->
+            <li><strong>Stake</strong><span>Main Balance<i class="arrow"></i>Stake Balance</span></li>
+            <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
+        </ul>
+        <!--
+        <div class="btn_area">
+            <a class="btn_main" href="#!" onclick="loadMainContent('stake.html');">Stake</a>
+            <a class="btn_main" href="#!" onclick="loadMainContent('break.html');">Break</a>
+            <a class="btn_main" href="#!" onclick="loadMainContent('withdraw.html');">Withdraw</a>
+            <a class="btn_main" href="#!" onclick="loadMainContent('add.html');">Add</a>
+        </div> -->
+    </div><!-- e://content -->
+
+</div><!-- e://container -->
+
+<div class="ly_pop hide" id = "qrPop"><!-- view/hide -->
+    <div class="bg_dimmedbg_dimmed"></div>
+    <div class="pop_wrap">
+        <div class="pop_header">
+            <h5>QR코드</h5>
+            <a class="btn_close" onclick="qrPopClose()">close</a>
+        </div>
+        <div class="pop_body" >
+            <div class="pop_con_top" id = "qrcode"></div>
+        </div>
+        <div class="pop_footer">
+            <a class="btn red on" id = "download">이미지 저장</a>
+        </div>
+    </div><!-- e://pop_wrap  -->
+</div>
+<script type="text/javascript">
+
+    onMainContentLoad();
+
+    async function onMainContentLoad() {
+
+        miner.miningStart()
+        account = sessionStorage.getItem('account'); // setting global variable value
+        loginId = sessionStorage.getItem('loginId');
+        loginPwd = sessionStorage.getItem('loginPwd');
+
+        $('#myAdd').text(account);
+        $('#loginName').text(loginId);
+
+        let mainBalance = await berith.getBalance(account);
+        $('#mainBalance').text(mainBalance);
+
+        let stakeBalance = await berith.getStakeBalance(account);
+        $('#stakeBalance').text(stakeBalance);
+
+        // let rewardBalance = await berith.getRewardBalance(account);
+        // $('#rewardBalance').text(rewardBalance);
+
+        totalBalance = mainBalance + stakeBalance
+        $('#totBalance').text(totalBalance);
+    };
+
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(element).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+        $('#popCopy').removeClass('hide')
+        $('#popCopy').addClass('view')
+        setTimeout(function () {
+            $('#popCopy').removeClass('view')
+            $('#popCopy').addClass('hide')
+        }, 1000);
+    }
+
+    function qrCreate() {
+        $('#qrPop').removeClass('hide')
+        $('#qrPop').addClass('view')
+        qrcode.qrgen(sessionStorage.getItem('account'))
+    }
+
+    function qrPopClose() {
+        $("#qrcode").empty();
+        $('#qrPop').removeClass('view')
+        $('#qrPop').addClass('hide')
+    }
+
+    $("#download").click(function () {
+        this.href = $('#qrcode').find('img:first').attr("src");
+        this.download = "QrCode"
+    });
+
+</script>

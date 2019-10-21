@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
@@ -15,68 +14,63 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // handleMessages handles messages
+// js api랑 통신하는 함수
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+	var info map[string]interface{}
+	err = json.Unmarshal(m.Payload, &info)
+	if err != nil{
+		payload = nil
+		return
+	}
+	api := info["api"]
+	args := info["args"].([]interface{})
 	switch m.Name {
+
 	case "init":
-		ch <- NodeMsg{
-			t: "init",
-			v: nil,
-		}
+		break
+	case "polling":
+		//ch2 <- 1
+		startPolling()
+		break
+	case  "stopPolling" :
+		ch2 <- 0
 		break
 	case "callApi":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
 
-		api := info["api"]
-		args := info["args"].([]interface{})
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
-		api := info["api"]
-		args := info["args"].([]interface{})
-		payload, err = callDB(api, args...)
+		payload , err = callDB(api , args...)
+
 		break
 	case "exportKeystore":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
 		args := info["args"].([]interface{})
 		payload, err = exportKeystore(args)
 		break
 
 	case "importKeystore":
-		var info map[string]interface{}
-		err = json.Unmarshal(m.Payload, &info)
-		if err != nil {
-			payload = nil
-			break
-		}
 		args := info["args"].([]interface{})
 		err = importKeystore(args)
 		payload = nil
 		break
 	}
 
+	if err!=nil {
+		astilog.Error(err.Error())
+	}
+	astilog.Debugf("Payload: %s", payload)
 	return
 }
 
-func callNodeApi(api interface{}, args ...interface{}) (string, error) {
+
+// cli 관련 api 처리하는 함수
+func callNodeApi(api interface{}, args ...interface{}) (string, error)  {
+	var apiName = api.(string)
+
 	var result json.RawMessage
 	p := make([]interface{}, 0)
 	for _, item := range args {
@@ -84,47 +78,26 @@ func callNodeApi(api interface{}, args ...interface{}) (string, error) {
 			break
 		}
 		// 트랜잭션시
-		if api.(string) == "berith_sendTransaction" {
+
+		if apiName == "berith_sendTransaction" || apiName == "berith_stake" || apiName == "berith_rewardToBalance"  || apiName == "berith_rewardToStake" || apiName == "berith_stopStaking"   {
 			temp := reflect.ValueOf(item).Interface()
-			itemMap := temp.(map[string]interface{})
-			argTemp := map[string]interface{}{
-				"from":  reflect.ValueOf(itemMap["from"]).String(),
-				"to":    reflect.ValueOf(itemMap["to"]).String(),
-				"value": reflect.ValueOf(itemMap["value"]).String(),
-			}
-			p = append(p, argTemp)
-		} else if api.(string) == "berith_stake" || api.(string) == "berith_rewardToBalance" || api.(string) == "berith_rewardToStake" {
-			temp := reflect.ValueOf(item).Interface()
-			itemMap := temp.(map[string]interface{})
-			argTemp := map[string]interface{}{
-				"from":  reflect.ValueOf(itemMap["from"]).String(),
-				"value": reflect.ValueOf(itemMap["value"]).String(),
-			}
-			p = append(p, argTemp)
-		} else {
-			p = append(p, item)
+			itemMap:= temp.(map[string]interface{})
+			p = append(p, itemMap)
+		} else{
+			p = append(p , item)
 		}
 	}
 	err := client.Call(&result, api.(string), p...)
 
-	var val string
-	switch err := err.(type) {
-	case nil:
-		if result == nil {
-
-		} else {
-			val = string(result)
-			return val, err
-		}
-	case rpc.Error:
-		return val, err
-	default:
-		return val, err
+	if (err!= nil) {
+		return err.Error(), err
 	}
-
-	return val, err
+	return string(result), err
 }
-func callDB(api interface{}, args ...interface{}) (interface{}, error) {
+
+// db 관련 api 처리하는 함수
+func callDB ( api interface{}, args... interface{}) ( interface{}, error){
+
 	key := make([]string, 0)
 	for _, item := range args {
 		key = append(key, item.(string))
@@ -136,9 +109,11 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 		astilog.Error(errors.Wrap(err, "insert error"))
 	}
 	switch api.(string) {
-	case "selectContact":
-		contact := make(walletdb.Contact, 0)
-		err := WalletDB.Select([]byte(acc+"-contact"), &contact)
+
+	case "selectContact" :
+		contact := make(walletdb.Contact,0)
+		err := WalletDB.Select([]byte("c"+acc), &contact)
+
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +123,7 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 	case "selectMember":
 		var member walletdb.Member
 
-		err := WalletDB.Select([]byte(acc+"-member"), &member)
+		err := WalletDB.Select([]byte("qwer5910"), &member)
 		if err != nil {
 			return nil, err
 		}
@@ -156,31 +131,144 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 		break
 	case "insertContact":
 		contact := make(walletdb.Contact, 0)
-		WalletDB.Select([]byte(acc), &contact)
+		WalletDB.Select([]byte("c"+acc), &contact)
 		contact[common.HexToAddress(key[0])] = key[1]
-		err := WalletDB.Insert([]byte(acc+"-contact"), contact)
+
+		err := WalletDB.Insert([]byte("c"+acc) , contact)
 		if err != nil {
 			return nil, err
 		}
-		return nil, nil
+		return  contact , nil
+		break
+	case "updateContact":
+		contact := make(walletdb.Contact, 0)
+		WalletDB.Select([]byte("c"+acc), &contact)
+		delete(contact, common.HexToAddress(key[0]))
+		err := WalletDB.Insert([]byte("c"+acc) , contact)
+		if err != nil {
+			return nil , err
+		}
+		return contact, nil
+		break
+	case "restoreMember":
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[1]), &mem)
+		if err == nil {
+			return "err" , err
+		}
+		member := walletdb.Member{
+			Address: common.HexToAddress(key[0]),
+			ID : key[1],
+			Password: key[2],
+			PrivateKey: key[3],
+		}
+		err = WalletDB.Insert([]byte(key[1]) , member)
+		if err != nil {
+			return nil , err
+		}
+		return member, nil
+		break
+	case "updateMember":
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[0]), &mem)
+		if err != nil {
+			return "err" , err
+		}
+		mem.Password = key[1]
+		err = WalletDB.Insert([]byte(key[0]) , mem)
+		if err != nil {
+			return nil , err
+		}
+		return mem, nil
+		break
+	case "selectTxInfo":
+		txMaster := make(walletdb.TxHistoryMaster , 0)
+		err := WalletDB.Select([]byte("t"+acc) , &txMaster)
+		if err != nil {
+			return nil , err
+		}
+		txDetails := make([]walletdb.TxHistory,0)
+		for _ , val := range txMaster {
+			var txDetail walletdb.TxHistory
+			err2 := WalletDB.Select([]byte(val) , &txDetail)
+			if err2 != nil {
+				return nil , err
+			}
+			txDetails=append(txDetails,txDetail)
+		}
+		return txDetails , nil
+		break
+	case "insertTxInfo":
+		var tempTxInfo walletdb.TxHistory
+		err := WalletDB.Select([]byte(key[0]), &tempTxInfo)
+		if err == nil{
+			return "err" ,err
+		}
+		txMaster := make(walletdb.TxHistoryMaster , 0)
+		WalletDB.Select([]byte("t"+acc), &txMaster)
+		txMaster[key[0]] = key[0]
+		err = WalletDB.Insert([]byte("t"+acc), txMaster)
+		if err != nil {
+			return nil ,err
+		}
+		txinfo := walletdb.TxHistory{
+			TxAddress: common.HexToAddress(key[1]),
+			TxType: key[2],
+			TxAmount: key[3],
+			Txtime: time.Now().Format("2006-01-02 15:04:05"),
+			Hash: common.HexToHash(key[4]),
+			GasLimit: key[5],
+			GasPrice: key[6],
+		}
+		err = WalletDB.Insert([]byte(key[0]), txinfo)
+		if err != nil {
+			return nil , err
+		}
+		return txinfo, nil
+
 		break
 	case "insertMember":
-		member := walletdb.Member{
-			Address:  common.HexToAddress(acc),
-			ID:       key[0],
-			Password: key[1],
+		var mem walletdb.Member
+		err := WalletDB.Select([]byte(key[0]), &mem)
+		if err == nil {
+			return "err" , err
 		}
-		member.PrivateKey[0] = 12
-		err = WalletDB.Insert([]byte(acc+"-member"), member)
+		newAcc ,err := callNodeApi("personal_newAccount", key[1])
+		newAcc = strings.ReplaceAll(newAcc , "\"","")
+		privateKey , err := callNodeApi("personal_privateKey",newAcc , key[1] )
+		privateKey = strings.ReplaceAll(privateKey , "\"","")
+		member := walletdb.Member{
+
+			Address: common.HexToAddress(newAcc),
+			ID : key[0],
+
+			Password: key[1],
+			PrivateKey: privateKey,
+		}
+
+		err = WalletDB.Insert([]byte(key[0]) , member)
+
 		if err != nil {
 			return nil, err
 		}
+		return member, nil
 		break
 
+	case "checkLogin":
+		var member walletdb.Member
+
+		err := WalletDB.Select([]byte(key[0]), &member)
+		if err != nil {
+			return nil, err
+		}
+		return member, nil
+		break
 	}
 
 	return nil, nil
 }
+
+// 개인키 내보내기 함수 
 
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName := "keystore.zip"
@@ -215,7 +303,9 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 	return body, nil
 }
 
-func importKeystore(args []interface{}) error {
+// 개인키 삽입 함수
+func importKeystore(args []interface{}) (error)  {
+
 
 	dir, err := stack.FetchKeystoreDir()
 	if err != nil {

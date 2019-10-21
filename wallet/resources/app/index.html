@@ -8,16 +8,41 @@
     <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
     <link rel="stylesheet" href="static/lib/astinotifier/astinotifier.css">
     <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
+    <style type="text/css">
+        html {
+            font-family: sans-serif;
+        }
+        td {
+            vertical-align: top;
+            padding-top: 0.2em;
+            padding-bottom: 0.2em;
+        }
+        td:first-child {
+            white-space: pre;
+            padding-right: 0.5em;
+        }
+        input[type=radio], input[type=checkbox] {
+            margin: 0em;
+            padding: 0em;
+        }
+        input[type=radio] + label, input[type=checkbox] + label {
+            margin-right: 0.8em;
+            padding-left: 0.2em;
+        }
+    </style>
 </head>
 <body>
 
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="static/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script src="static/lib/qrcodegen/qrcode.js"></script>
+
     <script>if (window.module) module = window.module;</script>
 
     <script src="static/js/index.js"></script>
     <script src="static/js/hexConvert.js"></script>
     <script src="static/js/database.js"></script>
+    <script src="static/js/qrGen.js"></script>
 
     <script src="static/js/api/berith.js"></script>
     <script src="static/js/api/admin.js"></script>
@@ -119,11 +144,32 @@
         </tbody>
     </table> <br > <br>
 
+    <input type ="text" id ="getPrivateAdd" > 계정 주소</input>
+    <input type ="text" id ="getPrivatePwd" > 계정 비밀번호</input>
+    <input type = "text" id = "getPrivateResult" > 결과 </input>
+    <button onclick="personal.getPrivateKey($(getPrivateAdd).val() , $(getPrivatePwd).val())" > 개인키 조회</button> <br> <br>
 
-    <textarea id="polling"></textarea>
-    <button onclick="index.nextPage()">Next Page</button> <br> <br>
+    <input type ="text" id ="importRawKeyAdd" > 개인키 주소</input>
+    <input type ="text" id ="importRawKeyPwd" > 계정 비밀번호</input>
+    <input type = "text" id = "importRawKeyResult" > 결과 </input>
+    <button onclick="personal.importRawKey($(importRawKeyAdd).val() , $(importRawKeyPwd).val())" > keystore 복원</button> <br> <br>
 
+    <input type ="text" id ="updateAccountAdd" > 계정 주소</input>
+    <input type ="text" id ="updateAccountPwd" > 기존 비밀번호</input>
+    <input type ="text" id ="updateAccountNewPwd" > 새 비밀번호</input>
+    <input type = "text" id = "updateAccountResult" > 결과 </input>
+    <button onclick="berith.updateAccount($(updateAccountAdd).val() , $(updateAccountPwd).val() , $(updateAccountNewPwd).val())" > 계정 비밀번호 변경</button> <br> <br>
 
+    <button onclick="berith.pendingTransactions()">pedingTransActions </button>
+    <textarea id="pendingResult"></textarea>
+    <br> <br>
+    <textarea id = "qrtext"></textarea> <br>
+    <button onclick="qrcode.qrgen($(qrtext).val())">qr Create</button> <br> <br>
+    <div style="border: 2px solid #000;width:500px">
+        <div id="qrcode"></div>
+    </div>
+
+    <button onclick="database.checkLogin($(memberName).val() , $(memberPwd).val())" > 조회죟죄호지호짛조</button> <br> <br>
 
 
     <input type = "password" id = "exportPassword" > Export Password </input>
@@ -135,6 +181,10 @@
     <input type = "password" id = "importPassword" > Import Password </input>
     <button onclick="berith.importKeystore()">Import Keystore</button>
     <br><br>
+
+    <textarea id="polling"></textarea>
+    <button onclick="index.nextPage()">Next Page</button> <br> <br>
+
 
 </body>
 </html>
