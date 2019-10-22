@@ -2210,6 +2210,11 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
                 return new BigNumber(number.replace('0x',''), 16);
             }
 
+            if(number.indexof('Bx') === 0 || number.indexOf('-Bx') === 0) {
+                var tempNumber = number.replace('Bx', '');
+                return new BigNumber(tempNumber, 16);
+            }
+
             return new BigNumber(number.toString(10), 10);
         };
 
