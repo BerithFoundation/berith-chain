@@ -34,23 +34,20 @@
                     <div class="box_inp">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id = "contactUpdateName" placeholder="지갑 이름을 입력해 주세요" />
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
-                    <p class="error_txt" id = "err1">
-
-                    </p>
+                    <p class="error_txt" id = "err1"></p>
                 </div>
                 <div class="inp_group" id = "contactUpdateAddrGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>지갑주소</h5>
                     <div class="box_inp disabled">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id = "contactUpdateAddr" placeholder="지갑 주소를 입력해 주세요" disabled/>
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
-                    <p class="error_txt" id = "err2">
-                    </p>
+                    <p class="error_txt" id = "err2"></p>
                 </div>
             </div>
             <div class="pop_footer">
@@ -63,80 +60,71 @@
         </div>
 
     </div>
-    <script type="text/javascript">
-        $('#contactUpdateName').focus(function(){
-            $('#contactUpdateNameGroup').addClass('active del')
-        });
-        $('#contactUpdateName').blur(function(){
-            $('#contactUpdateNameGroup').removeClass('active del')
-        });
-        $("#contactUpdateName").on("propertychange change keyup paste input", function() {
-            var currentVal = $(this).val();
-            if( currentVal != ""){
-                $('#btnUpdate').addClass('on')
-            }else{
-                $('#btnUpdate').removeClass('on')
-            }
-        });
-        function openContactUpdate(value){
-            $('#contactUpdate').removeClass("hide")
-            $('#contactUpdate').addClass("view")
-            var addNum = value.attr('id')
-            var addr = $('#addr'+addNum).text()
-            // console.log("addr :: " + addr)
-             $('#contactUpdateAddr').val(addr)
+<script type="text/javascript">
+    $("#contactUpdateName").on("propertychange change keyup paste input", function() {
+        var currentVal = $(this).val();
+        if( currentVal != ""){
+            $('#btnUpdate').addClass('on')
+        }else{
+            $('#btnUpdate').removeClass('on')
         }
-        function closeContactUpdate(){
-            $('#contactUpdate').removeClass("view")
-            $('#contactUpdate').addClass("hide")
+    });
+    function openContactUpdate(value){
+        $('#contactUpdate').removeClass("hide")
+        $('#contactUpdate').addClass("view")
+        var addNum = value.attr('id')
+        var addr = $('#addr'+addNum).text()
+        $('#contactUpdateAddr').val(addr)
+        registerEvents()
+    }
+    function closeContactUpdate(){
+        $('#contactUpdate').removeClass("view")
+        $('#contactUpdate').addClass("hide")
+    }
+    async function fnContactUpdate() {
+        var name = $('#contactUpdateName').val()
+        var addr = $('#contactUpdateAddr').val()
+        var vali = await validationUpdate(name,addr)
+        if ( vali == false){
+            return
         }
-        async function fnContactUpdate() {
-            var name = $('#contactUpdateName').val()
-            var addr = $('#contactUpdateAddr').val()
-            var vali = await validationUpdate(name,addr)
-            console.log("vali ::: " + vali)
-            if ( vali == false){
-                return
-            }
-            var obj = await database.insertContact(addr, name)
-            console.log("add success ::" + obj)
-            if(  obj != null){
-                $('#popUpdate').removeClass('hide')
-                $('#popUpdate').addClass('view')
-                setTimeout(function () {
-                    $('#popUpdate').removeClass('view')
-                    $('#popUpdate').addClass('hide')
-                    closeContactUpdate()
-                    closeContactList()
-                    openContactList()
-                },3000)
-            }
-
-
+        var obj = await database.insertContact(addr, name)
+        console.log("add success ::" + obj)
+        if(  obj != null){
+            $('#popUpdate').removeClass('hide')
+            $('#popUpdate').addClass('view')
+            setTimeout(function () {
+                $('#popUpdate').removeClass('view')
+                $('#popUpdate').addClass('hide')
+                closeContactUpdate()
+                closeContactList()
+                openContactList()
+            },3000)
         }
-        async function validationUpdate(name, addr){
-            var obj = await database.selectContact()
-            var keys = Object.keys(obj);
-            if( name == ""){
+    }
+    async function validationUpdate(name, addr){
+        var obj = await database.selectContact()
+        var keys = Object.keys(obj);
+        if( name == ""){
+            $('#contactUpdateNameGroup').addClass('error')
+            $('#err1').html("저장할 이름을 입력하세요.")
+            $('#contactUpdateName').focus()
+            return false
+        }
+        for ( var i in keys) {
+            if (name == obj[keys[i]]){
+                console.log("same Name !!! ")
                 $('#contactUpdateNameGroup').addClass('error')
-                $('#err1').html("저장할 이름을 입력하세요.")
+                $('#err1').html("이미 존재하는 이름 입니다.")
                 $('#contactUpdateName').focus()
                 return false
             }
-            for ( var i in keys) {
-                if (name == obj[keys[i]]){
-                    console.log("same Name !!! ")
-                    $('#contactUpdateNameGroup').addClass('error')
-                    $('#err1').html("이미 존재하는 이름 입니다.")
-                    $('#contactUpdateName').focus()
-                    return false
-                }
-            }
-            $('#contactUpdateNameGroup').removeClass('error')
-            return true
         }
+        $('#contactUpdateNameGroup').removeClass('error')
+        return true
+    }
 
-    </script>
+</script>
 </body>
 
 </html>

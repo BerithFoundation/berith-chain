@@ -197,12 +197,6 @@ let berith = {
 
     exportKeystore: function (pwd) {
         let message = {"name": "exportKeystore"};
-        // let password = $('#exportPassword').val()
-        //
-        // if (!pwd) {
-        //     alert("Enter password to export keystore")
-        //     return
-        // }
         message.payload = {
             "args" : [pwd]
         }

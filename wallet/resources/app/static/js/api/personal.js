@@ -47,10 +47,6 @@ let personal = {
         return result.payload;
     },
 
-
-
-
-
     lockAccount: function () {
         let message = {"name": "callApi"};
         message.payload = {
@@ -78,6 +74,12 @@ let personal = {
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
             var obj =message.payload
+
+            if ( obj == "account already exists") {
+                $('#privateKeyGroup').addClass('error')
+                $('#err1').html("키스토어 파일이 이미 존재합니다.")
+                return
+            }
             var obj2 = JSON.parse(obj)
             console.log( "obj ::: " + obj)
             console.log( "obj2 ::: " + obj2)

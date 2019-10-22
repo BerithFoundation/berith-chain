@@ -7,7 +7,7 @@
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
             <div class="pop_header">
-                <h5>EXPORT</h5>
+                <h5>개인키확인</h5>
                 <a class="btn_close" onclick="closePrivateKeyPop()">close</a>
             </div>
             <div class="pop_body">
@@ -37,6 +37,7 @@
             $('#privateKeyCheck').addClass('view')
             $('#privateKeyCheckTopText').html(loginId+"의 개인키입니다.")
             $('#privateKeyResult').html(JSON.parse(data))
+
         }
         function closePrivateKeyPop() {
             $('#privateKeyCheck').removeClass('view')
@@ -44,6 +45,7 @@
             $('#exportPwd').val("")
             $('#btnPrivateKeyCheck').removeClass('on')
             $('#btnKeystoreExport').removeClass('on')
+            headerPopup('exportPop')
         }
 
         function copyToClipboardPrivateKey(element) {

@@ -5,19 +5,19 @@
         <!--<li>선출될 확률 : <em>35%</em></li> -->
         <!--<li >참여 수 : <em>300</em></li> -->
     </ul>
-    <a class="btn_export" onclick="openExport()">Export</a>
+    <a class="btn_export" onclick="headerPopup('exportPop')">Export</a>
     <a class="btn_contact" onclick="openContactList()">Contact</a>
-    <a class="btn_setting" onclick="openMySetting()">Setting</a>
+    <a class="btn_setting" onclick="headerPopup('mySetting')">Setting</a>
 
 </div>
 <!--contact Pop -->
 <div id = contactPop> </div>
 <!--contact Add Pop  -->
-<div id = contactAddPop ></div>
+<div id = contactAddPop class="ly_pop hide"></div>
 <!--mySetting Pop  -->
-<div id = mySetting> </div>
+<div id = mySetting class="ly_pop hide"> </div>
 <!--export Pop  -->
-<div id = exportPop></div>
+<div id = exportPop class="ly_pop hide"></div>
 
 <script type="text/javascript">
 
@@ -26,4 +26,15 @@
     $('#mySetting').load('mySetting.html');
     $('#exportPop').load('export.html');
 
+    function headerPopup(htmlName) {
+        let selector = "#" + htmlName
+        if ($(selector).hasClass("view")) {
+            $(selector).removeClass("view");
+            $(selector).addClass("hide");
+        } else {
+            $(selector).removeClass("hide");
+            $(selector).addClass("view");
+        }
+        registerEvents()
+    }
 </script>

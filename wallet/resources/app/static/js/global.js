@@ -44,8 +44,10 @@ function loadMainContent(htmlName) {
     $( "#main-content" ).load( htmlName, function() {
         registerEvents();
     });
-
 }
+// function loadHeaderContent(htmlName) {
+//
+// }
 
 function loadMainContentWithCallBack(htmlName, callBackFunction) {
     $( "#main-content" ).load( htmlName, function() {

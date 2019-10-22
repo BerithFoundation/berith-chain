@@ -44,7 +44,7 @@ func ToHexArray(b [][]byte) []string {
 // s may be prefixed with "0x".
 func FromHex(s string) []byte {
 	if len(s) > 1 {
-		if s[0:2] == "0x" || s[0:2] == "0X" {
+		if s[0:2] == "0x" || s[0:2] == "0X" || HasAddressPrefix(s)  {
 			s = s[2:]
 		}
 	}

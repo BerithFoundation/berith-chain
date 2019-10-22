@@ -7,15 +7,6 @@
             <span><a class="copy" onclick="copyToClipboard('#myAdd')">복사</a><a class="qr" onclick="qrCreate()">qr</a></span>
         </div>
         <hr/>
-        <!--
-        <ul class="info">
-            <li><strong>Stake</strong>
-                <spna>Main Balance<i class="arrow"></i>Stake Balance</spna>
-            </li>
-            <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
-            <li><strong>Add</strong><span>Reward Balance<i class="arrow"></i>Stake Balance</span></li>
-            <li><strong>Withdraw</strong><span>Reward Balance<i class="arrow"></i>Main Balance</span></li>
-        </ul>-->
         <div class="one_sec_wrap hide" id="popCopy"><!-- view/hide -->
             <div class="bg"></div>
             <p class="complete">복사 완료</p>
@@ -49,26 +40,12 @@
                             <a class="btn_break" href="#!" onclick="loadMainContent('break.html')">Break</a></span>
                     </div>
                 </div>
-                <!--
-                <div class="con_box">
-                    <div class="txt_wrap">
-                        <strong>Reward Balance</strong>
-                        <p class="coin"><em id="rewardBalance"></em> BER</p>
-                    </div>
-                </div> -->
             </div>
         </div><!-- e://middle_area -->
         <ul class="info"><!-- location move 0906 -->
             <li><strong>Stake</strong><span>Main Balance<i class="arrow"></i>Stake Balance</span></li>
             <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
         </ul>
-        <!--
-        <div class="btn_area">
-            <a class="btn_main" href="#!" onclick="loadMainContent('stake.html');">Stake</a>
-            <a class="btn_main" href="#!" onclick="loadMainContent('break.html');">Break</a>
-            <a class="btn_main" href="#!" onclick="loadMainContent('withdraw.html');">Withdraw</a>
-            <a class="btn_main" href="#!" onclick="loadMainContent('add.html');">Add</a>
-        </div> -->
     </div><!-- e://content -->
 
 </div><!-- e://container -->
@@ -92,9 +69,11 @@
 
     onMainContentLoad();
 
+    // 메인페이지 로드 함수
     async function onMainContentLoad() {
-
+        //마이닝 시작
         miner.miningStart()
+        // 세션정보 가져오기
         account = sessionStorage.getItem('account'); // setting global variable value
         loginId = sessionStorage.getItem('loginId');
         loginPwd = sessionStorage.getItem('loginPwd');

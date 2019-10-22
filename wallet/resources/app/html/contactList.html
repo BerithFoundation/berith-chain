@@ -16,10 +16,6 @@
 </head>
 
 <body>
-    <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
     <div class="ly_pop exlarge hide" id = "contactList" ><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
@@ -29,7 +25,7 @@
             </div>
             <div class="pop_body">
                 <div class="pop_con_top right">
-                    <a class="btn_add_contact" onclick="openContactAdd()">Contact 추가</a>
+                    <a class="btn_add_contact" onclick="headerPopup('contactAddPop')">Contact 추가</a>
                 </div>
                 <div class="inp_group " id ="searchGroup"><!--  input 선택 시 active del 추가  -->
                     <div class="row_group search">
@@ -41,10 +37,10 @@
                         </div>
 
                         <div class="box_inp" >
-                                    <span class="inp_wrap">
-                                        <input class="inp" id ="searchText" type="text">
-                                    </span>
-                            <a class="del" href="#!">삭제</a>
+                            <span class="inp_wrap">
+                                <input class="inp" id ="searchText" type="text">
+                                <a class="del" href="#!">삭제</a>
+                            </span>
                         </div>
                         <div class="btn_inp">
                             <a class="btn white medium2" href="#!" onclick="getContactList('y')">검색</a>
@@ -90,20 +86,11 @@
     <div id ="contactUpdatePop"></div>
     <div id ="contactDeletePop"></div>
     <script type = "text/javascript">
-        var pageCnt = 0
-        var contents = new Array()
-        var contactDataAll
+        var pageCnt = 0 , contactDataAll , contents = new Array()
 
         $(document).ready(function(){
             $("#contactUpdatePop").load("contactUpdate.html");
             $("#contactDeletePop").load("contactDeleteConfirm.html");
-        });
-
-        $('#searchText').focus(function(){
-            $('#searchGroup').addClass('active del')
-        });
-        $('#searchText').blur(function(){
-            $('#searchGroup').removeClass('active del')
         });
 
         function closeContactList(){
@@ -114,30 +101,28 @@
             $('#searchText').empty()
             $('#contactList').removeClass('hide');
             $('#contactList').addClass('view');
+            registerEvents()
             getContactList("n")
         }
 
         async function getContactList(searchYn) {
-            var cnt = 0
+            var cnt = 0 , radioVal , text , pageFrame = ''
             var obj = await database.selectContact()
-            var radioVal
-            var text
             contactDataAll = obj
             contents =  []
-            var pageFrame = ''
             pageCnt = 0
             $('#contactData').empty()
             $('#contactPaging').empty()
             if( searchYn == "y" ){
                 radioVal = $('input[name="group"]:checked').val();
                 text  =$('#searchText').val()
-
-                if(text == "") {
-                    $('#searchGroup').addClass('error')
-                    $('#err1').html("검색어를  입력하세요")
-                    $('#searchText').focus()
-                    return
-                }
+                console.log("searchText ::: " + text)
+                // if(text == "") {
+                //     $('#searchGroup').addClass('error')
+                //     $('#err1').html("검색어를  입력하세요")
+                //     $('#searchText').focus()
+                //     return
+                // }
             }
             if( obj == ""){
                 contents += '<tr class="no_data ">'
@@ -201,6 +186,14 @@
                 if( pageCnt > 1 ){
                     pageFrame += '<a class="next" onclick="nextPage()">Next</a>'
                 }
+                if(!contents[0]){
+                    contents += '<tr class="no_data ">'
+                    contents += '<td colspan="5"><i class="icon"></i>검색결과가 없습니다.</td>'
+                    contents += '</tr>'
+                    $('#contactData').append(contents)
+                    $('#contactCount').text(cnt)
+                    return
+                }
                 $('#contactData').append(contents[0])
                 $('#contactCount').text(cnt)
                 $('#contactPaging').append(pageFrame)
@@ -233,7 +226,6 @@
                 $('#contactData').empty()
                 $('#contactData').append(contents[obj2-1])
             }
-
         }
         function movePage(num) {
             $('#contactPaging').children('.active').removeClass('active')
@@ -258,18 +250,12 @@
             }, 1000);
         }
         function movePageSend(value) {
-            /*var addNum = value.attr('id')
-            var addr = $('#addr'+addNum).text()
-            location.href = "send.html?addr="+addr*/
-
             var addNum = value.attr('id');
             var addr = $('#addr'+addNum).text();
             loadMainContentWithCallBack("send.html", function() {
                 closeContactList();
                 populateAddressField(addr); // Defined in 'send.html'
             });
-
-
         }
     </script>
 </body>

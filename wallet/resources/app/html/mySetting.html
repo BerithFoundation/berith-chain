@@ -1,33 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="utf-8">
-    <title>Berith PC Wallet</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
-    <meta name="subject" content="" />
-    <meta name="application-name" content="">
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <meta name="copyright" content="Copyrights (c) " />
-    <meta name="robots" content="ALL" />
-    <meta name="robots" content="index,follow" />
 
-    
-</head>
-    
-<body>
-
-    <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
-    <div class="ly_pop hide" id = "mySettingPop"><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
             <div class="pop_header">
                 <h5>My page</h5>
-                <a class="btn_close" onclick="closeMySetting()">close</a>
+                <a class="btn_close" onclick="headerPopup('mySetting')">close</a>
             </div>
             <div class="pop_body">
                 <div class="inp_group">
@@ -43,23 +19,21 @@
                         <h5>현재 비밀번호</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
-                                <input class="inp" id ="originPwd" type="text" />
+                                <input class="inp" id ="originPwd" type="password" />
                                 <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
-                        <p class="error_txt" >
-
-                        </p>
+                        <p class="error_txt" ></p>
                     </div>
                     <div class="inp_group  " id ="changePwdGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                         <h5>변경 비밀번호</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
-                                <input class="inp" id = "changePwd" type="text"  />
-                                <a class="icon view_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <input class="inp" id = "changePwd" type="password"  />
+                                <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
                         <p class="error_txt">
                             입력해 주세요.
@@ -69,10 +43,10 @@
                         <h5>변경 비밀번호 확인</h5>
                         <div class="box_inp">
                             <span class="inp_wrap">
-                                <input class="inp" id = "changePwd2" type="text"  />
+                                <input class="inp" id = "changePwd2" type="password"  />
                                 <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
                         <p class="error_txt">
                             입력해 주세요.
@@ -86,33 +60,13 @@
         </div><!-- e://pop_wrap  -->
 
         <div id = "pwdChangeConfirmPop"></div>
-    </div>
+
     <script type="text/javascript">
-        //let openYn = 0
-        //let updateAdd = sessionStorage.getItem('account');
-        //let loginId = sessionStorage.getItem('loginId')
         $(document).ready(function () {
            $('#pwdChangeConfirmPop').load("pwdChangeConfirm.html");
+            let loginName = sessionStorage.getItem('loginId');
+            $('#loginNameSetting').text(loginName)
         });
-        $('#originPwd').focus(function () {
-            $('#originPwdGroup').addClass('active del')
-        });
-        $('#originPwd').blur(function () {
-            $('#originPwdGroup').removeClass('active del')
-        });
-        $('#changePwd').focus(function () {
-            $('#changePwdGroup').addClass('active del')
-        });
-        $('#changePwd').blur(function () {
-            $('#changePwdGroup').removeClass('active del')
-        });
-        $('#changePwd2').focus(function () {
-            $('#changePwdGroup2').addClass('active del')
-        });
-        $('#changePwd2').blur(function () {
-            $('#changePwdGroup2').removeClass('active del')
-        });
-
         $("#originPwd").on("propertychange change keyup paste input", function() {
             var currentVal = $(this).val();
             if( currentVal != "" && $('#changePwd').val() != "" && $('#changePwd2').val() != ""){
@@ -137,29 +91,14 @@
                 $('#fnChangeBtn').removeClass('on')
             }
         });
-
-        function openMySetting(){
-            $('#mySettingPop').removeClass('hide');
-            $('#mySettingPop').addClass('view');
-            let loginName = sessionStorage.getItem('loginId');
-            $('#loginNameSetting').text(loginName)
-        }
-        function closeMySetting(){
-            $('#mySettingPop').removeClass('view');
-            $('#mySettingPop').addClass('hide');
-        }
-        // function openPwdChange() {
-        //     if (openYn == 0 ){
-        //         $('#pwdChange').removeClass('hide')
-        //         $('#pwdChange').addClass('view')
-        //         openYn =1
-        //     }else {
-        //         $('#pwdChange').removeClass('view')
-        //         $('#pwdChange').addClass('hide')
-        //         $('#fnChangeBtn').removeClass('on')
-        //         openYn =0
-        //     }
-        // }
+        $('.btn_close').click(function () {
+            console.log("close !!! ")
+            $('.inp').val("");
+            if(!$('#pwdChange').hasClass('hide')){
+                $('#pwdChange').addClass('hide')
+                $('#pwdChange').removeClass('view')
+            }
+        })
         async function fnPwdChangeConfirm() {
             var vali = $('#fnChangeBtn').attr('class')
             var vali2 = vali.includes('on')

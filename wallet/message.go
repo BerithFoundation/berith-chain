@@ -152,6 +152,15 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[1]), &mem)
 		if err == nil {
+			mem = walletdb.Member{
+				Address: common.HexToAddress(key[0]),
+				ID : key[1],
+				Password: key[2],
+				PrivateKey: key[3],
+			}
+			return mem, nil
+		}
+		if err != nil {
 			return "err" , err
 		}
 		member := walletdb.Member{

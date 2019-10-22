@@ -102,10 +102,6 @@ let database = {
                 astilectron.sendMessage(message , function (message) {
                     asticode.loader.hide()
                     var obj = message.payload
-                    // var keys = Object.keys(obj)
-                    // for ( var i in keys) {
-                    //     console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
-                    // }
                     resolve(obj)
                 })
             }) // settimeout
@@ -122,6 +118,9 @@ let database = {
             asticode.loader.hide()
             var obj = message.payload
             console.log("obj :::  " + obj)
+            if (obj != "" || obj != undefined){
+                succesChange()
+            }
         });
     },
     insertMember : function (memberName , memberPwd) {
@@ -159,7 +158,7 @@ let database = {
             var obj = message.payload
             if(obj == "err"){
                 $('#idGroup').addClass('error')
-                $('#err1').html("이미 존재하는 아이디 입니다.")
+                $('#err1').html("키스토어 복원에 실패하였습니다.")
                 return
             }else{
                 console.log("ADD :: " + obj.Address)
