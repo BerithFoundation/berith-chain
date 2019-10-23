@@ -87,9 +87,6 @@
         let stakeBalance = await berith.getStakeBalance(account);
         $('#stakeBalance').text(stakeBalance);
 
-        // let rewardBalance = await berith.getRewardBalance(account);
-        // $('#rewardBalance').text(rewardBalance);
-
         totalBalance = mainBalance + stakeBalance
         $('#totBalance').text(totalBalance);
     };

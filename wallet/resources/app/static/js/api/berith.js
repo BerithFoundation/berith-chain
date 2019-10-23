@@ -46,22 +46,20 @@ let berith = {
     getBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload)
-        var val = await hexToDecimal(obj) / 1000000000000000000;
+        var val = await convertAmount(obj)
         return val;
     },
 
     getStakeBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getStakeBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload)
-        var val  =await hexToDecimal(obj) / 1000000000000000000;
-        // var val  =parseInt(obj, 16);
+        var val  =await convertAmount(obj)
         return val;
     },
-
     getRewardBalance : async function (address) {
         result = await sendMessage("callApi", "berith_getRewardBalance", [address,"latest"]);
         var obj = JSON.parse(result.payload);
-        var val  =await hexToDecimal(obj) / 1000000000000000000;
+        var val  =await convertAmount(obj) / 1000000000000000000;
         // var val  =parseInt(obj, 16);
         return val;
     },
@@ -145,9 +143,6 @@ let berith = {
         return result;
     },
 
-
-
-
     pendingTransactions: function ( ) {
         let message = {"name": "callApi"};
         message.payload = {
@@ -174,6 +169,7 @@ let berith = {
             console.log("updateAccount ::: " + message.payload)
         })
     },
+
     startPolling : function () {
         let message = { "name" :  "polling"};
         message.payload = {
@@ -184,6 +180,7 @@ let berith = {
             asticode.loader.hide();
         });
     },
+
     stopPolling : function () {
         let message = { "name" :  "stopPolling"};
         message.payload = {
@@ -211,6 +208,7 @@ let berith = {
             asticode.loader.hide();
         })
     },
+
     importKeystore: function (e) {
         asticode.loader.show()
         let file = document.getElementById("keystoreFile").files[0];

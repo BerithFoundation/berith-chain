@@ -45,9 +45,6 @@ function loadMainContent(htmlName) {
         registerEvents();
     });
 }
-// function loadHeaderContent(htmlName) {
-//
-// }
 
 function loadMainContentWithCallBack(htmlName, callBackFunction) {
     $( "#main-content" ).load( htmlName, function() {
@@ -56,13 +53,22 @@ function loadMainContentWithCallBack(htmlName, callBackFunction) {
     });
 }
 
-
 async function hexToDecimal(value) {
     let decimalValue = toDecimal(value);
     // console.log(decimalValue);
     return decimalValue;
 }
 
+async function convertAmount(value) {
+    let decimalValue = toDecimal(value);
+    let result = BigInt(decimalValue) / BigInt(1000000000000000000)
+    return result
+}
+function trlistAmount(value) {
+    let decimalValue = toDecimal(value);
+    let result = BigInt(decimalValue) / BigInt(1000000000000000000)
+    return result
+}
 function getWholePart(value) {
     return (value + "").split(".")[0];
 }

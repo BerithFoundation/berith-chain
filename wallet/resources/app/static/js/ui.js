@@ -5,12 +5,10 @@ $(document).ready(function() {
 
 function registerEvents() {
     $(".inp").focus(function () {
-        //$(this).parent().parent().parent().parent().addClass("active del");
         $(this).closest('.inp_group').addClass("active");
     });
 
     $(".inp").blur(function () {
-        //$(this).parent().parent().parent().parent().removeClass("active del");
         $(this).closest('.inp_group').removeClass("active");
     });
     $(".inp").on("propertychange change keyup paste input", function() {

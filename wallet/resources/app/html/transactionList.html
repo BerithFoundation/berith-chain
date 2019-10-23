@@ -65,7 +65,6 @@
     var txListContents = new Array()
     async function searchTransacionList(searchType){
         var obj2 = await database.selectTxInfo(account)
-        console.log( "obj2 ::: " + obj2)
         if( obj2 == undefined) {
             console.log( "in if ")
             txListContents[0] += '<tr class="no_data ">'
@@ -76,8 +75,6 @@
             $('#searchListCnt').html(0)
             return
         }
-        console.log( "out if")
-        // if ( obj2 == undefined)
         var obj = obj2.payload
         var cnt = 0
         var pageCnt = 0
@@ -97,7 +94,7 @@
                         txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Send</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
+                        txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
                         txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                     }
                 })
@@ -112,7 +109,7 @@
                         txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Receive</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
+                        txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
                         txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                     }
                 })
@@ -127,7 +124,7 @@
                         txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Stake</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
+                        txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
                         txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                     }
                 })
@@ -142,7 +139,7 @@
                         txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Break</span></td>'
-                        txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
+                        txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
                         txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                     }
                 })
@@ -169,7 +166,7 @@
                             txListContents[vv] += '<td class="type"><span class="gray">Break</span></td>'
                             break;
                     }
-                    txListContents[vv] += '<td class="amount">'+ toDecimal(i.TxAmount) / 1000000000000000000+'</td>'
+                    txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount) +'</td>'
                     txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                 })
                 break
@@ -245,20 +242,7 @@
             $('#txListData').append(txListContents[obj])
         }
     }
-    // // $('#tableTr').onclick = function () {
-    // //
-    // // }
-    // $("#txTable tr").click(function() {
-    //
-    //     var str = ""
-    //     var tdArr = new Array();    // 배열 선언
-    //
-    //
-    //     // 현재 클릭된 Row(<tr>)
-    //     var tr = $(this);
-    //     var td = tr.children();
-    //
-    // }
+
     function openDetailPopup(type , time, hash){
         // console.log('openDetailPopup!!!!')
         console.log('hash!!! : ' + hash)

@@ -15,7 +15,6 @@
             <p class="coin" id="stakeBalance"></p>
         </div>
         <hr/>
-
     </div><!-- e://aside -->
 
     <div class="content">
@@ -24,43 +23,43 @@
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
-                                <span class="inp_wrap">
-                                    <input class="inp" type="text"/>
-                                </span>
-                    <a class="del" href="#!">삭제</a>
+                    <span class="inp_wrap">
+                        <input class="inp" type="text"/>
+                        <a class="del" href="#!">삭제</a>
+                    </span>
                 </div>
                 <div class="btn_inp">
                     <a class="btn white medium2" href="#!" onclick="stakeAll()">모두 보내기</a>
                 </div>
             </div>
             <p class="error_txt">
-                소수점은 한번만 입력해 주세요.
+                올바른 수량을 입력하세요.(최소 100000 개 이상 )
             </p>
         </div><!-- e://inp_group -->
         <div class="row_group">
             <div class="con_box input">
-                <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group" id = "stakeGasL"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id = "stakeGasLimit" value = "21000"/>
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
-                <div class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group" id = "stakeGasP"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id = "stakeGasPrice" value = "21000"/>
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
             </div>
@@ -155,18 +154,27 @@
     async function validateStakeAmount() {
         let stakeAmountField = $('#stakeAmount').find('input[type=text]:first');
         let stakeAmount = stakeAmountField.val();
+        let gasLimit = $('#stakeGasLimit').val()
+        let gasPrice = $('#stakeGasPrice').val()
 
-        if (isDecimalNumber(stakeAmount)) {
+        if (isDecimalNumber(stakeAmount) ) {
             let mainBalance = await berith.getBalance(account);
-            if (parseInt(stakeAmount) > parseInt(mainBalance)) {
-                console.error("input stake amount is more than the available balance");
+            if (parseInt(stakeAmount) > parseInt(mainBalance) || parseInt(stakeAmount) < 100000 ) {
                 $("#stakeAmount").addClass("error");
                 return false;
-            } else {
+            }else if(!isDecimalNumber(gasLimit)) {
+                $('#stakeGasLimit').val(21000)
+                $('#stakeGasL').addClass("error")
+                return false
+            }else if(!isDecimalNumber(gasPrice)) {
+                $('#stakeGasPrice').val(21000)
+                $('#stakeGasL').removeClass("error")
+                $('#stakeGasP').addClass("error")
+                return false
+            }  else {
                 $("#stakeAmount").removeClass("error");
             }
         } else {
-            console.error("not a valid amount");
             $("#stakeAmount").addClass("error");
             return false;
         }
