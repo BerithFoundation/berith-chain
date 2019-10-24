@@ -63,7 +63,11 @@ let berith = {
         // var val  =parseInt(obj, 16);
         return val;
     },
-
+    getRealGasUsed: async function(hash){
+        result = await sendMessage("callApi" , "berith_getTransactionReceipt" , [hash])
+        var val = JSON.parse(result.payload)
+        return val;
+    },
     sendTransaction: async function (sendAmount , receiverAccount , gasLimit , gasPrice) {
         var valueData = hexConvert.getTxValue(sendAmount).value
         var valueData2 = "0x"+valueData
@@ -87,8 +91,12 @@ let berith = {
         return result;
     },
 
-    stopStaking : async function () {
-        result = await sendMessage("callApi", "berith_stopStaking", [{from: account}]);
+    stopStaking : async function (gasLimit, gasPrice) {
+        var gasLimitValue  = parseInt(gasLimit).toString(16)
+        var gasPriceValue = parseInt(gasPrice).toString(16)
+        var gasLimitValue2  = "0x"+gasLimitValue
+        var gasPriceValue2  = "0x"+gasPriceValue
+        result = await sendMessage("callApi", "berith_stopStaking", [{from: account , gas: gasLimitValue2 , gasPrice: gasPriceValue2}]);
         return result;
     },
     mining : async function(){

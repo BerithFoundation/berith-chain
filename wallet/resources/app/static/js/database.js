@@ -54,12 +54,12 @@ let database = {
             $('#memberData').append(contents)
         })
     },
-    insertTxInfo : function(blockNumber , txAdd , txType , txAmount  , hash , gasLimit, gasPrice) {
+    insertTxInfo : function(blockNumber , txAdd , txType , txAmount  , hash , gasLimit, gasPrice ,gasUsed) {
         let message = {"name" : "callDB"}
 
         message.payload = {
             "api" : "insertTxInfo",
-            "args" : [blockNumber ,txAdd , txType ,txAmount , hash , gasLimit , gasPrice]
+            "args" : [blockNumber ,txAdd , txType ,txAmount , hash , gasLimit , gasPrice ,gasUsed]
         }
         asticode.loader.show()
         astilectron.sendMessage(message , function (message) {

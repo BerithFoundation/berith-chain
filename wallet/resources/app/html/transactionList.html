@@ -18,21 +18,7 @@
                 <span class="all_count">전체 <em id = "allListCnt">0</em></span>
                 <span class="search_count">검색결과 <em id = "searchListCnt">0</em></span><!-- 전체 리스트일 경우 hide -->
             </div>
-            <!--
-            <div class="select_wrap right">
-                <label>생성시간</label>
-                <div class="box_sel">
-                    <select class="time">
-                        <option>전체</option>
-                    </select>
-                </div>
-                <label>상태</label>
-                <div class="box_sel">
-                    <select class="state">
-                        <option>전체</option>
-                    </select>
-                </div>
-            </div>-->
+
         </div>
         <table class="list_table transction_data" id = "txTable">
             <colgroup>
@@ -64,9 +50,15 @@
     onTransactionListLoad();
     var txListContents = new Array()
     async function searchTransacionList(searchType){
+        txListContents = []
+        var cnt = 0
+        var pageCnt = 0
+        var pageFrame = ''
+        $('#txListData').empty()
+        $('#trListPaging').empty()
         var obj2 = await database.selectTxInfo(account)
         if( obj2 == undefined) {
-            console.log( "in if ")
+            // console.log( "in if ")
             txListContents[0] += '<tr class="no_data ">'
             txListContents[0] += '<td colspan="4"><i class="icon"></i>검색 결과가 없습니다.</td>'
             txListContents[0] += '</tr>'
@@ -76,13 +68,18 @@
             return
         }
         var obj = obj2.payload
-        var cnt = 0
-        var pageCnt = 0
-        var pageFrame = ''
-        $('#txListData').empty()
-        $('#trListPaging').empty()
-        txListContents = []
         var tabMenu = $('#tabMenu').children('.on')
+        var sortingField = "Txtime"
+        obj.sort(function (a, b) {
+            var aResult = parseInt(a[sortingField].replace(/-|\s|:/gi, ''))
+            var bResult = parseInt(b[sortingField].replace(/-|\s|:/gi, ''))
+            return aResult > bResult ? -1 : 1 ;
+        })
+        // // // console.log( "obj Length ::: " + obj.length  )
+        // obj.forEach((i) => {
+        //     console.log( "obj :: " + parseInt(i.Txtime.replace(/-|\s|:/gi, '')) + "obj2 ::: " + i.Txtime)
+        //     console.log ("obj ::: " + JSON.stringify(i))
+        // })
         switch (searchType) {
             case "Send" :
                 tabMenu.removeClass('on')
@@ -91,7 +88,7 @@
                     if(i.TxType == "0"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.TxAmount + '\',\''+ i.Hash+'\' ,\''+i.TxBlockNumber+'\' ,\''+i.GasLimit+'\' , \''+i.GasPrice+'\' , \'' + i.GasUsed+'\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Send</span></td>'
                         txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
@@ -106,7 +103,7 @@
                     if(i.TxType == "1 "){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.TxAmount + '\',\''+ i.Hash+'\' ,\''+i.TxBlockNumber+'\' ,\''+i.GasLimit+'\' , \''+i.GasPrice+'\' , \'' + i.GasUsed+'\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="white">Receive</span></td>'
                         txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
@@ -121,7 +118,7 @@
                     if(i.TxType == "2"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.TxAmount + '\',\''+ i.Hash+'\' ,\''+i.TxBlockNumber+'\' ,\''+i.GasLimit+'\' , \''+i.GasPrice+'\' , \'' + i.GasUsed+'\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Stake</span></td>'
                         txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
@@ -136,7 +133,7 @@
                     if(i.TxType == "3"){
                         var vv =parseInt(cnt / 10)
                         cnt ++
-                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\')"> '
+                        txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.TxAmount + '\',\''+ i.Hash+'\' ,\''+i.TxBlockNumber+'\' ,\''+i.GasLimit+'\' , \''+i.GasPrice+'\' , \'' + i.GasUsed+'\')"> '
                         txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                         txListContents[vv] += '<td class="type"><span class="gray">Break</span></td>'
                         txListContents[vv] += '<td class="amount">'+ trlistAmount(i.TxAmount)+'</td>'
@@ -150,7 +147,8 @@
                 obj.forEach((i) => {
                     var vv =parseInt(cnt / 10)
                     cnt ++
-                    txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.Hash + '\')"> '
+                    txListContents[vv] += '<tr onclick="openDetailPopup('+i.TxType+' , \'' + i.Txtime + '\', \'' + i.TxAmount + '\',\''+ i.Hash+'\' ,\''+i.TxBlockNumber+'\' ,\''+i.GasLimit+'\' , \''+i.GasPrice+'\' , \'' + i.GasUsed+'\')"> '
+                    // txListContents[vv] += '<tr onclick="openDetailPopup('+ i + ')">'
                     txListContents[vv] += '<td class ="date" > '+i.Txtime+' </td>'
                     switch (i.TxType) {
                         case "0":
@@ -170,7 +168,7 @@
                     txListContents[vv] += '<td class="state"><span class="success"><i class="icon"></i>전송 완료</span></td></tr>'
                 })
                 break
-        }
+        } // switch-case
         if ( txListContents[0] ==  undefined) {
             txListContents[0] += '<tr class="no_data ">'
             txListContents[0] += '<td colspan="4"><i class="icon"></i>검색 결과가 없습니다.</td>'
@@ -242,10 +240,7 @@
             $('#txListData').append(txListContents[obj])
         }
     }
-
-    function openDetailPopup(type , time, hash){
-        // console.log('openDetailPopup!!!!')
-        console.log('hash!!! : ' + hash)
+    function openDetailPopup(type , time, amount , hash ,number , gasLimit , gasPrice , gasUsed){
         switch (type) {
             case 0:
                 $('#txDetailState').attr("class","white")
@@ -265,6 +260,12 @@
                 break
         }
         $('#txDetailDate').html(time)
+        $('#txDetailAmount').html(trlistAmount(amount))
+        $('#txDetailHash').html(hash)
+        $('#txDetailBlockNumber').html(toDecimal(number))
+        $('#txDetailGasLimit').html(toDecimal(gasLimit))
+        $('#txDetailGasPrice').html(toDecimal(gasPrice))
+        $('#txDetailGasUsed').html("0.0000000000000"+toDecimal(gasUsed))
         togglePopUp("txListDetailPopup")
     }
 </script>

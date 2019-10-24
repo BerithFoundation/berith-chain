@@ -33,11 +33,12 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	case "init":
 		break
 	case "polling":
-		//ch2 <- 1
+		//ch2 <- true
 		startPolling()
 		break
 	case  "stopPolling" :
-		ch2 <- 0
+		//ch2 <- false
+		fmt.Print("logout!!!!")
 		break
 	case "callApi":
 		payload, err = callNodeApi(api, args...)
@@ -219,6 +220,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 			return nil ,err
 		}
 		txinfo := walletdb.TxHistory{
+			TxBlockNumber : key[0],
 			TxAddress: common.HexToAddress(key[1]),
 			TxType: key[2],
 			TxAmount: key[3],
@@ -226,6 +228,7 @@ func callDB ( api interface{}, args... interface{}) ( interface{}, error){
 			Hash: common.HexToHash(key[4]),
 			GasLimit: key[5],
 			GasPrice: key[6],
+			GasUsed: key[7],
 		}
 		err = WalletDB.Insert([]byte(key[0]), txinfo)
 		if err != nil {
