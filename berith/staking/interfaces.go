@@ -1,7 +1,10 @@
 package staking
 
 import (
+	"io"
 	"math/big"
+
+	"github.com/BerithFoundation/berith-chain/rlp"
 
 	"github.com/BerithFoundation/berith-chain/core/state"
 
@@ -27,6 +30,16 @@ type StakingList interface {
 	ClearTable()
 	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool)
 	ToArray() []common.Address
+}
+
+type Stakers interface {
+	Put(common.Address)
+	Remove(common.Address)
+	IsContain(common.Address) bool
+	AsList() []common.Address
+	FetchFromList([]common.Address)
+	EncodeRLP(io.Writer) error
+	DecodeRLP(*rlp.Stream) error
 }
 
 /*

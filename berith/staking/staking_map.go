@@ -17,10 +17,11 @@ import (
 //[BERITH]
 //StakingMap StakingList 인터페이스를 맵형태로 구현한 구조체
 type StakingMap struct {
-	storage    map[common.Address]stkInfo
-	sortedList []common.Address
-	miners     map[common.Address]bool
-	table      map[common.Address]VoteResult
+	storage             map[common.Address]stkInfo
+	sortedList          []common.Address
+	miners              map[common.Address]bool
+	table               map[common.Address]VoteResult
+	totalStakingBalance *big.Int
 }
 
 //[BERITH]

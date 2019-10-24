@@ -3,32 +3,24 @@ package stakingdb
 import (
 	"fmt"
 
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/rlp"
+
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/syndtr/goleveldb/leveldb/iterator"
 )
 
 type StakingDB struct {
-	Encoder encodeFunc
-	Decoder decodeFunc
 	creator createFunc
 	stakeDB *berithdb.LDBDatabase
 }
 
-type decodeFunc func(val []byte) (staking.StakingList, error)
-
-type encodeFunc func(list staking.StakingList) ([]byte, error)
-
-type createFunc func() staking.StakingList
-
-func (s *StakingDB) Iterator() iterator.Iterator {
-	return s.stakeDB.NewIterator()
-}
+type createFunc func() staking.Stakers
 
 /**
 DB Create
 */
-func (s *StakingDB) CreateDB(filename string, decoder decodeFunc, encoder encodeFunc, creator createFunc) error {
+func (s *StakingDB) CreateDB(filename string, creator createFunc) error {
 	if s.stakeDB != nil {
 		return nil
 	}
@@ -40,8 +32,6 @@ func (s *StakingDB) CreateDB(filename string, decoder decodeFunc, encoder encode
 	}
 
 	s.stakeDB = db
-	s.Encoder = encoder
-	s.Decoder = decoder
 	s.creator = creator
 	return nil
 }
@@ -63,8 +53,15 @@ func (s *StakingDB) getValue(key string) ([]byte, error) {
 /**
 DB Insert Value
 */
-func (s *StakingDB) pushValue(k string, v []byte) error {
+func (s *StakingDB) pushValue(k string, stakers staking.Stakers) error {
 	key := []byte(k)
+
+	v, err := rlp.EncodeToBytes(stakers)
+
+	if err != nil {
+		return err
+	}
+
 	return s.stakeDB.Put(key, v)
 }
 
@@ -78,28 +75,27 @@ func (s *StakingDB) Close() {
 	s.stakeDB.Close()
 }
 
-func (s *StakingDB) GetStakingList(key string) (staking.StakingList, error) {
-	rlpVal, rlpErr := s.getValue(key)
-	if rlpErr != nil {
-		return nil, rlpErr
-	}
-
-	result, err := s.Decoder(rlpVal)
-
+func (s *StakingDB) GetStakers(key string) (staking.Stakers, error) {
+	val, err := s.getValue(key)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
-}
+	holder := make([]common.Address, 0)
 
-func (s *StakingDB) Commit(key string, stakingList staking.StakingList) error {
-	bytes, err := s.Encoder(stakingList)
-	if err != nil {
-		return err
+	if err := rlp.DecodeBytes(val, holder); err != nil {
+		return nil, err
 	}
 
-	err = s.pushValue(key, bytes)
+	stakers := s.creator()
+
+	stakers.FetchFromList(holder)
+
+	return stakers, nil
+}
+
+func (s *StakingDB) Commit(key string, value staking.Stakers) error {
+	err := s.pushValue(key, value)
 
 	if err != nil {
 		return err
@@ -108,6 +104,6 @@ func (s *StakingDB) Commit(key string, stakingList staking.StakingList) error {
 	return nil
 }
 
-func (s *StakingDB) NewStakingList() staking.StakingList {
+func (s *StakingDB) NewStakers() staking.Stakers {
 	return s.creator()
 }

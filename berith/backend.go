@@ -31,7 +31,11 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berith/brtapi"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/filters"
+	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/consensus"
@@ -40,10 +44,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/filters"
-	"github.com/BerithFoundation/berith-chain/berith/gasprice"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/internal/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
@@ -92,8 +92,8 @@ type Berith struct {
 
 	APIBackend *BerAPIBackend
 
-	miner     *miner.Miner
-	gasPrice  *big.Int
+	miner      *miner.Miner
+	gasPrice   *big.Int
 	berithbase common.Address
 
 	networkID     uint64
@@ -138,7 +138,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 
 	stakingDB := &stakingdb.StakingDB{}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
-	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New); stkErr != nil {
+	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
 	}
 	engine := CreateConsensusEngine(chainConfig, chainDb, stakingDB)
@@ -152,13 +152,11 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 		shutdownChan:   make(chan bool),
 		networkID:      config.NetworkId,
 		gasPrice:       config.MinerGasPrice,
-		berithbase:      config.Berithbase,
+		berithbase:     config.Berithbase,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 		stakingDB:      stakingDB,
 	}
-
-
 
 	log.Info("Initialising Berith protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 
@@ -257,8 +255,6 @@ func (s *Berith) APIs() []rpc.API {
 	apis = append(apis, brtapi.GetAPIs(s.APIBackend, s.miner)...)
 	// Append any APIs exposed explicitly by the consensus engine
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
-
-
 
 	// Append all the local APIs and return
 	return append(apis, []rpc.API{

@@ -1329,7 +1329,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 
 	stakingDB := &stakingdb.StakingDB{}
 	stakingDBPath := stack.ResolvePath("stakingDB")
-	stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New)
+	stakingDB.CreateDB(stakingDBPath, staking.NewStakers)
 
 	chain, err = core.NewBlockChain(stakingDB, chainDb, cache, config, engine, vmcfg, nil)
 	if err != nil {
