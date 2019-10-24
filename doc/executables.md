@@ -76,9 +76,15 @@ berithench execute transfer --nodes "http://localhost:8501,http://localhost:8502
     --outputpath "/home/app/workspaces/berith/berithench-test.txt"
 ```
 
-- tps :   
+- tps : getting tps from start block number to last block number  
 
-
+```bash
+$ ./build/bin/berithench tps --nodes "http://localhost:8501" --startblock 1 --lastblock 3
+>>>>>> start to test tps from [1 ~ 3] <<<<<<
+block #2 > #tx : 0 / #tps : 0.0000
+block #3 > #tx : 2 / #tps : 0.4000
+>> block (1,3] #tps : 0.1000 / #tx : 2
+```
 
 ---  
 

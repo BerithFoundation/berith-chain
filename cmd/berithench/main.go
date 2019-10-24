@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
-
 	cli "gopkg.in/urfave/cli.v1"
 	"os"
 )
@@ -29,9 +28,9 @@ var (
 
 func init() {
 	app.Action = cli.ShowSubcommandHelp
-
 	app.Commands = []cli.Command{
 		ExecuteCommand,
+		TpsCommand,
 	}
 }
 
