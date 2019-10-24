@@ -120,57 +120,30 @@ web3._extend({
 `
 
 const Bsrr_JS = `
-web3._extend({
-	property: 'bsrr',
-	methods: [
-		new web3._extend.Method({
-			name: 'getState',
-			call: 'bsrr_getState',
-			params: 1,
-			inputFormatter: [null]
-		}),
-		new web3._extend.Method({
-			name: 'getBlockCreators',
-			call: 'bsrr_getBlockCreators',
-			params: 1,
-			inputFormatter: [null]
-		}),
-		new web3._extend.Method({
-			name: 'getSigners',
-			call: 'bsrr_getSigners',
-			params: 1,
-			inputFormatter: [null]
-		}),
-		new web3._extend.Method({
-			name: 'getSignersAtHash',
-			call: 'bsrr_getSignersAtHash',
-			params: 1
-		}),
-		new web3._extend.Method({
-			name: 'propose',
-			call: 'bsrr_propose',
-			params: 2
-		}),
-		new web3._extend.Method({
-			name: 'discard',
-			call: 'bsrr_discard',
-			params: 1
-		}),
-		new web3._extend.Method({
-			name: 'getJoinRatio',
-			call: 'bsrr_getJoinRatio',
-			params: 1,
-			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
-		}),
-	],
-	properties: [
-		new web3._extend.Property({
-			name: 'proposals',
-			getter: 'bsrr_proposals'
-		}),
-	]
-});
-`
+ web3._extend({
+ 	property: 'bsrr',
+ 	methods: [
+ 		new web3._extend.Method({
+ 			name: 'getBlockCreators',
+ 			call: 'bsrr_getBlockCreators',
+ 			params: 1,
+ 			inputFormatter: [null]
+ 		}),
+ 		new web3._extend.Method({
+ 			name: 'getSignersAtHash',
+ 			call: 'bsrr_getSignersAtHash',
+ 			params: 1
+ 		}),
+ 		new web3._extend.Method({
+ 			name: 'getJoinRatio',
+ 			call: 'bsrr_getJoinRatio',
+ 			params: 1,
+ 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+ 		}),
+ 	],
+ 	properties: []
+ });
+ `
 
 const Admin_JS = `
 web3._extend({

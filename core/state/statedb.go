@@ -318,10 +318,10 @@ func (self *StateDB) HasSuicided(addr common.Address) bool {
  */
 
 // [BERITH] SetStaking adds StakeBalance
-func (self *StateDB) SetStaking(addr common.Address, amount *big.Int) {
+func (self *StateDB) SetStaking(addr common.Address, amount, blockNumber *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.SetStaking(amount)
+		stateObject.SetStaking(amount, blockNumber)
 	}
 }
 
@@ -333,6 +333,15 @@ func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	}
 	return common.Big0
 }
+
+func (self *StateDB) GetStakeUpdated(addr common.Address) *big.Int {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.StakeUpdated()
+	}
+	return common.Big0
+}
+
 // [BRT] RemoveStakeBalance
 func (self *StateDB) RemoveStakeBalance(addr common.Address) {
 	stateObject := self.GetOrNewStateObject(addr)
@@ -342,13 +351,12 @@ func (self *StateDB) RemoveStakeBalance(addr common.Address) {
 }
 
 // [BRT] AddStakeBalance
-func (self *StateDB) AddStakeBalance(addr common.Address, amount *big.Int) {
+func (self *StateDB) AddStakeBalance(addr common.Address, amount, blockNumber *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.AddStakeBalance(amount)
+		stateObject.AddStakeBalance(amount, blockNumber)
 	}
 }
-
 
 func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 	stateObject := self.getStateObject(addr)
@@ -357,16 +365,13 @@ func (self *StateDB) GetAccountInfo(addr common.Address) *Account {
 	}
 
 	return &Account{
-		Nonce: uint64(0),
-		Balance:common.Big0,
-		Root:emptyCode,
-		CodeHash: nil,
+		Nonce:        uint64(0),
+		Balance:      common.Big0,
+		Root:         emptyCode,
+		CodeHash:     nil,
 		StakeBalance: nil,
-		Point: nil}
+		Point:        nil}
 }
-
-
-
 
 // [BERITH] Set Selection Point
 func (self *StateDB) SetPoint(addr common.Address, amount *big.Int) {
@@ -429,6 +434,39 @@ func (self *StateDB) GetBehindBalance(addr common.Address) []Behind {
 		return stateObject.BehindBalance()
 	}
 	return []Behind{}
+}
+
+//[BERITH] Penalty
+func (self *StateDB) AddPenalty(addr common.Address, blockNumber *big.Int) {
+	stateObject := self.getStateObject(addr)
+	if stateObject == nil {
+		return
+	}
+	stateObject.AddPenalty(blockNumber)
+}
+
+func (self *StateDB) RemovePenalty(addr common.Address, blockNumber *big.Int) {
+	stateObject := self.getStateObject(addr)
+	if stateObject == nil {
+		return
+	}
+	stateObject.RemovePenalty(blockNumber)
+}
+
+func (self *StateDB) GetPenalty(addr common.Address) uint64 {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.Penalty()
+	}
+	return 0
+}
+
+func (self *StateDB) GetPenaltyUpdated(addr common.Address) *big.Int {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.PenaltyUpdated()
+	}
+	return big.NewInt(0)
 }
 
 // AddBalance adds amount to the account associated with addr.
