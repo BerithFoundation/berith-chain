@@ -28,6 +28,7 @@ import (
 )
 
 var (
+	// flags
 	StartBlockFlag = cli.Int64Flag{
 		Name:  "startblock",
 		Usage: "first block number to check",
@@ -38,6 +39,8 @@ var (
 		Usage: "last block number to check",
 		Value: int64(0),
 	}
+
+	// commands
 	TpsCommand = cli.Command{
 		Action: testTPS,
 		Name:   "tps",

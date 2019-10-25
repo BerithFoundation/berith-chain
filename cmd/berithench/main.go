@@ -22,21 +22,12 @@ import (
 	"os"
 )
 
-var (
-	app = utils.NewApp("", "berithench")
-)
-
-func init() {
-	app.Action = cli.ShowSubcommandHelp
-	app.Commands = []cli.Command{
-		ExecuteCommand,
-		TpsCommand,
-	}
-}
+var gitCommit = "" // Git SHA1 commit hash of the release (set via linker flags)
+var app *cli.App
 
 // Commonly used flags in cli.
 var (
-	ChainIdFlag = cli.Int64Flag{
+	ChainIDFlag = cli.Int64Flag{
 		Name:  "chainid",
 		Usage: "network chain id",
 	}
@@ -49,6 +40,14 @@ var (
 		Usage: "Directory of config toml file",
 	}
 )
+
+func init() {
+	app = utils.NewAppWithHelpTemplate(gitCommit, "an Berith test tools", false)
+	app.Commands = []cli.Command{
+		ExecuteCommand,
+		TpsCommand,
+	}
+}
 
 func main() {
 	if err := app.Run(os.Args); err != nil {

@@ -31,16 +31,16 @@ import (
 )
 
 type berithenchConfig struct {
-	ChainID    int64    // chain id
-	Nodes      []string // endpoints of nodes
-	Keystore   string   // keystore path
-	Addresses  []string // from addresses in tx
-	Password   string   // password file path
-	Duration   string   // time duration for test execution
-	TxCount    uint64   // tx count of test execution
-	InitDelay  uint64   // initial sleep before testing
-	TxInterval uint64   // interval between send transactions
-	OutputPath string   // path of output
+	ChainID    int64    `json:"chainId"`    // chain id
+	Nodes      []string `json:"nodes"`      // endpoints of nodes
+	Keystore   string   `json:"keystore"`   // keystore path
+	Addresses  []string `json:"addresses"`  // from addresses in tx
+	Password   string   `json:"password"`   // password file path
+	Duration   string   `json:"duration"`   // time duration for test execution
+	TxCount    uint64   `json:"txCount"`    // tx count of test execution
+	InitDelay  uint64   `json:"initDelay"`  // initial sleep before testing
+	TxInterval uint64   `json:"txInterval"` // interval between send transactions
+	OutputPath string   `json:"outputPath"` // path of output
 }
 
 var (
@@ -82,7 +82,7 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 
 	// apply flags
 	var (
-		chainID    = ctx.Int64(ChainIdFlag.Name)
+		chainID    = ctx.Int64(ChainIDFlag.Name)
 		nodes      = ctx.String(NodesFlag.Name)
 		keystore   = ctx.String(KeystoreFlag.Name)
 		addrs      = ctx.String(AddressesFlag.Name)
@@ -94,7 +94,9 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 		output     = ctx.String(OutputPath.Name)
 	)
 	// FIXME : more efficient compare
-	cfg.ChainID = chainID
+	if chainID != 0 {
+		cfg.ChainID = chainID
+	}
 	if nodes != "" {
 		cfg.Nodes = strings.Split(nodes, ",")
 	}

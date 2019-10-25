@@ -18,6 +18,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/BerithFoundation/berith-chain/accounts"
@@ -27,6 +28,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/gookit/color"
 	cli "gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"math"
@@ -76,17 +78,15 @@ var (
 
 	// commands
 	ExecuteCommand = cli.Command{
-		Action:   cli.ShowSubcommandHelp,
-		Name:     "execute",
-		Usage:    "request transactions to given nodes",
-		Category: "EXECUTE COMMANDS",
+		Name:  "execute",
+		Usage: "request transactions to given nodes",
 		Subcommands: []cli.Command{
 			{
 				Name:   "transfer",
 				Usage:  "sends only transfer transactions",
 				Action: transfer,
 				Flags: []cli.Flag{
-					ChainIdFlag,
+					ChainIDFlag,
 					NodesFlag,
 					ConfigFileFlag,
 					KeystoreFlag,
@@ -107,10 +107,18 @@ type doWork func(taskID string, count uint64)
 
 // transfer send transactions given cli context
 func transfer(ctx *cli.Context) error {
+	color.Yellow.Println(">>> Setup to send transfer transactions <<<")
+
 	// setup
 	cfg, err := parseConfig(ctx)
 	if err != nil {
 		return err
+	}
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		color.Yellow.Println("> failed to marshal config : %v\n", err)
+	} else {
+		color.Yellow.Println(">", string(b))
 	}
 
 	testCtx := parseContext(cfg)
@@ -119,13 +127,14 @@ func transfer(ctx *cli.Context) error {
 	}
 
 	setupContext(testCtx)
+	color.Yellow.Println("> Success to setup context")
 	defer tearDownContext(testCtx)
 
 	// do request after initial delay
 	if testCtx.InitDelay > 0 {
 		time.Sleep(time.Duration(testCtx.InitDelay))
 	}
-	log.Info(">> Start to send transfer transactions <<")
+	color.Cyan.Println(">>> Start to send transfer transactions <<<")
 	startTime := time.Now()
 	var wait sync.WaitGroup
 	for i, addrCtx := range testCtx.AddressContexts {
@@ -141,7 +150,7 @@ func transfer(ctx *cli.Context) error {
 	// TODO : write output to console and file by using text/template
 	layout := "15:04:05.999"
 	var out bytes.Buffer
-	out.WriteString("// ------------------------------------\n")
+	out.WriteString("// ------------------------------------------------------------------------\n")
 	out.WriteString(fmt.Sprintf(">>>>>> Complete to send transactions [%s] ~ [%s] <<<<<<\n", startTime.Format(layout), endTime.Format(layout)))
 
 	out.WriteString("## args\n")
@@ -152,14 +161,25 @@ func transfer(ctx *cli.Context) error {
 		out.WriteString(fmt.Sprintf("Node : %s --> %s\n", nodeCtx.url, nodeCtx.summary.String()))
 	}
 
-	out.WriteString("\n## addrs\n")
-	for _, addrCtx := range testCtx.AddressContexts {
-		out.WriteString(fmt.Sprintf("Addr : %s --> %s, first tx hash : %s\n", addrCtx.account.Address.Hex(), addrCtx.summary.String(), addrCtx.summary.firstTxHash))
+	out.WriteString("\n## addresses\n")
+	nodeCtx := testCtx.NodeContexts[0]
+	addrFormat := "#%d.Addr(%s)\n - %s\n - first tx hash : %s(in block %d)\n"
+	for idx, addrCtx := range testCtx.AddressContexts {
+		firstBlock := int64(0)
+		// getting test started block
+		if addrCtx.summary.firstTxHash != "" {
+			block, err := nodeCtx.client.BlockByNumber(context.Background(), nil)
+			if err == nil {
+				firstBlock = block.Number().Int64()
+			}
+		}
+		out.WriteString(fmt.Sprintf(addrFormat, idx, addrCtx.account.Address.Hex(), addrCtx.summary.String(), addrCtx.summary.firstTxHash, firstBlock))
 	}
-	out.WriteString("--------------------------------------- //\n")
+	out.WriteString("--------------------------------------------------------------------------- //\n")
 
 	// flush output to console & file
-	fmt.Print(out.String())
+	fmt.Println(out.String())
+
 	if testCtx.OutputPath != "" {
 		path := testCtx.OutputPath
 		fi, err := os.Stat(path)
@@ -208,7 +228,6 @@ func sendTransferTransactions(taskID string, ctx *berithenchContext, addrCtx *ad
 		}
 		toAddrs = append(toAddrs, atx.account.Address.Hex()[2:])
 	}
-	fmt.Printf("final to addrs :%v\n", toAddrs)
 
 	// setup task
 	cctx := context.Background() // TODO : check need timeout
@@ -306,7 +325,7 @@ func calcTxCount(idx, addrLen, txCount int) int {
 	return count
 }
 
-// parseContext parse bbench config to test context
+// parseContext parse berithench config to test context with unlock all
 func parseContext(config *berithenchConfig) *berithenchContext {
 	ctx := berithenchContext{
 		ChainID:    big.NewInt(config.ChainID),
@@ -346,7 +365,6 @@ func parseContext(config *berithenchConfig) *berithenchContext {
 	for i, addr := range addrs {
 		targetAddrs[addr] = passwords[i]
 	}
-
 	scryptN := keystore.StandardScryptN
 	scryptP := keystore.StandardScryptP
 	ctx.Keystore = keystore.NewKeyStore(config.Keystore, scryptN, scryptP)
