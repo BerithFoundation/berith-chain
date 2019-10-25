@@ -34,7 +34,7 @@ var gitCommit = ""
 var app *cli.App
 
 func init() {
-	app = utils.NewApp(gitCommit, "an Berith key manager")
+	app = utils.NewAppWithHelpTemplate(gitCommit, "an Berith key manager", false)
 	app.Commands = []cli.Command{
 		commandGenerate,
 		commandInspect,

@@ -70,6 +70,7 @@ var (
 		"./cmd/berithkey",
 		"./cmd/bootnode",
 		"./cmd/gwizard",
+		"./cmd/berithench",
 		"./wallet",
 	}
 	// Files that end up in the berith*.zip archive.
