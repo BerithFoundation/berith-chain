@@ -83,7 +83,7 @@ func (s *StakingDB) GetStakers(key string) (staking.Stakers, error) {
 
 	holder := make([]common.Address, 0)
 
-	if err := rlp.DecodeBytes(val, holder); err != nil {
+	if err := rlp.DecodeBytes(val, &holder); err != nil {
 		return nil, err
 	}
 
@@ -95,9 +95,7 @@ func (s *StakingDB) GetStakers(key string) (staking.Stakers, error) {
 }
 
 func (s *StakingDB) Commit(key string, value staking.Stakers) error {
-	err := s.pushValue(key, value)
-
-	if err != nil {
+	if err := s.pushValue(key, value); err != nil {
 		return err
 	}
 

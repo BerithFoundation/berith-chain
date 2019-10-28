@@ -1,11 +1,12 @@
 package bsrr
 
 import (
-	"github.com/BerithFoundation/berith-chain/berith/staking"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/params"
 	"testing"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/berith/selection"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 func TestGetMaxMiningCandidates(t *testing.T) {
@@ -23,12 +24,12 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 		holders  int
 		expected int
 	}{
-		{0, 0},                   // no holders
-		{1, 1},                   // only one holders
-		{10, 3},                  // equals to 0 point
-		{8, 2},                   // less than 0.5 point
-		{9, 3},                   // greater than or equals 0.5 point
-		{30, staking.MAX_MINERS}, // greater than staking.MAX_MINERS
+		{0, 0},                     // no holders
+		{1, 1},                     // only one holders
+		{10, 3},                    // equals to 0 point
+		{8, 2},                     // less than 0.5 point
+		{9, 3},                     // greater than or equals 0.5 point
+		{30, selection.MAX_MINERS}, // greater than staking.MAX_MINERS
 	}
 
 	for i, tt := range tests {

@@ -6,8 +6,6 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/rlp"
 
-	"github.com/BerithFoundation/berith-chain/core/state"
-
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
@@ -16,21 +14,21 @@ import (
 [BERITH]
 스테이킹 리스트 인터페이스
 */
-type StakingList interface {
-	GetInfo(address common.Address) (StakingInfo, error)
-	SetInfo(info StakingInfo) error
-	Delete(address common.Address) error
-	Encode() ([]byte, error)
-	Decode(rlpData []byte) (StakingList, error)
-	Copy() StakingList
-	Len() int
-	Print()
-	GetJoinRatio(address common.Address, blockNumber uint64, states *state.StateDB) float64
-	Sort()
-	ClearTable()
-	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool)
-	ToArray() []common.Address
-}
+// type StakingList interface {
+// 	GetInfo(address common.Address) (StakingInfo, error)
+// 	SetInfo(info StakingInfo) error
+// 	Delete(address common.Address) error
+// 	Encode() ([]byte, error)
+// 	Decode(rlpData []byte) (StakingList, error)
+// 	Copy() StakingList
+// 	Len() int
+// 	Print()
+// 	GetJoinRatio(address common.Address, blockNumber uint64, states *state.StateDB) float64
+// 	Sort()
+// 	ClearTable()
+// 	GetDifficultyAndRank(addr common.Address, blockNumber uint64, states *state.StateDB) (*big.Int, int, bool)
+// 	ToArray() []common.Address
+// }
 
 type Stakers interface {
 	Put(common.Address)
@@ -57,8 +55,8 @@ type StakingInfo interface {
 스테이킹 리스트 데이터 베이스 인터페이스
 */
 type DataBase interface {
-	GetStakingList(key string) (StakingList, error)
-	Commit(key string, stakingList StakingList) error
-	NewStakingList() StakingList
+	GetStakers(key string) (Stakers, error)
+	Commit(key string, stks Stakers) error
+	NewStakers() Stakers
 	Close()
 }

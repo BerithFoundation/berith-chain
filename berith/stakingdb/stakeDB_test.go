@@ -1,7 +1,6 @@
 package stakingdb
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/BerithFoundation/berith-chain/berith/staking"
@@ -39,11 +38,23 @@ func Test01(t *testing.T) {
 
 	db.Commit("test", stks)
 
+	stks = db.NewStakers()
+
+	printStakers(stks.AsList())
+
+	stks, err := db.GetStakers("test")
+
+	if err != nil {
+		println(err.Error())
+	}
+
+	printStakers(stks.AsList())
+
 }
 
 func printStakers(list []common.Address) {
 	println("====================[STAKERS]======================")
 	for i, v := range list {
-		fmt.Printf("[%d,%s]\n", i, v.Hex())
+		println("[", i, ",", v.Hex(), "]")
 	}
 }

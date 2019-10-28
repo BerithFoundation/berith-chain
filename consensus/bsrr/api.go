@@ -16,12 +16,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
-	"errors"
-
-	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
@@ -59,238 +54,238 @@ type API struct {
 /*
 [BERITH]
 상태의 정보를 반환하는 함수
-*/
-func (api *API) GetState(number *rpc.BlockNumber) (string, error) {
+// */
+// func (api *API) GetState(number *rpc.BlockNumber) (string, error) {
 
-	header := api.chain.GetHeaderByNumber(uint64(number.Int64()))
-	if header == nil {
-		return "", errors.New("No search a block")
-	}
-	state, err := api.chain.StateAt(header.Root)
+// 	header := api.chain.GetHeaderByNumber(uint64(number.Int64()))
+// 	if header == nil {
+// 		return "", errors.New("No search a block")
+// 	}
+// 	state, err := api.chain.StateAt(header.Root)
 
-	if err != nil {
-		return "", err
-	}
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	users, err := api.GetBlockCreators(number)
+// 	users, err := api.GetBlockCreators(number)
 
-	if err != nil {
-		return "", err
-	}
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	result := "{\n\tHASH : " + header.Hash().Hex() + ", "
-	result += "\n\tROOT : " + header.Root.Hex() + ", "
-	result += "\n\tRESULTS : ["
+// 	result := "{\n\tHASH : " + header.Hash().Hex() + ", "
+// 	result += "\n\tROOT : " + header.Root.Hex() + ", "
+// 	result += "\n\tRESULTS : ["
 
-	for _, user := range users {
+// 	for _, user := range users {
 
-		info := state.GetAccountInfo(user)
-		result += "\n\t\t{"
-		result += "\n\t\t\tCODEHASH : " + common.Bytes2Hex(info.CodeHash) + ", "
-		result += "\n\t\t\tNONCE : " + string(info.Nonce) + ", "
-		result += "\n\t\t\tROOT : " + info.Root.Hex() + ", "
-		result += "\n\t\t\tMAIN : " + info.Balance.String() + ", "
-		result += "\n\t\t\tPOINT : " + info.Point.String() + ", "
-		result += "\n\t\t\tSTAKE : " + info.StakeBalance.String()
-		result += "\n\t\t}, "
-	}
-	result += "\n\t]\n}"
+// 		info := state.GetAccountInfo(user)
+// 		result += "\n\t\t{"
+// 		result += "\n\t\t\tCODEHASH : " + common.Bytes2Hex(info.CodeHash) + ", "
+// 		result += "\n\t\t\tNONCE : " + string(info.Nonce) + ", "
+// 		result += "\n\t\t\tROOT : " + info.Root.Hex() + ", "
+// 		result += "\n\t\t\tMAIN : " + info.Balance.String() + ", "
+// 		result += "\n\t\t\tPOINT : " + info.Point.String() + ", "
+// 		result += "\n\t\t\tSTAKE : " + info.StakeBalance.String()
+// 		result += "\n\t\t}, "
+// 	}
+// 	result += "\n\t]\n}"
 
-	return result, nil
+// 	return result, nil
 
-}
+// }
 
-/*
-[BERITH]
-현재 로컬 블록상 의 선출된 BC 를 반환 하는 함수
-*/
-func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
-	var header *types.Header
-	if number == nil || *number == rpc.LatestBlockNumber {
-		header = api.chain.CurrentHeader()
-	} else {
-		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
-	}
+// /*
+// [BERITH]
+// 현재 로컬 블록상 의 선출된 BC 를 반환 하는 함수
+// */
+// func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
+// 	var header *types.Header
+// 	if number == nil || *number == rpc.LatestBlockNumber {
+// 		header = api.chain.CurrentHeader()
+// 	} else {
+// 		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+// 	}
 
-	if header == nil {
-		return nil, errUnknownBlock
-	}
+// 	if header == nil {
+// 		return nil, errUnknownBlock
+// 	}
 
-	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+// 	if parent == nil {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
-	if !exist {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+// 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+// 	if !exist {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	signers, err := api.bsrr.getSigners(api.chain, target)
-	if err != nil {
-		return nil, err
-	}
+// 	signers, err := api.bsrr.getSigners(api.chain, target)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	signersMap := signers.signersMap()
-	result := make([]common.Address, 0)
-	for k, _ := range signersMap {
-		result = append(result, k)
-	}
-	return result, nil
-}
+// 	signersMap := signers.signersMap()
+// 	result := make([]common.Address, 0)
+// 	for k, _ := range signersMap {
+// 		result = append(result, k)
+// 	}
+// 	return result, nil
+// }
 
-/*
-[BERITH]
-예전에는 이함수가 의미 있었으나 매블록마다 선출 하기때문에 현재는 의미 없음
-이후 어떻게 쓰일지 고민 필요가 있음
-예) 3블록 이후 선출될 사람을 알기 위함 정도
-*/
-// GetSigners retrieves the list of authorized signers at the specified block.
-func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
-	// Retrieve the requested block number (or current if none requested)
-	var header *types.Header
-	if number == nil || *number == rpc.LatestBlockNumber {
-		header = api.chain.CurrentHeader()
-	} else {
-		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
-	}
-	// Ensure we have an actually valid block and return the signers from its snapshot
-	if header == nil {
-		return nil, errUnknownBlock
-	}
+// /*
+// [BERITH]
+// 예전에는 이함수가 의미 있었으나 매블록마다 선출 하기때문에 현재는 의미 없음
+// 이후 어떻게 쓰일지 고민 필요가 있음
+// 예) 3블록 이후 선출될 사람을 알기 위함 정도
+// */
+// // GetSigners retrieves the list of authorized signers at the specified block.
+// func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
+// 	// Retrieve the requested block number (or current if none requested)
+// 	var header *types.Header
+// 	if number == nil || *number == rpc.LatestBlockNumber {
+// 		header = api.chain.CurrentHeader()
+// 	} else {
+// 		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+// 	}
+// 	// Ensure we have an actually valid block and return the signers from its snapshot
+// 	if header == nil {
+// 		return nil, errUnknownBlock
+// 	}
 
-	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+// 	if parent == nil {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
-	if !exist {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+// 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+// 	if !exist {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	signers, err := api.bsrr.getSigners(api.chain, target)
-	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
-	if err != nil {
-		return nil, err
-	}
-	//return snap.signers(), nil
-	return signers, nil
-}
+// 	signers, err := api.bsrr.getSigners(api.chain, target)
+// 	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	//return snap.signers(), nil
+// 	return signers, nil
+// }
 
-/*
-[BERITH]
-BC 선출 확율을 반환하는 함수
-*/
-func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
-	// Retrieve the requested block number (or current if none requested)
-	var header *types.Header
-	var num int64
-	if number == nil || *number == rpc.LatestBlockNumber {
-		header = api.chain.CurrentHeader()
-	} else {
-		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
-	}
-	// Ensure we have an actually valid block and return the signers from its snapshot
-	if header == nil {
-		return 0, errUnknownBlock
-	}
+// /*
+// [BERITH]
+// BC 선출 확율을 반환하는 함수
+// */
+// func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
+// 	// Retrieve the requested block number (or current if none requested)
+// 	var header *types.Header
+// 	var num int64
+// 	if number == nil || *number == rpc.LatestBlockNumber {
+// 		header = api.chain.CurrentHeader()
+// 	} else {
+// 		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+// 	}
+// 	// Ensure we have an actually valid block and return the signers from its snapshot
+// 	if header == nil {
+// 		return 0, errUnknownBlock
+// 	}
 
-	num = header.Number.Int64()
+// 	num = header.Number.Int64()
 
-	epoch := int64(api.bsrr.config.Epoch)
+// 	epoch := int64(api.bsrr.config.Epoch)
 
-	if num <= epoch {
-		return 0, errNoData
-	}
+// 	if num <= epoch {
+// 		return 0, errNoData
+// 	}
 
-	//p := header.ParentHash
-	//uint64(num - epoch - 2)
-	//	prev_header := api.chain.GetHeaderByNumber(5740)
+// 	//p := header.ParentHash
+// 	//uint64(num - epoch - 2)
+// 	//	prev_header := api.chain.GetHeaderByNumber(5740)
 
-	stakingList, err := api.bsrr.getStakingList(api.chain, uint64(num), header.Hash())
-	if err != nil {
-		return 0, err
-	}
+// 	stakingList, err := api.bsrr.getStakingList(api.chain, uint64(num), header.Hash())
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return 0, consensus.ErrUnknownAncestor
-	}
+// 	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+// 	if parent == nil {
+// 		return 0, consensus.ErrUnknownAncestor
+// 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
-	if !exist {
-		return 0, consensus.ErrUnknownAncestor
-	}
+// 	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+// 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+// 	if !exist {
+// 		return 0, consensus.ErrUnknownAncestor
+// 	}
 
-	states, err := api.chain.StateAt(target.Root)
-	if err != nil {
-		return 0, err
-	}
+// 	states, err := api.chain.StateAt(target.Root)
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	roi, err := api.bsrr.getJoinRatio(&stakingList, address, uint64(num), states)
-	if err != nil {
-		return 0, err
-	}
+// 	roi, err := api.bsrr.getJoinRatio(&stakingList, address, uint64(num), states)
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	return roi, nil
-}
+// 	return roi, nil
+// }
 
-// GetSignersAtHash retrieves the list of authorized signers at the specified block.
-func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
-	header := api.chain.GetHeaderByHash(hash)
-	if header == nil {
-		return nil, errUnknownBlock
-	}
+// // GetSignersAtHash retrieves the list of authorized signers at the specified block.
+// func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
+// 	header := api.chain.GetHeaderByHash(hash)
+// 	if header == nil {
+// 		return nil, errUnknownBlock
+// 	}
 
-	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+// 	if parent == nil {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
-	if !exist {
-		return nil, consensus.ErrUnknownAncestor
-	}
+// 	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+// 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+// 	if !exist {
+// 		return nil, consensus.ErrUnknownAncestor
+// 	}
 
-	signers, err := api.bsrr.getSigners(api.chain, target)
-	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
-	if err != nil {
-		return nil, err
-	}
-	return signers, nil
-}
+// 	signers, err := api.bsrr.getSigners(api.chain, target)
+// 	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return signers, nil
+// }
 
-// Proposals returns the current proposals the node tries to uphold and vote on.
-func (api *API) Proposals() map[common.Address]bool {
-	api.bsrr.lock.RLock()
-	defer api.bsrr.lock.RUnlock()
+// // Proposals returns the current proposals the node tries to uphold and vote on.
+// func (api *API) Proposals() map[common.Address]bool {
+// 	api.bsrr.lock.RLock()
+// 	defer api.bsrr.lock.RUnlock()
 
-	proposals := make(map[common.Address]bool)
-	for address, auth := range api.bsrr.proposals {
-		proposals[address] = auth
-	}
-	return proposals
-}
+// 	proposals := make(map[common.Address]bool)
+// 	for address, auth := range api.bsrr.proposals {
+// 		proposals[address] = auth
+// 	}
+// 	return proposals
+// }
 
-// Propose injects a new authorization proposal that the signer will attempt to
-// push through.
-func (api *API) Propose(address common.Address, auth bool) {
-	api.bsrr.lock.Lock()
-	defer api.bsrr.lock.Unlock()
+// // Propose injects a new authorization proposal that the signer will attempt to
+// // push through.
+// func (api *API) Propose(address common.Address, auth bool) {
+// 	api.bsrr.lock.Lock()
+// 	defer api.bsrr.lock.Unlock()
 
-	api.bsrr.proposals[address] = auth
-}
+// 	api.bsrr.proposals[address] = auth
+// }
 
-// Discard drops a currently running proposal, stopping the signer from casting
-// further votes (either for or against).
-func (api *API) Discard(address common.Address) {
-	api.bsrr.lock.Lock()
-	defer api.bsrr.lock.Unlock()
+// // Discard drops a currently running proposal, stopping the signer from casting
+// // further votes (either for or against).
+// func (api *API) Discard(address common.Address) {
+// 	api.bsrr.lock.Lock()
+// 	defer api.bsrr.lock.Unlock()
 
-	delete(api.bsrr.proposals, address)
-}
+// 	delete(api.bsrr.proposals, address)
+// }
