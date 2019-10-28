@@ -1084,7 +1084,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var formatOutputBytes = function (param, name) {
             var matches = name.match(/^bytes([0-9]*)/);
             var size = parseInt(matches[1]);
-            return '0x' + param.staticPart().slice(0, 2 * size);
+            return 'Bx' + param.staticPart().slice(0, 2 * size);
         };
 
         /**
@@ -1120,7 +1120,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var formatOutputAddress = function (param) {
             var value = param.staticPart();
-            return "0x" + value.slice(value.length - 40, value.length);
+            return "Bx" + value.slice(value.length - 40, value.length);
         };
 
         module.exports = {
@@ -2209,6 +2209,10 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
             if (isString(number) && (number.indexOf('0x') === 0 || number.indexOf('-0x') === 0)) {
                 return new BigNumber(number.replace('0x',''), 16);
+            }
+
+            if (isString(number) && (number.indexOf('Bx') === 0 || number.indexOf('-Bx') === 0)) {
+                return new BigNumber(number.replace('Bx',''), 16);
             }
 
             return new BigNumber(number.toString(10), 10);

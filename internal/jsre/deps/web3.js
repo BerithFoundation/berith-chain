@@ -1084,7 +1084,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var formatOutputBytes = function (param, name) {
             var matches = name.match(/^bytes([0-9]*)/);
             var size = parseInt(matches[1]);
-            return '0x' + param.staticPart().slice(0, 2 * size);
+            return 'Bx' + param.staticPart().slice(0, 2 * size);
         };
 
         /**
@@ -2210,6 +2210,10 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
                 return new BigNumber(number.replace('0x',''), 16);
             }
 
+            if (isString(number) && (number.indexOf('Bx') === 0 || number.indexOf('-Bx') === 0)) {
+                return new BigNumber(number.replace('Bx',''), 16);
+            }
+
             return new BigNumber(number.toString(10), 10);
         };
 
@@ -2236,7 +2240,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          * @return {Boolean}
          */
         var isStrictAddress = function (address) {
-            return /^0x[0-9a-f]{40}$/i.test(address);
+            return /^Bx[0-9a-f]{40}$/i.test(address);
         };
 
         /**
@@ -2247,10 +2251,10 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          * @return {Boolean}
          */
         var isAddress = function (address) {
-            if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
+            if (!/^(Bx)?[0-9a-f]{40}$/i.test(address)) {
                 // check if it has the basic requirements of an address
                 return false;
-            } else if (/^(0x)?[0-9a-f]{40}$/.test(address) || /^(0x)?[0-9A-F]{40}$/.test(address)) {
+            } else if (/^(Bx)?[0-9a-f]{40}$/.test(address) || /^(Bx)?[0-9A-F]{40}$/.test(address)) {
                 // If it's all small caps or all all caps, return true
                 return true;
             } else {
@@ -2308,7 +2312,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         };
 
         /**
-         * Transforms given string to valid 20 bytes-length addres with 0x prefix
+         * Transforms given string to valid 20 bytes-length addres with Bx prefix
          *
          * @method toAddress
          * @param {String} address
