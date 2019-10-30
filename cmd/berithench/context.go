@@ -27,15 +27,18 @@ import (
 )
 
 type berithenchContext struct {
-	ChainID         *big.Int           // chain id
-	NodeContexts    []*nodeContext     // node contexts
-	Keystore        *keystore.KeyStore // keystore
-	AddressContexts []*addressContext  // addresses of sending tx
-	Duration        time.Duration      // time duration for test execution
-	TxCount         uint64             // tx count of test execution
-	TxInterval      uint64             // interval of sending transactions
-	InitDelay       uint64             // delay of initial
-	OutputPath      string             // output dir path to write a summary file
+	TestId           string             // test id "berithench-{15:04:05.999}"
+	ChainID          *big.Int           // chain id
+	NodeContexts     []*nodeContext     // node contexts
+	Keystore         *keystore.KeyStore // keystore
+	AddressContexts  []*addressContext  // addresses of sending tx
+	Duration         time.Duration      // time duration for test execution
+	TxCount          uint64             // tx count of test execution
+	TxInterval       uint64             // interval of sending transactions
+	InitDelay        uint64             // delay of initial
+	OutputPath       string             // output dir path to write a summary file
+	EnableCpuProfile bool               // enable start cpu profile
+	EnableGoTrace    bool               // enable start go trace
 }
 
 type addressContext struct {
@@ -50,8 +53,10 @@ type nodeContext struct {
 	url     string               // node rpc url
 	summary *summaryContext
 
-	quitTask     chan struct{} // flag for quitting task
-	subscription berith_chain.Subscription
+	quitTask        chan struct{} // flag for quitting task
+	startCpuProfile bool
+	startGoTrace    bool
+	subscription    berith_chain.Subscription
 }
 
 type summaryContext struct {
