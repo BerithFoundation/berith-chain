@@ -5,16 +5,23 @@
 
 */
 
-package staking
+package selection
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"math"
 	"math/big"
 	"math/rand"
+	"sort"
+
+	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/core/state"
 
 	"github.com/BerithFoundation/berith-chain/common"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 const (
@@ -24,6 +31,8 @@ const (
 var (
 	DIF_MAX = int64(5000000)
 	DIF_MIN = int64(10000)
+
+	selectionCache, _ = lru.NewARC(1024)
 )
 
 /**
@@ -96,6 +105,22 @@ type Range struct {
 type VoteResult struct {
 	Score *big.Int `json:"score"`
 	Rank  int      `json:"rank"`
+}
+
+type VoteResults map[common.Address]VoteResult
+
+type sortableList []common.Address
+
+func (s sortableList) Len() int {
+	return len(s)
+}
+
+func (s sortableList) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+func (s sortableList) Less(a, b int) bool {
+	return bytes.Compare(s[a][:], s[b][:]) == -1
 }
 
 /*
@@ -181,14 +206,55 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 BC 선출을 하기 위한 함수
 선출된 BC map 을 리턴 한다.
 */
-func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult {
+func SelectBlockCreator(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
+	result := make(VoteResults)
+	val, ok := selectionCache.Get(hash)
+
+	if ok {
+		bytes, ok := val.([]byte)
+		if ok {
+			json.Unmarshal(bytes, &result)
+			return result
+		}
+		selectionCache.Remove(hash)
+	}
+
+	list := sortableList(stks.AsList())
+	if len(list) == 0 {
+		return result
+	}
+
+	sort.Sort(list)
+
+	cddts := NewCandidates()
+
+	for _, stk := range list {
+		point := state.GetPoint(stk).Uint64()
+		cddts.Add(Candidate{
+			point:   point,
+			address: stk,
+		})
+	}
+
+	result = cddts.selectBlockCreator(number)
+
+	if bytes, err := json.Marshal(result); err == nil {
+		selectionCache.Add(hash, bytes)
+	}
+
+	return result
+
+}
+
+func (cs *Candidates) selectBlockCreator(number uint64) VoteResults {
+
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
 		size:    len(cs.selections) + 1,
 		front:   0,
 		rear:    0,
 	}
-	result := make(map[common.Address]VoteResult)
+	result := make(VoteResults)
 
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
@@ -202,7 +268,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 		end:   len(cs.selections),
 	})
 
-	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
+	for count := 1; queue.front != queue.rear; count++ {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
 		result[account] = VoteResult{
@@ -213,7 +279,7 @@ func (cs *Candidates) BlockCreator(number uint64) *map[common.Address]VoteResult
 	}
 
 	//fmt.Println(DIF)
-	return &result
+	return result
 }
 
 /*

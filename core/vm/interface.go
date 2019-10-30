@@ -65,15 +65,22 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	SetStaking(common.Address, *big.Int)
+	SetStaking(common.Address, *big.Int, *big.Int)
 	GetStakeBalance(common.Address) *big.Int
-	AddStakeBalance(common.Address, *big.Int)
+	GetStakeUpdated(common.Address) *big.Int
+	AddStakeBalance(common.Address, *big.Int, *big.Int)
 	RemoveStakeBalance(common.Address)
 
 	//Selection Point
 	SetPoint(addr common.Address, amount *big.Int)
 	GetPoint(common.Address) *big.Int
 	AddPoint(addr common.Address, amount *big.Int)
+
+	//Penalty
+	AddPenalty(common.Address, *big.Int)
+	RemovePenalty(common.Address, *big.Int)
+	GetPenalty(common.Address) uint64
+	GetPenaltyUpdated(common.Address) *big.Int
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM

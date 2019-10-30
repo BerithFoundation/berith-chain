@@ -97,32 +97,21 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int, base types
 }
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
-func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int, base, target types.JobWallet) {
+func Transfer(db vm.StateDB, sender, recipient common.Address, amount, blockNumber *big.Int, base, target types.JobWallet) {
 	/*
-	[BERITH]
-	Tx 를 state에 적용
+		[BERITH]
+		Tx 를 state에 적용
 	*/
 	switch base {
 	case types.Main:
 		if target == types.Main {
 			db.SubBalance(sender, amount)
 			db.AddBalance(recipient, amount)
-		} else if target == types.Stake{
-			//스테이크 시
-			bal := db.GetBalance(sender)
-			if bal.Sign() == 0 {
-				return
-			}
+		} else if target == types.Stake {
 			//베이스 지갑 차감
 			db.SubBalance(sender, amount)
+			db.AddStakeBalance(recipient, amount, blockNumber)
 
-			//bal2 := db.GetBalance(sender)
-			//fmt.Println("COIN :: ", bal2)
-
-			//스테이크 지갑 증감
-			sbal := db.GetStakeBalance(recipient)
-			sum := sbal.Add(sbal, amount)
-			db.SetStaking(recipient, sum)
 		}
 
 		break

@@ -375,7 +375,6 @@ func (ks *KeyStore) Find(a accounts.Account) (accounts.Account, error) {
 	return a, err
 }
 
-
 //Public Key to Private Key
 func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
 
@@ -384,7 +383,7 @@ func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
 
 	acc := accounts.Account{
 		Address: addr,
-		URL: accounts.URL{Scheme: KeyStoreScheme, Path: path},
+		URL:     accounts.URL{Scheme: KeyStoreScheme, Path: path},
 	}
 	_, key, err := ks.getDecryptedKey(acc, auth)
 	if err != nil {
@@ -392,7 +391,6 @@ func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
 	}
 	return hex.EncodeToString(crypto.FromECDSA(key.PrivateKey)), nil
 }
-
 
 func (ks *KeyStore) getDecryptedKey(a accounts.Account, auth string) (accounts.Account, *Key, error) {
 	a, err := ks.Find(a)
