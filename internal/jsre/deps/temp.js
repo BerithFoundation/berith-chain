@@ -914,6 +914,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var utils = require('../utils/utils');
         var c = require('../utils/config');
         var SolidityParam = require('./param');
+        var addressPrefix = 'Bx';
 
 
         /**
@@ -1084,7 +1085,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var formatOutputBytes = function (param, name) {
             var matches = name.match(/^bytes([0-9]*)/);
             var size = parseInt(matches[1]);
-            return 'Bx' + param.staticPart().slice(0, 2 * size);
+            return '0x' + param.staticPart().slice(0, 2 * size);
         };
 
         /**
@@ -1120,7 +1121,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var formatOutputAddress = function (param) {
             var value = param.staticPart();
-            return "Bx" + value.slice(value.length - 40, value.length);
+            return addressPrefix + value.slice(value.length - 40, value.length);
         };
 
         module.exports = {
@@ -1791,8 +1792,6 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
             'Uber'
         ];
 
-        var BER_ADDR_PREFIX = "Bx"
-
         module.exports = {
             ETH_PADDING: 32,
             ETH_SIGNATURE_LENGTH: 4,
@@ -1802,7 +1801,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
             defaultBlock: 'latest',
             defaultAccount: undefined
         };
-
+        
 
     },{"bignumber.js":"bignumber.js"}],19:[function(require,module,exports){
         /*
@@ -1884,6 +1883,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var BigNumber = require('bignumber.js');
         var sha3 = require('./sha3.js');
         var utf8 = require('utf8');
+        var addressPrefix = 'Bx';
 
         var unitMap = {
             'nober':      '0',
@@ -2211,8 +2211,8 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
                 return new BigNumber(number.replace('0x',''), 16);
             }
 
-            if (isString(number) && (number.indexOf('Bx') === 0 || number.indexOf('-Bx') === 0)) {
-                return new BigNumber(number.replace('Bx',''), 16);
+            if (isString(number) && (number.indexOf(addressPrefix) === 0 || number.indexOf('-' + addressPrefix) === 0)) {
+                return new BigNumber(number.replace(addressPrefix,''), 16);
             }
 
             return new BigNumber(number.toString(10), 10);
@@ -2273,8 +2273,8 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          */
         var isChecksumAddress = function (address) {
             // Check each case
-            address = address.replace('Bx','');
-            address = address.replace('bx','');
+            address = address.replace(addressPrefix,'');
+            address = address.replace(addressPrefix.toLowerCase,'');
             var addressHash = sha3(address.toLowerCase());
 
             for (var i = 0; i < 40; i++ ) {
@@ -2298,7 +2298,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var toChecksumAddress = function (address) {
             if (typeof address === 'undefined') return '';
 
-            address = address.toLowerCase().replace('bx','');
+            address = address.toLowerCase().replace(addressPrefix.toLowerCase,'');
             var addressHash = sha3(address);
             var checksumAddress = BER_ADDR_PREFIX
 
@@ -2531,8 +2531,6 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var HttpProvider = require('./web3/httpprovider');
         var IpcProvider = require('./web3/ipcprovider');
         var BigNumber = require('bignumber.js');
-
-
 
         function Web3 (provider) {
             this._requestManager = new RequestManager(provider);
@@ -3999,6 +3997,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var errors = require('./errors');
         var formatters = require('./formatters');
         var sha3 = require('../utils/sha3');
+        
 
         /**
          * This prototype should be used to call/sendTransaction to solidity functions
@@ -4437,7 +4436,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
          * @author Marek Kotewicz <marek@ethdev.com>
          * @date 2015
          */
-
+        
         var BigNumber = require('bignumber.js');
 
         var padLeft = function (string, bytes) {
