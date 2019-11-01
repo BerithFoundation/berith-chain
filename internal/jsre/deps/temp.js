@@ -2300,7 +2300,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
             address = address.toLowerCase().replace(addressPrefix.toLowerCase,'');
             var addressHash = sha3(address);
-            var checksumAddress = BER_ADDR_PREFIX
+            var checksumAddress = addressPrefix;
 
             for (var i = 0; i < address.length; i++ ) {
                 // If ith character is 9 to f then make it uppercase
@@ -3926,11 +3926,11 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
         var inputAddressFormatter = function (address) {
             var iban = new Iban(address);
             if (iban.isValid() && iban.isDirect()) {
-                return BER_ADDR_PREFIX + iban.address();
+                return addressPrefix + iban.address();
             } else if (utils.isStrictAddress(address)) {
                 return address;
             } else if (utils.isAddress(address)) {
-                return BER_ADDR_PREFIX + address;
+                return addressPrefix + address;
             }
             throw new Error('invalid address');
         };
