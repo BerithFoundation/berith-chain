@@ -31,26 +31,31 @@ import (
 )
 
 type berithenchConfig struct {
-	ChainID    int64    `json:"chainId"`    // chain id
-	Nodes      []string `json:"nodes"`      // endpoints of nodes
-	Keystore   string   `json:"keystore"`   // keystore path
-	Addresses  []string `json:"addresses"`  // from addresses in tx
-	Password   string   `json:"password"`   // password file path
-	Duration   string   `json:"duration"`   // time duration for test execution
-	TxCount    uint64   `json:"txCount"`    // tx count of test execution
-	InitDelay  uint64   `json:"initDelay"`  // initial sleep before testing
-	TxInterval uint64   `json:"txInterval"` // interval between send transactions
-	OutputPath string   `json:"outputPath"` // path of output
+	ChainID          int64    `json:"chainId"`          // chain id
+	Nodes            []string `json:"nodes"`            // endpoints of nodes
+	Keystore         string   `json:"keystore"`         // keystore path
+	Addresses        []string `json:"addresses"`        // from addresses in tx
+	Password         string   `json:"password"`         // password file path
+	Duration         string   `json:"duration"`         // time duration for test execution
+	TxCount          uint64   `json:"txCount"`          // tx count of test execution
+	InitDelay        uint64   `json:"initDelay"`        // initial sleep before testing
+	TxInterval       uint64   `json:"txInterval"`       // interval between send transactions
+	OutputPath       string   `json:"outputPath"`       // path of results
+	EnableCpuProfile bool     `json:"enableCpuProfile"` // enable cpu profile
+	EnableGoTrace    bool     `json:"enableGoTrace"`    // enable go trace
 }
 
 var (
 	defaultConfig = berithenchConfig{
-		Keystore:   "",
-		Password:   "",
-		Duration:   "",
-		TxCount:    0,
-		TxInterval: 10,
-		InitDelay:  0,
+		Keystore:         "",
+		Password:         "",
+		Duration:         "",
+		TxCount:          0,
+		TxInterval:       10,
+		InitDelay:        0,
+		OutputPath:       getDefaultWorkingDir(),
+		EnableCpuProfile: false,
+		EnableGoTrace:    false,
 	}
 	tomlSettings = toml.Config{
 		NormFieldName: func(rt reflect.Type, key string) string {
@@ -82,16 +87,18 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 
 	// apply flags
 	var (
-		chainID    = ctx.Int64(ChainIDFlag.Name)
-		nodes      = ctx.String(NodesFlag.Name)
-		keystore   = ctx.String(KeystoreFlag.Name)
-		addrs      = ctx.String(AddressesFlag.Name)
-		password   = ctx.String(PasswordFlag.Name)
-		duration   = ctx.String(DurationFlag.Name)
-		txCount    = ctx.Uint64(TxCountFlag.Name)
-		txInterval = ctx.Uint64(TxIntervalFlag.Name)
-		initDelay  = ctx.Uint64(InitDelay.Name)
-		output     = ctx.String(OutputPath.Name)
+		chainID          = ctx.Int64(ChainIDFlag.Name)
+		nodes            = ctx.String(NodesFlag.Name)
+		keystore         = ctx.String(KeystoreFlag.Name)
+		addrs            = ctx.String(AddressesFlag.Name)
+		password         = ctx.String(PasswordFlag.Name)
+		duration         = ctx.String(DurationFlag.Name)
+		txCount          = ctx.Uint64(TxCountFlag.Name)
+		txInterval       = ctx.Uint64(TxIntervalFlag.Name)
+		initDelay        = ctx.Uint64(InitDelay.Name)
+		output           = ctx.String(OutputPath.Name)
+		enableCpuProfile = ctx.IsSet(EnableCpuProfile.Name)
+		enableGoTrace    = ctx.IsSet(EnableGoTrace.Name)
 	)
 	// FIXME : more efficient compare
 	if chainID != 0 {
@@ -123,6 +130,12 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 	}
 	if output != "" {
 		cfg.OutputPath = output
+	}
+	if enableCpuProfile {
+		cfg.EnableCpuProfile = enableCpuProfile
+	}
+	if enableGoTrace {
+		cfg.EnableGoTrace = enableGoTrace
 	}
 	return &cfg, nil
 }
@@ -178,4 +191,13 @@ func parseDuration(config *berithenchConfig) time.Duration {
 	d += t.Minute() * int(time.Minute)
 	d += t.Second() * int(time.Second)
 	return time.Duration(d)
+}
+
+// getWorkingDir returns user's home dir or temp dir if occur error
+func getDefaultWorkingDir() string {
+	home, err := os.UserHomeDir()
+	if err == nil {
+		return home
+	}
+	return os.TempDir()
 }

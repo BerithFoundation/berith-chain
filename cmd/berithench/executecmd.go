@@ -26,8 +26,9 @@ import (
 	"github.com/BerithFoundation/berith-chain/berithclient"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/gookit/color"
 	cli "gopkg.in/urfave/cli.v1"
 	"io/ioutil"
@@ -37,8 +38,26 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
+	"text/template"
 	"time"
+)
+
+const (
+	transferResultTemplate = `// ------------------------------------------------------------------------
+>>>>>> Complete to send transactions [{{.StartTime}}] ~ [{{.EndTime}}] <<<<<<
+## args
+> repeat : [{{.Repeat}}], duration : [{{.Duration}}], interval : [{{.Interval}}]
+## nodes
+{{range $index, $node := .Nodes}}[#{{$index}}] Node : {{$node.Url}} --> Request : {{$node.Request}} / Success : {{$node.Success}} / Fail : {{$node.Fail}}
+{{end}}
+## addresses
+{{range $index, $address := .Addresses}}[#{{$index}}] Addr({{$address.Hex}})
+ - Request : {{$address.Request}} / Success : {{$address.Success}} / Fail : {{$address.Fail}}
+ - first tx hash : {{$address.FirstTxHash}} (in block {{$address.FirstTxBlockNumber}})
+{{end}}
+--------------------------------------------------------------------------- //`
 )
 
 var (
@@ -71,11 +90,18 @@ var (
 		Name:  "initdelay",
 		Usage: "Sleep before testing",
 	}
+	EnableCpuProfile = cli.BoolFlag{
+		Name:  "cpuprofile",
+		Usage: "Start to debug.cpuProfile with given path",
+	}
+	EnableGoTrace = cli.StringFlag{
+		Name:  "gotrace",
+		Usage: "Start to debug.startGoTrace with given path.",
+	}
 	OutputPath = cli.StringFlag{
 		Name:  "outputpath",
 		Usage: "Dir path of output",
 	}
-
 	// commands
 	ExecuteCommand = cli.Command{
 		Name:  "execute",
@@ -97,6 +123,8 @@ var (
 					TxIntervalFlag,
 					InitDelay,
 					OutputPath,
+					EnableCpuProfile,
+					EnableGoTrace,
 				},
 			},
 		},
@@ -130,7 +158,7 @@ func transfer(ctx *cli.Context) error {
 	color.Yellow.Println("> Success to setup context")
 	defer tearDownContext(testCtx)
 
-	// do request after initial delay
+	// start to test transfer transactions after initial delay
 	if testCtx.InitDelay > 0 {
 		time.Sleep(time.Duration(testCtx.InitDelay))
 	}
@@ -147,57 +175,104 @@ func transfer(ctx *cli.Context) error {
 	wait.Wait()
 	endTime := time.Now()
 
-	// TODO : write output to console and file by using text/template
-	layout := "15:04:05.999"
-	var out bytes.Buffer
-	out.WriteString("// ------------------------------------------------------------------------\n")
-	out.WriteString(fmt.Sprintf(">>>>>> Complete to send transactions [%s] ~ [%s] <<<<<<\n", startTime.Format(layout), endTime.Format(layout)))
-
-	out.WriteString("## args\n")
-	out.WriteString(fmt.Sprintf("> repeat : [%d], duration : [%s], interval : [%dms]\n", testCtx.TxCount, testCtx.Duration, testCtx.TxInterval))
-
-	out.WriteString("\n## nodes\n")
-	for _, nodeCtx := range testCtx.NodeContexts {
-		out.WriteString(fmt.Sprintf("Node : %s --> %s\n", nodeCtx.url, nodeCtx.summary.String()))
-	}
-
-	out.WriteString("\n## addresses\n")
+	// record test results
+	result := make(map[string]interface{})
 	nodeCtx := testCtx.NodeContexts[0]
-	addrFormat := "#%d.Addr(%s)\n - %s\n - first tx hash : %s(in block %d)\n"
-	for idx, addrCtx := range testCtx.AddressContexts {
-		firstBlock := int64(0)
-		// getting test started block
-		if addrCtx.summary.firstTxHash != "" {
-			block, err := nodeCtx.client.BlockByNumber(context.Background(), nil)
-			if err == nil {
-				firstBlock = block.Number().Int64()
+	nodeClient, rpcErr := rpc.DialContext(context.Background(), nodeCtx.url)
+
+	// start time, end time, test args
+	layout := "15:04:05.999"
+	result["StartTime"] = startTime.Format(layout)
+	result["EndTime"] = endTime.Format(layout)
+	result["Repeat"] = testCtx.TxCount
+	result["Duration"] = testCtx.Duration.String()
+	result["Interval"] = testCtx.TxInterval
+
+	// node result
+	type nodeResult struct {
+		Url     string
+		Request uint
+		Success uint
+		Fail    uint
+	}
+	var nodeResults []nodeResult
+	for _, nodeCtx := range testCtx.NodeContexts {
+		nodeResults = append(nodeResults, nodeResult{
+			Url:     nodeCtx.url,
+			Request: nodeCtx.summary.try,
+			Success: nodeCtx.summary.success,
+			Fail:    nodeCtx.summary.fail,
+		})
+	}
+	result["Nodes"] = nodeResults
+
+	// address's transactions result
+	type addressResult struct {
+		Hex                string
+		Request            uint
+		Success            uint
+		Fail               uint
+		FirstTxHash        string
+		FirstTxBlockNumber uint64
+	}
+	var addressResults []addressResult
+	for _, addrCtx := range testCtx.AddressContexts {
+		// getting first block number including address's transaction
+		firstBlock := uint64(0)
+		if rpcErr == nil && addrCtx.summary.firstTxHash != "" {
+			hash := common.HexToHash(addrCtx.summary.firstTxHash)
+			var result map[string]interface{}
+			if err := nodeClient.Call(&result, "berith_getTransactionByHash", hash); err == nil {
+				if _, ok := result["blockNumber"]; ok {
+					firstBlock, _ = hexutil.DecodeUint64(fmt.Sprintf("%v", result["blockNumber"]))
+				}
 			}
 		}
-		out.WriteString(fmt.Sprintf(addrFormat, idx, addrCtx.account.Address.Hex(), addrCtx.summary.String(), addrCtx.summary.firstTxHash, firstBlock))
+		addressResults = append(addressResults, addressResult{
+			Hex:                addrCtx.account.Address.Hex(),
+			Request:            addrCtx.summary.try,
+			Success:            addrCtx.summary.success,
+			Fail:               addrCtx.summary.fail,
+			FirstTxHash:        addrCtx.summary.firstTxHash,
+			FirstTxBlockNumber: firstBlock,
+		})
 	}
-	out.WriteString("--------------------------------------------------------------------------- //\n")
+	result["Addresses"] = addressResults
 
-	// flush output to console & file
+	// execute template
+	tmpl, err := template.New("").Parse(transferResultTemplate)
+	if err != nil {
+		fmt.Println("failed to execute template after test completion")
+		return err
+	}
+	var out bytes.Buffer
+	err = tmpl.Execute(&out, result)
+	if err != nil {
+		fmt.Println("failed to execute template after test completion")
+		return err
+	}
+
+	// display to std out
 	fmt.Println(out.String())
 
+	// write a result file
 	if testCtx.OutputPath != "" {
 		path := testCtx.OutputPath
 		fi, err := os.Stat(path)
 		if err == nil {
-			// if exist path, must be directory.
 			if !fi.IsDir() {
-				log.Warn("already exist output path.", "path", path)
+				fmt.Println("output path must be directory path not file. path :", path)
 				return nil
 			}
-			path = filepath.Join(path, "berithench-"+startTime.Format(layout)+".txt")
 		} else if !os.IsNotExist(err) {
-			log.Warn("failed to write output", "err", err)
+			fmt.Printf("failed to get output path's stat %v\n", err)
 			return nil
 		}
-		fmt.Println(">> try to write output to ", path)
+		path = filepath.Join(path, "berithench-"+testCtx.TestId+".out")
+		fmt.Println(">> try to write output :", path)
 		err = ioutil.WriteFile(path, out.Bytes(), 0644)
 		if err != nil {
-			log.Warn("failed to write a output file", "err", err)
+			fmt.Printf("failed to write output %v\n", err)
 			return nil
 		}
 	}
@@ -252,7 +327,7 @@ func sendTransferTransactions(taskID string, ctx *berithenchContext, addrCtx *ad
 
 		tx, err := ctx.Keystore.SignTx(addrCtx.account, tx, ctx.ChainID)
 		if err != nil {
-			log.Warn("cannot sign a transaction", "error", err)
+			fmt.Printf("cannot sign a transaction :%v\n", err)
 			return
 		}
 		randIdx = rand.Intn(100) % len(ctx.NodeContexts)
@@ -280,12 +355,16 @@ func sendTransferTransactions(taskID string, ctx *berithenchContext, addrCtx *ad
 
 	err := schedule(taskID, repeat, interval, delay, wait, work)
 	if err != nil {
-		log.Error("failed to setup task.", "addr", addrCtx.account.Address.Hex())
+		fmt.Println("failed to setup task. addr :", addrCtx.account.Address.Hex())
 	}
 }
 
 // setupContext setup test context such as calc nonce.
 func setupContext(ctx *berithenchContext) {
+	// setup test id
+	layout := "150405"
+	ctx.TestId = time.Now().Format(layout)
+
 	// setup start,end accounts nonce
 	addrLen := len(ctx.AddressContexts)
 	for i, addrCtx := range ctx.AddressContexts {
@@ -303,10 +382,76 @@ func setupContext(ctx *berithenchContext) {
 			addrCtx.lastNonce = startNonce + uint64(txCount) - 1
 		}
 	}
+
+	// start profile
+	if !ctx.EnableCpuProfile && !ctx.EnableGoTrace {
+		return
+	}
+
+	for i, nodeCtx := range ctx.NodeContexts {
+		nodeClient, err := rpc.DialContext(context.Background(), nodeCtx.url)
+		if err != nil {
+			utils.Fatalf("cant create a rpc client. url : %s, err : %v", nodeCtx.url, err)
+		}
+
+		if ctx.EnableCpuProfile {
+			name := "cpu-profile-node" + strconv.Itoa(i) + "-" + ctx.TestId
+			err = nodeClient.Call(nil, "debug_startCPUProfile", name)
+			if err != nil {
+				if strings.Contains(err.Error(), "already in progress") {
+					color.Yellow.Printf("> skip cpu profile because already in progress. node %s\n", nodeCtx.url)
+					continue
+				}
+				utils.Fatalf("failed to start cpu profile: %v", err)
+			}
+			color.Yellow.Printf("> started cpu profile. node %s : %s\n", nodeCtx.url, name)
+			nodeCtx.startCpuProfile = true
+		}
+
+		if ctx.EnableGoTrace {
+			name := "go-trace-node" + strconv.Itoa(i) + "-" + ctx.TestId
+			err = nodeClient.Call(nil, "debug_startGoTrace", name)
+			if err != nil {
+				if strings.Contains(err.Error(), "already in progress") {
+					color.Yellow.Printf("> skip cpu profile because already in progress. node %s\n", nodeCtx.url)
+					continue
+				}
+				utils.Fatalf("failed to start cpu profile: %v", err)
+			}
+			color.Yellow.Printf("> started go trace. node %s : %s\n", nodeCtx.url, name)
+			nodeCtx.startGoTrace = true
+		}
+	}
 }
 
 // tearDownContext clean up test context if needed
 func tearDownContext(ctx *berithenchContext) {
+	// stop profile
+	if ctx.EnableCpuProfile || ctx.EnableGoTrace {
+		for _, nodeCtx := range ctx.NodeContexts {
+			nodeClient, err := rpc.DialContext(context.Background(), nodeCtx.url)
+			if err != nil {
+				fmt.Println("cannot create a rpc client. url :", nodeCtx.url)
+				continue
+			}
+
+			if ctx.EnableCpuProfile && nodeCtx.startCpuProfile {
+				err = nodeClient.Call(nil, "debug_stopCPUProfile")
+				if err != nil {
+					fmt.Printf("failed to stop cpu profile: %v\n", err)
+				}
+			}
+
+			if ctx.EnableGoTrace && nodeCtx.startGoTrace {
+				err = nodeClient.Call(nil, "debug_stopGoTrace")
+				if err != nil {
+					fmt.Printf("failed to stop go trace: %v\n", err)
+				}
+			}
+		}
+		return
+	}
+
 	// clear node context
 	for _, nodeCtx := range ctx.NodeContexts {
 		nodeCtx.close()
@@ -328,12 +473,14 @@ func calcTxCount(idx, addrLen, txCount int) int {
 // parseContext parse berithench config to test context with unlock all
 func parseContext(config *berithenchConfig) *berithenchContext {
 	ctx := berithenchContext{
-		ChainID:    big.NewInt(config.ChainID),
-		Duration:   parseDuration(config),
-		TxCount:    config.TxCount,
-		TxInterval: config.TxInterval,
-		InitDelay:  config.InitDelay,
-		OutputPath: config.OutputPath,
+		ChainID:          big.NewInt(config.ChainID),
+		Duration:         parseDuration(config),
+		TxCount:          config.TxCount,
+		TxInterval:       config.TxInterval,
+		InitDelay:        config.InitDelay,
+		OutputPath:       config.OutputPath,
+		EnableCpuProfile: config.EnableCpuProfile,
+		EnableGoTrace:    config.EnableGoTrace,
 	}
 
 	// parse nodes rpc url -> testNode
