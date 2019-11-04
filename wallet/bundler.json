@@ -1,6 +1,11 @@
 {
-  "app_name": "Astilectron demo",
-  "icon_path_darwin": "resources/icon.icns",
-  "icon_path_linux": "resources/icon.png",
-  "icon_path_windows": "resources/icon.ico"
+  "app_name": "Berithwallet",
+  "icon_path_darwin": "resources/app/images/common/berith_pa.ico",
+  "icon_path_linux": "resources/app/images/common/berith_pa.ico",
+  "icon_path_windows": "resources/app/images/common/berith_pa.ico",
+  "environments": [{"arch": "amd64"  , "os": "linux"},
+    {"arch": "amd64"  , "os": "windows"}
+
+  ]
+
 }

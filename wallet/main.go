@@ -61,7 +61,7 @@ func start_ui(){
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/icon.icns",
 			AppIconDefaultPath: "resources/icon.png",
-			DataDirectoryPath: "C://Users/kimmegi/go/src/github.com/BerithFoundation/berith-chain/wallet",
+			//DataDirectoryPath: "C://Users/kimmegi/go/src/github.com/BerithFoundation/berith-chain/wallet",
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{

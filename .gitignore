@@ -51,3 +51,8 @@ cmd/berith/password.txt
 ./wallet/resources/app/.vscode
 
 **/yarn-error.log
+wallet/bind_windows_amd64.go
+
+wallet/bind_linux_amd64.go
+
+wallet/windows.syso
