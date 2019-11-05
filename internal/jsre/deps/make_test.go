@@ -32,7 +32,7 @@ func TestAsset(t *testing.T) {
 }
 
 func TestConvertWeb3(t *testing.T) {
-	dat, err := ioutil.ReadFile(os.TempDir() + "/web3.js")
+	dat, err := ioutil.ReadFile("web3.js")
 	check(err)
 
 	str := hex.EncodeToString(dat)
@@ -41,7 +41,7 @@ func TestConvertWeb3(t *testing.T) {
 
 	str2 := hex.EncodeToString(tt)
 
-	f, e := os.Create("./temp.txt")
+	f, e := os.Create(os.TempDir()+"/web3_bindata")
 	if e == nil {
 		if _, er := f.WriteString(str2); er == nil {
 			w := bufio.NewWriter(f)
