@@ -26,6 +26,10 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/berith"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/filters"
+	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/consensus"
@@ -33,10 +37,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/bloombits"
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/filters"
-	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/internal/berithapi"
 	"github.com/BerithFoundation/berith-chain/light"
@@ -96,7 +96,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightBerith, error) 
 
 	stakingDB := &stakingdb.StakingDB{}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
-	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New); stkErr != nil {
+	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
 	}
 
@@ -230,6 +230,7 @@ func (s *LightBerith) Engine() consensus.Engine           { return s.engine }
 func (s *LightBerith) LesVersion() int                    { return int(ClientProtocolVersions[0]) }
 func (s *LightBerith) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
 func (s *LightBerith) EventMux() *event.TypeMux           { return s.eventMux }
+
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.
 func (s *LightBerith) Protocols() []p2p.Protocol {

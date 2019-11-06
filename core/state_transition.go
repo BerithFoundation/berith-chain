@@ -17,10 +17,11 @@
 package core
 
 import (
-	"github.com/BerithFoundation/berith-chain/core/types"
 	"errors"
 	"math"
 	"math/big"
+
+	"github.com/BerithFoundation/berith-chain/core/types"
 
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/vm"

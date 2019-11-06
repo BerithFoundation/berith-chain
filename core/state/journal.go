@@ -133,8 +133,9 @@ type (
 	}
 	//brt staking change struct
 	stakingChange struct {
-		account *common.Address
-		prev    *big.Int
+		account     *common.Address
+		prevBalance *big.Int
+		prevBlock   *big.Int
 	}
 
 	//brt staking change struct
@@ -145,7 +146,13 @@ type (
 
 	behindChange struct {
 		account *common.Address
-		prev []Behind
+		prev    []Behind
+	}
+
+	penaltyChange struct {
+		account     *common.Address
+		prevPenalty uint64
+		prevBlock   *big.Int
 	}
 )
 
@@ -251,7 +258,7 @@ func (ch addPreimageChange) dirtied() *common.Address {
 
 //[Berith]
 func (ch stakingChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setStaking(ch.prev)
+	s.getStateObject(*ch.account).setStaking(ch.prevBalance, ch.prevBlock)
 }
 
 func (ch stakingChange) dirtied() *common.Address {
@@ -271,5 +278,13 @@ func (ch behindChange) revert(s *StateDB) {
 }
 
 func (ch behindChange) dirtied() *common.Address {
+	return ch.account
+}
+
+func (ch penaltyChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setPenalty(ch.prevPenalty, ch.prevBlock)
+}
+
+func (ch penaltyChange) dirtied() *common.Address {
 	return ch.account
 }

@@ -72,10 +72,8 @@ SUBCOMMANDS:
 {{range $categorized.Flags}}{{"\t"}}{{.}}
 {{end}}
 {{end}}{{end}}`
-)
 
-func init() {
-	cli.AppHelpTemplate = `{{.Name}} {{if .Flags}}[global options] {{end}}command{{if .Flags}} [command options]{{end}} [arguments...]
+	AppHelpTemplate = `{{.Name}} {{if .Flags}}[global options] {{end}}command{{if .Flags}} [command options]{{end}} [arguments...]
 
 VERSION:
    {{.Version}}
@@ -87,12 +85,19 @@ GLOBAL OPTIONS:
    {{range .Flags}}{{.}}
    {{end}}{{end}}
 `
-
-	cli.CommandHelpTemplate = CommandHelpTemplate
-}
+)
 
 // NewApp creates an app with sane defaults.
 func NewApp(gitCommit, usage string) *cli.App {
+	return NewAppWithHelpTemplate(gitCommit, usage, true)
+}
+
+// NewAppWithHelpTemplate creates an app with sane defaults, changing help template or not
+func NewAppWithHelpTemplate(gitCommit, usage string, changeTemplate bool) *cli.App {
+	if changeTemplate {
+		cli.AppHelpTemplate = AppHelpTemplate
+		cli.CommandHelpTemplate = CommandHelpTemplate
+	}
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.Author = ""
@@ -112,7 +117,6 @@ func NewApp(gitCommit, usage string) *cli.App {
 //
 // The flags are defined here so their names and help texts
 // are the same for all commands.
-
 var (
 	// General settings
 	DataDirFlag = DirectoryFlag{
@@ -1329,7 +1333,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 
 	stakingDB := &stakingdb.StakingDB{}
 	stakingDBPath := stack.ResolvePath("stakingDB")
-	stakingDB.CreateDB(stakingDBPath, staking.Decode, staking.Encode, staking.New)
+	stakingDB.CreateDB(stakingDBPath, staking.NewStakers)
 
 	chain, err = core.NewBlockChain(stakingDB, chainDb, cache, config, engine, vmcfg, nil)
 	if err != nil {
