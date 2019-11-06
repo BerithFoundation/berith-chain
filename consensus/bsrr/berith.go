@@ -760,6 +760,12 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 
 	results := selection.SelectBlockCreator(target.Number.Uint64(), target.Hash(), stks, stateDB)
 
+	max := c.getMaxMiningCandidates(len(results))
+
+	if results[signer].Rank > max {
+		return big.NewInt(0), -1
+	}
+
 	return results[signer].Score, results[signer].Rank
 }
 

@@ -76,6 +76,6 @@ func TestSelectBlockCreator(t *testing.T) {
 	}
 
 	if len(results) < 5 {
-		t.Errorf("only %d user selected [expected : 100]", len(results))
+		t.Errorf("only %d user selected [expected : 5]", len(results))
 	}
 }
