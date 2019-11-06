@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	MAX_MINERS = 6
+	MAX_MINERS = 10000
 )
 
 var (
@@ -268,7 +268,7 @@ func (cs *Candidates) selectBlockCreator(number uint64) VoteResults {
 		end:   len(cs.selections),
 	})
 
-	for count := 1; queue.front != queue.rear; count++ {
+	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
 		r, _ := queue.dequeue()
 		account := r.binarySearch(queue, cs)
 		result[account] = VoteResult{
