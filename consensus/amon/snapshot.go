@@ -9,24 +9,24 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 	  copyrights by ibizsoftware 2018 - 2019
 */
 
-package bsrr
+package amon
 
 import (
 	"bytes"
 	"encoding/json"
 
 	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/params"
 	lru "github.com/hashicorp/golang-lru"
 )
 
 // Snapshot is the state of the authorization voting at a given point in time.
 type Snapshot struct {
-	config   *params.BSRRConfig // Consensus engine parameters to fine tune behavior
+	config   *params.AmonConfig // Consensus engine parameters to fine tune behavior
 	sigcache *lru.ARCCache      // Cache of recent block signatures to speed up ecrecover
 
 	Number  uint64                      `json:"number"`  // Block number where the snapshot was created
@@ -44,7 +44,7 @@ func (s signersAscending) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 // newSnapshot creates a new snapshot with the specified startup parameters. This
 // method does not initialize the set of recent signers, so only ever use if for
 // the genesis block.
-func newSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address) *Snapshot {
+func newSnapshot(config *params.AmonConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address) *Snapshot {
 	snap := &Snapshot{
 		config:   config,
 		sigcache: sigcache,
@@ -59,8 +59,8 @@ func newSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, number uint6
 }
 
 // loadSnapshot loads an existing snapshot from the database.
-func loadSnapshot(config *params.BSRRConfig, sigcache *lru.ARCCache, db berithdb.Database, hash common.Hash) (*Snapshot, error) {
-	blob, err := db.Get(append([]byte("bsrr-"), hash[:]...))
+func loadSnapshot(config *params.AmonConfig, sigcache *lru.ARCCache, db berithdb.Database, hash common.Hash) (*Snapshot, error) {
+	blob, err := db.Get(append([]byte("amon-"), hash[:]...))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (s *Snapshot) store(db berithdb.Database) error {
 	if err != nil {
 		return err
 	}
-	return db.Put(append([]byte("bsrr-"), s.Hash[:]...), blob)
+	return db.Put(append([]byte("amon-"), s.Hash[:]...), blob)
 }
 
 // copy creates a deep copy of the snapshot, though not the individual votes.
@@ -108,7 +108,7 @@ func (s *Snapshot) validVote(address common.Address, authorize bool) bool {
 
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
-func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header, c *BSRR) (*Snapshot, error) {
+func (s *Snapshot) apply(chain consensus.ChainReader, stakingDB staking.DataBase, headers []*types.Header, c *Amon) (*Snapshot, error) {
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil

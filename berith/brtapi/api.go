@@ -182,8 +182,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	totalStakingAmount := new(big.Int).Add(stakingAmount,stakedAmount)
 
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
-		if totalStakingAmount.Cmp(config.Bsrr.StakeMinimum) <= -1 {
-			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, big.NewInt(1e+18))
+		if totalStakingAmount.Cmp(config.Amon.StakeMinimum) <= -1 {
+			minimum := new(big.Int).Div(config.Amon.StakeMinimum, big.NewInt(1e+18))
 
 			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
 			return common.Hash{}, errors.New("staking balance failed")

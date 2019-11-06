@@ -37,7 +37,7 @@ var (
 		HomesteadBlock: big.NewInt(0),
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
-		Bsrr: &BSRRConfig{
+		Amon: &AmonConfig{
 			Period:       10,
 			Epoch:        360,
 			Rewards:      common.StringToBig("20000"),
@@ -62,7 +62,7 @@ var (
 		HomesteadBlock: big.NewInt(0),
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
-		Bsrr: &BSRRConfig{
+		Amon: &AmonConfig{
 			Period:       5,
 			Epoch:        40,
 			Rewards:      common.StringToBig("20000"),
@@ -119,9 +119,9 @@ type ChainConfig struct {
 	EWASMBlock          *big.Int `json:"ewasmBlock,omitempty"`          // EWASM switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	Bsrr *BSRRConfig `json:"bsrr,omitempty"`
+	Amon *AmonConfig `json:"amon,omitempty"`
 }
-type BSRRConfig struct {
+type AmonConfig struct {
 	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
 	Epoch        uint64   `json:"epoch"`        // Epoch length to determine stakeholder
 	Rewards      *big.Int `json:"rewards"`      // Start block number of mining reward
@@ -130,16 +130,16 @@ type BSRRConfig struct {
 	ForkFactor   float64  `json:"forkfactor"`   // Number of mining candidates given stake holders
 }
 
-func (b *BSRRConfig) String() string {
-	return "bsrr"
+func (b *AmonConfig) String() string {
+	return "amon"
 }
 
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
 	switch {
-	case c.Bsrr != nil:
-		engine = c.Bsrr
+	case c.Amon != nil:
+		engine = c.Amon
 	default:
 		engine = "unknown"
 	}

@@ -18,7 +18,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 - 바디의 Tx를 확인 하여 Staking DB 에 기록 하고 선출
 **/
 
-package bsrr
+package amon
 
 import (
 	"bytes"
@@ -194,8 +194,8 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	return signer, nil
 }
 
-type BSRR struct {
-	config *params.BSRRConfig // Consensus engine configuration parameters
+type Amon struct {
+	config *params.AmonConfig // Consensus engine configuration parameters
 	db     berithdb.Database  // Database to store and retrieve snapshot checkpoints
 	//[BERITH] stakingDB clique 구조체에 추가
 	stakingDB staking.DataBase //stakingList를 저장하는 DB
@@ -216,8 +216,8 @@ type BSRR struct {
 }
 
 //[BERITH]
-//New 새로운 BSRR 구조체를 만드는 함수
-func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
+//New 새로운 Amon 구조체를 만드는 함수
+func New(config *params.AmonConfig, db berithdb.Database) *Amon {
 	conf := config
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
@@ -256,7 +256,7 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	//[BERITH] 캐쉬 인스턴스 생성및 사이즈 지정
 	cache, _ := lru.NewARC(inmemorySigners)
 
-	return &BSRR{
+	return &Amon{
 		config:     conf,
 		db:         db,
 		recents:    recents,
@@ -268,8 +268,9 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 }
 
 //[BERITH]
-//NewCliqueWithStakingDB StakingDB를 받아 새로운 BSRR 구조체를 생성하는 함수
-func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db berithdb.Database) *BSRR {
+//NewCliqueWithStakingDB StakingDB를 받아 새로운 Amon 구조체를 생성하는 함수
+// func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.AmonConfig, db berithdb.Database) *Amon {
+func NewAmonWithStakingDB(stakingDB staking.DataBase, config *params.AmonConfig, db berithdb.Database) *Amon {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
 	// Synchronize the engine.config and chainConfig.
@@ -278,19 +279,19 @@ func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfi
 
 // Author implements consensus.Engine, returning the Berith address recovered
 // from the signature in the header's extra-data section.
-func (c *BSRR) Author(header *types.Header) (common.Address, error) {
+func (c *Amon) Author(header *types.Header) (common.Address, error) {
 	return ecrecover(header, c.signatures)
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules.
-func (c *BSRR) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
+func (c *Amon) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 	return c.verifyHeader(chain, header, nil)
 }
 
 // VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers. The
 // method returns a quit channel to abort the operations and a results channel to
 // retrieve the async verifications (the order is that of the input slice).
-func (c *BSRR) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
+func (c *Amon) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
@@ -312,7 +313,7 @@ func (c *BSRR) VerifyHeaders(chain consensus.ChainReader, headers []*types.Heade
 // caller may optionally pass in a batch of parents (ascending order) to avoid
 // looking those up from the database. This is useful for concurrently verifying
 // a batch of new headers.
-func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
+func (c *Amon) verifyHeader(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	if header.Number == nil {
 		return errUnknownBlock
 	}
@@ -374,7 +375,7 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 // rather depend on a batch of previous headers. The caller may optionally pass
 // in a batch of parents (ascending order) to avoid looking those up from the
 // database. This is useful for concurrently verifying a batch of new headers.
-func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
+func (c *Amon) verifyCascadingFields(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// The genesis block is the always valid dead-end
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -405,7 +406,7 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
-func (c *BSRR) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
+func (c *Amon) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
 	if len(block.Uncles()) > 0 {
 		return errors.New("uncles not allowed")
 	}
@@ -414,7 +415,7 @@ func (c *BSRR) VerifyUncles(chain consensus.ChainReader, block *types.Block) err
 
 // VerifySeal implements consensus.Engine, checking whether the signature contained
 // in the header satisfies the consensus protocol requirements.
-func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
+func (c *Amon) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
 	return c.verifySeal(chain, header, nil)
 }
 
@@ -422,7 +423,7 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // consensus protocol requirements. The method accepts an optional list of parent
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
-func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
+func (c *Amon) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
 	number := header.Number
 	if number.Uint64() == 0 {
@@ -453,7 +454,7 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
-func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error {
+func (c *Amon) Prepare(chain consensus.ChainReader, header *types.Header) error {
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
 
@@ -476,7 +477,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// nonce is used to check order of staking list
 	header.Nonce = types.EncodeNonce(uint64(rank))
 
-	// FIXME : will remove extra data used in clique because of no meanings in bsrr consensus
+	// FIXME : will remove extra data used in clique because of no meanings in amon consensus
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
@@ -497,7 +498,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
-func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+func (c *Amon) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] 부모블록의 StakingList를 얻어온다.
 	stks, err := c.getStakers(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
@@ -577,7 +578,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 // Authorize injects a private key into the consensus engine to mint new blocks
 // with.
-func (c *BSRR) Authorize(signer common.Address, signFn SignerFn) {
+func (c *Amon) Authorize(signer common.Address, signFn SignerFn) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -587,7 +588,7 @@ func (c *BSRR) Authorize(signer common.Address, signFn SignerFn) {
 
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
-func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (c *Amon) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
 	header := block.Header()
 
 	// Sealing the genesis block is not supported
@@ -656,7 +657,7 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
-func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
+func (c *Amon) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 	//target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 	target, exist := c.getStakeTargetBlock(chain, parent)
 	if !exist {
@@ -666,7 +667,7 @@ func (c *BSRR) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *
 	return diff
 }
 
-func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.Header) (*types.Header, bool) {
+func (c *Amon) getAncestor(chain consensus.ChainReader, n int64, header *types.Header) (*types.Header, bool) {
 	target := header
 	targetNumber := new(big.Int).Sub(header.Number, big.NewInt(n))
 	for target != nil && target.Number.Cmp(big.NewInt(0)) > 0 && target.Number.Cmp(targetNumber) > 0 {
@@ -684,7 +685,7 @@ func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.H
 // 1) [0, epoch-1] : target == 블록 넘버 0(즉, genesis block) 인 블록
 // 2) [epoch, 2epoch] : target == 블록 넘버 epoch 인 블록
 // 3) [2epoch +1, ~) : target == 블록 넘버 - epoch 인 블록
-func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.Header) (*types.Header, bool) {
+func (c *Amon) getStakeTargetBlock(chain consensus.ChainReader, parent *types.Header) (*types.Header, bool) {
 	if parent == nil {
 		return &types.Header{}, false
 	}
@@ -713,7 +714,7 @@ func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.He
 
 // [BERITH] getRewardTargetBlock 주어진 header에 대하여 miner 보상을 결정 할 target block을 반환한다.
 // target block number == current block number - config.SlashRound
-func (c *BSRR) getRewardTargetBlock(chain consensus.ChainReader, header *types.Header) (*types.Header, bool) {
+func (c *Amon) getRewardTargetBlock(chain consensus.ChainReader, header *types.Header) (*types.Header, bool) {
 	if header == nil {
 		return &types.Header{}, false
 	}
@@ -731,7 +732,7 @@ func (c *BSRR) getRewardTargetBlock(chain consensus.ChainReader, header *types.H
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
-func (c *BSRR) SealHash(header *types.Header) common.Hash {
+func (c *Amon) SealHash(header *types.Header) common.Hash {
 	return sigHash(header)
 }
 
@@ -740,7 +741,7 @@ func (c *BSRR) SealHash(header *types.Header) common.Hash {
 // ==> (1234,1) or (0, -1) 반환
 // 2) [epoch+1, ~) -> target의 블록까지 존재하는 스테이킹 리스트기반 (diff, rank) 반환
 // ==> (diff,rank) or (0, -1) 반환
-func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, target *types.Header) (*big.Int, int) {
+func (c *Amon) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, target *types.Header) (*big.Int, int) {
 	// extract diff and rank from genesis's extra data
 	if target.Number.Cmp(big.NewInt(0)) == 0 {
 		return big.NewInt(diffWithoutStaker), 1
@@ -765,7 +766,7 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 
 // getDelay 주어진 rank에 따라 블록 Sealing에 대한 지연 시간을 반환한다.
 // 항상 0보다 크거나 같은 값을 반환
-func (c *BSRR) getDelay(rank int) time.Duration {
+func (c *Amon) getDelay(rank int) time.Duration {
 	if rank <= 1 {
 		return time.Duration(0)
 	}
@@ -782,19 +783,19 @@ func (c *BSRR) getDelay(rank int) time.Duration {
 }
 
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
-func (c *BSRR) Close() error {
+func (c *Amon) Close() error {
 	return nil
 }
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	number := header.Number.Uint64()
 	// 특정 블록 이후로 보상을 지급
-	if number < config.Bsrr.Rewards.Uint64() {
+	if number < config.Amon.Rewards.Uint64() {
 		return big.NewInt(0)
 	}
 
 	//공식이 10초 단위 이기때문
-	d := float64(config.Bsrr.Period) / 10
+	d := float64(config.Amon.Period) / 10
 	n := float64(number) * d
 
 	var z float64 = 0
@@ -816,12 +817,12 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 // AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
-func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.StateDB, header *types.Header) {
+func (c *Amon) accumulateRewards(chain consensus.ChainReader, state *state.StateDB, header *types.Header) {
 	config := chain.Config()
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
 
 	//과거 시점의 블록 생성자 가져온다.
-	target, exist := c.getAncestor(chain, int64(config.Bsrr.SlashRound), header)
+	target, exist := c.getAncestor(chain, int64(config.Amon.SlashRound), header)
 	if !exist {
 		return
 	}
@@ -838,7 +839,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 			continue
 		}
 
-		target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
+		target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Amon.SlashRound))
 		if header.Number.Cmp(target) == -1 {
 			continue
 		}
@@ -855,7 +856,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 }
 
 //[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
-func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.Stakers, error) {
+func (c *Amon) getStakers(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.Stakers, error) {
 	var (
 		list   staking.Stakers
 		blocks []*types.Block
@@ -926,7 +927,7 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 }
 
 //[BERITH] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, blocks []*types.Block) error {
+func (c *Amon) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, blocks []*types.Block) error {
 	if len(blocks) == 0 {
 		return nil
 	}
@@ -941,7 +942,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, bl
 }
 
 //[BERITH] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
-func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainReader, stks staking.Stakers, txs []*types.Transaction, header *types.Header) error {
+func (c *Amon) setStakersWithTxs(state *state.StateDB, chain consensus.ChainReader, stks staking.Stakers, txs []*types.Transaction, header *types.Header) error {
 	number := header.Number
 
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
@@ -1041,7 +1042,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 //[BERITH] 입력받은 블록넘버에, 블록생성이 가능한 계정의 목록을 반환하는 메서드.
 // 1) [0, epoch number) -> genesis의 extra 데이터에서 추출 한 signers 반환
 // 2) [epoch nunber ~ ) -> staking list 에서 추출 한 signers 반환
-func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (signers, error) {
+func (c *Amon) getSigners(chain consensus.ChainReader, target *types.Header) (signers, error) {
 	// extract signers from genesis block's extra data if block number equals to 0
 	if target.Number.Cmp(big.NewInt(0)) == 0 {
 		return c.getSignersFromExtraData(target)
@@ -1066,7 +1067,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 }
 
 //[BERITH] getSignersFromExtraData extra data 필드로 부터 signers를 반환한다.
-func (c *BSRR) getSignersFromExtraData(header *types.Header) (signers, error) {
+func (c *Amon) getSignersFromExtraData(header *types.Header) (signers, error) {
 	n := (len(header.Extra) - extraVanity - extraSeal) / common.AddressLength
 	if n < 1 {
 		return nil, errExtraSigners
@@ -1080,7 +1081,7 @@ func (c *BSRR) getSignersFromExtraData(header *types.Header) (signers, error) {
 }
 
 // [BERITH] getMaxMiningCandidates 주어진 스테이킹 리스트 수에서 블록을 생성 할 수 있는 후보자의 수를 반환한다.
-func (c *BSRR) getMaxMiningCandidates(holders int) int {
+func (c *Amon) getMaxMiningCandidates(holders int) int {
 	if holders == 0 {
 		return 0
 	}
@@ -1101,7 +1102,7 @@ func (c *BSRR) getMaxMiningCandidates(holders int) int {
 [BERITH]
 선출확율 반환 함수
 */
-func (c *BSRR) getJoinRatio(stks staking.Stakers, address common.Address, hash common.Hash, blockNumber uint64, states *state.StateDB) (float64, error) {
+func (c *Amon) getJoinRatio(stks staking.Stakers, address common.Address, hash common.Hash, blockNumber uint64, states *state.StateDB) (float64, error) {
 	var total float64
 	var n float64
 
@@ -1122,11 +1123,11 @@ func (c *BSRR) getJoinRatio(stks staking.Stakers, address common.Address, hash c
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
 // controlling the signer voting.
-func (c *BSRR) APIs(chain consensus.ChainReader) []rpc.API {
+func (c *Amon) APIs(chain consensus.ChainReader) []rpc.API {
 	return []rpc.API{{
-		Namespace: "bsrr",
+		Namespace: "amon",
 		Version:   "1.0",
-		Service:   &API{chain: chain, bsrr: c},
+		Service:   &API{chain: chain, amon: c},
 		Public:    false,
 	}}
 }

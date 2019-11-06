@@ -87,7 +87,7 @@ Service miner
 | `stop` | 마이닝을 정지 합니다.  |
 | `setBerithbase` | 계정을 선택합니다.  |
 
-Service bsrr
+Service amon
 
 |  Command    | Description |
 |:----------:|-------------|

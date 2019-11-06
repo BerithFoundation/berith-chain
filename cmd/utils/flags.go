@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
+	"github.com/BerithFoundation/berith-chain/consensus/amon"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -1313,7 +1313,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		Fatalf("%v", err)
 	}
 	var engine consensus.Engine
-	engine = bsrr.New(config.Bsrr, chainDb)
+	engine = amon.New(config.Amon, chainDb)
 	if gcmode := ctx.GlobalString(GCModeFlag.Name); gcmode != "full" && gcmode != "archive" {
 		Fatalf("--%s must be either 'full' or 'archive'", GCModeFlag.Name)
 	}

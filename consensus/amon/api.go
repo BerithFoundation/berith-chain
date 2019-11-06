@@ -13,7 +13,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 합의 알고리즘 에 관련된 함수를 이용하여 반환해야 할시 이곳에 API 구현
 */
 
-package bsrr
+package amon
 
 import (
 	"github.com/BerithFoundation/berith-chain/common"
@@ -26,21 +26,30 @@ import (
 // mechanisms of the proof-of-authority scheme.
 type API struct {
 	chain consensus.ChainReader
-	bsrr  *BSRR
+	amon  *Amon
 }
 
 /*
 [BERITH]
 현재 로컬 블록상 의 선출된 BC 를 반환 하는 함수
 */
-func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
+func (api *API) GetBlockCreatorsByNumber(number *rpc.BlockNumber) ([]common.Address, error) {
 	var header *types.Header
 	if number == nil || *number == rpc.LatestBlockNumber {
 		header = api.chain.CurrentHeader()
 	} else {
 		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
 	}
+	return api.getBlockCreators(header)
+}
 
+func (api *API) GetBlockCreatorsByHash(hash common.Hash) ([]common.Address, error) {
+	header := api.chain.GetHeaderByHash(hash)
+	return api.getBlockCreators(header)
+}
+
+// getBlockCreators returns a block creatable address given block header.
+func (api *API) getBlockCreators(header *types.Header) ([]common.Address, error) {
 	if header == nil {
 		return nil, errUnknownBlock
 	}
@@ -49,18 +58,14 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 	if parent == nil {
 		return nil, consensus.ErrUnknownAncestor
 	}
-
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+	target, exist := api.amon.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}
-
-	signers, err := api.bsrr.getSigners(api.chain, target)
+	signers, err := api.amon.getSigners(api.chain, target)
 	if err != nil {
 		return nil, err
 	}
-
 	return signers, nil
 }
 
@@ -84,7 +89,7 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 
 	num = header.Number.Int64()
 
-	epoch := int64(api.bsrr.config.Epoch)
+	epoch := int64(api.amon.config.Epoch)
 
 	if num <= epoch {
 		return 0, errNoData
@@ -94,7 +99,7 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 	//uint64(num - epoch - 2)
 	//	prev_header := api.chain.GetHeaderByNumber(5740)
 
-	stks, err := api.bsrr.getStakers(api.chain, uint64(num), header.Hash())
+	stks, err := api.amon.getStakers(api.chain, uint64(num), header.Hash())
 	if err != nil {
 		return 0, err
 	}
@@ -104,8 +109,8 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+	// target, exist := api.amon.getAncestor(api.chain, int64(api.amon.config.Epoch), parent)
+	target, exist := api.amon.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return 0, consensus.ErrUnknownAncestor
 	}
@@ -115,36 +120,10 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, err
 	}
 
-	roi, err := api.bsrr.getJoinRatio(stks, address, header.Hash(), uint64(num), states)
+	roi, err := api.amon.getJoinRatio(stks, address, header.Hash(), uint64(num), states)
 	if err != nil {
 		return 0, err
 	}
 
 	return roi, nil
-}
-
-// GetSignersAtHash retrieves the list of authorized signers at the specified block.
-func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
-	header := api.chain.GetHeaderByHash(hash)
-	if header == nil {
-		return nil, errUnknownBlock
-	}
-
-	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return nil, consensus.ErrUnknownAncestor
-	}
-
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
-	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
-	if !exist {
-		return nil, consensus.ErrUnknownAncestor
-	}
-
-	signers, err := api.bsrr.getSigners(api.chain, target)
-	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
-	if err != nil {
-		return nil, err
-	}
-	return signers, nil
 }

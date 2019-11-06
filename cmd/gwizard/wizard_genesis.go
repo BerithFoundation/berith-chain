@@ -51,9 +51,9 @@ func (w *wizard) makeGenesis() {
 		},
 	}
 
-	// In the case of bsrr, configure the consensus parameters
+	// In the case of amon, configure the consensus parameters
 	genesis.Difficulty = big.NewInt(1)
-	genesis.Config.Bsrr = &params.BSRRConfig{
+	genesis.Config.Amon = &params.AmonConfig{
 		Period:       30,
 		Epoch:        300,
 		Rewards:      big.NewInt(500),
@@ -68,7 +68,7 @@ func (w *wizard) makeGenesis() {
 
 	fmt.Println()
 	fmt.Println("How many seconds should blocks take? (default = 15)")
-	genesis.Config.Bsrr.Period = uint64(w.readDefaultInt(15))
+	genesis.Config.Amon.Period = uint64(w.readDefaultInt(15))
 
 	// We also need the initial signer during epoch i.e from 0 to epoch
 	fmt.Println()
