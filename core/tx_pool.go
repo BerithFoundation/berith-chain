@@ -631,7 +631,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	*/
 	stakedAmount := pool.currentState.GetStakeBalance(from)
 	totalStakingAmount := tx.Value().Add(tx.Value(), stakedAmount)
-	minimum := pool.chainconfig.Bsrr.StakeMinimum
+	minimum := pool.chainconfig.Amon.StakeMinimum
 	if tx.Base() == types.Main && tx.Target() == types.Stake {
 		if totalStakingAmount.Cmp(minimum) == -1 {
 			return ErrStakingBalance

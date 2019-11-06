@@ -30,7 +30,7 @@ var Modules = map[string]string{
 	"admin":      Admin_JS,
 	"chequebook": Chequebook_JS,
 	"clique":     Clique_JS,
-	"bsrr":       Bsrr_JS,
+	"amon":       Amon_JS,
 	"debug":      Debug_JS,
 	"berith":     BERITH_JS,
 	"miner":      Miner_JS,
@@ -119,24 +119,24 @@ web3._extend({
 });
 `
 
-const Bsrr_JS = `
+const Amon_JS = `
  web3._extend({
- 	property: 'bsrr',
+ 	property: 'amon',
  	methods: [
  		new web3._extend.Method({
- 			name: 'getBlockCreators',
- 			call: 'bsrr_getBlockCreators',
+ 			name: 'getBlockCreatorsByNumber',
+ 			call: 'amon_getBlockCreatorsByNumber',
  			params: 1,
  			inputFormatter: [null]
  		}),
  		new web3._extend.Method({
- 			name: 'getSignersAtHash',
- 			call: 'bsrr_getSignersAtHash',
+ 			name: 'getBlockCreatorsByHash',
+ 			call: 'amon_getBlockCreatorsByHash',
  			params: 1
  		}),
  		new web3._extend.Method({
  			name: 'getJoinRatio',
- 			call: 'bsrr_getJoinRatio',
+ 			call: 'amon_getJoinRatio',
  			params: 1,
  			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
  		}),

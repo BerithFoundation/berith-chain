@@ -1,4 +1,4 @@
-package bsrr
+package amon
 
 import (
 	"testing"
@@ -10,8 +10,8 @@ import (
 )
 
 func TestGetMaxMiningCandidates(t *testing.T) {
-	var c = &BSRR{
-		config: &params.BSRRConfig{
+	var c = &Amon{
+		config: &params.AmonConfig{
 			Period:       10,
 			Epoch:        360,
 			Rewards:      common.StringToBig("20000"),
@@ -41,8 +41,8 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 }
 
 func TestGetDelay(t *testing.T) {
-	var c = &BSRR{
-		config: &params.BSRRConfig{
+	var c = &Amon{
+		config: &params.AmonConfig{
 			Period:       0,
 			Epoch:        360,
 			Rewards:      common.StringToBig("20000"),

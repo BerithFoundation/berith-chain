@@ -13,9 +13,11 @@
 
 - <a href="#web3_clientVersion">web3_clientVersion</a>  
 - <a href="#web3_sha3">web3_sha3</a>  
+
 - <a href="#net_version">net_version</a>
 - <a href="#net_peerCount">net_peerCount</a>  
 - <a href="#net_listening">net_listening</a>  
+
 - <a href="#berith_protocolVersion">berith_protocolVersion</a>  
 - <a href="#berith_coinbase">berith_coinbase</a>  
 - <a href="#berith_syncing">berith_syncing</a>
@@ -49,6 +51,10 @@
 - <a href="#berith_getFilterChanges">berith_getFilterChanges</a>  
 - <a href="#berith_getFilterLogs">berith_getFilterLogs</a>  
 - <a href="#berith_getLogs">berith_getLogs</a>  
+
+- <a href="#amon_getBlockCreatorsByNumber">amon_getBlockCreatorsByNumber</a>
+- <a href="#amon_getBlockCreatorsByHash">amon_getBlockCreatorsByHash</a>
+- <a href="#amon_getJoinRatio">amon_getJoinRatio</a>
   
 ---  
 
@@ -1382,3 +1388,85 @@ curl --data '{"jsonrpc":"2.0","method":"berith_getLogs","params":[{"topics":["0x
 ```
 
 ---  
+
+<div id="amon_getBlockCreatorsByNumber"></div>  
+
+### amon_getBlockCreatorsByNumber  
+Returns an array of addresses who can seal a block the given block number.
+
+**Parameter**
+1. `QUANTITY|TAG`, 32 Bytes - Hash of a block.  
+
+
+**Returns**  
+`Array of DATA`, 20 Bytes - addresses who can seal a block. 
+
+
+**Example**  
+```js
+// Request
+curl --data '{"jsonrpc":"2.0","method":"amon_getBlockCreatorsByNumber","params":["0x9"],"id":1}' -H "Content-Type: application/json" -X POST localhost:8545
+
+// Response
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "Bxca7207de79e55c1a69dbc67a4a2e81dfc62c6ac4",
+    "Bxd8a25ff31c6174ce7bce74ca4a91c2e816dbf91e",
+    "Bx90865e6e6737fe766dd08f39cc2cf1550b5f3875",
+    "Bxbb926bbb0b15ca54d4a19dcdf44fc8940e3f6da3",
+    "Bx8676fb254279ef78c53b8a781e228ab439065786"
+  ]
+}
+```
+
+---  
+
+<div id="amon_getBlockCreatorsByHash"></div>  
+
+### amon_getBlockCreatorsByHash  
+Returns an array of addresses who can seal a block the given block hash.
+
+**Parameter**  
+1. `DATA`, 32 Bytes - Hash of a block.
+
+
+**Returns**    
+See [amon_getBlockCreatorsByNumber](#amon_getBlockCreatorsByNumber)
+
+
+**Example**  
+```js
+// Request
+curl --data '{"jsonrpc":"2.0","method":"amon_getBlockCreatorsByHash","params":["0x398514d5a403e6245f1af54f96d262f21a8a9bef1fb9b7920e46f14047752cb7"],"id":1}' -H "Content-Type: application/json" -X POST localhost:8545
+```
+
+---  
+
+<div id="amon_getJoinRatio"></div>  
+
+### amon_getJoinRatio  
+Returns a probability of the top of block creators. probability is determined by stake amount.
+
+**Parameter**  
+1. `DATA`, 20 Bytes - address to check probability of the top of block creators
+2. `QUANTITY|TAG`, 32 Bytes - Hash of a block.
+
+
+**Returns**    
+Returns a probability `float64`
+
+
+**Example**  
+```js
+// Request
+curl --data '{"jsonrpc":"2.0","method":"amon_getJoinRatio","params":["Bxbb926bbb0b15ca54d4a19dcdf44fc8940e3f6da3", "0x14"],"id":1}' -H "Content-Type: application/json" -X POST localhost:8545
+
+// Response
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": 0.13333333333333333
+}
+```

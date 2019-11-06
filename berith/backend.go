@@ -27,7 +27,7 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 
-	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
+	"github.com/BerithFoundation/berith-chain/consensus/amon"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berith/brtapi"
@@ -240,7 +240,7 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (berithdb.D
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Berith service
 func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
-	return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
+	return amon.NewAmonWithStakingDB(stakingDB, chainConfig.Amon, db)
 }
 
 // APIs return the collection of RPC services the berith package offers.
@@ -405,13 +405,13 @@ func (s *Berith) StartMining(threads int) error {
 			log.Error("Cannot start mining without berithbase", "err", err)
 			return fmt.Errorf("berithbase missing: %v", err)
 		}
-		if bsrr, ok := s.engine.(*bsrr.BSRR); ok {
+		if amon, ok := s.engine.(*amon.Amon); ok {
 			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 			if wallet == nil || err != nil {
 				log.Error("Berithbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
 			}
-			bsrr.Authorize(eb, wallet.SignHash)
+			amon.Authorize(eb, wallet.SignHash)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.
