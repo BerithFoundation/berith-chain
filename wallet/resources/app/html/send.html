@@ -6,7 +6,6 @@
             <p class="coin red" id="mainBalance"></p>
         </div>
         <hr/>
-
     </div><!-- e://aside -->
 
     <div class="content">
@@ -15,58 +14,60 @@
             <h5>받는 주소</h5>
             <div class="row_group">
                 <div class="box_inp">
-                                <span class="inp_wrap">
-                                    <input class="inp" type="text" id="sendAddr"/>
-                                </span>
-                    <a class="del" href="#!">삭제</a>
+                    <span class="inp_wrap">
+                        <input class="inp" type="text" id="sendAddr"/>
+                        <a class="del" href="#!">삭제</a>
+                    </span>
                 </div>
                 <div class="btn_inp">
                     <a class="btn blue medium2 contact" href="#!" onclick="openContactList();">Contact</a>
                 </div>
             </div>
             <p class="error_txt" id="err1">
-                주소를 입력하세요.
+                올바른 주소를 입력하세요.
             </p>
         </div><!-- e://inp_group -->
         <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
             <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
-                                <span class="inp_wrap">
-                                    <input class="inp" type="text" value=""/>
-                                </span>
-                    <a class="del" href="#!">삭제</a>
+                    <span class="inp_wrap">
+                        <input class="inp" type="text" value=""/>
+                        <a class="del" href="#!">삭제</a>
+                    </span>
                 </div>
                 <div class="btn_inp">
                     <a class="btn white medium2" href="#!" onclick="sendAll();">모두 보내기</a>
                 </div>
             </div>
             <p class="error_txt" id="err2">
-                수량을 입력하세요.
+                올바른 수량을 입력하세요.
             </p>
         </div><!-- e://inp_group -->
         <div class="row_group">
             <div class="con_box input">
-                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group" id = "sendGasL"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id="sendGasLimit" value="21000"/>
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
-                    <p class="error_txt">
+                    <p class="error_txt" id = "err3">
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
-                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group" id = "sendGasP"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
                             <input class="inp" type="text" id = "sendGasPrice" value="21000"/>
+                            <a class="del" href="#!">삭제</a>
                         </span>
-                        <a class="del" href="#!">삭제</a>
                     </div>
-                    <p class="error_txt">
+                    <p class="error_txt" id = "err4">
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
             </div>
@@ -84,7 +85,6 @@
         <div class="btn_area right">
             <a class="btn red medium on" href="#!" onclick="confirmation()">다음</a>
         </div>
-
     </div><!-- e://content -->
 </div><!-- e://container -->
 
@@ -167,18 +167,28 @@
     async function validateAmount() {
         let amountField = $('#sendAmount').find('input[type=text]:first');
         let amount = amountField.val();
+        let gasLimit = $('#sendGasLimit').val()
+        let gasPrice = $('#sendGasPrice').val()
 
-        if (isDecimalNumber(amount)) {
+        if (isDecimalNumber(amount) ) {
             let mainBalance = await berith.getBalance(account);
             if (parseInt(amount) > parseInt(mainBalance)) {
-                console.error("input amount is more than the available balance");
                 $("#sendAmount").addClass("error");
                 return false;
+            }else if(!isDecimalNumber(gasLimit)) {
+                $('#sendGasLimit').val(21000)
+                $('#sendGasL').addClass("error")
+                return false
+            }else if(!isDecimalNumber(gasPrice)) {
+                $('#sendGasPrice').val(21000)
+                $('#sendGasL').removeClass("error")
+                $('#sendGasP').addClass("error")
+                return false
             } else {
+                $('#sendGasP').removeClass("error")
                 $("#sendAmount").removeClass("error");
             }
         } else {
-            console.error("not a valid amount");
             $("#sendAmount").addClass("error");
             return false;
         }
@@ -187,6 +197,7 @@
 
     async function validateAddress() {
         let receiverAddress = $('#sendAddr').val();
+        console.log ( " 주소 vali 값 :: " + isAddress(receiverAddress))
         if (!isAddress(receiverAddress)) {
             $('#sendAddr').parent().parent().parent().parent().addClass("error");
             return false;

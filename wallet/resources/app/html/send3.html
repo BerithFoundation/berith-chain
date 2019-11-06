@@ -15,8 +15,8 @@
                     <span class="inp_wrap">
                         <input class="inp" id ="sendPwd" type="password" /><!-- type: password/text -->
                         <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                        <a class="del" href="#!">삭제</a>
                     </span>
-                <a class="del" href="#!">삭제</a>
             </div>
             <p class="error_txt">
                 비밀번호를 입력하세요.
@@ -28,15 +28,15 @@
     </div>
 </div><!-- e://pop_wrap  -->
 <script type="text/javascript">
-    $(".inp").focus(function () {
-        //$(this).parent().parent().parent().parent().addClass("active del");
-        $(this).closest('.inp_group').addClass("active del");
-    });
-
-    $(".inp").blur(function () {
-        //$(this).parent().parent().parent().parent().removeClass("active del");
-        $(this).closest('.inp_group').removeClass("active del");
-    });
+    // $(".inp").focus(function () {
+    //     $(this).closest('.inp_group').addClass("active del");
+    // });
+    //
+    // $(".inp").blur(function () {
+    //     //$(this).parent().parent().parent().parent().removeClass("active del");
+    //     $(this).closest('.inp_group').removeClass("active del");
+    // });
+    registerEvents()
     
     function checkPwd() {
         var sendPwd = $('#sendPwd').val()

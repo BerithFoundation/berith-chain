@@ -24,38 +24,40 @@
             <h5>수량 - BER<span class="info">보낼 수량은 Stake Balance의 전체 수량입니다.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
-                                <span class="inp_wrap">
-                                    <input id="stakedBalance" class="inp" type="text" value="" readonly/>
-                                </span>
+                    <span class="inp_wrap">
+                        <input id="stakedBalance" class="inp" type="text" value="" readonly/>
+                    </span>
                 </div>
             </div>
         </div><!-- e://inp_group -->
         <div class="row_group">
             <div class="con_box input">
-                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+
+                <div class="inp_group " id = "breakGasL"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>기본수수료</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text"/>
-                                    </span>
-                        <a class="del" href="#!">삭제</a>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "breakGasLimit" value=21000 />
+                            <a class="del" href="#!">삭제</a>
+                        </span>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
-                <div class="inp_group  "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                <div class="inp_group  " id = "breakGasP"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
                     <h5>수수료가격</h5>
                     <div class="box_inp">
-                                    <span class="inp_wrap">
-                                        <input class="inp" type="text"/>
-                                    </span>
-                        <a class="del" href="#!">삭제</a>
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "breakGasPrice" value=21000 />
+                            <a class="del" href="#!">삭제</a>
+                        </span>
                     </div>
                     <p class="error_txt">
-                        소수점은 한번만 입력해 주세요.
+                        올바른 수량을 입력하세요.
                     </p>
                 </div>
+
             </div>
             <div class="con_box info">
                 <div class="box_info">
@@ -69,7 +71,7 @@
             </div>
         </div>
         <div class="btn_area right">
-            <a class="btn red medium on" href="#!" onclick="next()">다음</a>
+            <a class="btn red medium on" href="#!" onclick="breakConfirmation()">다음</a>
         </div>
 
     </div><!-- e://content -->
@@ -77,8 +79,12 @@
 
 </div><!-- e://container -->
 
+<div id ="breakConfirmPop" class="ly_pop hide" ></div>
+<div id ="breakSuccessPop" class="ly_pop hide" ></div>
 
 <script type="text/javascript">
+    $('#breakConfirmPop').load("break2.html");
+    $('#breakSuccessPop').load("break3.html")
 
     onBreakLoad();
     async function onBreakLoad() {
@@ -101,4 +107,66 @@
             alert("Request submitted for stop staking");
         }
     }
+    async function fnBreak(){
+        let breakGasLimit = $('#breakGasLimit').val()
+        let breakGasPrice = $('#breakGasPrice').val()
+        let breakAmount   = $('#stakedBalance').val()
+        let result = await berith.stopStaking(breakGasLimit,breakGasPrice)
+        togglePopUp("breakConfirmPop");
+        if( result.name == "error"){
+            alert(result.payload);
+            return
+        }else {
+            let date = new Date();
+            $("#breakDate").text(date.toISOString()); //TODO:: spit time and date
+            $('#breakAmountSuccess').text(breakAmount)
+            $('#breakGasLimitSuccess').text(breakGasLimit)
+            $('#breakGasPriceSuccess').text(breakGasPrice)
+            togglePopUp("breakSuccessPop")
+        }
+    }
+    async function breakConfirmation() {
+        if( await isValidated()){
+            if ( $('#breakGasL').hasClass("error") ) {
+                $('#breakGasL').removeClass("error")
+            }
+            if ( $('#breakGasP').hasClass("error") ) {
+                $('#breakGasP').removeClass("error")
+            }
+            let breakAmount   = $('#stakedBalance').val()
+            let breakGasLimit = $('#breakGasLimit').val()
+            let breakGasPrice = $('#breakGasPrice').val()
+            if( breakGasLimit == "") {breakGasLimit = 21000}
+            if( breakGasPrice == "") {breakGasPrice = 21000}
+
+            $('#breakAmountConfirmaion').html(breakAmount)
+            $('#breakGasLimitConfirmation').html(breakGasLimit)
+            $('#breakGasPriceConfirmation').html(breakGasPrice)
+            // console.log("break ok!! ")
+            togglePopUp('breakConfirmPop');
+        }
+    }
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {
+        let isValidAmount = await validateAmount();
+        return isValidAmount
+    }
+    async function validateAmount() {
+        let gasLimit = $('#breakGasLimit').val()
+        let gasPrice = $('#breakGasPrice').val()
+
+        if(!isDecimalNumber(gasLimit)){
+            $('#breakGasLimit').val(21000)
+            $('#breakGasL').addClass("error")
+            return false
+        }else if(!isDecimalNumber(gasPrice)) {
+            $('#breakGasPrice').val(21000)
+            $('#breakGasL').removeClass("error")
+            $('#breakGasP').addClass("error")
+            return false
+        }else {
+            return true
+        }
+    }
+    
 </script>

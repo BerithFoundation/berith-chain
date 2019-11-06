@@ -38,7 +38,7 @@
             $('#syncCompleteTime').html("0초")
         }
     }
-     function blockInfo(data) {
+    function blockInfo(data) {
         var value , txType , gasLimit , gasPrice , hash
         var obj = JSON.parse(data)
         var result = obj.transactions
@@ -46,7 +46,7 @@
         var Raccount = [account]
         if ( result != ""){
             result.forEach((v) => {
-                Raccount.some((i) => {
+                Raccount.some(async (i) => {
                     value = v.value
                     hash = v.hash
                     gasLimit = v.gas
@@ -68,12 +68,18 @@
                                 txType = "5" // rewardToMain (withdraw)
                             }
                         }
+                        var gasUesd = await berith.getRealGasUsed(hash)
+                        // gasUesd = gasUesd.gasUsed
+                        //console.log( "hash ::: " + hash)
+                        // console.log("gas Used ::: " + gasUesd.gasUsed)
                         // console.log( "blockNumber : " + blockNumber + "/ account : " + account + "/ txType : " + txType + "/ value : "+ value)
-                        database.insertTxInfo(blockNumber, account , txType , value  , hash , gasLimit , gasPrice)
+                        database.insertTxInfo(blockNumber, account , txType , value  , hash , gasLimit , gasPrice ,gasUesd.gasUsed)
                         return ( i == v.from || i == v.to)
                     }
                 })
             })
+        }else {
+            console.log("no data!")
         }
     }
 </script>

@@ -33,8 +33,8 @@
                         <div class="box_inp">
                             <span class="inp_wrap">
                                 <input class="inp" type="text" id ="loginID" />
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
                         <p class="error_txt" id = "err1" >
 
@@ -46,8 +46,8 @@
                             <span class="inp_wrap">
                                 <input class="inp" type="password" id = "loginPwd" /><!-- type: password/text -->
                                 <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
                         <p class="error_txt" id = "err2">
 
@@ -59,8 +59,8 @@
                             <span class="inp_wrap">
                                 <input class="inp" type="password" id = "loginPwdR" /><!-- type: password/text -->
                                 <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                                <a class="del" href="#!">삭제</a>
                             </span>
-                            <a class="del" href="#!">삭제</a>
                         </div>
                         <p class="error_txt" id = "err3">
 
@@ -74,23 +74,47 @@
     </div>
     <script type="text/javascript">
         $('#loginID').focus(function(){
-            $('#idGroup').addClass('active del')
+            $('#idGroup').addClass('active')
         });
         $('#loginID').blur(function(){
-            $('#idGroup').removeClass('active del')
+            $('#idGroup').removeClass('active')
         });
         $('#loginPwd').focus(function(){
-            $('#pwdGroup').addClass('active del')
+            $('#pwdGroup').addClass('active')
         });
         $('#loginPwd').blur(function(){
-            $('#pwdGroup').removeClass('active del')
+            $('#pwdGroup').removeClass('active')
         });
         $('#loginPwdR').focus(function(){
-            $('#pwdGroupR').addClass('active del')
+            $('#pwdGroupR').addClass('active')
         });
         $('#loginPwdR').blur(function(){
-            $('#pwdGroupR').removeClass('active del')
+            $('#pwdGroupR').removeClass('active')
         });
+        $(".inp").on("propertychange change keyup paste input", function() {
+            var currentVal = $(this).val();
+            if(currentVal == ""){
+                $(this).closest('.inp_group').removeClass("del");
+            }else{
+                $(this).closest('.inp_group').addClass("del");
+            }
+        });
+        $('.del').click(function () {
+            $(this).siblings('input').val("")
+            $(this).closest('.inp_group').removeClass("del");
+        });
+        $('.icon').click(function () {
+            // console.log( "icon click !! ")
+            if( $(this).hasClass("hide_word")){
+                $(this).removeClass("hide_word")
+                $(this).addClass("view_word")
+                $(this).siblings('input').prop("type", "text");
+            }else {
+                $(this).removeClass("view_word")
+                $(this).addClass("hide_word")
+                $(this).siblings('input').prop("type", "password");
+            }
+        })
 
         $("#loginID").on("propertychange change keyup paste input", function() {
             var currentVal = $(this).val();

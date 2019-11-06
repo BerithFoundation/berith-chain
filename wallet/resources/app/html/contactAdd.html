@@ -1,80 +1,42 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="utf-8">
-    <title>Berith PC Wallet</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
-    <meta name="subject" content="" />
-    <meta name="application-name" content="">
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <meta name="copyright" content="Copyrights (c) " />
-    <meta name="robots" content="ALL" />
-    <meta name="robots" content="index,follow" />
-
-    
-</head>
-    
-<body>
-    <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
-    <div class="ly_pop hide" id ="contactAdd"><!-- view/hide -->
-        <div class="bg_dimmed"></div>
-        <div class="pop_wrap">
-            <div class="pop_header">
-                <h5>Contact 추가</h5>
-                <a class="btn_close" onclick="closeContactAdd()" >close</a>
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>Contact 추가</h5>
+        <a class="btn_close" onclick="headerPopup('contactAddPop')" >close</a>
+    </div>
+    <div class="pop_body">
+        <div class="inp_group" id = "contactAddNameGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>이름</h5>
+            <div class="box_inp">
+                <span class="inp_wrap">
+                    <input class="inp" type="text" id = "contactAddName" placeholder="지갑 이름을 입력해 주세요" />
+                    <a class="del" href="#!">삭제</a>
+                </span>
             </div>
-            <div class="pop_body">
-                <div class="inp_group" id = "contactAddNameGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                    <h5>이름</h5>
-                    <div class="box_inp">
-                        <span class="inp_wrap">
-                            <input class="inp" type="text" id = "contactAddName" placeholder="지갑 이름을 입력해 주세요" />
-                        </span>
-                        <a class="del" href="#!">삭제</a>
-                    </div>
-                    <p class="error_txt" id ="err1">
-                    </p>
-                </div>
-                <div class="inp_group" id = "contactAddAddressGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                    <h5>지갑주소</h5>
-                    <div class="box_inp">
-                        <span class="inp_wrap">
-                            <input class="inp" type="text" id = "contactAddAddress" placeholder="지갑 주소를 입력해 주세요" />
-                        </span>
-                        <a class="del" href="#!">삭제</a>
-                    </div>
-                    <p class="error_txt" id = "err2">
-                    </p>
-                </div>
+            <p class="error_txt" id ="err1"></p>
+        </div>
+        <div class="inp_group" id = "contactAddAddressGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>지갑주소</h5>
+            <div class="box_inp">
+                <span class="inp_wrap">
+                    <input class="inp" type="text" id = "contactAddAddress" placeholder="지갑 주소를 입력해 주세요" />
+                    <a class="del" href="#!">삭제</a>
+                </span>
             </div>
-            <div class="pop_footer">
-                <a class="btn red " id ="btnCreate" onclick="fnContactAdd()">확인</a><!-- input 입력시 on -->
-            </div>
-        </div><!-- e://pop_wrap  -->
-
-        <div class="one_sec_wrap hide" id = "popAdd"><!-- view/hide -->
-            <div class="bg"></div>
-            <p class="complete">추가 완료</p>
+            <p class="error_txt" id = "err2"></p>
         </div>
     </div>
+    <div class="pop_footer">
+        <a class="btn red " id ="btnCreate" onclick="fnContactAdd()">확인</a><!-- input 입력시 on -->
+    </div>
+</div><!-- e://pop_wrap  -->
+
+<div class="one_sec_wrap hide" id = "popAdd"><!-- view/hide -->
+    <div class="bg"></div>
+    <p class="complete">추가 완료</p>
+</div>
+
     <script type = "text/javascript">
-        $('#contactAddName').focus(function(){
-            $('#contactAddNameGroup').addClass('active del')
-        });
-        $('#contactAddName').blur(function(){
-            $('#contactAddNameGroup').removeClass('active del')
-        });
-        $('#contactAddAddress').focus(function(){
-            $('#contactAddAddressGroup').addClass('active del')
-        });
-        $('#contactAddAddress').blur(function(){
-            $('#contactAddAddressGroup').removeClass('active del')
-        });
         $("#contactAddName").on("propertychange change keyup paste input", function() {
             var currentVal = $(this).val();
             if( currentVal != "" && $('#contactAddAddress').val() != ""){
@@ -91,38 +53,28 @@
                 $('#btnCreate').removeClass('on')
             }
         });
-        function openContactAdd() {
-            $('#contactAdd').removeClass('hide');
-            $('#contactAdd').addClass('view');
-        }
-        function closeContactAdd(){
-            $('#contactAdd').removeClass('view');
-            $('#contactAdd').addClass('hide');
-        }
-
         async function fnContactAdd(){
             var contactAddName = $('#contactAddName').val()
             var contactAddAddress = $('#contactAddAddress').val()
             var validation = await validateAdd( contactAddAddress, contactAddName)
-            console.log("valresult :: " + validation)
             if(validation == false) {
-                console.log("val fail")
                 return
             }
-            console.log(" 주소록 추가 주소 ::: " + contactAddAddress)
             var obj = await database.insertContact(contactAddAddress, contactAddName)
-            console.log("add success ::" + obj)
             if(  obj != null){
-                var keys = Object.keys(obj)
-                for ( var i in keys) {
-                   console.log("add : " +keys[i]+ " , name : "  + obj[keys[i]])
-                }
                 $('#popAdd').removeClass('hide')
                 $('#popAdd').addClass('view')
+                if( $('#contactAddAddressGroup').hasClass('error')){
+                    $('#contactAddAddressGroup').removeClass('error')
+                }else if( $('#contactAddNameGroup').hasClass('error')){
+                    $('#contactAddNameGroup').removeClass('error')
+                }
+
                 setTimeout(function () {
                     $('#popAdd').removeClass('view')
                     $('#popAdd').addClass('hide')
-                    closeContactAdd()
+                    // closeContactAdd()
+                    headerPopup("contactAddPop")
                     closeContactList()
                     openContactList()
                 },3000)
@@ -144,16 +96,13 @@
                 return false
             }
             for ( var i in keys) {
-                console.log("val !!! add : " +keys[i]+ " , name : "  + obj[keys[i]])
                 if (name == obj[keys[i]]){
-                    console.log("same Name !!! ")
                     $('#contactAddNameGroup').addClass('error')
                     $('.error_txt').html("이미 존재하는 이름 입니다.")
                     $('#contactAddName').focus()
                     return false
                 }
                 if( add == keys[i]) {
-                    console.log("same add !!! ")
                     $('#contactAddAddressGroup').addClass('error')
                     $('.error_txt').html("이미 존재하는 주소 입니다.")
                     $('#contactAddAddress').focus()
@@ -162,7 +111,6 @@
             }
             return true
         }
-
     </script>
 </body>
 

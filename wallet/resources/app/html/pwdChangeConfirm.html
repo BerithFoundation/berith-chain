@@ -24,7 +24,7 @@
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
             <div class="pop_header">
-                <h5>STAKE 전송 확인</h5>
+                <h5>비밀번호 변경 확인</h5>
                 <a class="btn_close" onclick="closePwdChangeConfirmPop()">close</a>
             </div>
             <div class="pop_body">
@@ -38,7 +38,7 @@
                 <a class="btn red on" onclick="fnPwdChange()">확인</a>
             </div>
         </div><!-- e://pop_wrap  -->
-        <div class="one_sec_wrap hide" id = "popDelete"><!-- view/hide -->
+        <div class="one_sec_wrap hide" id = "changePwdPop"><!-- view/hide -->
             <div class="bg"></div>
             <p class="complete">변경 완료</p>
         </div>
@@ -48,7 +48,6 @@
         function openPwdChangeConfirmPop(add , pwd , cPwd) {
             $('#pwdChangeConfirm').removeClass('hide')
             $('#pwdChangeConfirm').addClass('view')
-
         }
         function closePwdChangeConfirmPop() {
             $('#pwdChangeConfirm').removeClass('view')
@@ -60,39 +59,16 @@
             // console.log("Add  : " + account + " ,  originPwd : " + pwd + "  ,  changePwd : " + cPwd )
             berith.updateAccount(account ,pwd, cPwd )
             database.updateMember(loginId , cPwd)
-
         }
-        // var deleteAddr
-        // function openContactDelete(value) {
-        //     deleteAddr = ""
-        //     $('#contactDeleteConfirmPop').removeClass('hide')
-        //     $('#contactDeleteConfirmPop').addClass('view')
-        //     var addNum = value.attr('id')
-        //     var addr = $('#addr'+addNum).text()
-        //     console.log( "delete Pop : " + addr)
-        //     deleteAddr = addr
-        // }
-        // function closeContactDelete() {
-        //     $('#contactDeleteConfirmPop').removeClass('view')
-        //     $('#contactDeleteConfirmPop').addClass('hide')
-        // }
-        // async function fnDeleteContact() {
-        //     console.log("delete Confirm : " + deleteAddr)
-        //     var obj =await database.updateContact(deleteAddr)
-        //     console.log("obj ::" + obj)
-        //     if( obj != null){
-        //         $('#popDelete').removeClass('hide')
-        //         $('#popDelete').addClass('view')
-        //         setTimeout(function () {
-        //             $('#popDelete').removeClass('view')
-        //             $('#popDelete').addClass('hide')
-        //             closeContactDelete()
-        //             closeContactList()
-        //             openContactList()
-        //         },3000)
-        //     }
-        //
-        // }
+        function succesChange() {
+            $('#changePwdPop').removeClass('hide')
+            $('#changePwdPop').addClass('view')
+            setTimeout(function () {
+                $('#changePwdPop').removeClass('view')
+                $('#changePwdPop').addClass('hide')
+                closePwdChangeConfirmPop()
+            },3000)
+        }
     </script>
 </body>
 

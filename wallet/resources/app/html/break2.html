@@ -1,0 +1,33 @@
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>BREAK 전송 확인</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('breakConfirmPop');">close</a>
+    </div>
+    <div class="pop_body">
+        <p class="pop_con_top">
+            Stake Balance 를 Main Balance로<br/>
+            전송하시겠습니까?
+        </p>
+        <table class="pop_table">
+            <tbody>
+            <tr>
+                <th>보낼 수량</th>
+                <td><em class="red"><p id="breakAmountConfirmaion"></p></em></td>
+            </tr>
+            <tr>
+                <th>기본수수료</th>
+                <td><p id = "breakGasLimitConfirmation"></p></td>
+            </tr>
+            <tr>
+                <th>수수료가격</th>
+                <td><p id = "breakGasPriceConfirmation"></p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pop_footer">
+        <a class="btn white on" href="#!" onclick="togglePopUp('breakConfirmPop');">취소</a>
+        <a class="btn red on" href="#!" onclick="fnBreak()">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->

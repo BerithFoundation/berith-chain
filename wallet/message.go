@@ -34,19 +34,19 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	case "init":
 		break
 	case "polling":
-		//ch2 <- 1
+		//ch2 <- true
 		startPolling()
 		break
-	case "stopPolling":
-		ch2 <- 0
+	case  "stopPolling" :
+		//ch2 <- false
+		fmt.Print("logout!!!!")
+
 		break
 	case "callApi":
-
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
-		payload, err = callDB(api, args...)
-
+		payload , err = callDB(api , args...)
 		break
 	case "exportKeystore":
 		args := info["args"].([]interface{})
@@ -154,7 +154,16 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[1]), &mem)
 		if err == nil {
-			return "err", err
+			mem = walletdb.Member{
+				Address: common.HexToAddress(key[0]),
+				ID : key[1],
+				Password: key[2],
+				PrivateKey: key[3],
+			}
+			return mem, nil
+		}
+		if err != nil {
+			return "err" , err
 		}
 		member := walletdb.Member{
 			Address:    common.HexToAddress(key[0]),
@@ -212,13 +221,15 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		txinfo := walletdb.TxHistory{
+			TxBlockNumber : key[0],
 			TxAddress: common.HexToAddress(key[1]),
-			TxType:    key[2],
-			TxAmount:  key[3],
-			Txtime:    time.Now().Format("2006-01-02 15:04:05"),
-			Hash:      common.HexToHash(key[4]),
-			GasLimit:  key[5],
-			GasPrice:  key[6],
+			TxType: key[2],
+			TxAmount: key[3],
+			Txtime: time.Now().Format("2006-01-02 15:04:05"),
+			Hash: common.HexToHash(key[4]),
+			GasLimit: key[5],
+			GasPrice: key[6],
+			GasUsed: key[7],
 		}
 		err = WalletDB.Insert([]byte(key[0]), txinfo)
 		if err != nil {

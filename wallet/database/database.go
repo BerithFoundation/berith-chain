@@ -17,6 +17,7 @@ type Member struct {
 }
 // 트랜잭션 리스트 Detail table ( key 값은 해당 transaction을 전파받은 블록넘버값)
 type TxHistory struct {
+	TxBlockNumber string // tx 발생 블록넘버
 	TxAddress common.Address // tx 주소값
 	TxType string	// tx 타입 ex ) send, receive , stake 등등
 	TxAmount string // tx value 값
@@ -25,6 +26,7 @@ type TxHistory struct {
 	Hash common.Hash  // 트랜잭션 hash 값
 	GasLimit string  // 기본수수료
 	GasPrice string  // 수수료 가격
+	GasUsed string // 실제 사용 수수료
 }
 
 // 주소록 table ( key 는 저장 주소값 )

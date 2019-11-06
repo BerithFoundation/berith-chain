@@ -34,7 +34,7 @@ var (
 	stack *node.Node
 
 	ch = make(chan NodeMsg)
-	ch2 = make(chan int)
+	ch2 = make(chan bool)
 )
 
 type NodeMsg struct {
@@ -122,17 +122,10 @@ func start_ui(){
 func startPolling(){
 	go func() {
 		for {
-			//동기화 여부
-			//var stopYn int
-			//stopYn = <- ch2
-			//if stopYn == 0 {
+			//isPolling := <- ch2
+			//if !isPolling {
 			//	break
 			//}
-			//miner,Merr :=callNodeApi("miner_start", nil)
-			//if Merr != nil {
-			//	astilog.Error(errors.Wrap(Merr, "mining failed"))
-			//}
-			//fmt.Println("miner : " , miner)
 			sync, err := callNodeApi("berith_syncing", nil)
 			if err != nil {
 				astilog.Error(errors.Wrap(err, "syncing failed"))
@@ -143,22 +136,25 @@ func startPolling(){
 				blockNum, err2 := callNodeApi("berith_blockNumber")
 				if err2 != nil{
 					astilog.Error(errors.Wrap(err, "blockNumber Failed"))
+					return
 				}
 				blockNum = strings.ReplaceAll(blockNum , "\"","")
 				blockInfo , err3 := callNodeApi("berith_getBlockByNumber" , blockNum ,true)
 				if err3 != nil {
 					astilog.Error(errors.Wrap(err, "getBlockByNumber Failed"))
+					return
 				}
 				if err := bootstrap.SendMessage(w, "getBlockInfo", blockInfo ); err != nil {
 					astilog.Error(errors.Wrap(err, "getBlockInfo failed"))
+					return
 				}
 			}
 
 			if err := bootstrap.SendMessage(w, "syncing", sync); err != nil {
 				astilog.Error(errors.Wrap(err, "syncing failed"))
+				return
 			}
-
-
+			//3초간격
 			time.Sleep(3 * time.Second)
 		}
 	}()
