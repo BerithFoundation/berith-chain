@@ -93,10 +93,10 @@
 			"revisionTime": "2017-02-10T01:56:32Z"
 		},
 		{
-			"checksumSHA1": "IRBgToPWFwu/x03VX8EzJrEHEvA=",
+			"checksumSHA1": "Xxvcql1erjb0n9U5oXpc65vx4Fk=",
 			"path": "github.com/asticode/go-astilectron",
-			"revision": "df875a09e6cc116f65786427ac8fc955e4420d31",
-			"revisionTime": "2019-08-13T12:17:36Z"
+			"revision": "da857fbc4e2380898aaa0ec0708da26cbacd334c",
+			"revisionTime": "2019-10-30T10:59:15Z"
 		},
 		{
 			"checksumSHA1": "lIREIg4qua9aMlem4mZo4via9rk=",
@@ -105,10 +105,10 @@
 			"revisionTime": "2019-08-16T06:50:04Z"
 		},
 		{
-			"checksumSHA1": "InIVA4gXZOX0wrsKbfusW5VEfPQ=",
+			"checksumSHA1": "9BkZz8a9bAHe78K6uNujj1QGuYc=",
 			"path": "github.com/asticode/go-astilectron-bundler",
-			"revision": "155c2a10bbb1791fbafe89a9b64be05c64f16c81",
-			"revisionTime": "2019-04-26T17:22:05Z"
+			"revision": "556b6782fba1cfc687e1974eb6b14c71525ebe11",
+			"revisionTime": "2019-11-04T13:26:18Z"
 		},
 		{
 			"checksumSHA1": "puedCZDM20WDAK0CiqoX5u9na4w=",
@@ -785,6 +785,10 @@
 			"revisionTime": "2018-06-15T20:27:29Z"
 		},
 		{
+			"path": "gitub.com/asticode",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "TT1rac6kpQp2vz24m5yDGUNQ/QQ=",
 			"path": "golang.org/x/crypto/cast5",
 			"revision": "6a293f2d4b14b8e6d3f0539e383f6d0d30fce3fd",
@@ -1067,10 +1071,10 @@
 			"revisionTime": "2016-06-21T03:49:01Z"
 		},
 		{
-			"checksumSHA1": "vndxs5Tv09/8S+Dr2PBAiM557lI=",
+			"checksumSHA1": "h+m6mYCZIKnMQI24faKak5o19es=",
 			"path": "gopkg.in/olebedev/go-duktape.v3",
-			"revision": "abf0ba0be5d5d36b1f9266463cc320b9a5ab224e",
-			"revisionTime": "2018-03-02T12:15:09Z"
+			"revision": "ec84240a7772c7a122b1c58a13398210659f7c40",
+			"revisionTime": "2019-02-13T23:42:57Z"
 		},
 		{
 			"checksumSHA1": "4BwmmgQUhWtizsR2soXND0nqZ1I=",
