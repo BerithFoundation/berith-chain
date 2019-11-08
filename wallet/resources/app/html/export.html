@@ -2,7 +2,7 @@
 <div class="pop_wrap">
     <div class="pop_header">
         <h5>비밀번호 입력</h5>
-        <a class="btn_close" onclick="headerPopup('exportPop')">close</a>
+        <a class="btn_close" onclick="closeExport()">close</a>
     </div>
     <div class="pop_body">
         <p class="pop_con_top" id ="exportTopText"></p>
@@ -66,7 +66,9 @@
         openPrivateKeyPop(apiResult.payload)
     }
     async function keystoreExport(pwd) {
-        var apiResult = await berith.exportKeystore(pwd)
+        var apiResult = await berith.exportKeystore(account,pwd , loginId)
+        $('#exportPwd').val("")
+        closeExport()
     }
 
     function validationFields() {
@@ -78,6 +80,9 @@
             return false
         }
         return true
+    }
+    function closeExport() {
+        headerPopup('exportPop')
     }
 
 </script>

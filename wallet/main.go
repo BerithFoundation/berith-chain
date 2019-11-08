@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
@@ -10,8 +11,11 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
+
 )
 
 
@@ -25,9 +29,12 @@ var (
 	node_console = flag.String("console", "", "console")
 	node_datadir = flag.String("datadir", "", "datadir")
 	node_verbosity = flag.String("verbosity", "", "verbosity")
-	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
+	VersionAstilectron string
+	VersionElectron    string
 	w       *astilectron.Window
 	WalletDB *walletdb.WalletDB
+
+
 
 	ctx 	context.Context
 	client *rpc.Client
@@ -59,9 +66,11 @@ func start_ui(){
 	if err := bootstrap.Run(bootstrap.Options{
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
-			AppIconDarwinPath:  "resources/icon.icns",
-			AppIconDefaultPath: "resources/icon.png",
-			DataDirectoryPath: "C://Users/kimmegi/go/src/github.com/BerithFoundation/berith-chain/wallet",
+			AppIconDarwinPath:  "./resources/app/images/common/berith_pa.ico",
+			AppIconDefaultPath: "./resources/app/images/common/berith_pa.ico",
+			//DataDirectoryPath: "./",
+			//DataDirectoryPath: "C://Users/kimmegi/go/src/github.com/BerithFoundation/berith-chain/wallet",
+			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
@@ -82,12 +91,16 @@ func start_ui(){
 						stack = nodeChannel.stack.(*node.Node)
 						dir , _ := stack.FetchKeystoreDir()
 						WalletDB ,_ = walletdb.NewWalletDB(dir+"/test.ldb")
+						//os.Remove(dir+string(os.PathSeparator)+"exportTemp" )
+						result := os.RemoveAll(dir+string(os.PathSeparator)+"exportTemp" )
+						fmt.Println("result :::: " , result)
 						ctx = context.TODO()
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
 						}
 						w.On(astilectron.EventNameWindowEventClosed, func(e astilectron.Event) (deleteListener bool) {
 							if stack == nil {
+
 								return false
 							}
 							stack.Stop()
@@ -103,7 +116,7 @@ func start_ui(){
 		},
 		//RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
-			Homepage:       "/html/login.html",
+			Homepage:       "html/login.html",
 			//Homepage:       "index.html",
 			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
