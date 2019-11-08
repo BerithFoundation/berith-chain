@@ -19,30 +19,39 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/cmd/utils"
-	"github.com/naoina/toml"
-	cli "gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/naoina/toml"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 type berithenchConfig struct {
-	ChainID          int64    `json:"chainId"`          // chain id
-	Nodes            []string `json:"nodes"`            // endpoints of nodes
-	Keystore         string   `json:"keystore"`         // keystore path
-	Addresses        []string `json:"addresses"`        // from addresses in tx
-	Password         string   `json:"password"`         // password file path
-	Duration         string   `json:"duration"`         // time duration for test execution
-	TxCount          uint64   `json:"txCount"`          // tx count of test execution
-	InitDelay        uint64   `json:"initDelay"`        // initial sleep before testing
-	TxInterval       uint64   `json:"txInterval"`       // interval between send transactions
-	OutputPath       string   `json:"outputPath"`       // path of results
-	EnableCpuProfile bool     `json:"enableCpuProfile"` // enable cpu profile
-	EnableGoTrace    bool     `json:"enableGoTrace"`    // enable go trace
+	ChainID          int64               `json:"chainId"`          // chain id
+	Nodes            []string            `json:"nodes"`            // endpoints of nodes
+	Keystore         string              `json:"keystore"`         // keystore path
+	Addresses        []string            `json:"addresses"`        // from addresses in tx
+	Password         string              `json:"password"`         // password file path
+	Duration         string              `json:"duration"`         // time duration for test execution
+	TxCount          uint64              `json:"txCount"`          // tx count of test execution
+	InitDelay        uint64              `json:"initDelay"`        // initial sleep before testing
+	TxInterval       uint64              `json:"txInterval"`       // interval between send transactions
+	OutputPath       string              `json:"outputPath"`       // path of output
+	StakeCount       uint64              `json:"stakeCount"`       // stake count of test execution
+	ContractCount    uint64              `json:"contractCount"`    //contract count of test execution
+	ContractData     map[string][]string `json:"contractData`      // transaction data to call smart contract
+	TxValue          uint64              `json:"txAmount"`         //value of transaction
+	StakeValue       uint64              `json:"stakeAmount"`      //value of Stake
+	ContractValue    uint64              `json:"contractAmount"`   //value of Contract Call
+	GasLimit         uint64              `json:"gasLimit"`         //gas limit
+	GasPrice         uint64              `json:"gasPrice"`         //gas price
+	EnableCpuProfile bool                `json:"enableCpuProfile"` // enable cpu profile
+	EnableGoTrace    bool                `json:"enableGoTrace"`    // enable go trace
 }
 
 var (
@@ -97,6 +106,13 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 		txInterval       = ctx.Uint64(TxIntervalFlag.Name)
 		initDelay        = ctx.Uint64(InitDelay.Name)
 		output           = ctx.String(OutputPath.Name)
+		stakeCount       = ctx.Uint64(StakeCountFlag.Name)
+		contractCount    = ctx.Uint64(ContractCountFlag.Name)
+		txValue          = ctx.Uint64(TxValueFlag.Name)
+		stakeValue       = ctx.Uint64(StakeValueFlag.Name)
+		contractValue    = ctx.Uint64(ContractValueFlag.Name)
+		gasLimit         = ctx.Uint64(GasLimitFlag.Name)
+		gasPrice         = ctx.Uint64(GasPriceFlag.Name)
 		enableCpuProfile = ctx.IsSet(EnableCpuProfile.Name)
 		enableGoTrace    = ctx.IsSet(EnableGoTrace.Name)
 	)
@@ -130,6 +146,27 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 	}
 	if output != "" {
 		cfg.OutputPath = output
+	}
+	if stakeCount > 0 {
+		cfg.StakeCount = stakeCount
+	}
+	if contractCount > 0 {
+		cfg.ContractCount = contractCount
+	}
+	if txValue > 0 {
+		cfg.TxValue = txValue
+	}
+	if stakeValue > 0 {
+		cfg.StakeValue = stakeValue
+	}
+	if contractValue > 0 {
+		cfg.ContractValue = contractValue
+	}
+	if gasLimit > 0 {
+		cfg.GasLimit = gasLimit
+	}
+	if gasPrice > 0 {
+		cfg.GasPrice = gasPrice
 	}
 	if enableCpuProfile {
 		cfg.EnableCpuProfile = enableCpuProfile

@@ -21,16 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/accounts/keystore"
-	"github.com/BerithFoundation/berith-chain/berithclient"
-	"github.com/BerithFoundation/berith-chain/cmd/utils"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/gookit/color"
-	cli "gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"math"
 	"math/big"
@@ -42,6 +32,17 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/berithclient"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/gookit/color"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 const (
@@ -62,30 +63,17 @@ const (
 
 var (
 	// flags
-	KeystoreFlag = cli.StringFlag{
-		Name:  "keystore",
-		Usage: "Directory of keystore file",
-	}
+
 	AddressesFlag = cli.StringFlag{
 		Name:  "addresses",
 		Usage: "From addresses to send transactions.",
 	}
-	PasswordFlag = cli.StringFlag{
-		Name:  "password",
-		Usage: "Password file path",
-	}
+
 	DurationFlag = cli.StringFlag{
 		Name:  "duration",
 		Usage: "How long the test will be executed",
 	}
-	TxCountFlag = cli.Uint64Flag{
-		Name:  "txcount",
-		Usage: "How many test runs will be executed",
-	}
-	TxIntervalFlag = cli.Uint64Flag{
-		Name:  "txinterval",
-		Usage: "Interval between transactions [ms]",
-	}
+
 	InitDelay = cli.Uint64Flag{
 		Name:  "initdelay",
 		Usage: "Sleep before testing",
@@ -110,7 +98,7 @@ var (
 			{
 				Name:   "transfer",
 				Usage:  "sends only transfer transactions",
-				Action: transfer,
+				Action: transferTx,
 				Flags: []cli.Flag{
 					ChainIDFlag,
 					NodesFlag,
@@ -134,7 +122,7 @@ var (
 type doWork func(taskID string, count uint64)
 
 // transfer send transactions given cli context
-func transfer(ctx *cli.Context) error {
+func transferTx(ctx *cli.Context) error {
 	color.Yellow.Println(">>> Setup to send transfer transactions <<<")
 
 	// setup
@@ -144,7 +132,7 @@ func transfer(ctx *cli.Context) error {
 	}
 	b, err := json.Marshal(cfg)
 	if err != nil {
-		color.Yellow.Println("> failed to marshal config : %v\n", err)
+		color.Yellow.Println("> failed to marshal config : ", err)
 	} else {
 		color.Yellow.Println(">", string(b))
 	}
