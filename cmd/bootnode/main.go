@@ -1,3 +1,4 @@
+// Modifications Copyright 2018 The berith Authors
 // Copyright 2015 The go-ethereum Authors
 // This file is part of go-ethereum.
 //
@@ -14,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// bootnode runs a bootstrap node for the Ethereum Discovery Protocol.
+// bootnode runs a bootstrap node for the Berith Discovery Protocol.
 package main
 
 import (
@@ -118,6 +119,8 @@ func main() {
 		}
 	}
 
+	printNotice(&nodeKey.PublicKey, *realaddr)
+
 	if *runv5 {
 		if _, err := discv5.ListenUDP(nodeKey, conn, "", restrictList); err != nil {
 			utils.Fatalf("%v", err)
@@ -135,4 +138,14 @@ func main() {
 	}
 
 	select {}
+}
+
+func printNotice(nodeKey *ecdsa.PublicKey, addr net.UDPAddr) {
+	if addr.IP.IsUnspecified() {
+		addr.IP = net.IP{127, 0, 0, 1}
+	}
+	n := enode.NewV4(nodeKey, addr.IP, 0, addr.Port)
+	fmt.Println(n.String())
+	fmt.Println("Note: you're using cmd/bootnode, a developer tool.")
+	fmt.Println("We recommend using a regular node as bootstrap node for production deployments.")
 }
