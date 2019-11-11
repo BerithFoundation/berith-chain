@@ -21,6 +21,8 @@ berith/keystore
 berith/history
 cmd/berith/debug
 node_modules
+.clef/
+bind*.go
 
 wallet/Berith/*
 wallet/vendor/
@@ -41,6 +43,7 @@ cmd/berith/password.txt
 # used by the Makefile
 /build/_workspace/
 /build/bin/
+/build/_bin/
 /berith*.zip
 
 # IdeaIDE

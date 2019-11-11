@@ -200,10 +200,10 @@ let berith = {
         });
     },
 
-    exportKeystore: function (add, pwd , id ) {
+    exportKeystore: function (pwd) {
         let message = {"name": "exportKeystore"};
         message.payload = {
-            "args" : [add ,pwd, id ]
+            "args" : [pwd]
         }
         asticode.loader.show()
         astilectron.sendMessage(message, function(message) {
@@ -214,7 +214,6 @@ let berith = {
             link.download="berith-keystore.zip";
             link.click();
             asticode.loader.hide();
-
         })
     },
 
