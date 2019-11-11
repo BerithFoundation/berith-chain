@@ -67,11 +67,12 @@ func start_ui() {
 		AssetDir: AssetDir,
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
-			AppIconDarwinPath:  "resources/icon.icns",
-			AppIconDefaultPath: "resources/icon.png",
+			AppIconDarwinPath:  "resources/app/images/common/berith_pa.ico",
+			AppIconDefaultPath: "resources/app/images/common/berith_pa.ico",
 			VersionAstilectron: VersionAstilectron,
 			VersionElectron:    VersionElectron,
 			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
+
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
@@ -148,7 +149,7 @@ func startPolling() {
 					astilog.Error(errors.Wrap(err, "blockNumber Failed"))
 					return
 				}
-				blockNum = strings.ReplaceAll(blockNum, "\"", "")
+				blockNum = strings.Replace(blockNum, "\"", "", -1)
 				blockInfo, err3 := callNodeApi("berith_getBlockByNumber", blockNum, true)
 				if err3 != nil {
 					astilog.Error(errors.Wrap(err, "getBlockByNumber Failed"))
