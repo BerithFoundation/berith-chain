@@ -3,6 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
@@ -10,14 +16,6 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"os"
-	"reflect"
-	"strings"
-	"time"
-)
-var (
-	WalletDB2 *walletdb.WalletDB
 )
 
 // handleMessages handles messages
@@ -247,12 +245,14 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return "err", err
 		}
 		newAcc, err := callNodeApi("personal_newAccount", key[1])
-		newAcc = strings.Replace(newAcc, "\"", "" ,-1)
+		newAcc = strings.ReplaceAll(newAcc, "\"", "")
 		privateKey, err := callNodeApi("personal_privateKey", newAcc, key[1])
-		privateKey = strings.Replace(privateKey, "\"", "" , -1)
+		privateKey = strings.ReplaceAll(privateKey, "\"", "")
 		member := walletdb.Member{
+
 			Address: common.HexToAddress(newAcc),
 			ID:      key[0],
+
 			Password:   key[1],
 			PrivateKey: privateKey,
 		}
@@ -283,67 +283,20 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName := "keystore.zip"
+
 	dir, err := stack.FetchKeystoreDir()
 	if err != nil {
 		return nil, err
 	}
-	tmmp,_ := ioutil.TempDir(dir, "tmp")
-
-	// export 하는 계정에 대한 keysotre 파일만 exportTemp 폴더로 이동하는 부분
-	keyAccount:= strings.Replace( args[0].(string), "Bx" , "",-1)
-	tempFile,_ := ioutil.ReadDir(dir)
-	for i, value := range tempFile {
-		value.Name()
-		if strings.Contains(value.Name(),keyAccount){
-			dir3 := tmmp +"/"+value.Name()
-			os.Create(dir3)
-			bytes, err := ioutil.ReadFile(dir+"/"+value.Name())
-			if err != nil {
-				panic(err)
-			}
-			//파일 쓰기
-			err = ioutil.WriteFile(dir3, bytes, 0)
-			if err != nil {
-				panic(err)
-			}
-		}
-		fmt.Println("name[",i, "]  :", value.Name())
-	}
-	// 끝
-	// export 하는 계정에 관련된 db 정보만 따로 추출하는 부분
-	WalletDB2 ,_ = walletdb.NewWalletDB(tmmp+"/test.ldb")
-	var mem walletdb.Member
-	var txInfo walletdb.TxHistory
-	contact := make(walletdb.Contact, 0)
-	txMaster := make(walletdb.TxHistoryMaster, 0)
-	WalletDB.Select([]byte("c"+args[0].(string)), &contact)
-	WalletDB.Select([]byte("t"+args[0].(string)), &txMaster)
-	for key , _ := range txMaster{
-		WalletDB.Select([]byte(key), &txInfo)
-		WalletDB2.Insert([]byte(key), txInfo)
-	}
-	err = WalletDB.Select([]byte(args[2].(string)), &mem)
-	if err != nil {
-		return nil, err
-	}
-	err = WalletDB2.Insert([]byte(args[2].(string)), mem)
-	if err != nil {
-		return nil, err
-	}
-	err = WalletDB2.Insert([]byte("c"+args[0].(string)), contact)
-	if err != nil {
-		return nil, err
-	}
-	err = WalletDB2.Insert([]byte("t"+args[0].(string)), txMaster)
-	if err != nil {
-		return nil, err
-	}// 끝
-	password := args[1].(string)
+	log.Info("Found keystore dir: ", dir)
+	password := args[0].(string)
 	targetPath := dir + string(os.PathSeparator) + tempFileName
-	er := ZipSecure(tmmp, targetPath, password)
+	er := ZipSecure(dir, targetPath, password)
 	if er != nil {
 		return nil, er
 	}
+	log.Info("Successfully created temp file, " + tempFileName + ", at: " + dir)
+
 	zippedFile, err := os.Open(targetPath)
 	if err != nil {
 		return nil, err
@@ -355,12 +308,9 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 	}
 
 	zippedFile.Close()
-	fmt.Println("targetPath :: " ,targetPath )
-	fmt.Println("dir2 :: " ,dir+string(os.PathSeparator)+"exportTemp"  )
 	os.Remove(targetPath)
-	WalletDB2.CloseDB()
-	result :=os.RemoveAll(tmmp)
-	fmt.Println("result :: " , result)
+	log.Info("Removed temp file, " + tempFileName + ", from: " + dir)
+
 	return body, nil
 }
 
@@ -384,4 +334,3 @@ func importKeystore(args []interface{}) error {
 	log.Info("Successfully imported keystore folder")
 	return err
 }
-
