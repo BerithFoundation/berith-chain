@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/wallet/database"
@@ -72,6 +73,7 @@ func start_ui() {
 			VersionAstilectron: VersionAstilectron,
 			VersionElectron:    VersionElectron,
 			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
+
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
@@ -148,7 +150,7 @@ func startPolling() {
 					astilog.Error(errors.Wrap(err, "blockNumber Failed"))
 					return
 				}
-				blockNum = strings.ReplaceAll(blockNum, "\"", "")
+				blockNum = strings.Replace(blockNum, "\"", "", -1)
 				blockInfo, err3 := callNodeApi("berith_getBlockByNumber", blockNum, true)
 				if err3 != nil {
 					astilog.Error(errors.Wrap(err, "getBlockByNumber Failed"))
