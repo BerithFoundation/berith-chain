@@ -115,9 +115,6 @@ func NewWalletDB(dir string) (*WalletDB, error) {
 		db: db,
 	}, nil
 }
-func (db *WalletDB) CloseDB() {
-	db.db.Close()
-}
 // db insert 함수
 func (db *WalletDB) Insert(key []byte, value interface{}) error {
 	data, err := rlp.EncodeToBytes(value)
@@ -144,5 +141,4 @@ func (db *WalletDB) Select(key []byte, holder interface{}) error {
 //
 //	return rlp.DecodeBytes(data, holder)
 //}
-
 
