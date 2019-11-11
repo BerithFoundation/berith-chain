@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-
 package main
 
 import (
@@ -231,16 +230,19 @@ func Init() {
 	}
 }
 
-
-
 func Start() {
+	// TODO : temporary flags
+	var args []string
+	args = append(args, os.Args[0])
+	if *nodePort != "" {
+		args = append(args, "--port", *nodePort)
+	}
 
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if err := app.Run(args); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
-
 
 // berith is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
@@ -287,8 +289,8 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		}
 		stateReader := berithclient.NewClient(rpcClient)
 		ch <- NodeMsg{
-			t: "client",
-			v: rpcClient,
+			t:     "client",
+			v:     rpcClient,
 			stack: stack,
 		}
 
@@ -346,6 +348,5 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}
-
 
 }

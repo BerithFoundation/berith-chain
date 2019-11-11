@@ -71,7 +71,7 @@ var (
 		"./cmd/bootnode",
 		"./cmd/gwizard",
 		"./cmd/berithench",
-		"./wallet",
+		//"./wallet",
 	}
 	// Files that end up in the berith*.zip archive.
 	berithArchiveFiles = []string{
@@ -177,6 +177,16 @@ func doInstall(cmdline []string) {
 	if flag.NArg() > 0 {
 		packages = flag.Args()
 	}
+	containsWallet := false
+	for _, pkg := range packages {
+		if pkg == "./wallet" {
+			containsWallet = true
+			break
+		}
+	}
+	if containsWallet {
+		fmt.Println("## Contains wallet@@")
+	}
 
 	if *arch == "" || *arch == runtime.GOARCH {
 		goinstall := goTool("install", buildFlags(env)...)
@@ -187,12 +197,10 @@ func doInstall(cmdline []string) {
 	}
 	// If we are cross compiling to ARMv5 ARMv6 or ARMv7, clean any previous builds
 	if *arch == "arm" {
-		fmt.Println(`#3 if *arch == "arm" {`)
 		os.RemoveAll(filepath.Join(runtime.GOROOT(), "pkg", runtime.GOOS+"_arm"))
 		for _, path := range filepath.SplitList(build.GOPATH()) {
 			os.RemoveAll(filepath.Join(path, "pkg", runtime.GOOS+"_arm"))
 		}
-		fmt.Println("#4")
 	}
 	// Seems we are cross compiling, work around forbidden GOBIN
 	goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
@@ -200,11 +208,9 @@ func doInstall(cmdline []string) {
 	goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
 	goinstall.Args = append(goinstall.Args, packages...)
 	build.MustRun(goinstall)
-	fmt.Println("#1")
 
 	if cmds, err := ioutil.ReadDir("cmd"); err == nil {
 		for _, cmd := range cmds {
-			fmt.Println("## cmd :", cmd)
 			pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
 			if err != nil {
 				log.Fatal(err)
