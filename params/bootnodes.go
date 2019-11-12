@@ -31,13 +31,9 @@ var MainnetBootnodes = []string{
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
 // Ropsten test network.
 var TestnetBootnodes = []string{
-	"enode://26a8d8bd85d676b8ce8fb1afd5e75492224f10dbe911c493ecc275eb4eddab273a0e73f93c78eb2a3375a04be34b5afb9e95f2cc86ff9846098ed36c6ee5f478@192.168.5.70:55555",
+	"enode://8142df22d4ca164db41f0cb6a66f439332ec8d9a799dbd1a5bbc990ca585fbc283dc949edb8a0962942accb0c361a1171dc16dd46abefd17b7dc8ef19e6894e8@13.209.204.31:55555",
 }
 
 // DiscoveryV5Bootnodes are the enode URLs of the P2P bootstrap nodes for the
 // experimental RLPx v5 topic-discovery network.
-var DiscoveryV5Bootnodes = []string{
-	"enode://4d98470f306fa082cb526eff963a04aaa553b21eda2ede35ef5923a183efb8c28acfb06cb72a07ec6710ce239da4ce12c2d3eaf50b4adf463848d572859cc9b5@13.125.92.15:41171",
-	"enode://cabe572bf008020cc125cd2a5353af57166adc5f14ee79261d9ca1f7c610a2a806e4b024ee17a609b95f09fc2bf26601433a5b0e156d5d18736004ae836ab550@34.237.211.223:41171",
-	"enode://361616802dd85bede35d557fc53080eac9a637d7c2f76d7e7619ca7922f328ca3f3a5ee11a1522af68ad5bcf99e88398eb2566efdb0e201c5e1159b3a66aab5a@121.141.157.228:41172",
-}
+var DiscoveryV5Bootnodes = []string{}
