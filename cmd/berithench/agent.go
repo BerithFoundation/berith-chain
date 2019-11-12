@@ -196,11 +196,11 @@ func exportAccount(ctx *cli.Context) error {
 				}
 			}
 			println()
-			println("%d accounts is created successfully", created)
+			println(created, "accounts is created successfully")
 			break
 		case "2":
 			println()
-			print("what teplate do you taken[1.json, 2.alloc, others.exit] : ")
+			print("what teplate do you taken[1.json, 2.alloc, 3.source code, others.exit] : ")
 			input, _, _ := reader.ReadLine()
 
 			switch string(input) {
@@ -239,6 +239,24 @@ func exportAccount(ctx *cli.Context) error {
 				if jsondata, err := json.MarshalIndent(result, "", "\t"); err == nil {
 					println(string(jsondata))
 				}
+			case "3":
+
+				println()
+				print("how many provide token to each address[1 ~ n(eth), others.exit]: ")
+				input, _, _ := reader.ReadLine()
+
+				token, err := strconv.Atoi(string(input))
+
+				if err != nil || token < 0 {
+					break
+				}
+
+				balance := new(big.Int).Mul(big.NewInt(int64(token)), big.NewInt(1e+18))
+
+				for _, acc := range ks.Accounts() {
+					fmt.Printf("common.HexToAddress(\"%s\"): {Balance: common.StringToBig(\"%s\")},\n", acc.Address.Hex(), balance.String())
+				}
+
 			}
 		default:
 			return nil
