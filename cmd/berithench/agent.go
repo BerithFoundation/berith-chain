@@ -277,7 +277,7 @@ func newAgent(cfg *berithenchConfig) (*agent, error) {
 		stopCh:      make(chan bool),
 		newBlockCh:  make(chan *types.Block),
 		nodes:       make(map[string]node),
-		ticker:      time.NewTicker(time.Millisecond * time.Duration(cfg.TxInterval)),
+		ticker:      time.NewTicker(time.Millisecond * time.Duration(cfg.TxInterval) / time.Duration(cfg.TxCount+cfg.StakeCount+cfg.ContractCount)),
 		blockTicker: time.NewTicker(time.Second),
 		txSub:       make([]chan bool, 0),
 		blockSub:    make([]chan bool, 0),
@@ -360,7 +360,7 @@ func (agent *agent) txLoop() {
 					delete(agent.txMap, tx)
 				}
 			}
-			agent.logCh <- fmt.Sprintf("[%s]%d Txs is precessed, left %d txs", txs.from, txsFromAgent, len(agent.txMap))
+			agent.logCh <- fmt.Sprintf("[%s]%d Txs is processed, left %d txs", txs.from, txsFromAgent, len(agent.txMap))
 		case tx := <-agent.txCh:
 			agent.txMap[tx.tx] = true
 			agent.logCh <- fmt.Sprintf("[Acc%d]Imported Tx \"%s\"", tx.from, tx.tx.Hex())
@@ -413,6 +413,7 @@ func (agent *agent) blockLoop(url string, ch chan bool) {
 }
 
 func (agent *agent) tickerLoop() {
+	index := 0
 	for {
 		select {
 		case <-agent.blockTicker.C:
@@ -420,9 +421,8 @@ func (agent *agent) tickerLoop() {
 				ch <- true
 			}
 		case <-agent.ticker.C:
-			for _, ch := range agent.txSub {
-				ch <- true
-			}
+			agent.txSub[index] <- true
+			index = (index + 1) % len(agent.txSub)
 		}
 	}
 }
@@ -443,6 +443,21 @@ func (agent *agent) transferLoop(url string, index int, ch chan bool) {
 	client, err := rpc.DialContext(context.Background(), url)
 	if err != nil {
 		agent.errCh <- err
+	}
+
+	var nonceStr string
+
+	err = client.CallContext(context.Background(), &nonceStr, "berith_getTransactionCount", agent.keystore.Accounts()[index].Address, "latest")
+
+	if err != nil {
+		agent.errCh <- err
+		return
+	}
+	nonce, err = hexutil.DecodeUint64(nonceStr)
+
+	if err != nil {
+		agent.errCh <- err
+		return
 	}
 
 	agent.logCh <- fmt.Sprintf("[Acc%d] is Running", index)
