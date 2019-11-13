@@ -50,6 +50,11 @@ var (
 		Usage: "Gas limit",
 	}
 
+	PasswordFlag = cli.StringFlag{
+		Name:  "password",
+		Usage: "password of agent accounts",
+	}
+
 	GasPriceFlag = cli.Uint64Flag{
 		Name:  "gasprice",
 		Usage: "Gas price",
@@ -329,6 +334,7 @@ func (agent *agent) run() {
 	}
 	for i := 0; i < int(agent.cfg.TxCount+agent.cfg.StakeCount+agent.cfg.ContractCount); i++ {
 		ch := make(chan bool)
+		agent.keystore.Unlock(agent.keystore.Accounts()[i], agent.cfg.Password)
 		go agent.transferLoop(agent.getNodeByIdx(i), i, ch)
 		agent.txSub = append(agent.txSub, ch)
 	}
@@ -447,7 +453,7 @@ func (agent *agent) transferLoop(url string, index int, ch chan bool) {
 
 	var nonceStr string
 
-	err = client.CallContext(context.Background(), &nonceStr, "berith_getTransactionCount", agent.keystore.Accounts()[index].Address, "latest")
+	err = client.CallContext(context.Background(), &nonceStr, "berith_getTransactionCount", agent.keystore.Accounts()[index].Address, "pending")
 
 	if err != nil {
 		agent.errCh <- err
@@ -508,7 +514,7 @@ func (agent *agent) transferLoop(url string, index int, ch chan bool) {
 			gasPrice := big.NewInt(int64(agent.cfg.GasPrice))
 
 			tx := types.NewTransaction(nonce, to, value, gasLimit, gasPrice, txData, base, target)
-			agent.keystore.Unlock(from, agent.cfg.Password)
+
 			tx, err := agent.keystore.SignTx(from, tx, big.NewInt(agent.cfg.ChainID))
 
 			if err != nil {

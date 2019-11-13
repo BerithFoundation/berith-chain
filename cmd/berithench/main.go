@@ -44,8 +44,8 @@ var (
 		Name:  "keystore",
 		Usage: "Directory of keystore file",
 	}
-	PasswordFlag = cli.StringFlag{
-		Name:  "password",
+	PasswordFileFlag = cli.StringFlag{
+		Name:  "passwordfile",
 		Usage: "Password file path",
 	}
 	TxCountFlag = cli.Uint64Flag{

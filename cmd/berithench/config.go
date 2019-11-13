@@ -36,7 +36,8 @@ type berithenchConfig struct {
 	Nodes            []string            `json:"nodes"`            // endpoints of nodes
 	Keystore         string              `json:"keystore"`         // keystore path
 	Addresses        []string            `json:"addresses"`        // from addresses in tx
-	Password         string              `json:"password"`         // password file path
+	Password         string              `json:"password"`         // password
+	PasswordFile     string              `json:"passwordFile"`     // password file path
 	Duration         string              `json:"duration"`         // time duration for test execution
 	TxCount          uint64              `json:"txCount"`          // tx count of test execution
 	InitDelay        uint64              `json:"initDelay"`        // initial sleep before testing
@@ -101,6 +102,7 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 		keystore         = ctx.String(KeystoreFlag.Name)
 		addrs            = ctx.String(AddressesFlag.Name)
 		password         = ctx.String(PasswordFlag.Name)
+		passwordFile     = ctx.String(PasswordFileFlag.Name)
 		duration         = ctx.String(DurationFlag.Name)
 		txCount          = ctx.Uint64(TxCountFlag.Name)
 		txInterval       = ctx.Uint64(TxIntervalFlag.Name)
@@ -131,6 +133,9 @@ func parseConfig(ctx *cli.Context) (*berithenchConfig, error) {
 	}
 	if password != "" {
 		cfg.Password = password
+	}
+	if passwordFile != "" {
+		cfg.PasswordFile = passwordFile
 	}
 	if duration != "" {
 		cfg.Duration = duration
@@ -195,10 +200,10 @@ func loadConfig(file string, cfg *berithenchConfig) error {
 
 // makePasswordList reads password lines from the file
 func makePasswordList(config *berithenchConfig) []string {
-	if config.Password == "" {
+	if config.PasswordFile == "" {
 		return nil
 	}
-	content, err := ioutil.ReadFile(config.Password)
+	content, err := ioutil.ReadFile(config.PasswordFile)
 	if err != nil {
 		utils.Fatalf("failed to read password file: %v", err)
 	}
