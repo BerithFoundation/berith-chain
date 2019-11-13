@@ -17,9 +17,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
-	"os"
 )
 
 var gitCommit = "" // Git SHA1 commit hash of the release (set via linker flags)
@@ -39,6 +40,22 @@ var (
 		Name:  "config",
 		Usage: "Directory of config toml file",
 	}
+	KeystoreFlag = cli.StringFlag{
+		Name:  "keystore",
+		Usage: "Directory of keystore file",
+	}
+	PasswordFileFlag = cli.StringFlag{
+		Name:  "passwordfile",
+		Usage: "Password file path",
+	}
+	TxCountFlag = cli.Uint64Flag{
+		Name:  "txcount",
+		Usage: "How many test runs will be executed",
+	}
+	TxIntervalFlag = cli.Uint64Flag{
+		Name:  "txinterval",
+		Usage: "Interval between transactions [ms]",
+	}
 )
 
 func init() {
@@ -46,6 +63,7 @@ func init() {
 	app.Commands = []cli.Command{
 		ExecuteCommand,
 		TpsCommand,
+		AgentCommand,
 	}
 }
 
