@@ -410,7 +410,7 @@ a.icon{color:transparent; text-indent:-9999px;}
 .login .btn_area a+a{margin-left:10px;}
 
 /* main */
-.main .aside{position: relative; padding-bottom:300px; background:#fff url(../../images/common/bg_aside.png) no-repeat center bottom 80px;}
+.main .aside{position: relative; padding-bottom:300px; background:#fff url(../../images/common/bg_aside.png) no-repeat center bottom 130px;}/*1129 수정*/
 .main .content{padding:103px 38px; }
 .main .top_area{width:100%; margin-bottom:20px; padding:28px 25px; color:#fff; border-radius: 4px;
     background: -moz-linear-gradient( -180deg, rgb(253,82,85) 0%, rgb(252,107,108) 100%);
@@ -486,3 +486,11 @@ a.icon{color:transparent; text-indent:-9999px;}
 /* space ins 0905 */
 .space_r {margin:0px 0 153px;}
 .main_btn_right {width: 50%; padding-right: 30px;}
+
+
+/*1119 법적책임 문구 추가*/
+.liability_txt_wrap {position:absolute; bottom:40px;}
+.liability_txt {font-size:11px; color:#888; line-height:18px; margin:30px 0 15px 0;  }
+
+.liability_txt_wrap2 {position:absolute; bottom:30px;}
+.center {text-align:center;}
