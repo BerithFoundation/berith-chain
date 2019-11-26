@@ -178,6 +178,11 @@
         let gasLimit = $('#sendGasLimit').val()
         let gasPrice = $('#sendGasPrice').val()
 
+        if(amount.substr(amount.indexOf('.')).length-1 > BERITH_UNIT) {
+            $("#sendAmount").addClass("error");
+                return false;
+        }
+
         if (isDecimalNumber(amount) ) {
             let mainBalance = await berith.getBalance(account);
             if (parseInt(amount) > parseInt(mainBalance)) {

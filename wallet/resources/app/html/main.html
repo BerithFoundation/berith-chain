@@ -95,8 +95,14 @@
         let stakeBalance = await berith.getStakeBalance(account);
         $('#stakeBalance').text(stakeBalance);
 
-        totalBalance = mainBalance + stakeBalance
-        $('#totBalance').text(totalBalance);
+        var total = (BigInt(mainBalance.replace(".","")) + BigInt(stakeBalance.replace(".",""))).toString();
+        var additionalZero = "";
+        for (var left = BERITH_UNIT - total.length ; left >= 0 ; left--) {
+            additionalZero += "0";
+        }
+        total = additionalZero + total;
+        total = total.substr(0,total.length-BERITH_UNIT)+"."+total.substr(total.length-BERITH_UNIT);
+        $('#totBalance').text(total);
     };
 
     function copyToClipboard(element) {

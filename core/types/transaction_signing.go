@@ -160,6 +160,8 @@ func (s EIP155Signer) Hash(tx *Transaction) common.Hash {
 		tx.data.Recipient,
 		tx.data.Amount,
 		tx.data.Payload,
+		tx.data.Base,
+		tx.data.Target,
 		s.chainId, uint(0), uint(0),
 	})
 }
