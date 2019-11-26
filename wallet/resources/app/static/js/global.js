@@ -12,6 +12,8 @@ var totalBalance
 // var stakeAmount
 // var stakeAccount
 
+const BERITH_UNIT = 8;
+
 // meessage.go 와 통신하는 함수
 async function sendMessage(methodType, methodName, args) {
     let messagePromise = new Promise(function (resolve) {
@@ -60,14 +62,10 @@ async function hexToDecimal(value) {
 }
 
 async function convertAmount(value) {
-    let decimalValue = toDecimal(value);
-    let result = BigInt(decimalValue) / BigInt(1000000000000000000)
-    return result
+    return toBerValue(value);
 }
 function trlistAmount(value) {
-    let decimalValue = toDecimal(value);
-    let result = BigInt(decimalValue) / BigInt(1000000000000000000)
-    return result
+    return toBerValue(value);
 }
 function getWholePart(value) {
     return (value + "").split(".")[0];
@@ -79,5 +77,27 @@ function getDecimalPart(value) {
         decimalPart = 0;
     }
     return decimalPart;
+}
+
+function toBerValue(s) {
+    s = s.substr(2);
+    var i, j, digits = [0], carry;
+    for (i = 0; i < s.length; i += 1) {
+        carry = parseInt(s.charAt(i), 16);
+        for (j = 0; j < digits.length; j += 1) {
+            digits[j] = digits[j] * 16 + carry;
+            carry = digits[j] / 10 | 0;
+            digits[j] %= 10;
+        }
+        while (carry > 0) {
+            digits.push(carry % 10);
+            carry = carry / 10 | 0;
+        }
+    }
+    for (var left = BERITH_UNIT - digits.length ; left >= 0 ; left--) {
+        digits.push(0);
+    }
+    var result = digits.reverse().join('');
+    return result.substr(0,result.length-BERITH_UNIT)+"."+result.substr(result.length-BERITH_UNIT)
 }
 

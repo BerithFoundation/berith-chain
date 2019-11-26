@@ -172,18 +172,17 @@ func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common
 */
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
-
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	if state == nil || err != nil {
 		return common.Hash{}, err
 	}
 	stakedAmount := state.GetStakeBalance(args.From)
 	stakingAmount := args.Value.ToInt()
-	totalStakingAmount := new(big.Int).Add(stakingAmount,stakedAmount)
+	totalStakingAmount := new(big.Int).Add(stakingAmount, stakedAmount)
 
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
 		if totalStakingAmount.Cmp(config.Bsrr.StakeMinimum) <= -1 {
-			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, big.NewInt(1e+18))
+			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, big.NewInt(1e+8))
 
 			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
 			return common.Hash{}, errors.New("staking balance failed")
@@ -280,7 +279,7 @@ func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.A
  - 어카운트 정보를 반환 하기 위한 구조체
 */
 type AccountInfo struct {
-	Balance  *big.Int //main balance
+	Balance      *big.Int //main balance
 	StakeBalance *big.Int //staking balance
 }
 
@@ -297,7 +296,7 @@ func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Ad
 
 	account := state.GetAccountInfo(address)
 	info := &AccountInfo{
-		Balance: account.Balance,
+		Balance:      account.Balance,
 		StakeBalance: account.StakeBalance,
 	}
 
