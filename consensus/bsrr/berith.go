@@ -978,10 +978,12 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		//[BERITH] 2019-09-03
 		//마지막 Staking의 블록번호가 저장되도록 수정
 		//일반 Tx가 아닌 경우 Stake or Unstake
-		if msg.Target() == types.Stake {
+		if msg.Base() == types.Main && msg.Target() == types.Stake {
 			stkChanged[msg.From()] = true
-		} else {
+		} else if msg.Base() == types.Stake && msg.Base() == types.Main {
 			stkChanged[msg.From()] = false
+		} else {
+			continue
 		}
 	}
 

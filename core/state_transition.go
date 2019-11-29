@@ -17,6 +17,7 @@
 package core
 
 import (
+	"bytes"
 	"errors"
 	"math"
 	"math/big"
@@ -196,6 +197,14 @@ func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWa
 	sender := vm.AccountRef(msg.From())
 	homestead := st.evm.ChainConfig().IsHomestead(st.evm.BlockNumber)
 	contractCreation := msg.To() == nil
+
+	if err := types.ValidateJobWallet(base, target); err != nil {
+		return nil, 0, false, err
+	}
+
+	if !contractCreation && (base == types.Stake || target == types.Stake) && bytes.Compare(sender.Address().Bytes(), msg.To().Bytes()) != 0 {
+		return nil, 0, false, ErrInvalidStakeReceiver
+	}
 
 	// Pay intrinsic gas
 	gas, err := IntrinsicGas(st.data, contractCreation, homestead)
