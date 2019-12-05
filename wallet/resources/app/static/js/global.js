@@ -12,7 +12,8 @@ var totalBalance
 // var stakeAmount
 // var stakeAccount
 
-const BERITH_UNIT = 8;
+const BERITH_UNIT = 18;
+const DISPLAY_UNIT = 8;
 
 // meessage.go 와 통신하는 함수
 async function sendMessage(methodType, methodName, args) {
@@ -98,6 +99,6 @@ function toBerValue(s) {
         digits.push(0);
     }
     var result = digits.reverse().join('');
-    return result.substr(0,result.length-BERITH_UNIT)+"."+result.substr(result.length-BERITH_UNIT)
+    return result.substr(0,result.length-BERITH_UNIT)+"."+result.substr(result.length-BERITH_UNIT, DISPLAY_UNIT)
 }
 
