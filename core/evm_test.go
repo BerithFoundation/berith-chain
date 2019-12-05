@@ -1,6 +1,7 @@
 package core
 
 import (
+	"crypto/ecdsa"
 	"fmt"
 	"math/big"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
 
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/berithdb"
@@ -99,32 +101,35 @@ var (
 
 func TestApplyAndRevertTransaction(t *testing.T) {
 
-	sender, err := ks.NewAccount("1234")
+	pvk := new(ecdsa.PrivateKey)
 
-	if err != nil {
-		t.Error(err)
-	}
+	pvk.PublicKey.Curve = secp256k1.S256()
+	pvk.D = big.NewInt(3360)
+	pvk.PublicKey.X, pvk.PublicKey.Y = secp256k1.S256().ScalarBaseMult(big.NewInt(3360).Bytes())
 
-	defer func() {
-		ks.Delete(sender, "1234")
-	}()
+	from := common.HexToAddress("Bx810722274468C2E5dEE8Aabd41aE61fA4d1A5cDa")
+
+	signer := types.NewEIP155Signer(big.NewInt(206))
 
 	for _, data := range datas {
 
 		init, _ := new(big.Int).SetString("100000000000000000000000000000000000000000000000", 10)
-		stateDB.AddBalance(sender.Address, init)
-		stateDB.AddStakeBalance(sender.Address, init, big.NewInt(1))
+		stateDB.AddBalance(from, init)
+		stateDB.AddStakeBalance(from, init, big.NewInt(1))
 		stateDB.Commit(true)
 
 		if data.base == types.Stake || data.target == types.Stake {
-			data.to = sender.Address
+			data.to = from
 		}
 
 		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target)
-		tx, err = ks.SignTxWithPassphrase(sender, "1234", tx, params.TestnetChainConfig.ChainID)
+
+		tx, err := types.SignTx(tx, signer, pvk)
+
 		if err != nil {
 			t.Error(err)
 		}
+
 		msg, err := tx.AsMessage(types.NewEIP155Signer(params.TestnetChainConfig.ChainID))
 		if err != nil {
 			t.Error(err)
@@ -137,31 +142,31 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 
 		snap := stateDB.Snapshot()
 
-		stateDB.AddPenalty(sender.Address, header.Number)
+		stateDB.AddPenalty(from, header.Number)
 
-		pen := stateDB.GetPenalty(sender.Address)
-		penUdt := stateDB.GetPenaltyUpdated(sender.Address)
+		pen := stateDB.GetPenalty(from)
+		penUdt := stateDB.GetPenaltyUpdated(from)
 
 		if pen != 1 || penUdt.Cmp(header.Number) != 0 {
 			t.Errorf("expected result is [1,%s] but [%d,%s]", header.Number.String(), pen, penUdt.String())
 		}
 
-		stateDB.RemovePenalty(sender.Address, header.Number)
+		stateDB.RemovePenalty(from, header.Number)
 
-		pen = stateDB.GetPenalty(sender.Address)
-		penUdt = stateDB.GetPenaltyUpdated(sender.Address)
+		pen = stateDB.GetPenalty(from)
+		penUdt = stateDB.GetPenaltyUpdated(from)
 
 		if pen != 0 || penUdt.Cmp(header.Number) != 0 {
 			t.Errorf("expected result is [1,%s] but [%d,%s]", header.Number.String(), pen, penUdt.String())
 		}
 
-		originFrom := getBalances(sender.Address, stateDB)
+		originFrom := getBalances(from, stateDB)
 		originTo := getBalances(*tx.To(), stateDB)
 
 		gasAmt := new(big.Int).Mul(tx.GasPrice(), big.NewInt(int64(tx.Gas())))
 
-		exptFrom := getBalances(sender.Address, stateDB)
-		exptTo := getBalances(sender.Address, stateDB)
+		exptFrom := getBalances(from, stateDB)
+		exptTo := getBalances(from, stateDB)
 
 		_, _, _, err = ApplyMessage(evm, msg, gp)
 		if err != nil {

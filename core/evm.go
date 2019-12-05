@@ -93,7 +93,7 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int, base types
 		return db.GetStakeBalance(addr).Cmp(amount) >= 0
 	}
 
-	return db.GetBalance(addr).Cmp(amount) >= 0
+	return false
 }
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db

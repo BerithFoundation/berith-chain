@@ -17,6 +17,7 @@
 package core
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -77,7 +78,8 @@ var (
 	// making the transaction invalid, rather a DOS protection.
 	ErrOversizedData = errors.New("oversized data")
 
-	ErrStakingBalance = errors.New("staking balance failed")
+	ErrStakingBalance       = errors.New("staking balance failed")
+	ErrInvalidStakeReceiver = errors.New("berith account only can stake token on itself")
 )
 
 var (
@@ -602,6 +604,15 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		Remote 상의 Tx 도 처리 하기 위해 TxPool 에서 타입 및 Tx 검증
 		cost == V + GP * GL
 	*/
+
+	if err := types.ValidateJobWallet(tx.Base(), tx.Target()); err != nil {
+		return err
+	}
+
+	if (tx.Base() == types.Stake || tx.Target() == types.Stake) && bytes.Compare(tx.To().Bytes(), from.Bytes()) != 0 {
+		return ErrInvalidStakeReceiver
+	}
+
 	if tx.Base() == types.Main {
 		if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
 			return ErrInsufficientFunds

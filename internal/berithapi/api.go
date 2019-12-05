@@ -288,7 +288,7 @@ func (s *PrivateAccountAPI) DeriveAccount(url string, path string, pin *bool) (a
 }
 
 // HasAccount checks a account's existence
-func (s *PrivateAccountAPI) HasAddress(addr common.Address,) bool {
+func (s *PrivateAccountAPI) HasAddress(addr common.Address) bool {
 	return fetchKeystore(s.am).HasAddress(addr)
 }
 
@@ -301,7 +301,7 @@ func (s *PrivateAccountAPI) NewAccount(password string) (common.Address, error) 
 	return common.Address{}, err
 }
 
-func (s *PrivateAccountAPI) PrivateKey(acc string, password string) (string, error){
+func (s *PrivateAccountAPI) PrivateKey(acc string, password string) (string, error) {
 	ks := fetchKeystore(s.am)
 	return ks.GetPrivateKey(acc, password)
 }
@@ -1086,6 +1086,15 @@ func (s *PublicTransactionPoolAPI) GetRawTransactionByBlockHashAndIndex(ctx cont
 
 // GetTransactionCount returns the number of transactions the given address has sent for the given block number
 func (s *PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Uint64, error) {
+
+	if blockNr == rpc.PendingBlockNumber {
+		nonce, err := s.b.GetPoolNonce(ctx, address)
+		if err != nil {
+			return nil, err
+		}
+		return (*hexutil.Uint64)(&nonce), nil
+	}
+
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
