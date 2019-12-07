@@ -57,7 +57,7 @@ func (w *wizard) makeGenesis() {
 		Period:       30,
 		Epoch:        300,
 		Rewards:      big.NewInt(500),
-		StakeMinimum: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+8)),
+		StakeMinimum: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
 		SlashRound:   uint64(1),
 	}
 

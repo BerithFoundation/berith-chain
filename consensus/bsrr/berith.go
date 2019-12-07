@@ -59,7 +59,7 @@ const (
 
 var (
 	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+8))
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
 	SlashRound   = uint64(2)
 	ForkFactor   = 1.0
 
@@ -397,7 +397,7 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	delayed := c.getDelay(int(header.Nonce.Uint64()))
 	if parent.Time.Int64()+int64(c.config.Period)+int64(delayed.Seconds()) > time.Now().Unix() {
 		log.Warn("found invalid timestamp header", "number", header.Number.Uint64(), "hash", header.Hash().Hex(), "rank", header.Nonce.Uint64())
-		return ErrInvalidTimestamp
+		//return ErrInvalidTimestamp
 	}
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
@@ -559,11 +559,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		return nil, errStakingList
 	}
 
-	println("====================[STAKERS]======================")
-	for _, stk := range stks.AsList() {
-		println(stk.Hex())
-	}
-
 	//Reward 보상
 	c.accumulateRewards(chain, state, header)
 
@@ -711,25 +706,6 @@ func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.He
 	return target, false
 }
 
-// [BERITH] getRewardTargetBlock 주어진 header에 대하여 miner 보상을 결정 할 target block을 반환한다.
-// target block number == current block number - config.SlashRound
-func (c *BSRR) getRewardTargetBlock(chain consensus.ChainReader, header *types.Header) (*types.Header, bool) {
-	if header == nil {
-		return &types.Header{}, false
-	}
-
-	targetNumber := new(big.Int).Sub(header.Number, big.NewInt(int64(c.config.SlashRound)))
-	if targetNumber.Cmp(big.NewInt(0)) < 0 {
-		return nil, false
-	}
-
-	target := chain.GetHeaderByNumber(targetNumber.Uint64())
-	if target == nil {
-		return target, false
-	}
-	return target, chain.HasBlockAndState(target.Hash(), targetNumber.Uint64())
-}
-
 // SealHash returns the hash of a block prior to it being sealed.
 func (c *BSRR) SealHash(header *types.Header) common.Hash {
 	return sigHash(header)
@@ -815,7 +791,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		return big.NewInt(0)
 	} else {
 		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+18))
 	}
 }
 
@@ -827,7 +803,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
 
 	//과거 시점의 블록 생성자 가져온다.
-	target, exist := c.getAncestor(chain, int64(config.Bsrr.SlashRound), header)
+	target, exist := c.getAncestor(chain, int64(config.Bsrr.Epoch), header)
 	if !exist {
 		return
 	}
@@ -844,7 +820,7 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 			continue
 		}
 
-		target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.SlashRound))
+		target := new(big.Int).Add(behind.Number, new(big.Int).SetUint64(config.Bsrr.Epoch))
 		if header.Number.Cmp(target) == -1 {
 			continue
 		}
@@ -992,8 +968,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+8))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+8))
+				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))

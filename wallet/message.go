@@ -164,9 +164,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			}
 			return mem, nil
 		}
-		if err != nil {
-			return "err" , err
-		}
 		member := walletdb.Member{
 			Address:    common.HexToAddress(key[0]),
 			ID:         key[1],

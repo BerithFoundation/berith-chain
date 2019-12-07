@@ -178,7 +178,7 @@
         let gasLimit = $('#sendGasLimit').val()
         let gasPrice = $('#sendGasPrice').val()
 
-        if(amount.substr(amount.indexOf('.')).length-1 > BERITH_UNIT) {
+        if(amount.substr(amount.indexOf('.')).length-1 > DISPLAY_UNIT) {
             $("#sendAmount").addClass("error");
                 return false;
         }
