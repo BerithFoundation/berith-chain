@@ -791,7 +791,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		return big.NewInt(0)
 	} else {
 		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+18))
+		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 	}
 }
 
