@@ -25,8 +25,8 @@ package params
 // the main Berith network.
 var MainnetBootnodes = []string{
 	// Berith Foundation Go Bootnodes
-	"enode://b51be77505e2391e0e2ad13a5153607ab5fd19b89a513d6ba5bc793aff6643b3b06dc33b05245b417f5dc5fcbd6a755b679c5730059e15346ddb84c96adbe388@15.164.130.81:40404",
-	"enode://6fdc64e4d2ad8c973a8606e4d1947b734a437d8f08f2c3e321c71f791b26ad27e38e0b9700900585a489373f38325f9a083b7e5a4520d9564c41ba9a44ec997e@13.124.140.180:40404",
+	"enode://ea9b7c833a522780cb50dbb5f6e44c8d475ce8dedda44cb555e59994a5f89288908ebb288cfec9962c7321dee311a2a9bbfbadda78b1b3ef6dbcb33aea063e21@13.124.140.180:40404",
+	"enode://2c7f9c316e460f98516e27ecd4bcb3e6772d2ae50db7ed11f96b4cb973aaca51b21cb485815d9f627c607e9def084c6e183cd2c12ec9dcc22fd9af198b6d34d3@15.164.130.81:40404",
 }
 
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
