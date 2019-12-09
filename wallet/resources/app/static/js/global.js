@@ -34,6 +34,24 @@ async function sendMessage(methodType, methodName, args) {
     });
     return messagePromise;
 }
+async function sendMessage2(methodType, methodName, args) {
+    let messagePromise = new Promise(function (resolve) {
+        let message = {"name": methodType};
+        message.payload = {
+            "api": methodName,
+            "args": args
+        }
+        ///asticode.loader.show()
+
+        //console.log("Request: ", JSON.stringify(message));
+        astilectron.sendMessage(message, function (response) {
+           // asticode.loader.hide();
+            //console.log("Response: ", JSON.stringify(response));
+            resolve(response);
+        });
+    });
+    return messagePromise;
+}
 
 // spa 구조 선언하는 함수
 function loadAppContents() {

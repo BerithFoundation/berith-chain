@@ -1,19 +1,25 @@
 let berith = {
 
-    blockNumber: function () {
-        let message = {"name": "callApi"};
-        message.payload = {
-            "api" : "berith_blockNumber",
-            "args" : []
-        }
-        asticode.loader.show()
-        astilectron.sendMessage(message, function(message) {
-            asticode.loader.hide();
-            var obj = message.payload
-            console.log("msg :: " + message.payload)
-            blockNumber = obj
-            $('#loginID').val(message.payload)
-        })
+    // blockNumber: function () {
+    //     let message = {"name": "callApi"};
+    //     message.payload = {
+    //         "api" : "berith_blockNumber",
+    //         "args" : []
+    //     }
+    //     asticode.loader.show()
+    //     astilectron.sendMessage(message, function(message) {
+    //         asticode.loader.hide();
+    //         var obj = message.payload
+    //         console.log("msg :: " + message.payload)
+    //         blockNumber = obj
+    //         $('#loginID').val(message.payload)
+    //     })
+    // },
+    blockNumber : async function (address) {
+        result = await sendMessage2("callApi", "berith_blockNumber", []);
+        var obj = JSON.parse(result.payload)
+        //var val = await convertAmount(obj)
+        return obj;
     },
 
     coinbase: function () {

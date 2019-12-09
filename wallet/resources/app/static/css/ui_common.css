@@ -334,10 +334,13 @@ a.icon{color:transparent; text-indent:-9999px;}
 .sync_bar{position: absolute; bottom:0; left:0; display:flex; width:100%; padding:7px 40px 7px 130px; background:#e8e8f0; color:#888; font-size:11px; font-weight:bold; line-height:16px; cursor:pointer;}
 .sync_bar strong{display:inline-block; height:16px; margin-right:65px;}
 .sync_bar strong:before{content:""; float:left; display:block; width:16px; height:16px; margin-right:5px; background:url(../../images/common/ico_sync.png)no-repeat center;}
+
+.sync_bar strong.add:before{content:""; float:left; display:block; width:16px; height:16px; margin-right:5px; background: none }
 .sync_bar .progress{float:left; flex:1; background:#cdcdd2; border-radius: 4px;}
 .sync_bar .progress_bar{display:block;  height:15px; background:#acacb7; border-radius: 4px;}
 .sync_bar .progress_info{margin-left:15px;}
-
+/*.sync_bar strong .sync{content:""; float:left; display:block; width:16px; height:16px; margin-right:5px; background:url(../../images/common/ico_sync.png)no-repeat center;}*/
+/*.sync_bar strong .complete{content:""; float:left; display:block; width:16px; height:16px; margin-right:5px; background: none no-repeat center;}*/
 
 .search_wrap{}
 
