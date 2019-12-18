@@ -36,7 +36,7 @@
             </p>
         </div><!-- e://inp_group -->
         <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-            <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
+            <h5>수량 - BERS<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
                     <span class="inp_wrap">
@@ -70,7 +70,7 @@
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
-                            <input class="inp" type="text" id = "sendGasPrice" value="21000"/>
+                            <input class="inp" type="text" id = "sendGasPrice" value="1"/>
                             <a class="del" href="#!">삭제</a>
                         </span>
                     </div>
@@ -109,7 +109,7 @@
 
     async function onSendLoad() {
         let mainBalance = await berith.getBalance(account);
-        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
+        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BERS";
         $('#mainBalance').html(mainBalanceContent);
     }
 
@@ -123,16 +123,16 @@
             let sendAmount = $('#sendAmount').find('input[type=text]:first').val();
             let receiversAddress = $("#sendAddr").val();
 
-            let sendGasLimit = $('#sendGasLimit').val();
-            let sendGasPrice = $('#sendGasPrice').val();
+            let sendGasLimit = $('#sendGasLimit').val() ;
+            let sendGasPrice = $('#sendGasPrice').val() * 1000000000;
 
             if( sendGasLimit == "") {sendGasLimit = 21000}
-            if( sendGasPrice == "") {sendGasPrice = 21000}
+            if( sendGasPrice == "") {sendGasPrice = 1000000000}
 
             $("#sendAmtForConfirmation").text(sendAmount);
             $("#sendAddForConfirmation").text(receiversAddress);
-            $("#sendGasLimitConfirmation").text(sendGasLimit)
-            $("#sendGasPriceConfirmation").text(sendGasPrice)
+            $("#sendGasLimitConfirmation").text($('#sendGasLimit').val())
+            $("#sendGasPriceConfirmation").text($('#sendGasPrice').val())
             togglePopUp("confirmationPopup");
         }
     }
@@ -142,7 +142,10 @@
         let amount = $('#sendAmount').find('input[type=text]:first').val();
 
         let sendGasLimit = $('#sendGasLimit').val();
-        let sendGasPrice = $('#sendGasPrice').val();
+        let sendGasPrice = $('#sendGasPrice').val()*1000000000;
+
+        if( sendGasLimit == "") {sendGasLimit = 21000}
+        if( sendGasPrice == "") {sendGasPrice = 1000000000}
 
         let result = await berith.sendTransaction(amount, receiversAddress, sendGasLimit, sendGasPrice);
         if (result.name == "error") {
@@ -193,7 +196,7 @@
                 $('#sendGasL').addClass("error")
                 return false
             }else if(!isDecimalNumber(gasPrice)) {
-                $('#sendGasPrice').val(21000)
+                $('#sendGasPrice').val(1)
                 $('#sendGasL').removeClass("error")
                 $('#sendGasP').addClass("error")
                 return false

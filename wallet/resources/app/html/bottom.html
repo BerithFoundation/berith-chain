@@ -1,6 +1,6 @@
 
 <div class="sync_bar " id = "progressSync"><!--hide -->
-    <strong id = "syncState">Synchronizing…</strong>
+    <strong class = "sync" id = "syncState">Synchronizing…</strong>
     <span class="progress">
             <span class="progress_bar" id="progressBar" onclick="togglePopUp('syncDetailPop')" style="width:45%"></span>
         </span>
@@ -18,22 +18,45 @@
         if( obj != false) {
             var currentBlock = await hexToDecimal(obj.currentBlock)
             var highestBlock = await hexToDecimal(obj.highestBlock)
+          //  console.log( "highestBlock : " + highestBlock + ",  currentBlock : " + currentBlock)
             var syncPercent = parseInt((currentBlock / highestBlock) * 100 )
             var remainBlock = highestBlock- currentBlock
             var completeTime = parseInt(remainBlock / 400)
             $('#progressInfo').html(syncPercent+ "%")
             $('#progressBar').css('width' , syncPercent+"%")
             $('#syncState').html("Synchronizing…")
-            $('#remainBlock').html(syncPercent)
+            $('#remainBlock').html(remainBlock)
             $('#lastBlock').html(highestBlock)
             $('#syncPercent').html(syncPercent+"%")
             $('#syncCompleteTime').html(completeTime)
+            if ( $('#syncState').hasClass("add") ) {
+                $('#syncState').removeClass("add");
+            }
+
+
+
+            // $('#syncState').css("background" );
+            //
         }else{
+            var highestBlock = await berith.blockNumber();
+            var highestBlock2 = await hexToDecimal(highestBlock)
+            //console.log("blockNumber : "+highestBlock);
+            //console.log("blockNumber2 : " + highestBlock2 );
+            if ( !$('#syncState').hasClass("add") ) {
+                $('#syncState').addClass("add");
+            }
+
+            // $('#syncState').css("background" ,"");
+            // if ( $('#syncState').hasClass("sync") ) {
+            //     $('#syncState').removeClass("sync")
+            //     $('#syncState').addClass("complete")
+            // }
+            // $('#syncState').css("background" ,"");
             $('#progressInfo').html("100%")
             $('#progressBar').css('width' , '100%')
             $('#syncState').html("Complete")
             $('#remainBlock').html("0")
-            $('#lastBlock').html("0")
+            $('#lastBlock').html(highestBlock2)
             $('#syncPercent').html("100%")
             $('#syncCompleteTime').html("0초")
         }

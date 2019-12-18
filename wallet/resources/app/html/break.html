@@ -28,7 +28,7 @@
     <div class="content">
         <h4>정보입력</h4>
         <div class="inp_group readonly "><!-- 읽기전용 readonly 추가-->
-            <h5>수량 - BER<span class="info">보낼 수량은 Stake Balance의 전체 수량입니다.</span></h5>
+            <h5>수량 - BERS<span class="info">보낼 수량은 Stake Balance의 전체 수량입니다.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
                     <span class="inp_wrap">
@@ -56,7 +56,7 @@
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
-                            <input class="inp" type="text" id = "breakGasPrice" value=21000 />
+                            <input class="inp" type="text" id = "breakGasPrice" value=1 />
                             <a class="del" href="#!">삭제</a>
                         </span>
                     </div>
@@ -96,11 +96,11 @@
     onBreakLoad();
     async function onBreakLoad() {
         let mainBalance = await berith.getBalance(account);
-        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
+        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BERS";
         $('#mainBalance').html(mainBalanceContent);
 
         let stakeBalance = await berith.getStakeBalance(account);
-        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BER";
+        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BERS";
         $('#stakeBalance').html(stakeBalanceContent);
 
         $("#stakedBalance").val(stakeBalance); // input field
@@ -116,8 +116,10 @@
     }
     async function fnBreak(){
         let breakGasLimit = $('#breakGasLimit').val()
-        let breakGasPrice = $('#breakGasPrice').val()
+        let breakGasPrice = $('#breakGasPrice').val() * 1000000000
         let breakAmount   = $('#stakedBalance').val()
+        if( breakGasLimit == "") {breakGasLimit = 21000}
+        if( breakGasPrice == "") {breakGasPrice = 1000000000}
         let result = await berith.stopStaking(breakGasLimit,breakGasPrice)
         togglePopUp("breakConfirmPop");
         if( result.name == "error"){
@@ -142,13 +144,13 @@
             }
             let breakAmount   = $('#stakedBalance').val()
             let breakGasLimit = $('#breakGasLimit').val()
-            let breakGasPrice = $('#breakGasPrice').val()
+            let breakGasPrice = $('#breakGasPrice').val()*1000000000
             if( breakGasLimit == "") {breakGasLimit = 21000}
-            if( breakGasPrice == "") {breakGasPrice = 21000}
+            if( breakGasPrice == "") {breakGasPrice = 1000000000}
 
             $('#breakAmountConfirmaion').html(breakAmount)
             $('#breakGasLimitConfirmation').html(breakGasLimit)
-            $('#breakGasPriceConfirmation').html(breakGasPrice)
+            $('#breakGasPriceConfirmation').html($('#breakGasPrice').val())
             // console.log("break ok!! ")
             togglePopUp('breakConfirmPop');
         }
@@ -167,7 +169,7 @@
             $('#breakGasL').addClass("error")
             return false
         }else if(!isDecimalNumber(gasPrice)) {
-            $('#breakGasPrice').val(21000)
+            $('#breakGasPrice').val(1)
             $('#breakGasL').removeClass("error")
             $('#breakGasP').addClass("error")
             return false

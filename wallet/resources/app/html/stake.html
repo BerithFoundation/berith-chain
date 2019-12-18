@@ -28,7 +28,7 @@
     <div class="content">
         <h4>정보입력</h4>
         <div id="stakeAmount" class="inp_group "><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-            <h5>수량 - BER<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
+            <h5>수량 - BERS<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
                     <span class="inp_wrap">
@@ -62,7 +62,7 @@
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
-                            <input class="inp" type="text" id = "stakeGasPrice" value = "21000"/>
+                            <input class="inp" type="text" id = "stakeGasPrice" value = "1"/>
                             <a class="del" href="#!">삭제</a>
                         </span>
                     </div>
@@ -100,11 +100,11 @@
     onStakeLoad();
     async function onStakeLoad() {
         let mainBalance = await berith.getBalance(account);
-        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
+        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BERS";
         $('#mainBalance').html(mainBalanceContent);
 
         let stakeBalance = await berith.getStakeBalance(account);
-        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BER";
+        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BERS";
         $('#stakeBalance').html(stakeBalanceContent);
     }
 
@@ -128,7 +128,10 @@
     async function stake() {
         let stakeAmount = $('#stakeAmount').find('input[type=text]:first').val();
         let stakeGasLimit = $('#stakeGasLimit').val()
-        let stakeGasPrice = $('#stakeGasPrice').val()
+        let stakeGasPrice = $('#stakeGasPrice').val()* 1000000000
+        if( stakeGasLimit == "") {stakeGasLimit = 21000}
+        if( stakeGasPrice == "") {stakeGasPrice = 1000000000}
+
         let result = await berith.stake(stakeAmount ,stakeGasLimit , stakeGasPrice);
         togglePopUp("confirmationPopup");
         if (result.name == "error") {
@@ -172,7 +175,7 @@
                 $('#stakeGasL').addClass("error")
                 return false
             }else if(!isDecimalNumber(gasPrice)) {
-                $('#stakeGasPrice').val(21000)
+                $('#stakeGasPrice').val(1)
                 $('#stakeGasL').removeClass("error")
                 $('#stakeGasP').addClass("error")
                 return false
