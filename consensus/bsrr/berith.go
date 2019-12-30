@@ -132,6 +132,8 @@ var (
 	errStakingList = errors.New("not found staking list")
 
 	errMissingState = errors.New("state missing")
+
+	errBIP1 = errors.New("error when fork network to BIP1")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -499,6 +501,7 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//[Berith] 부모블록의 StakingList를 얻어온다.
+	var stks staking.Stakers
 	stks, err := c.getStakers(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, errStakingList
@@ -523,6 +526,13 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
+
+		if chain.Config().IsBIP1Block(header.Number) {
+			stks, err = c.supportBIP1(chain, parent, stks)
+			if err != nil {
+				return nil, errBIP1
+			}
+		}
 		target, exist := c.getStakeTargetBlock(chain, parent)
 		if !exist {
 			return nil, consensus.ErrUnknownAncestor
@@ -836,6 +846,28 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	}
 }
 
+func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, stks staking.Stakers) (staking.Stakers, error) {
+	st, err := chain.StateAt(parent.Root)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, addr := range stks.AsList() {
+		if st.GetStakeBalance(addr).Cmp(c.config.StakeMinimum) < 0 {
+			stks.Remove(addr)
+		}
+	}
+
+	bytes, err := json.Marshal(stks)
+	if err != nil {
+		return nil, err
+	}
+	c.cache.Add(parent.Hash(), bytes)
+	c.stakingDB.Commit(parent.Hash().Hex(), stks)
+
+	return stks, nil
+}
+
 //[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
 func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.Stakers, error) {
 	var (
@@ -954,12 +986,20 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		//[BERITH] 2019-09-03
 		//마지막 Staking의 블록번호가 저장되도록 수정
 		//일반 Tx가 아닌 경우 Stake or Unstake
-		if msg.Base() == types.Main && msg.Target() == types.Stake {
-			stkChanged[msg.From()] = true
-		} else if msg.Base() == types.Stake && msg.Base() == types.Main {
-			stkChanged[msg.From()] = false
+		if chain.Config().IsBIP1(number) {
+			if msg.Base() == types.Main && msg.Target() == types.Stake {
+				stkChanged[msg.From()] = true
+			} else if msg.Base() == types.Stake && msg.Target() == types.Main {
+				stkChanged[msg.From()] = false
+			} else {
+				continue
+			}
 		} else {
-			continue
+			if msg.Base() == types.Main && msg.Target() == types.Stake {
+				stkChanged[msg.From()] = true
+			} else {
+				continue
+			}
 		}
 	}
 
