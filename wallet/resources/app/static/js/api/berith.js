@@ -74,35 +74,46 @@ let berith = {
         var val = JSON.parse(result.payload)
         return val;
     },
-    sendTransaction: async function (sendAmount , receiverAccount , gasLimit , gasPrice) {
+    sendTransaction: async function (sendAmount , receiverAccount , gasLimit , gasPrice, nonce) {
         var valueData = hexConvert.getTxValue(sendAmount).value
         var valueData2 = "0x"+valueData
         var gasLimitValue  = parseInt(gasLimit).toString(16)
         var gasPriceValue = parseInt(gasPrice).toString(16)
         var gasLimitValue2  = "0x"+gasLimitValue
         var gasPriceValue2  = "0x"+gasPriceValue
-        console.log( "gasLimitV ::: " +  gasLimitValue2 +"  , gasPriceV ::: " + gasPriceValue2)
-        result = await sendMessage("callApi", "berith_sendTransaction", [{from : account , to :receiverAccount , value: valueData2 , gas :gasLimitValue2 , gasPrice: gasPriceValue2 } ]);
+        var param = {from : account , to :receiverAccount , value: valueData2 , gas :gasLimitValue2 , gasPrice: gasPriceValue2} 
+        if(nonce){
+            param.nonce = "0x"+parseInt(nonce).toString(16);
+        }
+        result = await sendMessage("callApi", "berith_sendTransaction", [param]);
         return result;
     },
 
-    stake : async function (stakeAmount , gasLimit, gasPrice) {
+    stake : async function (stakeAmount , gasLimit, gasPrice, nonce) {
         var valueData = hexConvert.getTxValue(stakeAmount).value
         var valueData2 = "0x"+valueData;
         var gasLimitValue  = parseInt(gasLimit).toString(16)
         var gasPriceValue = parseInt(gasPrice).toString(16)
         var gasLimitValue2  = "0x"+gasLimitValue
         var gasPriceValue2  = "0x"+gasPriceValue
-        result = await sendMessage("callApi", "berith_stake", [{from : account , value: valueData2 ,gas :gasLimitValue2 , gasPrice: gasPriceValue2  } ]);
+        var param = {from : account , value: valueData2 ,gas :gasLimitValue2 , gasPrice: gasPriceValue2} 
+        if(nonce){
+            param.nonce = "0x"+parseInt(nonce).toString(16);
+        }
+        result = await sendMessage("callApi", "berith_stake", [param]);
         return result;
     },
 
-    stopStaking : async function (gasLimit, gasPrice) {
+    stopStaking : async function (gasLimit, gasPrice, nonce) {
         var gasLimitValue  = parseInt(gasLimit).toString(16)
         var gasPriceValue = parseInt(gasPrice).toString(16)
         var gasLimitValue2  = "0x"+gasLimitValue
         var gasPriceValue2  = "0x"+gasPriceValue
-        result = await sendMessage("callApi", "berith_stopStaking", [{from: account , gas: gasLimitValue2 , gasPrice: gasPriceValue2}]);
+        var param = {from: account , gas: gasLimitValue2 , gasPrice: gasPriceValue2}
+        if(nonce){
+            param.nonce = "0x"+parseInt(nonce).toString(16);
+        }
+        result = await sendMessage("callApi", "berith_stopStaking", [param]);
         return result;
     },
     mining : async function(){
@@ -180,7 +191,7 @@ let berith = {
         astilectron.sendMessage(message, function(message) {
             asticode.loader.hide();
             $('#updateAccountResult').val(message.payload)
-            console.log("updateAccount ::: " + message.payload)
+            // console.log("updateAccount ::: " + message.payload)
         })
     },
 
@@ -241,6 +252,76 @@ let berith = {
             asticode.loader.hide();
         })
     },
+    
+    getTransactionByHash: async function(hash) {
+        return await sendMessage2("callApi","berith_getTransactionByHash",[hash]);
+    },
+
+    resendTransaction: function(hash, gasPrice) {
+        asticode.loader.show()
+        let gasValue = '0x'+(gasPrice*1000000000).toString(16);
+        return new Promise((resolve,reject) => {
+            let txdata;
+            sendMessage2("callApi","berith_getTransactionByHash",[hash]).then(result => {
+                if(result && result.payload) {
+                    txdata = JSON.parse(result.payload);
+                    txdata.gasPrice = gasValue;
+                    if(txdata.base == 2)
+                        txdata.base = "stake";
+                    else
+                        txdata.base = "main";
+
+                    if(txdata.target == 2)
+                        txdata.target = "stake";
+                    else
+                        txdata.target = "main";
+                    return sendMessage2("callApi","berith_sendTransaction",[{from:txdata.from, to:txdata.to, value:txdata.value, nonce:txdata.nonce, gas:txdata.gas, gasPrice:gasValue, data:txdata.input, base:txdata.base, target:txdata.target}]);
+                }
+                return Promise.reject(new error("invalid transaction hash"));
+            }).then(result => {
+                if(result && result.payload) {
+                    resolve(txdata)
+                    asticode.loader.hide();
+                }
+                return Promise.reject(new error("failed to send transaction"));
+            }).catch(err => {
+                reject(err)
+                asticode.loader.hide();
+            });
+        });
+    },
+    cancelTransaction: function(hash) {
+        asticode.loader.show();
+        return new Promise((resolve,reject) => {
+            let txdata;
+            sendMessage2("callApi","berith_getTransactionByHash",[hash]).then(result => {
+                if(result && result.payload) {
+                    txdata = JSON.parse(result.payload);
+                    var gasPrice = (Math.floor(Number(txdata.gasPrice)/1000000000*11)/10 + 0.1).toFixed(1)
+                    if(Number(gasPrice) <= 1)
+                        gasPrice = "1";
+                    gasPrice = (Number(gasPrice) * 1000000000).toString(16);
+                    txdata.gasPrice = "0x"+gasPrice;
+                    txdata.to = txdata.from;
+                    txdata.value = "0x0";
+                    txdata.input = "0x";
+                    txdata.base = 1;
+                    txdata.target = 1;
+                    return sendMessage2("callApi","berith_sendTransaction",[{from:txdata.from, to:txdata.to, value:txdata.value, nonce:txdata.nonce, gas:txdata.gas, gasPrice:txdata.gasPrice, data:txdata.input}]);
+                }
+                return Promise.reject(new error("invalid transaction hash"));
+            }).then(result => {
+                if(result && result.payload) {
+                    resolve(txdata)
+                    asticode.loader.hide();
+                }
+                return Promise.reject(new error("failed to send transaction"));
+            }).catch(err => {
+                reject(err)
+                asticode.loader.hide();
+            });
+        });
+    } 
 }
 
 function base64ToArrayBuffer(base64) {

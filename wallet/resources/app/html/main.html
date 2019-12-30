@@ -3,7 +3,8 @@
         <h2 id="loginName">MY WALLET</h2>
         <div class="txt_wrap">
             <strong>My Address</strong>
-            <p class="addr" id="myAdd"></p>
+            <!-- 1217 지갑 주소 줄바꿈 -->
+            <p class="addr txt_overline" id="myAdd"></p>
             <span><a class="copy" onclick="copyToClipboard('#myAdd')">복사</a><a class="qr" onclick="qrCreate()">qr</a></span>
         </div>
         <hr/>
@@ -26,7 +27,7 @@
         <div class="top_area">
             <div class="txt_wrap">
                 <strong>Total Balance</strong>
-                <p class="coin"><em id="totBalance"></em> BERS</p>
+                <p class="coin"><em id="totBalance">0.00000000</em> BERS</p>
             </div>
         </div><!-- e://top_area -->
         <div class="middle_area">
@@ -34,7 +35,7 @@
                 <div class="con_box">
                     <div class="txt_wrap">
                         <strong>Main Balance</strong>
-                        <p class="coin"><em id="mainBalance"></em> BERS</p>
+                        <p class="coin"><em id="mainBalance">0.00000000</em> BERS</p>
                         <a class="btn_send" href="#!" onclick="loadMainContent('send.html');">Send</a>
                     </div>
                 </div>
@@ -43,7 +44,7 @@
                 <div class="con_box">
                     <div class="txt_wrap">
                         <strong>Stake Balance</strong>
-                        <p class="coin"><em id="stakeBalance"></em> BERS</p>
+                        <p class="coin"><em id="stakeBalance">0.00000000</em> BERS</p>
                         <span><a class="btn_stake" href="#!" onclick="loadMainContent('stake.html')">Stake</a>
                             <a class="btn_break" href="#!" onclick="loadMainContent('break.html')">Break</a></span>
                     </div>
@@ -75,6 +76,35 @@
 </div>
 <script type="text/javascript">
 
+    function balanceChanged() {
+        // console.log("EVENT COMMING");
+        var mainBalance = $("#mainBalance").text()
+        var stakeBalance = $("#stakeBalance").text()
+
+        // console.log("main "+mainBalance);
+        // console.log("stake "+stakeBalance);
+
+        var total = (BigInt(mainBalance.replace(".","")) + BigInt(stakeBalance.replace(".",""))).toString();
+        var additionalZero = "";
+        for (var left = DISPLAY_UNIT - total.length ; left >= 0 ; left--) {
+            additionalZero += "0";
+        }
+        total = additionalZero + total;
+        total = total.substr(0,total.length-DISPLAY_UNIT)+"."+total.substr(total.length-DISPLAY_UNIT);
+        $('#totBalance').text(total);
+    }
+
+    $(document).ready(function() {
+        account = sessionStorage.getItem("account");
+
+        $("#mainBalance").change(balanceChanged)
+        $("#stakeBalance").change(balanceChanged)
+
+        getRealtimeBalance("berith_getBalance",account,$("#mainBalance"));
+        getRealtimeBalance("berith_getStakeBalance",account,$("#stakeBalance"));
+        
+    });
+
     onMainContentLoad();
 
     // 메인페이지 로드 함수
@@ -89,20 +119,7 @@
         $('#myAdd').text(account);
         $('#loginName').text(loginId);
 
-        let mainBalance = await berith.getBalance(account);
-        $('#mainBalance').text(mainBalance);
-
-        let stakeBalance = await berith.getStakeBalance(account);
-        $('#stakeBalance').text(stakeBalance);
-
-        var total = (BigInt(mainBalance.replace(".","")) + BigInt(stakeBalance.replace(".",""))).toString();
-        var additionalZero = "";
-        for (var left = DISPLAY_UNIT - total.length ; left >= 0 ; left--) {
-            additionalZero += "0";
-        }
-        total = additionalZero + total;
-        total = total.substr(0,total.length-DISPLAY_UNIT)+"."+total.substr(total.length-DISPLAY_UNIT);
-        $('#totBalance').text(total);
+        
     };
 
     function copyToClipboard(element) {

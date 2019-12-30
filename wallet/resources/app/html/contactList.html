@@ -16,6 +16,7 @@
 </head>
 
 <body>
+    
     <div class="ly_pop exlarge hide" id = "contactList" ><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
@@ -208,7 +209,7 @@
                 $('#contactPaging').children('.active').removeClass('active')
                 var obj2 = parseInt(obj)+1
                 var pageId = '#page'+obj2
-                console.log( "obj2 :: "  +obj2 + "  pageCnt :: " + pageCnt + "  pageId :: " + pageId)
+                // console.log( "obj2 :: "  +obj2 + "  pageCnt :: " + pageCnt + "  pageId :: " + pageId)
                 $('#contactPaging').children(pageId).addClass('active')
                 $('#contactData').empty()
                 $('#contactData').append(contents[obj])
@@ -231,7 +232,7 @@
         function movePage(num) {
             $('#contactPaging').children('.active').removeClass('active')
             var obj2 = parseInt(num.text())
-            console.log("movePage ::: " + obj2)
+            // console.log("movePage ::: " + obj2)
             num.addClass('active')
 
             $('#contactData').empty()

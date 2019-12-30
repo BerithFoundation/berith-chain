@@ -16,11 +16,7 @@
 </head>
     
 <body>
-
-    <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
+    
     <div class="ly_pop hide" id ="contactUpdate"><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
@@ -89,7 +85,7 @@
             return
         }
         var obj = await database.insertContact(addr, name)
-        console.log("add success ::" + obj)
+        // console.log("add success ::" + obj)
         if(  obj != null){
             $('#popUpdate').removeClass('hide')
             $('#popUpdate').addClass('view')
@@ -113,7 +109,7 @@
         }
         for ( var i in keys) {
             if (name == obj[keys[i]]){
-                console.log("same Name !!! ")
+                // console.log("same Name !!! ")
                 $('#contactUpdateNameGroup').addClass('error')
                 $('#err1').html("이미 존재하는 이름 입니다.")
                 $('#contactUpdateName').focus()
