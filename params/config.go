@@ -42,6 +42,7 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: big.NewInt(0),
+		BIP1Block:           big.NewInt(508000),
 		Bsrr: &BSRRConfig{
 			Period:       5,
 			Epoch:        360,
@@ -124,7 +125,8 @@ type ChainConfig struct {
 	EWASMBlock          *big.Int `json:"ewasmBlock,omitempty"`          // EWASM switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	Bsrr *BSRRConfig `json:"bsrr,omitempty"`
+	Bsrr      *BSRRConfig `json:"bsrr,omitempty"`
+	BIP1Block *big.Int    `json:"bip1Block,omitempty"`
 }
 type BSRRConfig struct {
 	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
@@ -148,7 +150,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -158,6 +160,7 @@ func (c *ChainConfig) String() string {
 		c.EIP158Block,
 		c.ByzantiumBlock,
 		c.ConstantinopleBlock,
+		c.BIP1Block,
 		engine,
 	)
 }
@@ -195,6 +198,17 @@ func (c *ChainConfig) IsByzantium(num *big.Int) bool {
 // IsConstantinople returns whether num is either equal to the Constantinople fork block or greater.
 func (c *ChainConfig) IsConstantinople(num *big.Int) bool {
 	return isForked(c.ConstantinopleBlock, num)
+}
+
+func (c *ChainConfig) IsBIP1(num *big.Int) bool {
+	return isForked(c.BIP1Block, num)
+}
+
+func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
+	if c.BIP1Block == nil || num == nil {
+		return false
+	}
+	return c.BIP1Block.Cmp(num) == 0
 }
 
 // IsEWASM returns whether num represents a block number after the EWASM fork
