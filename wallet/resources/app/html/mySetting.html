@@ -92,7 +92,7 @@
             }
         });
         $('.btn_close').click(function () {
-            console.log("close !!! ")
+            // console.log("close !!! ")
             $('.inp').val("");
             if(!$('#pwdChange').hasClass('hide')){
                 $('#pwdChange').addClass('hide')
@@ -110,7 +110,7 @@
             var changePwd = $('#changePwd').val()
             let apiResult = await database.checkLogin(loginId,originPwd)
             var obj = apiResult.payload
-            console.log( " real Pwd : " + obj.Password + " , inpuPwd : " + originPwd)
+            // console.log( " real Pwd : " + obj.Password + " , inpuPwd : " + originPwd)
             if( originPwd != obj.Password) {
                 $('#originPwdGroup').addClass('error')
                 $('.error_txt').html("현재 비밀번호가 일치하지않습니다.")

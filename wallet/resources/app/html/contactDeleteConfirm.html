@@ -16,10 +16,7 @@
 </head>
     
 <body>
-    <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
+    
     <div class="ly_pop hide" id = "contactDeleteConfirmPop"><!-- view/hide -->
         <div class="bg_dimmed"></div>
         <div class="pop_wrap">
@@ -50,7 +47,7 @@
             $('#contactDeleteConfirmPop').addClass('view')
             var addNum = value.attr('id')
             var addr = $('#addr'+addNum).text()
-            console.log( "delete Pop : " + addr)
+            // console.log( "delete Pop : " + addr)
             deleteAddr = addr
         }
         function closeContactDelete() {
@@ -58,9 +55,9 @@
             $('#contactDeleteConfirmPop').addClass('hide')
         }
         async function fnDeleteContact() {
-            console.log("delete Confirm : " + deleteAddr)
+            // console.log("delete Confirm : " + deleteAddr)
             var obj =await database.updateContact(deleteAddr)
-            console.log("obj ::" + obj)
+            // console.log("obj ::" + obj)
             if( obj != null){
                 $('#popDelete').removeClass('hide')
                 $('#popDelete').addClass('view')

@@ -73,7 +73,7 @@
                 if (e.keyCode == '13')
                     fnLogin()
             });
-            console.log( "start !! ")
+            // console.log( "start !! ")
 
             $('#loginID').focus(function () {
                 $('#idGroup').addClass('active')
@@ -118,7 +118,7 @@
             if (validateFields(loginId,loginPwd)) {
                 let apiResult = await database.checkLogin(loginId, loginPwd);
                 if (apiResult == undefined) {
-                    console.log("no exists !!! ")
+                    // console.log("no exists !!! ")
                     $('#idGroup').addClass('error')
                     $('.error_txt').html("일치하는 아이디가 존재하지 않습니다.")
                 }
@@ -138,9 +138,9 @@
             let address = obj.Address;
             $('#idGroup').removeClass('error')
             $('#pwdGroup').removeClass('error')
-            console.log("address :: " + address)
+            // console.log("address :: " + address)
             let hasAddress = await personal.hasAddress(address)
-            console.log("hasAddress :: " + hasAddress)
+            // console.log("hasAddress :: " + hasAddress)
             if (hasAddress == "true") {
                 let isSetBerithbase = await miner.setBerithbase(address);
                 if (isSetBerithbase == "true") {
@@ -154,7 +154,7 @@
                     console.error("Something went wrong while setting Berithbase!!!")
                 }
             } else {
-                console.log("ffffffff")
+                // console.log("ffffffff")
                 $('#idGroup').addClass('error')
                 $('.error_txt').html("PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
                     "Keystore File 복원을 진행해 주세요.\n")

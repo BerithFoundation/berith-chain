@@ -1,42 +1,45 @@
 package walletdb
 
 import (
+	"io"
+	"strings"
+
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	"io"
-	"strings"
 )
 
 // 로그인 계정 table ( key 값은 id 로 설정)
 type Member struct {
 	Address    common.Address // 계정주소
-	PrivateKey string		  // 개인키
-	ID         string		  // id
-	Password   string		  // pwd
+	PrivateKey string         // 개인키
+	ID         string         // id
+	Password   string         // pwd
 }
+
 // 트랜잭션 리스트 Detail table ( key 값은 해당 transaction을 전파받은 블록넘버값)
 type TxHistory struct {
-	TxBlockNumber string // tx 발생 블록넘버
-	TxAddress common.Address // tx 주소값
-	TxType string	// tx 타입 ex ) send, receive , stake 등등
-	TxAmount string // tx value 값
-	Txtime string // tx 시간
-	TxState string // tx 상태
-	Hash common.Hash  // 트랜잭션 hash 값
-	GasLimit string  // 기본수수료
-	GasPrice string  // 수수료 가격
-	GasUsed string // 실제 사용 수수료
+	TxBlockNumber string         // tx 발생 블록넘버
+	TxAddress     common.Address // tx 주소값
+	TxType        string         // tx 타입 ex ) send, receive , stake 등등
+	TxAmount      string         // tx value 값
+	Txtime        string         // tx 시간
+	TxState       string         // tx 상태
+	Hash          common.Hash    // 트랜잭션 hash 값
+	GasLimit      string         // 기본수수료
+	GasPrice      string         // 수수료 가격
+	GasUsed       string         // 실제 사용 수수료
 }
 
 // 주소록 table ( key 는 저장 주소값 )
 type Contact map[common.Address]string
+
 // 트랜잭션 리스트 Master table ( key 값은 해당 transaction을 전파받은 블록넘버값)
 type TxHistoryMaster map[string]string
 
 // Contact table RLP encode 함수
 func (c Contact) EncodeRLP(w io.Writer) error {
-	result := make([]string,0)
+	result := make([]string, 0)
 
 	for k, v := range c {
 		result = append(result, k.Hex()+":"+v)
@@ -46,7 +49,7 @@ func (c Contact) EncodeRLP(w io.Writer) error {
 
 // txHistoryMaster table RLP encode 함수
 func (c TxHistoryMaster) EncodeRLP(w io.Writer) error {
-	result := make([]string,0)
+	result := make([]string, 0)
 
 	for k, v := range c {
 		result = append(result, k+":"+v)
@@ -73,6 +76,7 @@ func (c Contact) DecodeRLP(r *rlp.Stream) error {
 	}
 	return nil
 }
+
 // txHistoryMaster table RLP decode 함수
 func (c TxHistoryMaster) DecodeRLP(r *rlp.Stream) error {
 	arr := make([]string, 0)
@@ -92,8 +96,6 @@ func (c TxHistoryMaster) DecodeRLP(r *rlp.Stream) error {
 	}
 	return nil
 }
-
-
 
 type Transactions struct {
 	txs []common.Hash
@@ -118,6 +120,7 @@ func NewWalletDB(dir string) (*WalletDB, error) {
 func (db *WalletDB) CloseDB() {
 	db.db.Close()
 }
+
 // db insert 함수
 func (db *WalletDB) Insert(key []byte, value interface{}) error {
 	data, err := rlp.EncodeToBytes(value)
@@ -127,6 +130,7 @@ func (db *WalletDB) Insert(key []byte, value interface{}) error {
 
 	return db.db.Put(key, data)
 }
+
 // db select 함수
 func (db *WalletDB) Select(key []byte, holder interface{}) error {
 	data, err := db.db.Get(key)
@@ -136,6 +140,7 @@ func (db *WalletDB) Select(key []byte, holder interface{}) error {
 
 	return rlp.DecodeBytes(data, holder)
 }
+
 //func (db *WalletDB) Select2(key []byte, holder interface{}) error {
 //	data, err := db.db.Get(key)
 //	if err != nil {
@@ -144,5 +149,3 @@ func (db *WalletDB) Select(key []byte, holder interface{}) error {
 //
 //	return rlp.DecodeBytes(data, holder)
 //}
-
-

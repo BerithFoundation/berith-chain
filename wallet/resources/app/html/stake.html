@@ -82,6 +82,28 @@
                 </div>
             </div>
         </div>
+        <!-- 191217 : Nonce 설정추가 [s] -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div id="nonceErrContainer" class="inp_group"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <div id="onoff" class="onoff_group off"><!-- 버튼 클릭시 on  -->
+                        <div class="tit_onoff"><button id="nonce_btn" type="button" class="btn_onoff"><span class="ico_arr"></span>Nonce 설정</button><span class="info">Nonce를 지정하지 않아도 자동으로 Nonce가 지정되어 트랜잭션이 전송됩니다.</span></div>
+                        <div class="onbox">
+                            <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text" id="nonce" />
+                                </span>
+                                <a class="del" href="#!">삭제</a>
+                            </div>
+                            <p id="nonceErrMsg" class="error_txt">
+                            0이나 자연수의 값을 입력하세요.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 191217 : Nonce 설정추가 [e] -->
         <div class="btn_area right">
             <a class="btn red medium on" href="#!" onclick="confirmation();">다음</a>
         </div>
@@ -99,13 +121,12 @@
 
     onStakeLoad();
     async function onStakeLoad() {
-        let mainBalance = await berith.getBalance(account);
-        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BERS";
-        $('#mainBalance').html(mainBalanceContent);
-
-        let stakeBalance = await berith.getStakeBalance(account);
-        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BERS";
-        $('#stakeBalance').html(stakeBalanceContent);
+        getRealtimeBalance("berith_getBalance",sessionStorage.getItem("account"),$('#mainBalance'));
+        getRealtimeBalance("berith_getStakeBalance",sessionStorage.getItem("account"),$('#stakeBalance'));
+        $("#nonce_btn").click(() => {
+            $("#onoff").toggleClass("on");
+            $("#onoff").toggleClass("off");
+        });
     }
 
     async function stakeAll() {
@@ -119,8 +140,8 @@
             let stakeGasLimit = $('#stakeGasLimit').val()
             let stakeGasPrice = $('#stakeGasPrice').val()
             $("#stakeAmtForConfirmation").text(stakeAmount);
-            $('#stakeGasLimitConfirmation').text(stakeGasLimit)
-            $('#stakeGasPriceConfirmation').text(stakeGasPrice)
+            $('#stakeGasLimitConfirmation').text(stakeGasLimit);
+            $('#stakeGasPriceConfirmation').text(stakeGasPrice);
             togglePopUp("confirmationPopup");
         }
     }
@@ -132,7 +153,9 @@
         if( stakeGasLimit == "") {stakeGasLimit = 21000}
         if( stakeGasPrice == "") {stakeGasPrice = 1000000000}
 
-        let result = await berith.stake(stakeAmount ,stakeGasLimit , stakeGasPrice);
+        let nonce = $("#nonce").val()
+
+        let result = await berith.stake(stakeAmount ,stakeGasLimit , stakeGasPrice, nonce);
         togglePopUp("confirmationPopup");
         if (result.name == "error") {
             alert(result.payload);
@@ -148,7 +171,7 @@
             $("#stakingDate").text(date.toISOString()); //TODO:: spit time and date
             $("#successfullyStakedAmount").text($('#stakeAmount').find('input[type=text]:first').val());
             $('#stakeGasLimitSuccess').text(stakeGasLimit)
-            $('#stakeGasPriceSuccess').text(stakeGasPrice)
+            $('#stakeGasPriceSuccess').text((stakeGasPrice/1000000000).toFixed(1))
             $('#stakeAmount').find('input[type=text]:first').val("");
             togglePopUp("successPopup");
         }
@@ -164,7 +187,7 @@
         let stakeAmount = stakeAmountField.val();
         let gasLimit = $('#stakeGasLimit').val()
         let gasPrice = $('#stakeGasPrice').val()
-
+        let nonce = $("#nonce").val();
         if (isDecimalNumber(stakeAmount) ) {
             let mainBalance = await berith.getBalance(account);
             if (parseInt(stakeAmount) > parseInt(mainBalance) || parseInt(stakeAmount) < 100000 ) {
@@ -179,7 +202,10 @@
                 $('#stakeGasL').removeClass("error")
                 $('#stakeGasP').addClass("error")
                 return false
-            }  else {
+            } else if(nonce.trim() != "" && !isDecimalNumber(nonce)) {
+                $("#stakeAmount").removeClass("error");
+                $("#nonceErrContiner").addClass("error");
+            } else {
                 $("#stakeAmount").removeClass("error");
             }
         } else {

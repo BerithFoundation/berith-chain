@@ -14,6 +14,11 @@ var totalBalance
 
 const BERITH_UNIT = 18;
 const DISPLAY_UNIT = 8;
+const VERSION = "v1.1";
+
+
+let loops = [];
+let trListPage = 1;
 
 // meessage.go 와 통신하는 함수
 async function sendMessage(methodType, methodName, args) {
@@ -23,11 +28,11 @@ async function sendMessage(methodType, methodName, args) {
             "api": methodName,
             "args": args
         }
-        asticode.loader.show()
+        //asticode.loader.show()
 
-        //console.log("Request: ", JSON.stringify(message));
+        //console.log("Request: ", JSON.stringify(message));syncing
         astilectron.sendMessage(message, function (response) {
-            asticode.loader.hide();
+            //asticode.loader.hide();
             //console.log("Response: ", JSON.stringify(response));
             resolve(response);
         });
@@ -61,13 +66,22 @@ function loadAppContents() {
     $( "#footer-content" ).load( "bottom.html");
 }
 
+
+function clearLoops() {
+    loops.forEach(loop => {
+        clearInterval(loop);
+    })
+}
+
 function loadMainContent(htmlName) {
+    clearLoops();
     $( "#main-content" ).load( htmlName, function() {
         registerEvents();
     });
 }
 
 function loadMainContentWithCallBack(htmlName, callBackFunction) {
+    clearLoops();
     $( "#main-content" ).load( htmlName, function() {
         registerEvents();
         callBackFunction();
@@ -118,5 +132,24 @@ function toBerValue(s) {
     }
     var result = digits.reverse().join('');
     return result.substr(0,result.length-BERITH_UNIT)+"."+result.substr(result.length-BERITH_UNIT, DISPLAY_UNIT)
+}
+
+function getRealtimeBalance(method,address,...elems) {
+    var send = () => {
+        sendMessage2("callApi", method, [address,"latest"]).then(result => {
+            if(result && result.payload) {
+                var payload = JSON.parse(result.payload);
+                
+                elems.forEach(elem => {
+                    elem.text(toBerValue(payload));
+                    elem.trigger("change");
+                });
+            }
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    send();
+    loops.push(setInterval(send , 1000))
 }
 
