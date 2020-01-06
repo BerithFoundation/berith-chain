@@ -17,6 +17,8 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/BerithFoundation/berith-chain/params"
+
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/core/state"
 
@@ -84,9 +86,24 @@ func (cs *Candidates) Add(c Candidate) {
 블록 넘버를 해시로 바꾸고 그것을 강제로 int64로 변경 하는 함수
 결과 값을 Seed 로 쓴다.
 */
-func (cs Candidates) GetSeed(number uint64) int64 {
+func (cs Candidates) GetSeed(config *params.ChainConfig, number uint64) int64 {
 
 	bt := []byte{byte(number)}
+	if config.IsBIP2(big.NewInt(0).SetUint64(number)) {
+		bt = big.NewInt(0).SetUint64(number).Bytes()
+	}
+	hash := sha256.New()
+	hash.Write(bt)
+	md := hash.Sum(nil)
+	h := common.BytesToHash(md)
+	seed := h.Big().Int64()
+
+	return seed
+}
+
+func (cs Candidates) GetBIP2Seed(number uint64) int64 {
+
+	bt := big.NewInt(int64(number)).Bytes()
 	hash := sha256.New()
 	hash.Write(bt)
 	md := hash.Sum(nil)
@@ -162,7 +179,6 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 		return cs.selections[r.start].address
 	}
 	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
-
 	start := r.start
 	end := r.end
 	for {
@@ -201,12 +217,55 @@ func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	}
 }
 
+type JSONCandidate struct {
+	Address string `json:"address"`
+	Point   uint64 `json:"point"`
+	Value   uint64 `json:"value"`
+}
+
+type JSONCandidates struct {
+	User  []JSONCandidate `json:"user"`
+	Total uint64          `json:"total"`
+}
+
+func GetCandidates(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) *JSONCandidates {
+	list := sortableList(stks.AsList())
+	// if len(list) == 0 {
+	// 	return result
+	// }
+
+	sort.Sort(list)
+
+	cddts := NewCandidates()
+
+	for _, stk := range list {
+		point := state.GetPoint(stk).Uint64()
+		cddts.Add(Candidate{
+			point:   point,
+			address: stk,
+		})
+	}
+
+	jsonCddt := make([]JSONCandidate, 0)
+	for _, cddt := range cddts.selections {
+		jsonCddt = append(jsonCddt, JSONCandidate{
+			Address: cddt.address.Hex(),
+			Point:   cddt.point,
+			Value:   cddt.val,
+		})
+	}
+	return &JSONCandidates{
+		User:  jsonCddt,
+		Total: cddts.total,
+	}
+}
+
 /*
 [BERITH]
 BC 선출을 하기 위한 함수
 선출된 BC map 을 리턴 한다.
 */
-func SelectBlockCreator(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
+func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
 	result := make(VoteResults)
 	val, ok := selectionCache.Get(hash)
 
@@ -236,7 +295,7 @@ func SelectBlockCreator(number uint64, hash common.Hash, stks staking.Stakers, s
 		})
 	}
 
-	result = cddts.selectBlockCreator(number)
+	result = cddts.selectBlockCreator(config, number)
 
 	if bytes, err := json.Marshal(result); err == nil {
 		selectionCache.Add(hash, bytes)
@@ -246,7 +305,7 @@ func SelectBlockCreator(number uint64, hash common.Hash, stks staking.Stakers, s
 
 }
 
-func (cs *Candidates) selectBlockCreator(number uint64) VoteResults {
+func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint64) VoteResults {
 
 	queue := &Queue{
 		storage: make([]Range, len(cs.selections)),
@@ -259,7 +318,7 @@ func (cs *Candidates) selectBlockCreator(number uint64) VoteResults {
 	DIF := DIF_MAX
 	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
 
-	rand.Seed(cs.GetSeed(number))
+	rand.Seed(cs.GetSeed(config, number))
 
 	_ = queue.enqueue(Range{
 		min:   0,

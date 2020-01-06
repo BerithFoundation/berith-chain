@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/BerithFoundation/berith-chain/params"
+
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 
 	"github.com/BerithFoundation/berith-chain/berithdb"
@@ -63,7 +65,11 @@ func TestSelectBlockCreator(t *testing.T) {
 		st.SetPoint(addr, point)
 	}
 
-	results := SelectBlockCreator(blockNumber.Uint64(), common.Hash{}, stks, st)
+	config := &params.ChainConfig{
+		BIP2Block: big.NewInt(0),
+	}
+
+	results := SelectBlockCreator(config, blockNumber.Uint64(), common.Hash{}, stks, st)
 
 	for addr, result := range results {
 		expected, ok := expectedResults[addr]
@@ -78,4 +84,41 @@ func TestSelectBlockCreator(t *testing.T) {
 	if len(results) < 5 {
 		t.Errorf("only %d user selected [expected : 5]", len(results))
 	}
+}
+
+func TestSeed(t *testing.T) {
+
+	configs := []*params.ChainConfig{
+		&params.ChainConfig{
+			BIP2Block: big.NewInt(0),
+		},
+		&params.ChainConfig{},
+	}
+
+	expected := []bool{false, true} // Check for duplicate hash values
+
+	cddts := NewCandidates()
+
+	for round, config := range configs {
+
+		seeds := make(map[int64]int)
+
+		for i := uint64(0); i <= uint64(100000); i++ {
+			seeds[cddts.GetSeed(config, i)]++
+		}
+
+		result := false
+
+		for _, v := range seeds {
+			if v > 1 {
+				result = true
+			}
+		}
+
+		if expected[round] != result {
+			t.Errorf("invalid result [round : %d, expected : %t, result : %t]", round, expected[round], result)
+			return
+		}
+	}
+
 }
