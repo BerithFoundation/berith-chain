@@ -25,7 +25,8 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	// MainnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	MainnetGenesisHash = common.HexToHash("0x0c2efaedffcadfc946f140e3fd591628ddd6fd220e235abcf86d0f8de09b76bd")
 	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
 )
 
@@ -43,6 +44,7 @@ var (
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: big.NewInt(0),
 		BIP1Block:           big.NewInt(508000),
+		BIP2Block:           big.NewInt(545000),
 		Bsrr: &BSRRConfig{
 			Period:       5,
 			Epoch:        360,
@@ -127,6 +129,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Bsrr      *BSRRConfig `json:"bsrr,omitempty"`
 	BIP1Block *big.Int    `json:"bip1Block,omitempty"`
+	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
 }
 type BSRRConfig struct {
 	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
@@ -161,6 +164,7 @@ func (c *ChainConfig) String() string {
 		c.ByzantiumBlock,
 		c.ConstantinopleBlock,
 		c.BIP1Block,
+		c.BIP2Block,
 		engine,
 	)
 }
@@ -202,6 +206,10 @@ func (c *ChainConfig) IsConstantinople(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP1(num *big.Int) bool {
 	return isForked(c.BIP1Block, num)
+}
+
+func (c *ChainConfig) IsBIP2(num *big.Int) bool {
+	return isForked(c.BIP2Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -283,6 +291,12 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.EWASMBlock, newcfg.EWASMBlock, head) {
 		return newCompatError("ewasm fork block", c.EWASMBlock, newcfg.EWASMBlock)
+	}
+	if isForkIncompatible(c.BIP1Block, newcfg.BIP1Block, head) {
+		return newCompatError("bip1 fork block", c.BIP1Block, newcfg.BIP1Block)
+	}
+	if isForkIncompatible(c.BIP2Block, newcfg.BIP1Block, head) {
+		return newCompatError("bip2 fork block", c.BIP2Block, newcfg.BIP2Block)
 	}
 	return nil
 }

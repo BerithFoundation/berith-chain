@@ -16,6 +16,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 package bsrr
 
 import (
+	"github.com/BerithFoundation/berith-chain/berith/selection"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
@@ -27,6 +28,44 @@ import (
 type API struct {
 	chain consensus.ChainReader
 	bsrr  *BSRR
+}
+
+func (api *API) GetCandidates(number *rpc.BlockNumber) (*selection.JSONCandidates, error) {
+	var header *types.Header
+	if number == nil || *number == rpc.LatestBlockNumber {
+		header = api.chain.CurrentHeader()
+	} else {
+		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	}
+
+	if header == nil {
+		return nil, errUnknownBlock
+	}
+
+	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return nil, consensus.ErrUnknownAncestor
+	}
+
+	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+	if !exist {
+		return nil, consensus.ErrUnknownAncestor
+	}
+
+	stat, err := api.chain.StateAt(target.Root)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stks, err := api.bsrr.getStakers(api.chain, target.Number.Uint64(), target.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	return selection.GetCandidates(parent.Number.Uint64(), parent.Hash(), stks, stat), nil
+
 }
 
 /*

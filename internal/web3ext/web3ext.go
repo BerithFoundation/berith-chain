@@ -139,7 +139,12 @@ const Bsrr_JS = `
  			call: 'bsrr_getJoinRatio',
  			params: 1,
  			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
- 		}),
+		}),
+		new web3._extend.Method({
+			name: 'getCandidates',
+			call: 'bsrr_getCandidates',
+			params: 1
+		})
  	],
  	properties: []
  });

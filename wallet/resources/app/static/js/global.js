@@ -14,7 +14,7 @@ var totalBalance
 
 const BERITH_UNIT = 18;
 const DISPLAY_UNIT = 8;
-const VERSION = "v1.1";
+const VERSION = "v1.2";
 
 
 let loops = [];
