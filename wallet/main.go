@@ -30,6 +30,7 @@ var (
 	node_testnet   = flag.String("testnet", "", "testnet")
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
+	nodeConfig = flag.String("nodeconfig", "", "config file path")
 	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
 	w        *astilectron.Window
 	WalletDB *walletdb.WalletDB
