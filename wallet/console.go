@@ -18,14 +18,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"math"
 	"os"
+	"path/filepath"
 	godebug "runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/berith"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -194,7 +196,9 @@ func Init() {
 	app.Flags = append(app.Flags, metricsFlags...)
 
 	app.Before = func(ctx *cli.Context) error {
-		logdir := ""
+
+		//TODO : wallet program shoud export log file without debug flag
+		logdir := filepath.Join(node.DefaultDataDir(), "logs")
 		if err := debug.Setup(ctx, logdir); err != nil {
 			return err
 		}
@@ -234,8 +238,13 @@ func Start() {
 	// TODO : temporary flags
 	var args []string
 	args = append(args, os.Args[0])
+	args = append(args, "--debug")
 	if *nodePort != "" {
 		args = append(args, "--port", *nodePort)
+	}
+
+	if *nodeConfig != "" {
+		args = append(args, "--config", *nodeConfig)
 	}
 
 	if err := app.Run(args); err != nil {
