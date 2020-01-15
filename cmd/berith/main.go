@@ -18,14 +18,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"math"
 	"os"
+	"path/filepath"
 	godebug "runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/berith"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
