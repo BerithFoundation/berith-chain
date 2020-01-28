@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"path/filepath"
 	godebug "runtime/debug"
 	"sort"
 	"strconv"
