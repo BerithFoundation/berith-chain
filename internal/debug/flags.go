@@ -115,17 +115,39 @@ func init() {
 func Setup(ctx *cli.Context, logdir string) error {
 	// logging
 	log.PrintOrigins(ctx.GlobalBool(debugFlag.Name))
-	if logdir != "" {
-		rfh, err := log.RotatingFileHandler(
-			logdir,
-			262144,
-			log.JSONFormatOrderedEx(false, true),
-		)
-		if err != nil {
+
+	glogger.Verbosity(log.Lvl(ctx.GlobalInt(verbosityFlag.Name)))
+	glogger.Vmodule(ctx.GlobalString(vmoduleFlag.Name))
+	glogger.BacktraceAt(ctx.GlobalString(backtraceAtFlag.Name))
+	log.Root().SetHandler(glogger)
+
+	// profiling, tracing
+	runtime.MemProfileRate = ctx.GlobalInt(memprofilerateFlag.Name)
+	Handler.SetBlockProfileRate(ctx.GlobalInt(blockprofilerateFlag.Name))
+	if traceFile := ctx.GlobalString(traceFlag.Name); traceFile != "" {
+		if err := Handler.StartGoTrace(traceFile); err != nil {
 			return err
 		}
-		glogger.SetHandler(log.MultiHandler(ostream, rfh))
 	}
+	if cpuFile := ctx.GlobalString(cpuprofileFlag.Name); cpuFile != "" {
+		if err := Handler.StartCPUProfile(cpuFile); err != nil {
+			return err
+		}
+	}
+
+	// pprof server
+	if ctx.GlobalBool(pprofFlag.Name) {
+		address := fmt.Sprintf("%s:%d", ctx.GlobalString(pprofAddrFlag.Name), ctx.GlobalInt(pprofPortFlag.Name))
+		StartPProf(address)
+	}
+	return nil
+}
+
+func SetupForWallet(ctx *cli.Context, ch chan *log.Record) error {
+	// logging
+	log.PrintOrigins(ctx.GlobalBool(debugFlag.Name))
+
+	glogger.SetHandler(log.MultiHandler(ostream, log.ChannelHandler(ch)))
 	glogger.Verbosity(log.Lvl(ctx.GlobalInt(verbosityFlag.Name)))
 	glogger.Vmodule(ctx.GlobalString(vmoduleFlag.Name))
 	glogger.BacktraceAt(ctx.GlobalString(backtraceAtFlag.Name))

@@ -10,7 +10,6 @@ package selection
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"math"
 	"math/big"
@@ -23,7 +22,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/state"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	lru "github.com/hashicorp/golang-lru"
 )
 
 const (
@@ -33,8 +31,6 @@ const (
 var (
 	DIF_MAX = int64(5000000)
 	DIF_MIN = int64(10000)
-
-	selectionCache, _ = lru.NewARC(1024)
 )
 
 /**
@@ -267,16 +263,6 @@ BC 선출을 하기 위한 함수
 */
 func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
 	result := make(VoteResults)
-	val, ok := selectionCache.Get(hash)
-
-	if ok {
-		bytes, ok := val.([]byte)
-		if ok {
-			json.Unmarshal(bytes, &result)
-			return result
-		}
-		selectionCache.Remove(hash)
-	}
 
 	list := sortableList(stks.AsList())
 	if len(list) == 0 {
@@ -294,11 +280,10 @@ func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.H
 			address: stk,
 		})
 	}
-
-	result = cddts.selectBlockCreator(config, number)
-
-	if bytes, err := json.Marshal(result); err == nil {
-		selectionCache.Add(hash, bytes)
+	if config.IsBIP3(big.NewInt(int64(number))) {
+		result = cddts.selectBIP3BlockCreator(config, number)
+	} else {
+		result = cddts.selectBlockCreator(config, number)
 	}
 
 	return result
@@ -335,6 +320,65 @@ func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint
 			Rank:  count,
 		}
 		DIF -= DIF_R
+	}
+
+	//fmt.Println(DIF)
+	return result
+}
+
+func (cs *Candidates) selectBIP3BlockCreator(config *params.ChainConfig, number uint64) VoteResults {
+	result := make(VoteResults)
+
+	DIF := DIF_MAX
+	DIF_R := (DIF_MAX - DIF_MIN) / int64(len(cs.selections))
+	rank := 1
+	rand.Seed(cs.GetSeed(config, number))
+
+	for len(cs.selections) > 0 {
+
+		target := uint64(rand.Int63n(int64(cs.total)))
+
+		var chosen int
+		start := 0
+		end := len(cs.selections) - 1
+
+		for {
+			mid := (start + end) / 2
+			a := uint64(0)
+			if mid > 0 {
+				a = cs.selections[mid-1].val
+			}
+			b := cs.selections[mid].val
+
+			if target >= a && target <= b {
+				chosen = mid
+				cddt := cs.selections[mid]
+				result[cddt.address] = VoteResult{
+					Rank:  rank,
+					Score: big.NewInt(DIF),
+				}
+				DIF -= DIF_R
+				rank++
+				break
+			}
+
+			if target < a {
+				end = mid - 1
+			}
+			if target > b {
+				start = mid + 1
+			}
+		}
+
+		out := cs.selections[chosen]
+		for i := chosen; i+1 < len(cs.selections); i++ {
+			newCddt := cs.selections[i+1]
+			newCddt.val -= out.point
+			cs.selections[i] = newCddt
+		}
+
+		cs.selections = cs.selections[:len(cs.selections)-1]
+		cs.total -= out.point
 	}
 
 	//fmt.Println(DIF)

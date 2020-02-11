@@ -45,6 +45,7 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		BIP1Block:           big.NewInt(508000),
 		BIP2Block:           big.NewInt(545000),
+		BIP3Block:           big.NewInt(1168000),
 		Bsrr: &BSRRConfig{
 			Period:       5,
 			Epoch:        360,
@@ -130,6 +131,7 @@ type ChainConfig struct {
 	Bsrr      *BSRRConfig `json:"bsrr,omitempty"`
 	BIP1Block *big.Int    `json:"bip1Block,omitempty"`
 	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
+	BIP3Block *big.Int    `json:"bip3Block,omitempty"`
 }
 type BSRRConfig struct {
 	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
@@ -165,6 +167,7 @@ func (c *ChainConfig) String() string {
 		c.ConstantinopleBlock,
 		c.BIP1Block,
 		c.BIP2Block,
+		c.BIP3Block,
 		engine,
 	)
 }
@@ -210,6 +213,10 @@ func (c *ChainConfig) IsBIP1(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP2(num *big.Int) bool {
 	return isForked(c.BIP2Block, num)
+}
+
+func (c *ChainConfig) IsBIP3(num *big.Int) bool {
+	return isForked(c.BIP3Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -295,8 +302,11 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.BIP1Block, newcfg.BIP1Block, head) {
 		return newCompatError("bip1 fork block", c.BIP1Block, newcfg.BIP1Block)
 	}
-	if isForkIncompatible(c.BIP2Block, newcfg.BIP1Block, head) {
+	if isForkIncompatible(c.BIP2Block, newcfg.BIP2Block, head) {
 		return newCompatError("bip2 fork block", c.BIP2Block, newcfg.BIP2Block)
+	}
+	if isForkIncompatible(c.BIP3Block, newcfg.BIP3Block, head) {
+		return newCompatError("bip3 fork block", c.BIP3Block, newcfg.BIP3Block)
 	}
 	return nil
 }

@@ -525,6 +525,9 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		//Diff
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		if parent == nil {
+			log.Warn("unknown ancestor", "parent", "nil")
+		}
 		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 
 		if chain.Config().IsBIP1Block(header.Number) {
@@ -729,18 +732,21 @@ func (c *BSRR) SealHash(header *types.Header) common.Hash {
 func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, target *types.Header) (*big.Int, int) {
 	// extract diff and rank from genesis's extra data
 	if target.Number.Cmp(big.NewInt(0)) == 0 {
+		log.Info("default difficulty and rank", "diff", diffWithoutStaker, "rank", 1)
 		return big.NewInt(diffWithoutStaker), 1
 	}
 
 	stks, err := c.getStakers(chain, target.Number.Uint64(), target.Hash())
 
 	if err != nil {
+		log.Error("failed to get stakers", "err", err.Error())
 		return big.NewInt(0), -1
 	}
 
 	stateDB, err := chain.StateAt(target.Root)
 
 	if err != nil {
+		log.Error("failed to get state", "err", err.Error())
 		return big.NewInt(0), -1
 	}
 
@@ -749,6 +755,7 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 	max := c.getMaxMiningCandidates(len(results))
 
 	if results[signer].Rank > max {
+		log.Warn("out of rank", "hash", target.Hash().Hex(), "rank", results[signer].Rank, "max", max)
 		return big.NewInt(0), -1
 	}
 
