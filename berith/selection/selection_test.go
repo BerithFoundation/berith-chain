@@ -1,7 +1,10 @@
 package selection
 
 import (
+	"fmt"
 	"math/big"
+	"sort"
+	"strconv"
 	"testing"
 
 	"github.com/BerithFoundation/berith-chain/params"
@@ -121,4 +124,51 @@ func TestSeed(t *testing.T) {
 		}
 	}
 
+}
+
+func TestScore(t *testing.T) {
+	// st, _ := state.New(common.Hash{}, state.NewDatabase(berithdb.NewMemDatabase()))
+
+	stks := staking.NewStakers()
+	totalScore := make(map[common.Address]uint64)
+
+	// eth := big.NewInt(1e+18)
+	// value := new(big.Int).Mul(big.NewInt(1000000), eth)
+	value := big.NewInt(1000000)
+
+	for i := 0; i < 100; i++ {
+		addr := common.BytesToAddress([]byte(strconv.Itoa(i)))
+		stks.Put(addr)
+
+	}
+
+	list := sortableList(stks.AsList())
+	sort.Sort(list)
+
+	for blockNumber := uint64(600000); blockNumber < 700000; blockNumber++ {
+
+		cddts := NewCandidates()
+
+		//st.AddStakeBalance(addr, value, blockNumber)
+
+		for _, addr := range list {
+			cddts.Add(Candidate{
+				address: addr,
+				point:   value.Uint64(),
+				val:     value.Uint64(),
+			})
+		}
+
+		result := cddts.selectBIP3BlockCreator(params.MainnetChainConfig, blockNumber)
+
+		for k, v := range result {
+			if v.Rank <= 7 && v.Rank > 1 {
+				totalScore[k] += v.Score.Uint64()
+			}
+		}
+	}
+
+	for _, addr := range list {
+		fmt.Printf("[ADDR : %s, SCORE : %d]\n", addr.Hex(), totalScore[addr])
+	}
 }

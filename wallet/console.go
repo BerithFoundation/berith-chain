@@ -47,6 +47,7 @@ const (
 )
 
 var (
+	logCh = make(chan *log.Record)
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
 	// The app that holds all commands and flags.
@@ -199,7 +200,12 @@ func Init() {
 
 		//TODO : wallet program shoud export log file without debug flag
 		logdir := filepath.Join(node.DefaultDataDir(), "logs")
-		if err := debug.Setup(ctx, logdir); err != nil {
+
+		batch := log.NewBerithLogBatch(logCh, logdir, time.Hour*24, log.TerminalFormat(false))
+
+		go batch.Loop()
+
+		if err := debug.SetupForWallet(ctx, logCh); err != nil {
 			return err
 		}
 		// Cap the cache allowance and tune the garbage collector
@@ -246,10 +252,13 @@ func Start() {
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
 	}
-
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("node is down", "err", r)
+		}
+	}()
 	if err := app.Run(args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Error("node is down", "err", err.Error())
 	}
 }
 
