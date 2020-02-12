@@ -17,12 +17,8 @@
 package main
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
 	"math"
-	"net/http"
 	"os"
 	"path/filepath"
 	godebug "runtime/debug"
@@ -31,22 +27,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-
-	"github.com/BerithFoundation/berith-chain/p2p"
-
 	"github.com/BerithFoundation/berith-chain/berith"
-	"github.com/BerithFoundation/berith-chain/berithclient"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/berithclient"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/console"
 	"github.com/BerithFoundation/berith-chain/internal/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/node"
-	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/elastic/gosigar"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -57,7 +48,6 @@ const (
 
 var (
 	logCh = make(chan *log.Record)
-	batch *log.BerithLogBatch
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
 	// The app that holds all commands and flags.
@@ -211,7 +201,7 @@ func Init() {
 		//TODO : wallet program shoud export log file without debug flag
 		logdir := filepath.Join(node.DefaultDataDir(), "logs")
 
-		batch = log.NewBerithLogBatch(logCh, logdir, time.Hour*24, log.TerminalFormat(false))
+		batch := log.NewBerithLogBatch(logCh, logdir, time.Hour*24, log.TerminalFormat(false))
 
 		go batch.Loop()
 
@@ -272,12 +262,6 @@ func Start() {
 	}
 }
 
-type LogPost struct {
-	Enode      string `json:"enode"`
-	Berithbase string `json:"berithbase"`
-	Logs       string `json:"logs"`
-}
-
 // berith is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
@@ -287,41 +271,7 @@ func ber(ctx *cli.Context) error {
 	}
 	stack := makeFullNode(ctx)
 	startNode(ctx, stack)
-	handler := func(buffer string) {
-		if stack != nil {
-			rpcHandler, err := stack.RPCHandler()
-			println(buffer)
-			if err != nil {
-				return
-			}
 
-			cli := rpc.DialInProc(rpcHandler)
-
-			nodeInfo := p2p.NodeInfo{}
-			berithbase := common.Address{}
-			if err := cli.CallContext(context.Background(), &nodeInfo, "admin_nodeInfo"); err != nil {
-				return
-			}
-
-			if err := cli.CallContext(context.Background(), &berithbase, "berith_coinbase"); err != nil {
-				return
-			}
-
-			jsonByte, err := json.Marshal(LogPost{
-				Enode:      nodeInfo.Enode,
-				Berithbase: berithbase.Hex(),
-				Logs:       buffer,
-			})
-
-			if err != nil {
-				return
-			}
-
-			http.Post("https://baas.berith.co/v1/api/logs/bers", "application/json", bytes.NewReader(jsonByte))
-		}
-	}
-
-	batch.SetHandler(handler)
 	stack.Wait()
 	return nil
 }

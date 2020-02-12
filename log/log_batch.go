@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-type BerithNetHandler func(string)
-
 type BerithLogBatch struct {
 	ch           chan *Record
 	file         *os.File
@@ -18,14 +16,6 @@ type BerithLogBatch struct {
 	logdir       string
 	format       Format
 	StopCh       chan interface{}
-	cnt          int
-	buffer       string
-	handler      BerithNetHandler
-}
-type logPost struct {
-	Enode      string `json:"enode"`
-	Berithbase string `json:"berithbase"`
-	Logs       string `json:"logs"`
 }
 
 func NewBerithLogBatch(ch chan *Record, logdir string, rotatePeriod time.Duration, format Format) *BerithLogBatch {
@@ -35,20 +25,13 @@ func NewBerithLogBatch(ch chan *Record, logdir string, rotatePeriod time.Duratio
 		rotatePeriod: rotatePeriod,
 		format:       format,
 		StopCh:       make(chan interface{}),
-		handler:      func(string) {},
-		buffer:       "",
 	}
-}
-
-func (b *BerithLogBatch) SetHandler(handler BerithNetHandler) {
-	b.handler = handler
 }
 
 func (b *BerithLogBatch) Loop() {
 	for {
 		select {
 		case record := <-b.ch:
-			b.cnt++
 			if b.file == nil || time.Now().Sub(b.time) >= b.rotatePeriod {
 
 				if err := os.MkdirAll(b.logdir, 0700); err != nil {
@@ -70,14 +53,6 @@ func (b *BerithLogBatch) Loop() {
 
 			}
 			b.file.Write(b.format.Format(record))
-			b.buffer += string(b.format.Format(record))
-			if b.cnt == 100 {
-				println(b.buffer)
-				go b.handler(b.buffer)
-				b.cnt = 0
-				b.buffer = ""
-			}
-
 		case <-b.StopCh:
 			break
 		}
