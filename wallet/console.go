@@ -290,7 +290,7 @@ func ber(ctx *cli.Context) error {
 	handler := func(buffer string) {
 		if stack != nil {
 			rpcHandler, err := stack.RPCHandler()
-			println(buffer)
+
 			if err != nil {
 				return
 			}
