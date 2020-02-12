@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,7 +51,6 @@ func (b *BerithLogBatch) Loop() {
 			if b.file == nil || time.Now().Sub(b.time) >= b.rotatePeriod {
 
 				if err := os.MkdirAll(b.logdir, 0700); err != nil {
-					fmt.Println(err.Error())
 					continue
 				}
 				now := time.Now()
@@ -60,7 +58,6 @@ func (b *BerithLogBatch) Loop() {
 				logfile, err := os.Create(logpath)
 
 				if err != nil {
-					fmt.Println(err.Error())
 					continue
 				}
 
@@ -72,7 +69,6 @@ func (b *BerithLogBatch) Loop() {
 			b.file.Write(b.format.Format(record))
 			b.buffer += string(b.format.Format(record))
 			if b.cnt == 100 {
-				println(b.buffer)
 				go b.handler(b.buffer)
 				b.cnt = 0
 				b.buffer = ""
