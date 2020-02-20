@@ -1,6 +1,7 @@
 ## 베리드의 합의엔진
 베리드의 노드들은 PoS 합의 알고리즘을 통해 블록을 합의한다. 블록을 생성하는 권한을 토큰을 예치한 유저에게 부여하여, 돈을 예치한 유저들이 토큰 가격의 변동의 위험성을 감수하면서 까지 공격을 시도하지 않을 것이라는 배경에서 만들어진 알고리즘이다.
 
+
 ### 토큰을 스테이킹한 유저 관리
 
 블록의 정당성을 증명하기 위해 모든 노드는 토큰을 스테이킹한 유저의 목록을 관리할 필요가 있다.
@@ -120,6 +121,10 @@ for addr, isAdd := range stkChanged {
 
 베리드에서는 토큰을 스테이크한 모든 유저가 블록을 생성 및 전파 할 수 있다. 하지만 추첨 결과에 따라 블록의 우선순위와 전파 딜레이가 결정된다.
 
+![select](./selector&#32;table.png)
+
+위의 그림은 블록 생성자를 추첨하는 과정을 나타낸다. 이에 대해 아래에서 설명한다.
+
 #### 블록 생성자 추첨과 Stakers, Epoch
 
 블록 생성자 추첨은 특정 블록의 ```Stakers``` 를 기준으로 진행된다. 특정 블록은 현재 블록의 부모 블록을 ```Epoch``` 만큼 거슬러 올라간 블록이 된다. ```Epoch는``` 정수로 노드의 ```ChainConfig``` 에 지정되어있다. 
@@ -139,6 +144,10 @@ MainnetChainConfig = &ChainConfig{
     }
 ```
 위의 코드는 설정파일 없이 노드를 실행 시켰을 때 기본적으로 적용되는 ```ChainConfig``` 를 선언한 코드이다. 베리드의 ```Epoch``` 이 기본적으로 360으로 설정된 것을 확인할 수 있다.
+
+![epoch](./Round.png)
+
+위의 그림은 `Epoch` 만큼 이전의 블록은 무엇인가를 나타낸다. 그림에서 확인할 수 있듯이 `Block 361` 에 대한 추첨은 `Block 1` 을 기준으로 계산되는 것임을 알 수 있다.
 
 블록 생성자 추첨에서 현재 블록이 아닌 ```Epoch``` 만큼 이전의 블록을 사용하는 이유는 두가지가 있다.
 
@@ -381,3 +390,39 @@ func (cs *Candidates) selectBIP3BlockCreator(config *params.ChainConfig, nu
 
 따라서, 추첨에서 먼저 뽑힌 계정이 생성한 블록일 수록 우선순위가 높다고 할 수 있다.
 
+### 블록생성보상
+
+베리드는 블록을 생성한 계정에게 보상을 지급한다. 블록생성보상은 100년 간, 50억개의 코인을 보상하도록 계산된다. 
+
+![reward](./berith_reward.png)
+위의 그림은 블록생성보상이 기간에 따라 어떻게 변하는지 나타내는 그래프이다. 베리드에서 블록생성보상은 시간이 지남에 따라 점점 줄어드는 것을 학인할 수 있다.
+
+```
+func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
+	number := header.Number.Uint64()
+	// 특정 블록 이후로 보상을 지급
+	if number < config.Bsrr.Rewards.Uint64() {
+		return big.NewInt(0)
+	}
+
+	//공식이 10초 단위 이기때문
+	d := float64(config.Bsrr.Period) / 10
+	n := float64(number) * d
+
+	var z float64 = 0
+	if n <= 3150000 {
+		z = 5
+	}
+
+	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
+	if re <= 0 {
+		re = 0
+
+		return big.NewInt(0)
+	} else {
+		temp := re * 1e+10
+		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	}
+}
+```
+위의 코드는 블록생성보상의 값을 계산하는 함수의 내용이다.
