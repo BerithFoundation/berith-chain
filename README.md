@@ -37,7 +37,7 @@
 ## [베리드와 이더리움](./doc/etherAndBerith.md)
 베리드는 [https://github.com/ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) 를 커스터마이징한 블록체인 클라이언트이다. 베리드와 이더리움의 차이점에 대해 소개한다.
 
-## [Balance와 Transaction](./doc/bal_tx.md)
+## [Balance와 State](./doc/bal_tx.md)
 베리드는 Stake 를 구현하고, 블록 생성 보상을 지급하는 것에 안정성을 더하기 위해 특별한 balance, transaction 모델을 가지고 있다.
 
 ## [합의 엔진](doc/consensus.md)
