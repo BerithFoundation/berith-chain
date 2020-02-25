@@ -1,57 +1,58 @@
 # Berith
 
-베리드는 go 언어로 작성된 블록체인 클라이언트이다.
+Berith is a blockchain client written in go language.
 
-## [베리드 백서](./doc/BERITH_WhitePaper_190717_en.pdf)
-백서에서 베리드가 어떤 프로젝트이며, 무엇을 위해 기획되었는지 확인할 수 있다.
+## [Berith WhitePaper](./doc/BERITH_WhitePaper_190717_en.pdf)
+The white paper shows what Berith is and what it is designed for.
 
-## 아키텍쳐
+## Berith architecture
 
 ![architecture](./doc/berith_architect.jpg)
 
-위의 그림은 베리드의 모듈과 계층에 대해서 나타내고 있다. 베리드는 구조적으로 이더리움과 유사하지만 특정 부분에서 구조를 변형하였다.
+The figure above shows the modules and tiers of Berith. Berith has a structure similar to Ethereum, but in certain parts, it has been modified.
 
 ### Consensus
 
-베리드는 PoS 합의 엔진을 구현하기 위해 세가지 모듈을 추가하였다.
+Berith added three modules to implement the PoS consensus engine.
 
 ![bsrr](./doc/bsrr.png)
 
-위의 그림은 추가된 모듈들이 n 번째 블록을 합의하는 과정을 나타낸다. 그림에서 각 모듈이 합의 과정에서 어떤 일을 수행하는지 확인할 수 있다. 아래는 각 모듈에 대한 간략한 설명이다.
+The figure above shows processes the added modules agree on the nth block. It shows what each module is doing in the process of the agreement. Below is a brief description of each module. Below is a brief description of each module.
 
 #### BSRR
-`BSRR` 은 베리드 PoS 합의 알고리즘의 이름으로 위 그림의 이더리움의 `Consensus` 인터페이스를 구현하는 구조체를 포함하는 패키지이다. `Consensus` 인터페이스는 블록의 헤더를 검증하는 `VerifyHeader`, 블록의 바디를 검증하는 `Finalize`, 새로운 블록과 블록을 전파하는 신호를 p2p 패키지로 전달하는 `Seal` 등의 메소드를 가지고 있다. 베리드는 이 메소드들을 PoS 에 맞게 수정하였다.
+`BSRR` is the name of the Berith PoS consensus algorithm. It is a package that contains a structure that implements the Ethereum `Consensus` interface in the figure above. The `Consensus` interface has methods such as `VerifyHeader`, which validates the header of the block, `Finalize`, which validates the body of the block, and `Seal`, which passes to the p2p package the new block and the signal that propagates the block. Berith modified these methods for PoS.
 
 #### Selection
-`Selection` 은 계정의 목록을 받아서 이를 추첨하여 등수와 우선도를 반환하는 기능을 제공하는 패키지이다.
+`Selection` is a package that provides the ability to take a list of accounts and draw them to return their rank and priority.
 
 #### StakingDB
-`StakingDB` 는 코인을 `Stake` 한 계정의 목록을 로컬 DB에 저장하거나 조회하는 기능을 제공하는 패키지이다.
+`StakingDB` is a package that provides the function to store or query a list of accounts that have coins `staked` in the local DB.
 
-자세한 내용은 아래의 합의 파트에서 확인할 수 있다.
+More details can found in the agreement part below.
 
 
-## [실행 방법](./doc/runAndTest.md)
-베리드의 소스를 빌드하는 법, 노드를 실행하는 법, 테스트 하는 법에 대해 소개한다.
+## [How to execute](./doc/runAndTest.md)
+Introduces how to build Berith`s source code, run nodes, and test it.
 
-## [베리드와 이더리움](./doc/etherAndBerith.md)
-베리드는 [https://github.com/ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) 를 커스터마이징한 블록체인 클라이언트이다. 베리드와 이더리움의 차이점에 대해 소개한다.
+## [Berith and Ethereum](./doc/etherAndBerith.md)
+Berith is a [https://github.com/ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) blockchain client that customized Ethereum. Introduce the differences between Berith and Ethereum.
 
-## [Balance와 State](./doc/bal_tx.md)
-베리드는 Stake 를 구현하고, 블록 생성 보상을 지급하는 것에 안정성을 더하기 위해 특별한 balance, transaction 모델을 가지고 있다.
+## [Balance and Transaction](./doc/bal_tx.md)
+Berith has a special balance and transaction model for implementing Stake and adding stability to paying block creation rewards.
 
-## [합의 엔진](doc/consensus.md)
+## [Consensus algorithm](doc/consensus.md)
 
-베리드는 PoS 합의 엔진을 구현한 블록체인 클라이언트로 자세한 합의 방법에 대해 소개한다.
+Berith is a blockchain client that implements the PoS consensus algorithm.
+Introduces a detailed consensus method.
 
-## [베리드 하드포크](./doc/hardfork.md)
+## [Berith hardfork](./doc/hardfork.md)
 
-베리드에서 진행되었던 하드포크 이력과 하드포크를 진행하는 방법에 대해 소개한다.
+Introduces the hard fork history and how to proceed with the hard fork at Berith.
 
 ## [UI Wallet](./doc/uiwallet.md)
 
-베리드는 Electron으로 작성된 UI Wallet 을 포함하고 있다. 월렛의 작동원리와 실행방법에 대해 소개한다.
-
+Berith contains UI Wallet written in Electron.
+Introduces how Wallet works and how to execute it.
 
 
 
