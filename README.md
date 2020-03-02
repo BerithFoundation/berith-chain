@@ -1,6 +1,8 @@
 # Berith
 
 Berith is a blockchain client written in go language.
+[README for korean](./doc/README_KOR.md)
+
 
 ## [Berith WhitePaper](./doc/BERITH_WhitePaper_190717_en.pdf)
 The white paper shows what Berith is and what it is designed for.

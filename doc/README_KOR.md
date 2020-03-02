@@ -1,108 +1,57 @@
 # Berith
 
-## Introduction
-- [알고리즘]
+베리드는 go 언어로 작성된 블록체인 클라이언트이다.
 
-    * 베리드는 BC 를 선출 하여 블록에 대한 Reward 보상을 주는 PoS Chain 입니다.
-    
-    * 일정수량의 코인을 Stake 함으로 BC의 자격을 받을수 있습니다.
-    
-    * BC 는 매 라운드 마다 선출 하게 되며, 블록을 생성한 BC는 블록에 대한 Reward 를 받을수 있습니다.
+## [베리드 백서](./BERITH_WhitePaper_190717_en.pdf)
+백서에서 베리드가 어떤 프로젝트이며, 무엇을 위해 기획되었는지 확인할 수 있다.
 
-    ![berith_chain](berith_chain.png)
-- [지갑 구성]
+## 아키텍쳐
 
-    * 한개의 계정은 3개의 Balance 로 이루어져 있습니다.        
-    * Reward Balance 는 Stake Balance 와 Main Balance 로 이동을 할수 있습니다.         
-    * Stake Balance 는 Main Balance 로 이동 이 가능합니다.
-    * Main Balance 는 Stake Balance 로 이동 또는 타 계정간의 거래 에 이용 되는 Balance 입니다.
-    
-        |**Balance Type**     |   설명                                                          |
-        |:--------------------:|-----------------------------------------------------------------|
-        | **`Main`**          | 계정간의 거래 에 대한 모든 행동을 처리 하게 되는 Balance 입니다.|    
-        | **`Stake`**         | 현재 계정 의 Stake 한 수량을 보관 하는 Balance 입니다.          |
-        | **`Reward`**        | Stake 에 대한 Reward 를 지급하기 위한 Balance 입니다.           |
+![architecture](./berith_architect.jpg)
 
-- [리워드]
-    * 블록 생성을 한자가 Reward 를 받게 됩니다. 
-    * 해당 블록을 생성하자는 자가 생성 못하게 된다면 다른 BC 에게 권한이 넘어가게 됩니다.        
-    
-     ![berith_reward](berith_reward.png)
-     
-- [BC 선출]
-    * 스테이킹 수량, 기간 등을 고려하여 확률적으로 선출 됩니다.
-    * 선출은 매라운드 마다 진행됩니다.
- 
-      
-## Building the source
+위의 그림은 베리드의 모듈과 계층에 대해서 나타내고 있다. 베리드는 구조적으로 이더리움과 유사하지만 특정 부분에서 구조를 변형하였다.
 
-1. Install Go SDK - https://golang.org/dl/
-        
-        go1.11.1 이상
+### Consensus
 
-2. Build
+베리드는 PoS 합의 엔진을 구현하기 위해 세가지 모듈을 추가하였다.
 
-        ./build.sh  
-    
-    OR  
-    
-        go build ./cmd/berith
-        
-        
-## Executables
+![bsrr](./bsrr.png)
 
-| Command    | Description |
-|:----------:|-------------|
-| `berith` | 실제 노드를 구축 하며 여러가지 CLI 및 RPC 를 지원 합니다.  |
+위의 그림은 추가된 모듈들이 n 번째 블록을 합의하는 과정을 나타낸다. 그림에서 각 모듈이 합의 과정에서 어떤 일을 수행하는지 확인할 수 있다. 아래는 각 모듈에 대한 간략한 설명이다.
+
+#### BSRR
+`BSRR` 은 베리드 PoS 합의 알고리즘의 이름으로 위 그림의 이더리움의 `Consensus` 인터페이스를 구현하는 구조체를 포함하는 패키지이다. `Consensus` 인터페이스는 블록의 헤더를 검증하는 `VerifyHeader`, 블록의 바디를 검증하는 `Finalize`, 새로운 블록과 블록을 전파하는 신호를 p2p 패키지로 전달하는 `Seal` 등의 메소드를 가지고 있다. 베리드는 이 메소드들을 PoS 에 맞게 수정하였다.
+
+#### Selection
+`Selection` 은 계정의 목록을 받아서 이를 추첨하여 등수와 우선도를 반환하는 기능을 제공하는 패키지이다.
+
+#### StakingDB
+`StakingDB` 는 코인을 `Stake` 한 계정의 목록을 로컬 DB에 저장하거나 조회하는 기능을 제공하는 패키지이다.
+
+자세한 내용은 아래의 합의 파트에서 확인할 수 있다.
 
 
-## CLI (추후 상세 정의)
-Service berith
+## [실행 방법](./runAndTest_KOR.md)
+베리드의 소스를 빌드하는 법, 노드를 실행하는 법, 테스트 하는 법에 대해 소개한다.
 
-|  Command    | Description |
-|:----------:|-------------|
-| `stake` | 실제 노드를 구축 하며 여러가지 CLI 및 RPC 를 지원 합니다.  |
-| `stopStaking` | 제네시스 파일을 만들어 줍니다. |
-| `getAccountInfo` | 해당 계정의 모든 Balance 를 확인 할수 있습니다. |
-| `getRewardBalance` | 해당 계정의 Reward Balance 를 확인 할수 있습니다. |
-| `getStakeBalance` | 해당 계정의 Stake Balance 를 확인 할수 있습니다. |
-| `getBalance` | 해당 계정의 Main Balance 를 확인 할수 있습니다. |
-| `rewardToBalance` | 해당 계정에서 Reward Balance 를 Main Balance 로 이동 할수 있습니다. |
-| `rewardToStake` | 해당 계정에서 Reward Balance 를 Stake Balance 로 이동 할수 있습니다. |
-| `sendTransaction` | 해당 계정에서 Reward Balance 를 Stake Balance 로 이동 할수 있습니다. |
+## [베리드와 이더리움](./etherAndBerith_KOR.md)
+베리드는 [https://github.com/ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) 를 커스터마이징한 블록체인 클라이언트이다. 베리드와 이더리움의 차이점에 대해 소개한다.
 
-Service personal
+## [Balance와 State](./bal_tx_KOR.md)
+베리드는 Stake 를 구현하고, 블록 생성 보상을 지급하는 것에 안정성을 더하기 위해 특별한 balance, transaction 모델을 가지고 있다.
 
-|  Command    | Description |
-|:----------:|-------------|
-| `newAccount` | 새로운 계정을 만들게 됩니다.  |
-| `lockAccount` | 해당 계정의 지갑을 lock 상태로 변경합니다.  |
-| `unlockAccount` | 해당 계정의 지갑을 Unlock 상태로 변경합니다.  |
+## [합의 엔진](./consensus_KOR.md)
 
-Service miner
+베리드는 PoS 합의 엔진을 구현한 블록체인 클라이언트로 자세한 합의 방법에 대해 소개한다.
 
-|  Command    | Description |
-|:----------:|-------------|
-| `start` | 마이닝을 시작 합니다.  |
-| `stop` | 마이닝을 정지 합니다.  |
-| `setBerithbase` | 계정을 선택합니다.  |
+## [베리드 하드포크](./hardfork_KOR.md)
 
-Service bsrr
+베리드에서 진행되었던 하드포크 이력과 하드포크를 진행하는 방법에 대해 소개한다.
 
-|  Command    | Description |
-|:----------:|-------------|
-| `getRoi` | 예상 수익률  |
-| `getSigners` | 라운드 블록 사이너들을 확인 할수 있습니다.  |
-| `getBlockCreator` | 현 라운드에 블록생성자로 선출된 리스트를 확인 할수 있습니다.  |
-    
-   
-    
-## Dev Tool
+## [UI Wallet](./uiwallet_KOR.md)
 
-GoLand : https://www.jetbrains.com/go/
+베리드는 Electron으로 작성된 UI Wallet 을 포함하고 있다. 월렛의 작동원리와 실행방법에 대해 소개한다.
 
-VsCode : https://code.visualstudio.com/
 
-## License
 
-GNU License v3.0
+
