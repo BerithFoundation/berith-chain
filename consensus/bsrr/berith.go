@@ -478,7 +478,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// nonce is used to check order of staking list
 	header.Nonce = types.EncodeNonce(uint64(rank))
 
-	// FIXME : will remove extra data used in clique because of no meanings in bsrr consensus
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
