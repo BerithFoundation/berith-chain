@@ -870,7 +870,10 @@ func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, st
 		return nil, err
 	}
 	c.cache.Add(parent.Hash(), bytes)
-	c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	err = c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	if err != nil {
+		return nil, err
+	}
 
 	return stks, nil
 }
@@ -941,7 +944,10 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 		return nil, err
 	}
 	c.cache.Add(hash, bytes)
-	c.stakingDB.Commit(hash.Hex(), list)
+	err = c.stakingDB.Commit(hash.Hex(), list)
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }
