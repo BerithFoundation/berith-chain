@@ -805,7 +805,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	if re.Cmp(big.NewInt(0)) <= 0 {
 		re = big.NewInt(0)
 	}
-	return new(big.Int).Mul(re, big.NewInt(1e+18))
+	return new(big.Int).Mul(re, common.UnitForBer)
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
@@ -1086,7 +1086,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	}
 
 	result := list.AsList()
-	if len(result) <= 0 {
+	if len(result) == 0 {
 		return make([]common.Address, 0), nil
 	}
 	return result, nil
