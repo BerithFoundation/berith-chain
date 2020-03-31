@@ -786,30 +786,39 @@ func (c *BSRR) Close() error {
 }
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
+	const (
+		DEFAULT_BLOCK_CREATION_SEC    = 10      // Blocks are created every 10 seconds by default.
+		BLOCK_NUMBER_AT_1_YEAR        = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
+		DEFAULT_REWARD                = 26      // The basic reward is 26 tokens.
+		ADDITIONAL_REWARD             = 5       // Additional rewards are paid for one year.
+		BLOCK_SECTION_DIVISION_NUMBER = 7370000 // Reference value for dividing a block into 50 sections
+		GROUPING_VALUE                = 0.5     // Constant for grouping two groups to have the same Reward Subtract
+	)
+
 	number := header.Number.Uint64()
-	// 특정 블록 이후로 보상을 지급
+	// Reward after a specific block
 	if number < config.Bsrr.Rewards.Uint64() {
 		return big.NewInt(0)
 	}
 
-	//공식이 10초 단위 이기때문
-	d := float64(config.Bsrr.Period) / 10
-	n := float64(number) * d
+	// Value to correct Reward when block creation time is changed.
+	correctionValue := float64(config.Bsrr.Period) / DEFAULT_BLOCK_CREATION_SEC
+	correctedBlockNumber := float64(number) * correctionValue
 
-	var z float64 = 0
-	if n <= 3150000 {
-		z = 5
+	var additionalReward float64 = 0
+	if correctedBlockNumber <= BLOCK_NUMBER_AT_1_YEAR {
+		additionalReward = ADDITIONAL_REWARD
 	}
 
-	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
-	if re <= 0 {
-		re = 0
-
-		return big.NewInt(0)
-	} else {
-		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	plusReward := big.NewInt(int64((DEFAULT_REWARD + additionalReward)))
+	// The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
+	// The same amount is deducted for every two sections.
+	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber / BLOCK_SECTION_DIVISION_NUMBER) * GROUPING_VALUE))
+	reward := new(big.Int).Sub(plusReward, minusReward)
+	if reward.Cmp(big.NewInt(0)) <= 0 {
+		reward = big.NewInt(0)
 	}
+	return new(big.Int).Mul(reward, big.NewInt(1e+18))
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
