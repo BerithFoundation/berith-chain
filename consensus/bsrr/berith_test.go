@@ -71,7 +71,7 @@ func TestGetDelay(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		result := c.getDelay(tt.rank)
+		result, _ := c.getDelay(tt.rank)
 		if result != tt.delay {
 			t.Errorf("test #%d: rank : %d expected : %d but %d", i, tt.rank, tt.delay, result)
 		}

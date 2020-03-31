@@ -396,7 +396,11 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 		return ErrInvalidTimestamp
 	}
 	// TODO : Check environments that have different time server
-	delayed := c.getDelay(int(header.Nonce.Uint64()))
+	delayed, err := c.getDelay(int(header.Nonce.Uint64()))
+	if err != nil {
+		return ErrInvalidTimestamp
+	}
+
 	if parent.Time.Int64()+int64(c.config.Period)+int64(delayed.Seconds()) > time.Now().Unix() {
 		log.Warn("found invalid timestamp header", "number", header.Number.Uint64(), "hash", header.Hash().Hex(), "rank", header.Nonce.Uint64())
 		//return ErrInvalidTimestamp
@@ -635,7 +639,12 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 
-	delay += c.getDelay(rank)
+	//delay += c.getDelay(rank)
+	temp, err := c.getDelay(rank)
+	if err != nil {
+		return err
+	}
+	delay += temp
 
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
@@ -764,20 +773,26 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 
 // getDelay 주어진 rank에 따라 블록 Sealing에 대한 지연 시간을 반환한다.
 // 항상 0보다 크거나 같은 값을 반환
-func (c *BSRR) getDelay(rank int) time.Duration {
+func (c *BSRR) getDelay(rank int) (time.Duration, error) {
 	if rank <= 1 {
-		return time.Duration(0)
+		return time.Duration(0), nil
 	}
 
 	// 각 그룹별 지연시간
-	groupOrder, _ := c.rankGroup.GetGroupOrder(rank)
+	groupOrder, err := c.rankGroup.GetGroupOrder(rank)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay := time.Duration(groupOrder-1) * groupDelay
 
 	// 그룹 내 지연 시간
-	startRank, _, _ := c.rankGroup.GetGroupRange(groupOrder)
+	startRank, _, err := c.rankGroup.GetGroupRange(groupOrder)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay += time.Duration(rank-startRank) * termDelay
 
-	return delay
+	return delay, nil
 }
 
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
