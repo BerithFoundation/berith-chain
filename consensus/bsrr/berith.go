@@ -801,14 +801,11 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		z = 5
 	}
 
-	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
-	if re <= 0 {
-		re = 0
-
-		return big.NewInt(0)
-	} else {
-		return new(big.Int).Mul(big.NewInt(int64(re)), common.UnitForBer)
+	re := big.NewInt(int64((26 + z - math.Round(n / 7370000) * 0.5) * d))
+	if re.Cmp(big.NewInt(0)) <= 0 {
+		re = big.NewInt(0)
 	}
+	return new(big.Int).Mul(re, big.NewInt(1e+18))
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
