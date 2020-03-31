@@ -73,9 +73,6 @@ var (
 	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
 	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 
-	delays = []int{0, 3}
-	groups = []int{1, 5}
-
 	diffWithoutStaker = int64(1234)
 )
 
@@ -213,7 +210,6 @@ type BSRR struct {
 	lock   sync.RWMutex   // Protects the signer fields
 
 	// The fields below are for testing only
-	fakeDiff  bool                 // Skip difficulty verifications
 	rankGroup common.SequenceGroup // grouped by rank
 }
 
