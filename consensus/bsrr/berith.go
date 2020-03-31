@@ -59,7 +59,7 @@ const (
 
 var (
 	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	SlashRound   = uint64(2)
 	ForkFactor   = 1.0
 
@@ -808,7 +808,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		return big.NewInt(0)
 	} else {
 		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+		return new(big.Int).Mul(big.NewInt(int64(temp)), common.UnitForBer)
 	}
 }
 
@@ -1015,8 +1015,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
+				currentStkBal = new(big.Int).Div(currentStkBal, common.UnitForBer)
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), common.UnitForBer)
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
