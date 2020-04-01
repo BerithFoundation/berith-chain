@@ -47,7 +47,6 @@ func (api *API) GetCandidates(number *rpc.BlockNumber) (*selection.JSONCandidate
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
@@ -89,7 +88,6 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
@@ -105,7 +103,7 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 
 /*
 [BERITH]
-BC 선출 확율을 반환하는 함수
+BC 선출 확률을 반환하는 함수
 */
 func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)
@@ -124,14 +122,9 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 	num = header.Number.Int64()
 
 	epoch := int64(api.bsrr.config.Epoch)
-
 	if num <= epoch {
 		return 0, errNoData
 	}
-
-	//p := header.ParentHash
-	//uint64(num - epoch - 2)
-	//	prev_header := api.chain.GetHeaderByNumber(5740)
 
 	stks, err := api.bsrr.getStakers(api.chain, uint64(num), header.Hash())
 	if err != nil {
@@ -143,7 +136,6 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return 0, consensus.ErrUnknownAncestor
@@ -174,14 +166,12 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
 	signers, err := api.bsrr.getSigners(api.chain, target)
-	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 	if err != nil {
 		return nil, err
 	}
