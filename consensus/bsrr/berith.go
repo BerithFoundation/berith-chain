@@ -59,7 +59,7 @@ const (
 
 var (
 	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	SlashRound   = uint64(2)
 	ForkFactor   = 1.0
 
@@ -69,9 +69,6 @@ var (
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
-
-	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
-	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
 
 	delays = []int{0, 3}
 	groups = []int{1, 5}
@@ -213,7 +210,6 @@ type BSRR struct {
 	lock   sync.RWMutex   // Protects the signer fields
 
 	// The fields below are for testing only
-	fakeDiff  bool                 // Skip difficulty verifications
 	rankGroup common.SequenceGroup // grouped by rank
 }
 
@@ -355,15 +351,6 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 		return errInvalidNonce
 	}
 
-	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	//if number > 0 {
-	//	if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
-	//		return errInvalidDifficulty
-	//	}
-	//	if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
-	//		return errInvalidDifficulty
-	//	}
-	//}
 	// If all checks passed, validate any special fields for hard forks
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
@@ -395,12 +382,7 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	if parent.Time.Uint64()+c.config.Period > header.Time.Uint64() {
 		return ErrInvalidTimestamp
 	}
-	// TODO : Check environments that have different time server
-	delayed := c.getDelay(int(header.Nonce.Uint64()))
-	if parent.Time.Int64()+int64(c.config.Period)+int64(delayed.Seconds()) > time.Now().Unix() {
-		log.Warn("found invalid timestamp header", "number", header.Number.Uint64(), "hash", header.Hash().Hex(), "rank", header.Nonce.Uint64())
-		//return ErrInvalidTimestamp
-	}
+
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
@@ -430,26 +412,7 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-	//signers := c.getSigners(chain, header)
 
-	// Resolve the authorization key and check against signers
-	// signer, err := ecrecover(header, c.signatures)
-	// if err != nil {
-	// 	return err
-	// }
-	// if _, ok := signers.signersMap()[signer]; !ok {
-	// 	return errUnauthorizedSigner
-	// }
-
-	// if !c.fakeDiff {
-	// 	inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
-	// 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// }
 	return nil
 }
 
@@ -478,7 +441,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// nonce is used to check order of staking list
 	header.Nonce = types.EncodeNonce(uint64(rank))
 
-	// FIXME : will remove extra data used in clique because of no meanings in bsrr consensus
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
@@ -506,29 +468,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, errStakingList
 	}
-	/*
-		font := color.Yellow
-		if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
-			font = color.Green
-		}
-		font.Println("##############[FINALIZE]##############")
-		font.Println("NUMBER : ", header.Number.String())
-		font.Println("HASH : ", header.Hash().Hex())
-		font.Println("COINBASE : ", header.Coinbase.Hex())
-		font.Println("DIFFICULTY : ", header.Difficulty.String())
-		font.Println("UNCLES : ", header.UncleHash.Hex())
-		font.Println("######################################")
-	*/
 
 	if header.Coinbase != common.HexToAddress("0") {
 		var signers signers
-		//Diff
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		if parent == nil {
 			log.Warn("unknown ancestor", "parent", "nil")
 		}
-		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 
 		if chain.Config().IsBIP1Block(header.Number) {
 			stks, err = c.supportBIP1(chain, parent, stks)
@@ -556,8 +503,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			return nil, errUnauthorizedSigner
 		}
 
-		//font = color.Blue
-		//font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
 			return nil, errInvalidDifficulty
 		}
@@ -635,7 +580,12 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 
-	delay += c.getDelay(rank)
+	//delay += c.getDelay(rank)
+	temp, err := c.getDelay(rank)
+	if err != nil {
+		return err
+	}
+	delay += temp
 
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
@@ -689,9 +639,9 @@ func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.H
 }
 
 // [BERITH] getStakeTargetBlock 주어진 parent header에 대하여 miner를 결정 할 target block을 반환한다.
-// 1) [0, epoch-1] : target == 블록 넘버 0(즉, genesis block) 인 블록
-// 2) [epoch, 2epoch] : target == 블록 넘버 epoch 인 블록
-// 3) [2epoch +1, ~) : target == 블록 넘버 - epoch 인 블록
+// 1) [0 ~ epoch-1]     : target == 블록 넘버 0(즉, genesis block) 인 블록
+// 2) [epoch ~ 2epoch-1] : target == 블록 넘버 epoch 인 블록
+// 3) [2epoch ~ ...)       : target == 블록 넘버 - epoch 인 블록
 func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.Header) (*types.Header, bool) {
 	if parent == nil {
 		return &types.Header{}, false
@@ -764,20 +714,26 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 
 // getDelay 주어진 rank에 따라 블록 Sealing에 대한 지연 시간을 반환한다.
 // 항상 0보다 크거나 같은 값을 반환
-func (c *BSRR) getDelay(rank int) time.Duration {
+func (c *BSRR) getDelay(rank int) (time.Duration, error) {
 	if rank <= 1 {
-		return time.Duration(0)
+		return time.Duration(0), nil
 	}
 
 	// 각 그룹별 지연시간
-	groupOrder, _ := c.rankGroup.GetGroupOrder(rank)
+	groupOrder, err := c.rankGroup.GetGroupOrder(rank)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay := time.Duration(groupOrder-1) * groupDelay
 
 	// 그룹 내 지연 시간
-	startRank, _, _ := c.rankGroup.GetGroupRange(groupOrder)
+	startRank, _, err := c.rankGroup.GetGroupRange(groupOrder)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay += time.Duration(rank-startRank) * termDelay
 
-	return delay
+	return delay, nil
 }
 
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
@@ -878,7 +834,10 @@ func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, st
 		return nil, err
 	}
 	c.cache.Add(parent.Hash(), bytes)
-	c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	err = c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	if err != nil {
+		return nil, err
+	}
 
 	return stks, nil
 }
@@ -949,7 +908,10 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 		return nil, err
 	}
 	c.cache.Add(hash, bytes)
-	c.stakingDB.Commit(hash.Hex(), list)
+	err = c.stakingDB.Commit(hash.Hex(), list)
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }
@@ -1001,20 +963,10 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		//[BERITH] 2019-09-03
 		//마지막 Staking의 블록번호가 저장되도록 수정
 		//일반 Tx가 아닌 경우 Stake or Unstake
-		if chain.Config().IsBIP1(number) {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else if msg.Base() == types.Stake && msg.Target() == types.Main {
-				stkChanged[msg.From()] = false
-			} else {
-				continue
-			}
-		} else {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else {
-				continue
-			}
+		if chain.Config().IsBIP1(number) && msg.Base() == types.Stake && msg.Target() == types.Main {
+			stkChanged[msg.From()] = false
+		} else if msg.Base() == types.Main && msg.Target() == types.Stake {
+			stkChanged[msg.From()] = true
 		}
 	}
 
@@ -1023,8 +975,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
+				currentStkBal = new(big.Int).Div(currentStkBal, common.UnitForBer)
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), common.UnitForBer)
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
@@ -1042,28 +994,6 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 
 	}
 
-	// info, err := list.GetInfo(header.Coinbase)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if info.Value().Cmp(big.NewInt(0)) > 0 {
-
-	// 	input := stakingInfo{
-	// 		address:     info.Address(),
-	// 		value:       info.Value(),
-	// 		blockNumber: info.BlockNumber(),
-	// 	}
-
-	// 	list.SetInfo(input)
-	// }
-
-	// list.SetMiner(header.Coinbase)
-	// sr := c.config.SlashRound
-	// if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
-	// 	return c.slashBadSigner(chain, header, list, state)
-	// }
 	return nil
 }
 
@@ -1098,7 +1028,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	}
 
 	result := list.AsList()
-	if len(result) <= 0 {
+	if len(result) == 0 {
 		return make([]common.Address, 0), nil
 	}
 	return result, nil
