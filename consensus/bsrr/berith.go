@@ -802,8 +802,8 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	}
 
 	re := big.NewInt(int64((26 + z - math.Round(n / 7370000) * 0.5) * d))
-	if re.Cmp(big.NewInt(0)) <= 0 {
-		re = big.NewInt(0)
+	if re.Cmp(common.Big0) <= 0 {
+		re = common.Big0
 	}
 	return new(big.Int).Mul(re, common.UnitForBer)
 }
