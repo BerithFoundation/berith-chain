@@ -426,32 +426,18 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // consensus protocol requirements. The method accepts an optional list of parent
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
+/*
+	[Berith]
+	verifySeal method is necessary to implement Engine interface but not used.
+	The logic that verifies the signature contained in the header is in the Finalize method.
+*/
 func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
 	number := header.Number
 	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-	//signers := c.getSigners(chain, header)
 
-	// Resolve the authorization key and check against signers
-	// signer, err := ecrecover(header, c.signatures)
-	// if err != nil {
-	// 	return err
-	// }
-	// if _, ok := signers.signersMap()[signer]; !ok {
-	// 	return errUnauthorizedSigner
-	// }
-
-	// if !c.fakeDiff {
-	// 	inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
-	// 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// }
 	return nil
 }
 
