@@ -742,31 +742,43 @@ func (c *BSRR) Close() error {
 }
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
+	const (
+		defaultBlockCreationSec    = 10      // Blocks are created every 10 seconds by default.
+		blockNumberAt1Year         = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
+		defaultReward              = 26      // The basic reward is 26 tokens.
+		addtionalReward            = 5       // Additional rewards are paid for one year.
+		blockSectionDivisionNumber = 7370000 // Reference value for dividing a block into 50 sections
+		groupingValue              = 0.5     // Constant for grouping two groups to have the same Reward Subtract
+	)
+
 	number := header.Number.Uint64()
-	// 특정 블록 이후로 보상을 지급
+	// Reward after a specific block
 	if number < config.Bsrr.Rewards.Uint64() {
 		return big.NewInt(0)
 	}
 
-	//공식이 10초 단위 이기때문
-	d := float64(config.Bsrr.Period) / 10
-	n := float64(number) * d
+	// Value to correct Reward when block creation time is changed.
+	correctionValue := float64(config.Bsrr.Period) / defaultBlockCreationSec
+	correctedBlockNumber := float64(number) * correctionValue
 
-	var z float64 = 0
-	if n <= 3150000 {
-		z = 5
+	var additionalReward float64 = 0
+	if correctedBlockNumber <= blockNumberAt1Year {
+		additionalReward = addtionalReward
 	}
 
-	re := big.NewInt(int64((26 + z - math.Round(n / 7370000) * 0.5) * d))
-	if re.Cmp(common.Big0) <= 0 {
-		re = common.Big0
+	plusReward := big.NewInt(int64((defaultReward + additionalReward)))
+	// The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
+	// The same amount is deducted for every two sections.
+	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber /blockSectionDivisionNumber) * groupingValue))
+	reward := new(big.Int).Sub(plusReward, minusReward)
+	if reward.Cmp(big.NewInt(0)) <= 0 {
+		reward = big.NewInt(0)
 	}
-	return new(big.Int).Mul(re, common.UnitForBer)
+	return new(big.Int).Mul(reward, common.UnitForBer)
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
-// reward. The total reward consists of the static block reward and rewards for
-// included uncles. The coinbase of each uncle block is also rewarded.
+// reward.
 func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.StateDB, header *types.Header) {
 	config := chain.Config()
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
