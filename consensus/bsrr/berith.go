@@ -55,6 +55,8 @@ const (
 
 	termDelay  = 100 * time.Millisecond // Delay per signer in the same group
 	groupDelay = 1 * time.Second        // Delay per groups
+
+	commonDiff = 3 // A constant that specifies the maximum number of people in a group when dividing a signer's candidates into multiple groups
 )
 
 var (
@@ -265,7 +267,7 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		signatures: signatures,
 		cache:      cache,
 		proposals:  make(map[common.Address]bool),
-		rankGroup:  &common.ArithmeticGroup{CommonDiff: 3},
+		rankGroup:  &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}
 }
 
