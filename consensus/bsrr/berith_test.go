@@ -29,13 +29,13 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 		{10, 3},                    // equals to 0 point
 		{8, 2},                     // less than 0.5 point
 		{9, 3},                     // greater than or equals 0.5 point
-		{30, selection.MAX_MINERS}, // greater than staking.MAX_MINERS
+		{35000, selection.MAX_MINERS}, // greater than staking.MAX_MINERS
 	}
 
-	for i, tt := range tests {
-		result := c.getMaxMiningCandidates(tt.holders)
-		if result != tt.expected {
-			t.Errorf("test #%d: expected : %d but %d", i, tt.expected, result)
+	for i, test := range tests {
+		result := c.getMaxMiningCandidates(test.holders)
+		if result != test.expected {
+			t.Errorf("test #%d: expected : %d but %d", i, test.expected, result)
 		}
 	}
 }
@@ -71,7 +71,7 @@ func TestGetDelay(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		result := c.getDelay(tt.rank)
+		result, _ := c.getDelay(tt.rank)
 		if result != tt.delay {
 			t.Errorf("test #%d: rank : %d expected : %d but %d", i, tt.rank, tt.delay, result)
 		}

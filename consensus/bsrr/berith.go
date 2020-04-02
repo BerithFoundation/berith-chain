@@ -59,7 +59,7 @@ const (
 
 var (
 	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	SlashRound   = uint64(2)
 	ForkFactor   = 1.0
 
@@ -210,7 +210,6 @@ type BSRR struct {
 	lock   sync.RWMutex   // Protects the signer fields
 
 	// The fields below are for testing only
-	fakeDiff  bool                 // Skip difficulty verifications
 	rankGroup common.SequenceGroup // grouped by rank
 }
 
@@ -581,7 +580,12 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 
-	delay += c.getDelay(rank)
+	//delay += c.getDelay(rank)
+	temp, err := c.getDelay(rank)
+	if err != nil {
+		return err
+	}
+	delay += temp
 
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
@@ -710,20 +714,26 @@ func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.Chai
 
 // getDelay 주어진 rank에 따라 블록 Sealing에 대한 지연 시간을 반환한다.
 // 항상 0보다 크거나 같은 값을 반환
-func (c *BSRR) getDelay(rank int) time.Duration {
+func (c *BSRR) getDelay(rank int) (time.Duration, error) {
 	if rank <= 1 {
-		return time.Duration(0)
+		return time.Duration(0), nil
 	}
 
 	// 각 그룹별 지연시간
-	groupOrder, _ := c.rankGroup.GetGroupOrder(rank)
+	groupOrder, err := c.rankGroup.GetGroupOrder(rank)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay := time.Duration(groupOrder-1) * groupDelay
 
 	// 그룹 내 지연 시간
-	startRank, _, _ := c.rankGroup.GetGroupRange(groupOrder)
+	startRank, _, err := c.rankGroup.GetGroupRange(groupOrder)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay += time.Duration(rank-startRank) * termDelay
 
-	return delay
+	return delay, nil
 }
 
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
@@ -747,15 +757,11 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		z = 5
 	}
 
-	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
-	if re <= 0 {
-		re = 0
-
-		return big.NewInt(0)
-	} else {
-		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	re := big.NewInt(int64((26 + z - math.Round(n / 7370000) * 0.5) * d))
+	if re.Cmp(common.Big0) <= 0 {
+		re = common.Big0
 	}
+	return new(big.Int).Mul(re, common.UnitForBer)
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
@@ -816,7 +822,10 @@ func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, st
 		return nil, err
 	}
 	c.cache.Add(parent.Hash(), bytes)
-	c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	err = c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	if err != nil {
+		return nil, err
+	}
 
 	return stks, nil
 }
@@ -887,7 +896,10 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 		return nil, err
 	}
 	c.cache.Add(hash, bytes)
-	c.stakingDB.Commit(hash.Hex(), list)
+	err = c.stakingDB.Commit(hash.Hex(), list)
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }
@@ -939,20 +951,10 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		//[BERITH] 2019-09-03
 		//마지막 Staking의 블록번호가 저장되도록 수정
 		//일반 Tx가 아닌 경우 Stake or Unstake
-		if chain.Config().IsBIP1(number) {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else if msg.Base() == types.Stake && msg.Target() == types.Main {
-				stkChanged[msg.From()] = false
-			} else {
-				continue
-			}
-		} else {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else {
-				continue
-			}
+		if chain.Config().IsBIP1(number) && msg.Base() == types.Stake && msg.Target() == types.Main {
+			stkChanged[msg.From()] = false
+		} else if msg.Base() == types.Main && msg.Target() == types.Stake {
+			stkChanged[msg.From()] = true
 		}
 	}
 
@@ -961,8 +963,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
+				currentStkBal = new(big.Int).Div(currentStkBal, common.UnitForBer)
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), common.UnitForBer)
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
@@ -1014,7 +1016,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	}
 
 	result := list.AsList()
-	if len(result) <= 0 {
+	if len(result) == 0 {
 		return make([]common.Address, 0), nil
 	}
 	return result, nil
