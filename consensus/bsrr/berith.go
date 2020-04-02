@@ -208,11 +208,11 @@ type BSRR struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	proposals map[common.Address]bool // Current list of proposals we are pushing
-
 	signer common.Address // Berith address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
+
+	proposals map[common.Address]bool // Current list of proposals we are pushing
 
 	// The fields below are for testing only
 	fakeDiff  bool                 // Skip difficulty verifications
@@ -494,29 +494,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, errStakingList
 	}
-	/*
-		font := color.Yellow
-		if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
-			font = color.Green
-		}
-		font.Println("##############[FINALIZE]##############")
-		font.Println("NUMBER : ", header.Number.String())
-		font.Println("HASH : ", header.Hash().Hex())
-		font.Println("COINBASE : ", header.Coinbase.Hex())
-		font.Println("DIFFICULTY : ", header.Difficulty.String())
-		font.Println("UNCLES : ", header.UncleHash.Hex())
-		font.Println("######################################")
-	*/
 
 	if header.Coinbase != common.HexToAddress("0") {
 		var signers signers
-		//Diff
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		if parent == nil {
 			log.Warn("unknown ancestor", "parent", "nil")
 		}
-		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 
 		if chain.Config().IsBIP1Block(header.Number) {
 			stks, err = c.supportBIP1(chain, parent, stks)
@@ -544,8 +529,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			return nil, errUnauthorizedSigner
 		}
 
-		//font = color.Blue
-		//font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
 			return nil, errInvalidDifficulty
 		}
