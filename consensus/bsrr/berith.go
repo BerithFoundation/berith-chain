@@ -383,11 +383,7 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	if parent.Time.Uint64()+c.config.Period > header.Time.Uint64() {
 		return ErrInvalidTimestamp
 	}
-	delayed := c.getDelay(int(header.Nonce.Uint64()))
-	if parent.Time.Int64()+int64(c.config.Period)+int64(delayed.Seconds()) > time.Now().Unix() {
-		log.Warn("found invalid timestamp header", "number", header.Number.Uint64(), "hash", header.Hash().Hex(), "rank", header.Nonce.Uint64())
-		return ErrInvalidTimestamp
-	}
+
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
