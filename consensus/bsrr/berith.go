@@ -70,8 +70,8 @@ var (
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 
-	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
-	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
+	delays = []int{0, 3}
+	groups = []int{1, 5}
 
 	diffWithoutStaker = int64(1234)
 )
@@ -351,15 +351,6 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 		return errInvalidNonce
 	}
 
-	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	//if number > 0 {
-	//	if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
-	//		return errInvalidDifficulty
-	//	}
-	//	if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
-	//		return errInvalidDifficulty
-	//	}
-	//}
 	// If all checks passed, validate any special fields for hard forks
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
@@ -421,26 +412,7 @@ func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-	//signers := c.getSigners(chain, header)
 
-	// Resolve the authorization key and check against signers
-	// signer, err := ecrecover(header, c.signatures)
-	// if err != nil {
-	// 	return err
-	// }
-	// if _, ok := signers.signersMap()[signer]; !ok {
-	// 	return errUnauthorizedSigner
-	// }
-
-	// if !c.fakeDiff {
-	// 	inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
-	// 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// }
 	return nil
 }
 
@@ -469,7 +441,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// nonce is used to check order of staking list
 	header.Nonce = types.EncodeNonce(uint64(rank))
 
-	// FIXME : will remove extra data used in clique because of no meanings in bsrr consensus
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
@@ -497,29 +468,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 	if err != nil {
 		return nil, errStakingList
 	}
-	/*
-		font := color.Yellow
-		if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
-			font = color.Green
-		}
-		font.Println("##############[FINALIZE]##############")
-		font.Println("NUMBER : ", header.Number.String())
-		font.Println("HASH : ", header.Hash().Hex())
-		font.Println("COINBASE : ", header.Coinbase.Hex())
-		font.Println("DIFFICULTY : ", header.Difficulty.String())
-		font.Println("UNCLES : ", header.UncleHash.Hex())
-		font.Println("######################################")
-	*/
 
 	if header.Coinbase != common.HexToAddress("0") {
 		var signers signers
-		//Diff
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		if parent == nil {
 			log.Warn("unknown ancestor", "parent", "nil")
 		}
-		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
 
 		if chain.Config().IsBIP1Block(header.Number) {
 			stks, err = c.supportBIP1(chain, parent, stks)
@@ -547,8 +503,6 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			return nil, errUnauthorizedSigner
 		}
 
-		//font = color.Blue
-		//font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
 			return nil, errInvalidDifficulty
 		}
@@ -685,9 +639,9 @@ func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.H
 }
 
 // [BERITH] getStakeTargetBlock 주어진 parent header에 대하여 miner를 결정 할 target block을 반환한다.
-// 1) [0, epoch-1] : target == 블록 넘버 0(즉, genesis block) 인 블록
-// 2) [epoch, 2epoch] : target == 블록 넘버 epoch 인 블록
-// 3) [2epoch +1, ~) : target == 블록 넘버 - epoch 인 블록
+// 1) [0 ~ epoch-1]     : target == 블록 넘버 0(즉, genesis block) 인 블록
+// 2) [epoch ~ 2epoch-1] : target == 블록 넘버 epoch 인 블록
+// 3) [2epoch ~ ...)       : target == 블록 넘버 - epoch 인 블록
 func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.Header) (*types.Header, bool) {
 	if parent == nil {
 		return &types.Header{}, false
@@ -1028,28 +982,6 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 
 	}
 
-	// info, err := list.GetInfo(header.Coinbase)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if info.Value().Cmp(big.NewInt(0)) > 0 {
-
-	// 	input := stakingInfo{
-	// 		address:     info.Address(),
-	// 		value:       info.Value(),
-	// 		blockNumber: info.BlockNumber(),
-	// 	}
-
-	// 	list.SetInfo(input)
-	// }
-
-	// list.SetMiner(header.Coinbase)
-	// sr := c.config.SlashRound
-	// if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
-	// 	return c.slashBadSigner(chain, header, list, state)
-	// }
 	return nil
 }
 
