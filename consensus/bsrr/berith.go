@@ -59,7 +59,7 @@ const (
 
 var (
 	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
+	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	SlashRound   = uint64(2)
 	ForkFactor   = 1.0
 
@@ -803,15 +803,11 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		z = 5
 	}
 
-	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
-	if re <= 0 {
-		re = 0
-
-		return big.NewInt(0)
-	} else {
-		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
+	re := big.NewInt(int64((26 + z - math.Round(n / 7370000) * 0.5) * d))
+	if re.Cmp(common.Big0) <= 0 {
+		re = common.Big0
 	}
+	return new(big.Int).Mul(re, common.UnitForBer)
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
@@ -1001,20 +997,10 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		//[BERITH] 2019-09-03
 		//마지막 Staking의 블록번호가 저장되도록 수정
 		//일반 Tx가 아닌 경우 Stake or Unstake
-		if chain.Config().IsBIP1(number) {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else if msg.Base() == types.Stake && msg.Target() == types.Main {
-				stkChanged[msg.From()] = false
-			} else {
-				continue
-			}
-		} else {
-			if msg.Base() == types.Main && msg.Target() == types.Stake {
-				stkChanged[msg.From()] = true
-			} else {
-				continue
-			}
+		if chain.Config().IsBIP1(number) && msg.Base() == types.Stake && msg.Target() == types.Main {
+			stkChanged[msg.From()] = false
+		} else if msg.Base() == types.Main && msg.Target() == types.Stake {
+			stkChanged[msg.From()] = true
 		}
 	}
 
@@ -1023,8 +1009,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
+				currentStkBal = new(big.Int).Div(currentStkBal, common.UnitForBer)
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), common.UnitForBer)
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
@@ -1098,7 +1084,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	}
 
 	result := list.AsList()
-	if len(result) <= 0 {
+	if len(result) == 0 {
 		return make([]common.Address, 0), nil
 	}
 	return result, nil
