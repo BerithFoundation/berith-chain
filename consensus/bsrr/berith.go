@@ -787,12 +787,12 @@ func (c *BSRR) Close() error {
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	const (
-		DEFAULT_BLOCK_CREATION_SEC    = 10      // Blocks are created every 10 seconds by default.
-		BLOCK_NUMBER_AT_1_YEAR        = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
-		DEFAULT_REWARD                = 26      // The basic reward is 26 tokens.
-		ADDITIONAL_REWARD             = 5       // Additional rewards are paid for one year.
-		BLOCK_SECTION_DIVISION_NUMBER = 7370000 // Reference value for dividing a block into 50 sections
-		GROUPING_VALUE                = 0.5     // Constant for grouping two groups to have the same Reward Subtract
+		defaultBlockCreationSec    = 10      // Blocks are created every 10 seconds by default.
+		blockNumberAt1Year         = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
+		defaultReward              = 26      // The basic reward is 26 tokens.
+		addtionalReward            = 5       // Additional rewards are paid for one year.
+		blockSectionDivisionNumber = 7370000 // Reference value for dividing a block into 50 sections
+		groupingValue              = 0.5     // Constant for grouping two groups to have the same Reward Subtract
 	)
 
 	number := header.Number.Uint64()
@@ -802,18 +802,18 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	}
 
 	// Value to correct Reward when block creation time is changed.
-	correctionValue := float64(config.Bsrr.Period) / DEFAULT_BLOCK_CREATION_SEC
+	correctionValue := float64(config.Bsrr.Period) / defaultBlockCreationSec
 	correctedBlockNumber := float64(number) * correctionValue
 
 	var additionalReward float64 = 0
-	if correctedBlockNumber <= BLOCK_NUMBER_AT_1_YEAR {
-		additionalReward = ADDITIONAL_REWARD
+	if correctedBlockNumber <= blockNumberAt1Year {
+		additionalReward = addtionalReward
 	}
 
-	plusReward := big.NewInt(int64((DEFAULT_REWARD + additionalReward)))
+	plusReward := big.NewInt(int64((defaultReward + additionalReward)))
 	// The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
 	// The same amount is deducted for every two sections.
-	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber / BLOCK_SECTION_DIVISION_NUMBER) * GROUPING_VALUE))
+	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber /blockSectionDivisionNumber) * groupingValue))
 	reward := new(big.Int).Sub(plusReward, minusReward)
 	if reward.Cmp(big.NewInt(0)) <= 0 {
 		reward = big.NewInt(0)
