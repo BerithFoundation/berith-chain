@@ -55,6 +55,8 @@ const (
 
 	termDelay  = 100 * time.Millisecond // Delay per signer in the same group
 	groupDelay = 1 * time.Second        // Delay per groups
+
+	commonDiff = 3 // A constant that specifies the maximum number of people in a group when dividing a signer's candidates into multiple groups
 )
 
 var (
@@ -69,9 +71,6 @@ var (
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
-
-	delays = []int{0, 3}
-	groups = []int{1, 5}
 
 	diffWithoutStaker = int64(1234)
 )
@@ -203,11 +202,11 @@ type BSRR struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	proposals map[common.Address]bool // Current list of proposals we are pushing
-
 	signer common.Address // Berith address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
+
+	proposals map[common.Address]bool // Current list of proposals we are pushing
 
 	// The fields below are for testing only
 	rankGroup common.SequenceGroup // grouped by rank
@@ -261,7 +260,7 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		signatures: signatures,
 		cache:      cache,
 		proposals:  make(map[common.Address]bool),
-		rankGroup:  &common.ArithmeticGroup{CommonDiff: 3},
+		rankGroup:  &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}
 }
 
@@ -406,6 +405,11 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // consensus protocol requirements. The method accepts an optional list of parent
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
+/*
+	[Berith]
+	verifySeal method is necessary to implement Engine interface but not used.
+	The logic that verifies the signature contained in the header is in the Finalize method.
+*/
 func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
 	number := header.Number
@@ -746,7 +750,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		defaultBlockCreationSec    = 10      // Blocks are created every 10 seconds by default.
 		blockNumberAt1Year         = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
 		defaultReward              = 26      // The basic reward is 26 tokens.
-		addtionalReward            = 5       // Additional rewards are paid for one year.
+		additionalReward           = 5       // Additional rewards are paid for one year.
 		blockSectionDivisionNumber = 7370000 // Reference value for dividing a block into 50 sections
 		groupingValue              = 0.5     // Constant for grouping two groups to have the same Reward Subtract
 	)
@@ -761,14 +765,17 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	correctionValue := float64(config.Bsrr.Period) / defaultBlockCreationSec
 	correctedBlockNumber := float64(number) * correctionValue
 
-	var additionalReward float64 = 0
+	var addtional float64 = 0
 	if correctedBlockNumber <= blockNumberAt1Year {
-		additionalReward = addtionalReward
+		addtional = additionalReward
 	}
 
-	plusReward := big.NewInt(int64((defaultReward + additionalReward)))
-	// The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
-	// The same amount is deducted for every two sections.
+	plusReward := big.NewInt(int64((defaultReward + addtional)))
+	/*
+		[Berith]
+		The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
+		The same amount is deducted for every two sections.
+	*/
 	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber /blockSectionDivisionNumber) * groupingValue))
 	reward := new(big.Int).Sub(plusReward, minusReward)
 	if reward.Cmp(big.NewInt(0)) <= 0 {

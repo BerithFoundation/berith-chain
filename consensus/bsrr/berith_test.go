@@ -50,7 +50,7 @@ func TestGetDelay(t *testing.T) {
 			SlashRound:   1000,
 			ForkFactor:   1.0,
 		},
-		rankGroup: &common.ArithmeticGroup{CommonDiff: 3},
+		rankGroup: &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}
 
 	tests := []struct {
