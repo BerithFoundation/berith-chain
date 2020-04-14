@@ -1,10 +1,7 @@
 /**
 [BERITH]
 선출 연산을 담당 하는 go파일
-
-
 */
-
 package selection
 
 import (
@@ -109,187 +106,6 @@ func (cs Candidates) GetBIP2Seed(number uint64) int64 {
 	return seed
 }
 
-type Range struct {
-	min   uint64
-	max   uint64
-	start int
-	end   int
-}
-type VoteResult struct {
-	Score *big.Int `json:"score"`
-	Rank  int      `json:"rank"`
-}
-
-type VoteResults map[common.Address]VoteResult
-
-type sortableList []common.Address
-
-func (s sortableList) Len() int {
-	return len(s)
-}
-
-func (s sortableList) Swap(a, b int) {
-	s[a], s[b] = s[b], s[a]
-}
-
-func (s sortableList) Less(a, b int) bool {
-	return bytes.Compare(s[a][:], s[b][:]) == -1
-}
-
-/*
-[BERITH]
-랜덤값으로 binarySearch 하기 위한 원형큐 구조체
-*/
-type Queue struct {
-	storage []Range
-	size    int
-	front   int
-	rear    int
-}
-
-func (q *Queue) enqueue(r Range) error {
-	next := (q.rear + 1) % q.size
-	if next == q.front {
-		return errors.New("Queue is full")
-	}
-	q.storage[q.rear] = r
-	q.rear = next
-	return nil
-}
-
-func (q *Queue) dequeue() (Range, error) {
-	if q.front == q.rear {
-		return Range{}, errors.New("Queue is Empty")
-	}
-	result := q.storage[q.front]
-	q.front = (q.front + 1) % q.size
-	return result, nil
-}
-
-/**
-[BERITH]
-Random 값을 폭단위로 binarySearch 한다.
-*/
-func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
-	if r.end-r.start <= 1 {
-		return cs.selections[r.start].address
-	}
-	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
-	start := r.start
-	end := r.end
-	for {
-		target := (start + end) / 2
-		a := r.min
-		if target > 0 {
-			a = cs.selections[target-1].val
-		}
-		b := cs.selections[target].val
-
-		if random >= a && random <= b {
-			if r.start != target {
-				q.enqueue(Range{
-					min:   r.min,
-					max:   a - 1,
-					start: r.start,
-					end:   target,
-				})
-			}
-			if target+1 != r.end {
-				q.enqueue(Range{
-					min:   b + 1,
-					max:   r.max,
-					start: target + 1,
-					end:   r.end,
-				})
-			}
-			return cs.selections[target].address
-		}
-
-		if random < a {
-			end = target
-		} else {
-			start = target + 1
-		}
-	}
-}
-
-type JSONCandidate struct {
-	Address string `json:"address"`
-	Point   uint64 `json:"point"`
-	Value   uint64 `json:"value"`
-}
-
-type JSONCandidates struct {
-	User  []JSONCandidate `json:"user"`
-	Total uint64          `json:"total"`
-}
-
-func GetCandidates(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) *JSONCandidates {
-	list := sortableList(stks.AsList())
-	// if len(list) == 0 {
-	// 	return result
-	// }
-
-	sort.Sort(list)
-
-	cddts := NewCandidates()
-
-	for _, stk := range list {
-		point := state.GetPoint(stk).Uint64()
-		cddts.Add(Candidate{
-			point:   point,
-			address: stk,
-		})
-	}
-
-	jsonCddt := make([]JSONCandidate, 0)
-	for _, cddt := range cddts.selections {
-		jsonCddt = append(jsonCddt, JSONCandidate{
-			Address: cddt.address.Hex(),
-			Point:   cddt.point,
-			Value:   cddt.val,
-		})
-	}
-	return &JSONCandidates{
-		User:  jsonCddt,
-		Total: cddts.total,
-	}
-}
-
-/*
-[BERITH]
-BC 선출을 하기 위한 함수
-선출된 BC map 을 리턴 한다.
-*/
-func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
-	result := make(VoteResults)
-
-	list := sortableList(stks.AsList())
-	if len(list) == 0 {
-		return result
-	}
-
-	sort.Sort(list)
-
-	cddts := NewCandidates()
-
-	for _, stk := range list {
-		point := state.GetPoint(stk).Uint64()
-		cddts.Add(Candidate{
-			point:   point,
-			address: stk,
-		})
-	}
-	if config.IsBIP3(big.NewInt(int64(number))) {
-		result = cddts.selectBIP3BlockCreator(config, number)
-	} else {
-		result = cddts.selectBlockCreator(config, number)
-	}
-
-	return result
-
-}
-
 func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint64) VoteResults {
 
 	queue := &Queue{
@@ -327,6 +143,7 @@ func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint
 }
 
 func (cs *Candidates) selectBIP3BlockCreator(config *params.ChainConfig, number uint64) VoteResults {
+
 	result := make(VoteResults)
 
 	DIF := DIF_MAX
@@ -401,4 +218,202 @@ func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	f := float64(stake) / float64(cs.total)
 	r := math.Round(f * float64(100))
 	return r
+}
+
+type Range struct {
+	min   uint64
+	max   uint64
+	start int
+	end   int
+}
+
+/**
+[BERITH]
+Random 값을 폭단위로 binarySearch 한다.
+*/
+func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
+	if r.end-r.start <= 1 {
+		return cs.selections[r.start].address
+	}
+	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
+	start := r.start
+	end := r.end
+	for {
+		target := (start + end) / 2
+		a := r.min
+		if target > 0 {
+			a = cs.selections[target-1].val
+		}
+		b := cs.selections[target].val
+
+		if random >= a && random <= b {
+			if r.start != target {
+				q.enqueue(Range{
+					min:   r.min,
+					max:   a - 1,
+					start: r.start,
+					end:   target,
+				})
+			}
+			if target+1 != r.end {
+				q.enqueue(Range{
+					min:   b + 1,
+					max:   r.max,
+					start: target + 1,
+					end:   r.end,
+				})
+			}
+			return cs.selections[target].address
+		}
+
+		if random < a {
+			end = target
+		} else {
+			start = target + 1
+		}
+	}
+}
+
+type VoteResult struct {
+	Score *big.Int `json:"score"`
+	Rank  int      `json:"rank"`
+}
+
+type VoteResults map[common.Address]VoteResult
+
+type sortableList []common.Address
+
+func (s sortableList) Len() int {
+	return len(s)
+}
+
+func (s sortableList) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+func (s sortableList) Less(a, b int) bool {
+	return bytes.Compare(s[a][:], s[b][:]) == -1
+}
+
+/*
+[BERITH]
+랜덤값으로 binarySearch 하기 위한 원형큐 구조체
+*/
+type Queue struct {
+	storage []Range
+	size    int
+	front   int
+	rear    int
+}
+
+func (q *Queue) enqueue(r Range) error {
+	next := (q.rear + 1) % q.size
+	if next == q.front {
+		return errors.New("Queue is full")
+	}
+	q.storage[q.rear] = r
+	q.rear = next
+	return nil
+}
+
+func (q *Queue) dequeue() (Range, error) {
+	if q.front == q.rear {
+		return Range{}, errors.New("Queue is Empty")
+	}
+	result := q.storage[q.front]
+	q.front = (q.front + 1) % q.size
+	return result, nil
+}
+
+type JSONCandidate struct {
+	Address string `json:"address"`
+	Point   uint64 `json:"point"`
+	Value   uint64 `json:"value"`
+}
+
+type JSONCandidates struct {
+	User  []JSONCandidate `json:"user"`
+	Total uint64          `json:"total"`
+}
+
+func GetCandidates(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) *JSONCandidates {
+	list := sortableList(stks.AsList())
+	// if len(list) == 0 {
+	// 	return result
+	// }
+
+	sort.Sort(list)
+
+	cddts := NewCandidates()
+
+	for _, stk := range list {
+		point := state.GetPoint(stk).Uint64()
+		cddts.Add(Candidate{
+			point:   point,
+			address: stk,
+		})
+	}
+
+	jsonCddt := make([]JSONCandidate, 0)
+	for _, cddt := range cddts.selections {
+		jsonCddt = append(jsonCddt, JSONCandidate{
+			Address: cddt.address.Hex(),
+			Point:   cddt.point,
+			Value:   cddt.val,
+		})
+	}
+	return &JSONCandidates{
+		User:  jsonCddt,
+		Total: cddts.total,
+	}
+}
+
+/*
+[BERITH]
+BC 선출을 하기 위한 함수
+선출된 BC map 을 리턴 한다.
+*/
+func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
+	result := make(VoteResults)
+
+	list := sortableList(stks.AsList())
+	if len(list) == 0 {
+		return result
+	}
+
+	sort.Sort(list)
+
+	cddts := NewCandidates()
+	blockNumber := big.NewInt(int64(number))
+
+	for _, stk := range list {
+		stakeBalance := state.GetStakeBalance(stk)
+		/*
+			[Berith]
+			Stake Balance 한도 추가에 따라서, Stake Balance를 한도 이상 가지고 있는 대상은 선출 포인트를 재계산
+		*/
+		var point uint64
+		if config.IsBIP4(blockNumber) && stakeBalance.Cmp(config.Bsrr.LimitStakeBalance) == 1  {
+			limitStakeBalanceInBer := new(big.Int).Div(config.Bsrr.LimitStakeBalance, big.NewInt(1e+18))
+			lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(stk))
+			adv := staking.CalcAdvForExceededPoint(blockNumber, lastStkBlock, config.Bsrr.Period, common.BigIntToBigFloat(limitStakeBalanceInBer))
+
+			point = new(big.Int).Add(limitStakeBalanceInBer, adv).Uint64()
+		} else {
+			point = state.GetPoint(stk).Uint64()
+		}
+
+		cddts.Add(Candidate{
+			point:   point,
+			address: stk,
+		})
+	}
+
+	if config.IsBIP3(blockNumber) {
+		result = cddts.selectBIP3BlockCreator(config, number)
+	} else {
+		result = cddts.selectBlockCreator(config, number)
+	}
+
+	return result
 }

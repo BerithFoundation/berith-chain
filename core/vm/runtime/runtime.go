@@ -104,7 +104,8 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	}
 	var (
 		address = common.BytesToAddress([]byte("contract"))
-		vmenv   = NewEnv(cfg)
+		//vmenv   = NewEnv(cfg)
+		vmenv   = NewEnv2(cfg)
 		sender  = vm.AccountRef(cfg.Origin)
 	)
 	cfg.State.CreateAccount(address)
@@ -135,7 +136,8 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 		cfg.State, _ = state.New(common.Hash{}, state.NewDatabase(berithdb.NewMemDatabase()))
 	}
 	var (
-		vmenv  = NewEnv(cfg)
+		//vmenv  = NewEnv(cfg)
+		vmenv  = NewEnv2(cfg)
 		sender = vm.AccountRef(cfg.Origin)
 	)
 
@@ -157,7 +159,8 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, error) {
 	setDefaults(cfg)
 
-	vmenv := NewEnv(cfg)
+	//vmenv := NewEnv(cfg)
+	vmenv := NewEnv2(cfg)
 
 	sender := cfg.State.GetOrNewStateObject(cfg.Origin)
 	// Call the code with the given configuration.

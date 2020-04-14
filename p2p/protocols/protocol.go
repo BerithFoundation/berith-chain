@@ -26,6 +26,10 @@ devp2p subprotocols by abstracting away code standardly shared by protocols.
 * TODO: automatic generation of wire protocol specification for peers
 
 */
+
+/*
+	[warning] 패키지가 없는 문제 확인 필요
+*/
 package protocols
 
 import (

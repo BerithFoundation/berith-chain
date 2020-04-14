@@ -129,7 +129,8 @@ func (b *BerAPIBackend) GetEVM(ctx context.Context, msg core.Message, state *sta
 	state.SetBalance(msg.From(), math.MaxBig256)
 	vmError := func() error { return nil }
 
-	context := core.NewEVMContext(msg, header, b.e.BlockChain(), nil)
+	isBIP4 := b.e.chainConfig.IsBIP4(header.Number)
+	context := core.NewEVMContext(msg, header, b.e.BlockChain(), nil, isBIP4)
 	return vm.NewEVM(context, state, b.e.chainConfig, *b.e.blockchain.GetVMConfig()), vmError, nil
 }
 

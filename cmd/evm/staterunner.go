@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
+/*
+	[warning] 패키지가 없는 문제 확인 필요
+*/
 package main
 
 import (
@@ -26,7 +29,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/tests"
+	"github.com/BerithFoundation/berith-chain/tests" // [warning] 패키지 없음
 
 	cli "gopkg.in/urfave/cli.v1"
 )

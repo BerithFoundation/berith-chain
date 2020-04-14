@@ -325,7 +325,7 @@ func (self *StateDB) SetStaking(addr common.Address, amount, blockNumber *big.In
 	}
 }
 
-// [BERITH] GetStakeBalance
+// [BERITH] GetStakeBalance 단위 wei
 func (self *StateDB) GetStakeBalance(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {

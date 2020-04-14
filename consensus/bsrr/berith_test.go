@@ -12,12 +12,13 @@ import (
 func TestGetMaxMiningCandidates(t *testing.T) {
 	var c = &BSRR{
 		config: &params.BSRRConfig{
-			Period:       10,
-			Epoch:        360,
-			Rewards:      common.StringToBig("20000"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   1000,
-			ForkFactor:   0.3,
+			Period:            10,
+			Epoch:             360,
+			Rewards:           common.StringToBig("20000"),
+			StakeMinimum:      common.StringToBig(params.StakeMinimum),
+			LimitStakeBalance: common.StringToBig(params.LimitStakeBalance),
+			SlashRound:        1000,
+			ForkFactor:        0.3,
 		},
 	}
 	tests := []struct {
@@ -43,12 +44,13 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 func TestGetDelay(t *testing.T) {
 	var c = &BSRR{
 		config: &params.BSRRConfig{
-			Period:       0,
-			Epoch:        360,
-			Rewards:      common.StringToBig("20000"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   1000,
-			ForkFactor:   1.0,
+			Period:            0,
+			Epoch:             360,
+			Rewards:           common.StringToBig("20000"),
+			StakeMinimum:      common.StringToBig(params.StakeMinimum),
+			LimitStakeBalance: common.StringToBig(params.LimitStakeBalance),
+			SlashRound:        1000,
+			ForkFactor:        1.0,
 		},
 		rankGroup: &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}

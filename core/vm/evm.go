@@ -34,9 +34,9 @@ var emptyCodeHash = crypto.Keccak256Hash(nil)
 
 type (
 	// CanTransferFunc is the signature of a transfer guard function
-	CanTransferFunc func(StateDB, common.Address, *big.Int, types.JobWallet) bool
+	CanTransferFunc  func(StateDB, common.Address, *big.Int, types.JobWallet, *big.Int) bool
 	// TransferFunc is the signature of a transfer function
-	//TransferFunc func(StateDB, common.Address, common.Address, *big.Int)
+	// TransferFunc func(StateDB, common.Address, common.Address, *big.Int)
 	TransferFunc func(StateDB, common.Address, common.Address, *big.Int, *big.Int, types.JobWallet, types.JobWallet)
 	// GetHashFunc returns the nth block hash in the blockchain
 	// and is used by the BLOCKHASH EVM op code.
@@ -182,6 +182,11 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, base types.JobWallet, target types.JobWallet) (ret []byte, leftOverGas uint64, err error) {
+	var (
+		to       = AccountRef(addr)
+		snapshot = evm.StateDB.Snapshot()
+	)
+
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -191,14 +196,11 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		return nil, gas, ErrDepth
 	}
 	// Fail if we're trying to transfer more than the available balance
-	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value, base) {
+	limitStakeBalance := evm.chainConfig.Bsrr.LimitStakeBalance
+	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value, base, limitStakeBalance) {
 		return nil, gas, ErrInsufficientBalance
 	}
 
-	var (
-		to       = AccountRef(addr)
-		snapshot = evm.StateDB.Snapshot()
-	)
 	if !evm.StateDB.Exist(addr) {
 		precompiles := PrecompiledContractsHomestead
 		if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
@@ -254,6 +256,11 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 // CallCode differs from Call in the sense that it executes the given address'
 // code with the caller as context.
 func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+	var (
+		snapshot = evm.StateDB.Snapshot()
+		to       = AccountRef(caller.Address())
+	)
+
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -263,14 +270,11 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 		return nil, gas, ErrDepth
 	}
 	// Fail if we're trying to transfer more than the available balance
-	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main) {
+	limitStakeBalance := evm.chainConfig.Bsrr.LimitStakeBalance
+	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main, limitStakeBalance) {
 		return nil, gas, ErrInsufficientBalance
 	}
 
-	var (
-		snapshot = evm.StateDB.Snapshot()
-		to       = AccountRef(caller.Address())
-	)
 	// initialise a new contract and set the code that is to be used by the
 	// EVM. The contract is a scoped environment for this execution context
 	// only.
@@ -381,9 +385,12 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	if evm.depth > int(params.CallCreateDepth) {
 		return nil, common.Address{}, gas, ErrDepth
 	}
-	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main) {
+
+	limitStakeBalance := evm.chainConfig.Bsrr.LimitStakeBalance
+	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main, limitStakeBalance) {
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
+
 	nonce := evm.StateDB.GetNonce(caller.Address())
 	evm.StateDB.SetNonce(caller.Address(), nonce+1)
 

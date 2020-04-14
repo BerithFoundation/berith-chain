@@ -100,9 +100,7 @@ func (s *stateObject) empty() bool {
 /*
 [BERITH]
 어카운트 구조체
-StakeBalance 추가
-BehindBalance 추가
-Selection Point 추가
+StakeBalance, StakeUpdated, Point, BehindBalance, Penalty, PenlatyUpdated 추가
 */
 type Account struct {
 	Nonce          uint64

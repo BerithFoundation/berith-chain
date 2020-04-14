@@ -101,6 +101,12 @@ func StringToBig(value string) *big.Int {
 	return result
 }
 
+// BigIntToBigFloat converts big.Int into big.Float
+func BigIntToBigFloat(value *big.Int) *big.Float {
+	var result = new(big.Float).SetInt(value)
+	return result
+}
+
 // Bytes gets the byte representation of the underlying hash.
 func (h Hash) Bytes() []byte { return h[:] }
 
