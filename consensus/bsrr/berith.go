@@ -60,10 +60,11 @@ const (
 )
 
 var (
-	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
-	SlashRound   = uint64(2)
-	ForkFactor   = 1.0
+	RewardBlock          = big.NewInt(500)
+	StakeMinimum, _      = new(big.Int).SetString(params.StakeMinimum, 0)
+	LimitStakeBalance, _ = new(big.Int).SetString(params.LimitStakeBalance, 0)
+	SlashRound           = uint64(2)
+	ForkFactor           = 1.0
 
 	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -988,7 +989,9 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
 				period := c.config.Period
-				point = staking.CalcPointBigint(prevStkBal, additionalStkBal, currentBlock, lastStkBlock, period)
+				isBIP4 := chain.Config().IsBIP4(currentBlock)
+				limitStakeBalanceInBer := new(big.Int).Div(chain.Config().Bsrr.LimitStakeBalance, big.NewInt(1e+18))
+				point = staking.CalcPointBigint(prevStkBal, additionalStkBal, currentBlock, lastStkBlock, limitStakeBalanceInBer, period, isBIP4)
 			}
 			state.SetPoint(addr, point)
 		}

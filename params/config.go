@@ -23,6 +23,12 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
+const (
+	// 1베리드(wei단위): 1000000000000000000
+	StakeMinimum      = "100000000000000000000000"   // 10만 베리드(wei단위)
+	LimitStakeBalance = "50000000000000000000000000" // 5천만 베리드(wei단위)
+)
+
 // Genesis hashes to enforce below configs on.
 var (
 	// MainnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
@@ -46,13 +52,15 @@ var (
 		BIP1Block:           big.NewInt(508000),
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
+		BIP4Block:           big.NewInt(3000000), // [kyumin] 블록 번호 설정 필요
 		Bsrr: &BSRRConfig{
-			Period:       5,
-			Epoch:        360,
-			Rewards:      common.StringToBig("360"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   0,
-			ForkFactor:   1.0,
+			Period:            5,
+			Epoch:             360,
+			Rewards:           common.StringToBig("360"),
+			StakeMinimum:      common.StringToBig(StakeMinimum),
+			LimitStakeBalance: common.StringToBig(LimitStakeBalance),
+			SlashRound:        0,
+			ForkFactor:        1.0,
 		},
 	}
 
@@ -72,12 +80,13 @@ var (
 		EIP155Block:    big.NewInt(0),
 		EIP158Block:    big.NewInt(0),
 		Bsrr: &BSRRConfig{
-			Period:       5,
-			Epoch:        40,
-			Rewards:      common.StringToBig("20000"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   500,
-			ForkFactor:   1.0,
+			Period:            5,
+			Epoch:             40,
+			Rewards:           common.StringToBig("20000"),
+			StakeMinimum:      common.StringToBig(StakeMinimum),
+			LimitStakeBalance: common.StringToBig(LimitStakeBalance),
+			SlashRound:        500,
+			ForkFactor:        1.0,
 		},
 	}
 
@@ -132,14 +141,16 @@ type ChainConfig struct {
 	BIP1Block *big.Int    `json:"bip1Block,omitempty"`
 	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
 	BIP3Block *big.Int    `json:"bip3Block,omitempty"`
+	BIP4Block *big.Int    `json:"bip4Block,omitempty"`
 }
 type BSRRConfig struct {
-	Period       uint64   `json:"period"`       // Number of seconds between blocks to enforce
-	Epoch        uint64   `json:"epoch"`        // Epoch length to determine stakeholder
-	Rewards      *big.Int `json:"rewards"`      // Start block number of mining reward
-	StakeMinimum *big.Int `json:"stakeminimum"` // Minimum of stake in WEI
-	SlashRound   uint64   `json:"slashRound"`   // Reward after block proceed
-	ForkFactor   float64  `json:"forkfactor"`   // Number of mining candidates given stake holders
+	Period            uint64   `json:"period"`              // Number of seconds between blocks to enforce
+	Epoch             uint64   `json:"epoch"`               // Epoch length to determine stakeholder
+	Rewards           *big.Int `json:"rewards"`             // Start block number of mining reward
+	StakeMinimum      *big.Int `json:"stakeminimum"`        // Minimum of stake in WEI
+	LimitStakeBalance *big.Int `json:"limitStakeBalance"`   // Limit of stake in WEI
+	SlashRound        uint64   `json:"slashRound"`          // Reward after block proceed
+	ForkFactor        float64  `json:"forkfactor"`          // Number of mining candidates given stake holders
 }
 
 func (b *BSRRConfig) String() string {
@@ -155,7 +166,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -168,6 +179,7 @@ func (c *ChainConfig) String() string {
 		c.BIP1Block,
 		c.BIP2Block,
 		c.BIP3Block,
+		c.BIP4Block,
 		engine,
 	)
 }
@@ -217,6 +229,10 @@ func (c *ChainConfig) IsBIP2(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP3(num *big.Int) bool {
 	return isForked(c.BIP3Block, num)
+}
+
+func (c *ChainConfig) IsBIP4(num *big.Int) bool {
+	return isForked(c.BIP4Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -307,6 +323,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.BIP3Block, newcfg.BIP3Block, head) {
 		return newCompatError("bip3 fork block", c.BIP3Block, newcfg.BIP3Block)
+	}
+	if isForkIncompatible(c.BIP4Block, newcfg.BIP4Block, head) {
+		return newCompatError("bip4 fork block", c.BIP4Block, newcfg.BIP4Block)
 	}
 	return nil
 }

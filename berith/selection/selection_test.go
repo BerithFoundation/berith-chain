@@ -22,23 +22,23 @@ import (
 */
 func TestSelectBlockCreator(t *testing.T) {
 	expectedResults := map[common.Address]VoteResult{
-		common.HexToAddress("0000000000000000000000000000000000000001"): VoteResult{
+		common.HexToAddress("0000000000000000000000000000000000000000"): VoteResult{
 			Score: big.NewInt(5000000),
 			Rank:  1,
 		},
-		common.HexToAddress("0000000000000000000000000000000000000000"): VoteResult{
+		common.HexToAddress("0000000000000000000000000000000000000004"): VoteResult{
 			Score: big.NewInt(4002000),
 			Rank:  2,
 		},
-		common.HexToAddress("0000000000000000000000000000000000000004"): VoteResult{
+		common.HexToAddress("0000000000000000000000000000000000000003"): VoteResult{
 			Score: big.NewInt(3004000),
 			Rank:  3,
 		},
-		common.HexToAddress("0000000000000000000000000000000000000003"): VoteResult{
+		common.HexToAddress("0000000000000000000000000000000000000002"): VoteResult{
 			Score: big.NewInt(2006000),
 			Rank:  4,
 		},
-		common.HexToAddress("0000000000000000000000000000000000000002"): VoteResult{
+		common.HexToAddress("000000000000000000000000000000000000000"): VoteResult{
 			Score: big.NewInt(1008000),
 			Rank:  5,
 		},
@@ -51,9 +51,7 @@ func TestSelectBlockCreator(t *testing.T) {
 	blockNumber := big.NewInt(100)
 	value := new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	for i := 0; i < 5; i++ {
-
 		addr := common.BigToAddress(big.NewInt(int64(i)))
-
 		st.AddStakeBalance(addr, value, blockNumber)
 		stks.Put(addr)
 
@@ -62,24 +60,26 @@ func TestSelectBlockCreator(t *testing.T) {
 		nowBlock := blockNumber
 		stakeBlock := new(big.Int).Set(st.GetStakeUpdated(addr))
 		period := uint64(40)
+		isBIP4 := params.MainnetChainConfig.IsBIP4(big.NewInt(3000000))
+		limitStakeBalanceInBer := new(big.Int).Div(params.MainnetChainConfig.Bsrr.LimitStakeBalance, big.NewInt(1e+18))
 
-		point := staking.CalcPointBigint(prevStake, addStake, nowBlock, stakeBlock, period)
+		point := staking.CalcPointBigint(prevStake, addStake, nowBlock, stakeBlock, limitStakeBalanceInBer, period, isBIP4)
 		st.SetPoint(addr, point)
 	}
 
-	config := &params.ChainConfig{
-		BIP2Block: big.NewInt(0),
-	}
+	config := params.MainnetChainConfig
+	config.BIP2Block = big.NewInt(0)
 
 	results := SelectBlockCreator(config, blockNumber.Uint64(), common.Hash{}, stks, st)
 
 	for addr, result := range results {
 		expected, ok := expectedResults[addr]
+
 		if !ok {
 			t.Errorf("%s isn't in expected result", addr)
 		}
 		if expected.Rank != result.Rank || expected.Score.Cmp(result.Score) != 0 {
-			t.Errorf("expected result is [%d, %s] but, [%d, %s]", expected.Rank, expected.Score.String(), result.Rank, result.Score.String())
+			t.Errorf("expected result is [%d, %d, %s] but, [%d, %d, %s]", addr, expected.Rank, expected.Score.String(), addr, result.Rank, result.Score.String())
 		}
 	}
 

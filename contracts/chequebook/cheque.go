@@ -19,6 +19,10 @@
 // The functions in this package allow using chequebook for
 // issuing, receiving, verifying cheques in ether; (auto)cashing cheques in ether
 // as well as (auto)depositing ether to the chequebook contract.
+
+/*
+	[warning] 패키지가 없는 문제 확인 필요
+*/
 package chequebook
 
 //go:generate abigen --sol contract/chequebook.sol --exc contract/mortal.sol:mortal,contract/owned.sol:owned --pkg contract --out contract/chequebook.go
@@ -30,7 +34,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
-	"github.com/quorum/swarm/services/swap/swap"
+	"github.com/quorum/swarm/services/swap/swap" // [warning] 패키지 없음
 	"io/ioutil"
 	"math/big"
 	"os"

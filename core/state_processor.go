@@ -93,7 +93,8 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 
 	//[BERITH]
 	// Create a new context to be used in the EVM environment
-	context := NewEVMContext(msg, header, bc, author)
+	isBIP4 := config.IsBIP4(header.Number)
+	context := NewEVMContext(msg, header, bc, author, isBIP4)
 	// Create a new environment which holds all relevant information
 	// about the transaction and calling mechanisms.
 	vmenv := vm.NewEVM(context, statedb, config, cfg)

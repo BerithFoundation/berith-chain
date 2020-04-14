@@ -107,7 +107,8 @@ func (b *LesApiBackend) GetTd(hash common.Hash) *big.Int {
 
 func (b *LesApiBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header) (*vm.EVM, func() error, error) {
 	state.SetBalance(msg.From(), math.MaxBig256)
-	context := core.NewEVMContext(msg, header, b.e.blockchain, nil)
+	isBIP4 := b.e.chainConfig.IsBIP4(header.Number)
+	context := core.NewEVMContext(msg, header, b.e.blockchain, nil, isBIP4)
 	return vm.NewEVM(context, state, b.e.chainConfig, vm.Config{}), state.Error, nil
 }
 

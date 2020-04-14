@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/BerithFoundation/berith-chain/core"
 	"strconv"
 
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
@@ -185,7 +186,7 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, common.UnitForBer)
 
 			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
-			return common.Hash{}, errors.New("staking balance failed")
+			return common.Hash{}, core.ErrUnderStakeBalance
 		}
 	}
 

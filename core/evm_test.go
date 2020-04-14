@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 	"time"
 
@@ -135,7 +137,8 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 			t.Error(err)
 		}
 		author := common.BytesToAddress([]byte("gas"))
-		ctx := NewEVMContext(msg, &header, nil, &author)
+		isBIP4 := params.TestnetChainConfig.IsBIP4(header.Number)
+		ctx := NewEVMContext(msg, &header, nil, &author, isBIP4)
 		gp := new(GasPool)
 		gp.AddGas(header.GasLimit)
 		evm := vm.NewEVM(ctx, stateDB, params.TestnetChainConfig, vmConfig)
@@ -254,4 +257,48 @@ func checkBigInt(a, b *big.Int) error {
 		return fmt.Errorf("expected %s but, %s", a.String(), b.String())
 	}
 	return nil
+}
+
+func TestGetCanTransferFunc(t *testing.T) {
+	type testData struct {
+		isBIP4 bool
+		target types.JobWallet
+		want vm.CanTransferFunc
+	}
+
+	tests := []testData {
+		testData{isBIP4: false, target: types.Main, want: CanTransfer},
+		testData{isBIP4: false, target: types.Stake, want: CanTransfer},
+		testData{isBIP4: true, target: types.Main, want: CanTransfer},
+		testData{isBIP4: true, target: types.Stake, want: CanTransferBIP4},
+	}
+
+	for _, test := range tests {
+		resultFuncName := runtime.FuncForPC(reflect.ValueOf(getCanTransferFunc(test.isBIP4, test.target)).Pointer()).Name()
+		expectedFuncName := runtime.FuncForPC(reflect.ValueOf(test.want).Pointer()).Name()
+
+		if resultFuncName != expectedFuncName {
+			t.Errorf("expected %s but %s", expectedFuncName, resultFuncName)
+		}
+	}
+}
+
+func TestCheckStakeBalanceAmount(t *testing.T) {
+	type testData struct {
+		totalStakingAmount *big.Int
+		maximum *big.Int
+		want bool
+	}
+
+	tests := []testData {
+		testData{totalStakingAmount: big.NewInt(49999999), maximum: big.NewInt(50000000), want: true},
+		testData{totalStakingAmount: big.NewInt(50000000), maximum: big.NewInt(50000000), want: true},
+		testData{totalStakingAmount: big.NewInt(50000001), maximum: big.NewInt(50000000), want: false},
+	}
+
+	for _, test := range tests {
+		if CheckStakeBalanceAmount(test.totalStakingAmount, test.maximum) != test.want {
+			t.Errorf("expected but")
+		}
+	}
 }
