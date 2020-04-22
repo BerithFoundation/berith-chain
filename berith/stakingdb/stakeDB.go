@@ -2,12 +2,13 @@ package stakingdb
 
 import (
 	"fmt"
-
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
-
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 type StakingDB struct {
@@ -104,4 +105,33 @@ func (s *StakingDB) Commit(key string, value staking.Stakers) error {
 
 func (s *StakingDB) NewStakers() staking.Stakers {
 	return s.creator()
+}
+
+func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) error {
+	fmt.Println("Clean stakingDB")
+
+	for {
+		key := []byte(header.Hash().Hex())
+		exist, err := s.isExist(key)
+		if err != nil {
+			return err
+		}
+
+		if !exist { break }
+
+		err = s.delete(key)
+		if err != nil {
+			return err
+		}
+		header = chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	}
+	return s.stakeDB.LDB().CompactRange(util.Range{})
+}
+
+func (s *StakingDB) isExist(key []byte) (bool, error) {
+	return s.stakeDB.Has(key)
+}
+
+func (s *StakingDB) delete(key []byte) error {
+	return s.stakeDB.Delete(key)
 }

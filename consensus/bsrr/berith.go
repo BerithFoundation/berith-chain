@@ -57,6 +57,8 @@ const (
 	groupDelay = 1 * time.Second        // Delay per groups
 
 	commonDiff = 3 // A constant that specifies the maximum number of people in a group when dividing a signer's candidates into multiple groups
+
+	cleanCycle = 100000 // Standard number of stakingDB clean cycle
 )
 
 var (
@@ -128,6 +130,8 @@ var (
 	errStakingList = errors.New("not found staking list")
 
 	errMissingState = errors.New("state missing")
+
+	errCleanStakingDB = errors.New("fail to clean stakingDB")
 
 	errBIP1 = errors.New("error when fork network to BIP1")
 )
@@ -512,6 +516,17 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 		}
 		if header.Nonce.Uint64() != uint64(rank) {
 			return nil, errInvalidNonce
+		}
+
+		/*
+			[Berith]
+			To reduce disk usage, Staker information is periodically deleted.
+		*/
+		if new(big.Int).Mod(header.Number, big.NewInt(cleanCycle)).Cmp(common.Big0) == 0 {
+			err = c.stakingDB.Clean(chain, target)
+			if err != nil {
+				return nil, errCleanStakingDB
+			}
 		}
 	}
 
