@@ -770,18 +770,17 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		addtional = additionalReward
 	}
 
-	plusReward := big.NewInt(int64((defaultReward + addtional)))
 	/*
 		[Berith]
 		The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
 		The same amount is deducted for every two sections.
 	*/
-	minusReward := big.NewInt(int64(math.Round(correctedBlockNumber /blockSectionDivisionNumber) * groupingValue))
-	reward := new(big.Int).Sub(plusReward, minusReward)
-	if reward.Cmp(big.NewInt(0)) <= 0 {
-		reward = big.NewInt(0)
+	reward := (defaultReward - math.Round(correctedBlockNumber / blockSectionDivisionNumber) * groupingValue + addtional) * correctionValue
+	if reward <= 0 {
+		return big.NewInt(0)
 	}
-	return new(big.Int).Mul(reward, common.UnitForBer)
+	temp := reward * 1e+10
+	return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
