@@ -1,9 +1,9 @@
 package brtapi
 
 import (
+	"context"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/miner"
-	"context"
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
@@ -30,7 +30,7 @@ type Backend interface {
 //GetAPIs get apis of berith serivce
 func GetAPIs(b Backend, miner *miner.Miner) []rpc.API {
 	nonceLock := new(AddrLocker)
-	
+
 	return []rpc.API{
 		{
 			Namespace: "berith",

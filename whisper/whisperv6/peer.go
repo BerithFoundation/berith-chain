@@ -22,11 +22,11 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	mapset "github.com/deckarep/golang-set"
 )
 
 // Peer represents a whisper protocol peer connection.

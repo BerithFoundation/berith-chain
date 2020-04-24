@@ -22,9 +22,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
 func newEmptySecure() *SecureTrie {

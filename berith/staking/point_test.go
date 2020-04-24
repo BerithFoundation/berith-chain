@@ -9,7 +9,7 @@ import (
 /*
 [BERITH]
 선출 포인트 계산 테스트
- */
+*/
 func TestCalcPoint(t *testing.T) {
 	add_stake := big.NewInt(1000000)
 	prev_stake := big.NewInt(10000000)
@@ -24,7 +24,7 @@ func TestCalcPoint(t *testing.T) {
 /*
 [BERITH]
 선출 포인트 계산 테스트
- */
+*/
 func TestCalcPoint2(t *testing.T) {
 	add_stake := big.NewInt(1000000)
 	prev_stake := big.NewInt(10000000)

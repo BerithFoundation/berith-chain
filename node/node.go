@@ -246,7 +246,7 @@ func (n *Node) openDataDir() error {
 	return nil
 }
 
-func (n *Node) GetRpcApis() []rpc.API{
+func (n *Node) GetRpcApis() []rpc.API {
 	return n.rpcAPIs
 }
 
@@ -623,8 +623,9 @@ func (n *Node) apis() []rpc.API {
 		},
 	}
 }
+
 // returns the final configuration being used
-func (n *Node) Config() *Config{
+func (n *Node) Config() *Config {
 	return n.config
 }
 

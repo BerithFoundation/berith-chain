@@ -603,7 +603,6 @@ func putint(b []byte, i uint64) (size int) {
 		b[3] = byte(i)
 		return 4
 
-		
 	case i < (1 << 40):
 		b[0] = byte(i >> 32)
 		b[1] = byte(i >> 24)
