@@ -45,7 +45,7 @@ type berithenchConfig struct {
 	OutputPath       string              `json:"outputPath"`       // path of output
 	StakeCount       uint64              `json:"stakeCount"`       // stake count of test execution
 	ContractCount    uint64              `json:"contractCount"`    //contract count of test execution
-	ContractData     map[string][]string `json:"contractData`      // transaction data to call smart contract
+	ContractData     map[string][]string `json:"contractData"`     // transaction data to call smart contract
 	TxValue          uint64              `json:"txAmount"`         //value of transaction
 	StakeValue       uint64              `json:"stakeAmount"`      //value of Stake
 	ContractValue    uint64              `json:"contractAmount"`   //value of Contract Call

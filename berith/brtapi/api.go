@@ -39,7 +39,7 @@ type PrivateBerithAPI struct {
 // SendTxArgs represents the arguments to sumbit a new transaction into the transaction pool.
 /*
 [BERITH]
-기존 트렌젝션 구조체에 base, target 을 넣어 tx 타입을 지정한다.
+기존 트렌젝션 구조체에 Base, Target 을 넣어 tx 타입을 지정한다.
 */
 type SendTxArgs struct {
 	From     common.Address  `json:"from"`
@@ -52,8 +52,8 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data   *hexutil.Bytes  `json:"data"`
 	Input  *hexutil.Bytes  `json:"input"`
-	base   types.JobWallet `json:"base"`
-	target types.JobWallet `json:"target"`
+	Base   types.JobWallet `json:"Base"`
+	Target types.JobWallet `json:"Target"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -105,9 +105,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.base, args.target)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.Base, args.Target)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.base, args.target)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.Base, args.Target)
 }
 
 /*
@@ -166,7 +166,7 @@ func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common
 /*
 [BERITH]
 - SendStaking creates a transaction for user staking
-- berith.stake 명령시 처리 하는 함수로 추가된 base 와 target 을 지정하여 Tx 를 만드는 함수
+- berith.stake 명령시 처리 하는 함수로 추가된 Base 와 Target 을 지정하여 Tx 를 만드는 함수
 - 초반 스테이킹시 10만개이하로 에러를 반환하는 선처리 로직 포함
 - WalletTxArg 구조체는 Tx 를 제한두기위한 구조체
 */
@@ -196,8 +196,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	sendTx.From = args.From
 	sendTx.To = &args.From
 	sendTx.Value = args.Value
-	sendTx.base = types.Main
-	sendTx.target = types.Stake
+	sendTx.Base = types.Main
+	sendTx.Target = types.Stake
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
 	sendTx.Nonce = args.Nonce
@@ -218,8 +218,8 @@ func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (
 	sendTx.From = args.From
 	sendTx.To = &args.From
 	sendTx.Value = new(hexutil.Big)
-	sendTx.base = types.Stake
-	sendTx.target = types.Main
+	sendTx.Base = types.Stake
+	sendTx.Target = types.Main
 	sendTx.Gas = args.Gas
 	sendTx.GasPrice = args.GasPrice
 
