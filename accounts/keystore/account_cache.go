@@ -27,10 +27,10 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
+	mapset "github.com/deckarep/golang-set"
 )
 
 // Minimum amount of time between cache reloads. This limit applies if the platform does

@@ -775,7 +775,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 		The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
 		The same amount is deducted for every two sections.
 	*/
-	reward := (defaultReward - math.Round(correctedBlockNumber / blockSectionDivisionNumber) * groupingValue + addtional) * correctionValue
+	reward := (defaultReward - math.Round(correctedBlockNumber/blockSectionDivisionNumber)*groupingValue + addtional) * correctionValue
 	if reward <= 0 {
 		return big.NewInt(0)
 	}

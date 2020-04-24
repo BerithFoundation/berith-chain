@@ -25,12 +25,12 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/docker/docker/pkg/reexec"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/p2p/enode"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/docker/docker/pkg/reexec"
 )
 
 // Node represents a node in a simulation network which is created by a

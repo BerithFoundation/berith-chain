@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/BerithFoundation/berith-chain/p2p/enode"
 	"github.com/BerithFoundation/berith-chain/p2p/enr"
 	"github.com/BerithFoundation/berith-chain/p2p/netutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {

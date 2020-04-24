@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/internal/jsre"
 	"github.com/BerithFoundation/berith-chain/node"
 )
@@ -74,7 +74,7 @@ func (p *hookedPrompter) SetWordCompleter(completer WordCompleter) {}
 type tester struct {
 	workspace string
 	stack     *node.Node
-	berith  *berith.Berith
+	berith    *berith.Berith
 	console   *Console
 	input     *hookedPrompter
 	output    *bytes.Buffer
@@ -95,7 +95,7 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 		t.Fatalf("failed to create node: %v", err)
 	}
 	con := &berith.Config{
-		Genesis:   core.DeveloperGenesisBlock(15, common.Address{}),
+		Genesis:    core.DeveloperGenesisBlock(15, common.Address{}),
 		Berithbase: common.HexToAddress(testAddress),
 	}
 	if confOverride != nil {
@@ -133,7 +133,7 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 	return &tester{
 		workspace: workspace,
 		stack:     stack,
-		berith:  berith,
+		berith:    berith,
 		console:   console,
 		input:     prompter,
 		output:    printer,

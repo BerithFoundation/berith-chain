@@ -27,10 +27,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cespare/cp"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/cespare/cp"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (

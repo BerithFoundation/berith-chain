@@ -297,12 +297,12 @@ func (l *txList) Filter(mainbal *big.Int, gasLimit uint64) (types.Transactions, 
 
 	// Filter out all the transactions above the account's funds
 	/*
-	[BERITH]
-	Transcaion Filter 로직 정의
-	TX 타입을 구분하여 기준 연산이 틀려짐
+		[BERITH]
+		Transcaion Filter 로직 정의
+		TX 타입을 구분하여 기준 연산이 틀려짐
 	*/
 	removed := l.txs.Filter(func(tx *types.Transaction) bool {
-		if tx.Base() == types.Main{
+		if tx.Base() == types.Main {
 			return tx.Cost().Cmp(mainbal) > 0 || tx.Gas() > gasLimit
 		} else {
 			return tx.MainFee().Cmp(mainbal) > 0 || tx.Gas() > gasLimit

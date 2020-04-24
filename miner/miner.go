@@ -22,12 +22,12 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
@@ -44,7 +44,7 @@ type Miner struct {
 	mux      *event.TypeMux
 	worker   *worker
 	coinbase common.Address
-	e      Backend
+	e        Backend
 	engine   consensus.Engine
 	exitCh   chan struct{}
 
@@ -54,7 +54,7 @@ type Miner struct {
 
 func New(e Backend, config *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(block *types.Block) bool) *Miner {
 	miner := &Miner{
-		e:      e,
+		e:        e,
 		mux:      mux,
 		engine:   engine,
 		exitCh:   make(chan struct{}),
@@ -169,7 +169,6 @@ func (self *Miner) SetBerithbase(addr common.Address) {
 	self.worker.setBerithbase(addr)
 }
 
-
 func (self *Miner) GetBerithbase() common.Address {
-	return  self.coinbase
+	return self.coinbase
 }

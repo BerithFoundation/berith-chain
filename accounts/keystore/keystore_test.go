@@ -387,7 +387,6 @@ func tmpKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
 	return d, new(string(d))
 }
 
-
 //Public Key >> Private Key
 func TestKeyStore_GetPrivateKey(t *testing.T) {
 	dir, ks := tmpKeyStore(t, true)

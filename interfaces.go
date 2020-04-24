@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common" 
+	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
 )
 

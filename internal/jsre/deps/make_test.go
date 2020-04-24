@@ -41,7 +41,7 @@ func TestConvertWeb3(t *testing.T) {
 
 	str2 := hex.EncodeToString(tt)
 
-	f, e := os.Create(os.TempDir()+"/web3_bindata")
+	f, e := os.Create(os.TempDir() + "/web3_bindata")
 	if e == nil {
 		if _, er := f.WriteString(str2); er == nil {
 			w := bufio.NewWriter(f)

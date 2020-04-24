@@ -22,12 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/allegro/bigcache"
-	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/allegro/bigcache"
 )
 
 var (
@@ -132,8 +132,8 @@ type rawShortNode struct {
 }
 
 func (n rawShortNode) canUnload(uint16, uint16) bool { panic("this should never end up in a live trie") }
-func (n rawShortNode) cache() (hashNode, bool)       { panic("this should never end up in a live trie") }
-func (n rawShortNode) fstring(ind string) string     { panic("this should never end up in a live trie") }
+func (n rawShortNode) cache() (hashNode, bool)   { panic("this should never end up in a live trie") }
+func (n rawShortNode) fstring(ind string) string { panic("this should never end up in a live trie") }
 
 // cachedNode is all the information we know about a single cached node in the
 // memory database write layer.
