@@ -121,8 +121,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-
-		break
 	case "selectMember":
 		var member walletdb.Member
 
@@ -131,7 +129,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
 	case "insertContact":
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte("c"+acc), &contact)
@@ -142,7 +139,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-		break
 	case "updateContact":
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte("c"+acc), &contact)
@@ -152,7 +148,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-		break
 	case "restoreMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[1]), &mem)
@@ -176,7 +171,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
 	case "updateMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)
@@ -189,7 +183,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return mem, nil
-		break
 	case "selectTxInfo":
 		txMaster := make(walletdb.TxHistoryMaster, 0)
 		err := WalletDB.Select([]byte("t"+acc), &txMaster)
@@ -206,7 +199,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			txDetails = append(txDetails, txDetail)
 		}
 		return txDetails, nil
-		break
 	case "insertTxInfo":
 		var tempTxInfo walletdb.TxHistory
 		err := WalletDB.Select([]byte(key[0]), &tempTxInfo)
@@ -236,8 +228,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return txinfo, nil
-
-		break
 	case "insertMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)
@@ -261,8 +251,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
-
 	case "checkLogin":
 		var member walletdb.Member
 
@@ -271,7 +259,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
 	}
 
 	return nil, nil

@@ -95,7 +95,7 @@ func newTester(t *testing.T, confOverride func(*berith.Config)) *tester {
 		t.Fatalf("failed to create node: %v", err)
 	}
 	con := &berith.Config{
-		Genesis:    core.DeveloperGenesisBlock(15, common.Address{}),
+		Genesis:    core.DefaultTestnetGenesisBlock(),
 		Berithbase: common.HexToAddress(testAddress),
 	}
 	if confOverride != nil {
