@@ -18,10 +18,10 @@
 
 /*
 [BERITH]
-web3 서비스 모듈 를 확장 등록 처리를 함
-key : 서비스 이름
-value : 등록 모듈 정보
-추후 이것은 jsre 에 컴파일 등록 됨
+Web3 service module is handled by extension registration
+key : Service name
+value : Registration module information
+Later on, this will be compiled in jsre
 */
 
 package web3ext

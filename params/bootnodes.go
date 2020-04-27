@@ -16,7 +16,7 @@
 
 /*
 [BERITH]
-부트노드 에 대한 정보를 적는 곳
+Information about boot nodes
 */
 
 package params

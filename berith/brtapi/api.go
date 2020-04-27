@@ -1,7 +1,7 @@
 /*
 [BERITH]
-berith 에서 새롭게 추가된 함수 구현체
-CLI 및 RPC 에서 사용하는 함수를 구현하는 곳
+New function implementation in berith
+Where to implement functions used by CLI and RPC
 */
 
 package brtapi
@@ -16,7 +16,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/rpc"
 
-	// "fmt"
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
@@ -25,7 +24,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/log"
-	// "github.com/BerithFoundation/berith-chain/berith/stake"
 )
 
 //PrivateBerithAPI struct of berith private apis
@@ -36,10 +34,10 @@ type PrivateBerithAPI struct {
 	accountManager *accounts.Manager
 }
 
-// SendTxArgs represents the arguments to sumbit a new transaction into the transaction pool.
 /*
 [BERITH]
-기존 트렌젝션 구조체에 Base, Target 을 넣어 tx 타입을 지정한다.
+SendTxArgs represents the arguments to sumbit a new transaction into the transaction pool.
+Specify the tx type by putting Base and Target in the existing transaction structure.
 */
 type SendTxArgs struct {
 	From     common.Address  `json:"from"`
@@ -112,7 +110,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 
 /*
 [BERITH]
-구현체를 등록 하기 위해 최초로 호출되는 함수
+The first function called to register the implementation
 */
 func NewPrivateBerithAPI(b Backend, m *miner.Miner, nonceLock *AddrLocker) *PrivateBerithAPI {
 	return &PrivateBerithAPI{
@@ -152,7 +150,7 @@ type WalletTxArgs struct {
 
 /*
 [BERITH]
-지정된 어카운트의 선출 포인트를 확인 할수 있는 함수
+Function to check the elected point of the specified account
 */
 func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -166,9 +164,10 @@ func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common
 /*
 [BERITH]
 - SendStaking creates a transaction for user staking
-- berith.stake 명령시 처리 하는 함수로 추가된 Base 와 Target 을 지정하여 Tx 를 만드는 함수
-- 초반 스테이킹시 10만개이하로 에러를 반환하는 선처리 로직 포함
-- WalletTxArg 구조체는 Tx 를 제한두기위한 구조체
+- Function to handle berith.stake request
+- Create Tx with added base and target.
+- Includes pre-processing logic that returns less than 100,000 errors when staking early
+- WalletTxArg structure is a structure to limit Tx
 */
 func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 
@@ -192,7 +191,7 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 	// Look up the wallet containing the requested signer
 	sendTx := new(SendTxArgs)
 
-	//Tx 를 만들어줌
+	// Create transaction
 	sendTx.From = args.From
 	sendTx.To = &args.From
 	sendTx.Value = args.Value
@@ -208,8 +207,8 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common
 /*
 [BERITH]
 - SendStaking creates a transaction for user staking
-- 이함수를 호출하면 모든 Staking 해제 하고 Main 으로 반환됨
-- Tx 를 만들어서 Send 하는 역할만 함 이후 처리는 Consensus 에서 처리
+- When this function is called, all staking is released and returned to Main
+- After creating Tx and sending it, it is processed by Consensus.
 */
 func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
 	// Look up the wallet containing the requested signer
@@ -229,7 +228,7 @@ func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (
 /*
 [BERITH]
 - private trasaction function
-- 실제 트렌젝션 처리를 하는 함수
+- Functions that deal with actual transactions
 */
 func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
 	account := accounts.Account{Address: args.From}
@@ -263,8 +262,8 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 
 /*
 [BERITH]
- - 지정한 Account 의 스테이킹 수량을 확인 하는 함수
- - 현재 로컬상 블록 상태를 확인 하여 반환
+ - Function to check the staking quantity of the specified Account
+ - Check and return the current local block status
 */
 func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -276,7 +275,7 @@ func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.A
 
 /*
 [BERITH]
- - 어카운트 정보를 반환 하기 위한 구조체
+ - Structure for returning account information
 */
 type AccountInfo struct {
 	Balance      *big.Int //main balance
@@ -285,8 +284,8 @@ type AccountInfo struct {
 
 /*
 [BERITH]
-- 어카운트 정보 (All Balance) 를 반환 하기 위한 함수
-- 정보 확인 편의를 생각하여 만든 함수
+- Function to return account information (All Balance)
+- Functions created for convenience of information verification
 */
 func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*AccountInfo, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -305,8 +304,8 @@ func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Ad
 
 /*
 [BERITH]
-- 키스토어 의 비밀번호를 변경하는 함수
-- 유저들의 요청에 의해 만듬
+- Function to change the keystore password
+- Made by user's request
 */
 func (s *PrivateBerithAPI) UpdateAccount(ctx context.Context, address common.Address, passphrase, newPassphrase string) error {
 	return fetchKeystore(s.accountManager).Update(accounts.Account{Address: address}, passphrase, newPassphrase)

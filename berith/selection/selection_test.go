@@ -18,7 +18,7 @@ import (
 
 /*
 [BERITH]
-선출 로직 테스트
+Elected Logic Test
 */
 func TestSelectBlockCreator(t *testing.T) {
 	expectedResults := map[common.Address]VoteResult{
@@ -126,13 +126,9 @@ func TestSeed(t *testing.T) {
 }
 
 func TestScore(t *testing.T) {
-	// st, _ := state.New(common.Hash{}, state.NewDatabase(berithdb.NewMemDatabase()))
-
 	stks := staking.NewStakers()
 	totalScore := make(map[common.Address]uint64)
 
-	// eth := big.NewInt(1e+18)
-	// value := new(big.Int).Mul(big.NewInt(1000000), eth)
 	value := big.NewInt(1000000)
 
 	for i := 0; i < 100; i++ {
@@ -147,8 +143,6 @@ func TestScore(t *testing.T) {
 	for blockNumber := uint64(600000); blockNumber < 700000; blockNumber++ {
 
 		cddts := NewCandidates()
-
-		//st.AddStakeBalance(addr, value, blockNumber)
 
 		for _, addr := range list {
 			cddts.Add(Candidate{
