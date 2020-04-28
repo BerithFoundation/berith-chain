@@ -601,7 +601,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	/*
 		[BERITH]
-		Remote 상의 Tx 도 처리 하기 위해 TxPool 에서 타입 및 Tx 검증
+		Type and Tx verification in TxPool to process Tx on Remote
 		cost == V + GP * GL
 	*/
 
@@ -637,8 +637,8 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	/*
 		[BERITH]
-		악의 적인 Stake 를 막기 위함. (여기에 걸린다면 소스를 수정 했다고 봐야함)
-		- Genesis 에 적힌 최소 스테이킹 수량 체크
+		Logic to prevent malicious stake
+		Check the minimum staking quantity written on Genesis
 	*/
 	stakedAmount := pool.currentState.GetStakeBalance(from)
 	totalStakingAmount := tx.Value().Add(tx.Value(), stakedAmount)
@@ -734,7 +734,6 @@ func (pool *TxPool) add(tx *types.Transaction, local bool) (bool, error) {
 }
 
 // enqueueTx inserts a new transaction into the non-executable transaction queue.
-//
 // Note, this method assumes the pool lock is held!
 func (pool *TxPool) enqueueTx(hash common.Hash, tx *types.Transaction) (bool, error) {
 	// Try to insert the transaction into the future queue

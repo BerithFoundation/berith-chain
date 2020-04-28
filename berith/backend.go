@@ -65,7 +65,6 @@ type LesServer interface {
 /*
 [BERITH]
 Berith implements the Berith full node service.
-풀노드 구조체
 */
 type Berith struct {
 	config      *Config
@@ -101,8 +100,10 @@ type Berith struct {
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and berithbase)
 
-	//[BERITH]
-	//스테이킹 디비
+	/*
+	[BERITH]
+	database for staker infos
+	*/
 	stakingDB *stakingdb.StakingDB
 }
 
@@ -247,8 +248,8 @@ func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database
 // NOTE, some of these services probably need to be moved to somewhere else.
 /*
 [BERITH]
-각 서비스 구현체 등록
-서비스 : miner, admin, berith...등등
+Registration of each service implementation
+services : miner, admin, berith, etc...
 */
 func (s *Berith) APIs() []rpc.API {
 	apis := berithapi.GetAPIs(s.APIBackend)

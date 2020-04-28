@@ -10,7 +10,7 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 */
 /*
 [BERITH]
-합의 알고리즘 에 관련된 함수를 이용하여 반환해야 할시 이곳에 API 구현
+Consensus algorithm related API
 */
 
 package bsrr
@@ -69,7 +69,7 @@ func (api *API) GetCandidates(number *rpc.BlockNumber) (*selection.JSONCandidate
 
 /*
 [BERITH]
-현재 로컬 블록상 의 선출된 BC 를 반환 하는 함수
+Function that returns the selected Block Creator on the current local block
 */
 func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
 	var header *types.Header
@@ -103,7 +103,7 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 
 /*
 [BERITH]
-BC 선출 확률을 반환하는 함수
+A function that returns the probability of Block Creator election
 */
 func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)

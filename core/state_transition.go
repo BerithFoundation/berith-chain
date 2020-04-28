@@ -72,8 +72,7 @@ type Message interface {
 	GasPrice() *big.Int
 	Gas() uint64
 	Value() *big.Int
-	//Staking() bool
-	//[BERITH]
+
 	Base() types.JobWallet
 	Target() types.JobWallet
 

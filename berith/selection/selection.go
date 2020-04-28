@@ -1,8 +1,6 @@
 /**
 [BERITH]
-선출 연산을 담당 하는 go파일
-
-
+package in charge of electing operation
 */
 
 package selection
@@ -35,26 +33,21 @@ var (
 
 /**
 [BERITH]
-선출을 위해 Staking 한 계정들의 정보를 담는 구조체
+Structure that holds the information of the staking accounts for election
 */
 type Candidate struct {
-	address common.Address //계정 주소
-	point   uint64         //계정의 포인트 (내가 뽑힐 확률 : 나의 포인트 / 전체 유저의 포인트)
-	val     uint64         //블록 생성자 선출을 위해 사용되는 값
+	address common.Address // Account address
+	point   uint64         // Points in the account (probability of being drawn: my points / points of all users)
+	val     uint64         // Value used to elect block constructor
 }
 
 func (c *Candidate) GetPoint() uint64 {
 	return c.point
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-/**
-[BERITH]
-
-*/
 type Candidates struct {
 	selections []Candidate
-	total      uint64 //Total Staking  + Adv
+	total      uint64 // Total Staking  + Adv
 	ts         uint64
 }
 
@@ -68,8 +61,8 @@ func NewCandidates() *Candidates {
 
 /*
 [BERITH]
-BC 선출을 하기 위해 Staker 를 등록하기 위한 함수
-이후에 호출 될 함수는 BlockCreator 함수이다.
+Function to register Staker to elect Block Creator
+The function to be called later is the BlockCreator function.
 */
 func (cs *Candidates) Add(c Candidate) {
 	cs.total += c.point
@@ -79,8 +72,8 @@ func (cs *Candidates) Add(c Candidate) {
 
 /*
 [BERITH]
-블록 넘버를 해시로 바꾸고 그것을 강제로 int64로 변경 하는 함수
-결과 값을 Seed 로 쓴다.
+Function to convert block number to hash and force it to int64
+Write the result value as Seed.
 */
 func (cs Candidates) GetSeed(config *params.ChainConfig, number uint64) int64 {
 
@@ -138,7 +131,7 @@ func (s sortableList) Less(a, b int) bool {
 
 /*
 [BERITH]
-랜덤값으로 binarySearch 하기 위한 원형큐 구조체
+Circular queue structure for binarySearch by random value
 */
 type Queue struct {
 	storage []Range
@@ -168,7 +161,7 @@ func (q *Queue) dequeue() (Range, error) {
 
 /**
 [BERITH]
-Random 값을 폭단위로 binarySearch 한다.
+BinarySearch the Random value in width units.
 */
 func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
 	if r.end-r.start <= 1 {
@@ -226,14 +219,10 @@ type JSONCandidates struct {
 
 func GetCandidates(number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) *JSONCandidates {
 	list := sortableList(stks.AsList())
-	// if len(list) == 0 {
-	// 	return result
-	// }
 
 	sort.Sort(list)
 
 	cddts := NewCandidates()
-
 	for _, stk := range list {
 		point := state.GetPoint(stk).Uint64()
 		cddts.Add(Candidate{
@@ -258,8 +247,8 @@ func GetCandidates(number uint64, hash common.Hash, stks staking.Stakers, state 
 
 /*
 [BERITH]
-BC 선출을 하기 위한 함수
-선출된 BC map 을 리턴 한다.
+Function to elect Block Creator
+Returns the elected Block Creator map.
 */
 func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.Hash, stks staking.Stakers, state *state.StateDB) VoteResults {
 	result := make(VoteResults)
@@ -272,7 +261,6 @@ func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.H
 	sort.Sort(list)
 
 	cddts := NewCandidates()
-
 	for _, stk := range list {
 		point := state.GetPoint(stk).Uint64()
 		cddts.Add(Candidate{
@@ -321,8 +309,6 @@ func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint
 		}
 		DIF -= DIF_R
 	}
-
-	//fmt.Println(DIF)
 	return result
 }
 
@@ -380,14 +366,12 @@ func (cs *Candidates) selectBIP3BlockCreator(config *params.ChainConfig, number 
 		cs.selections = cs.selections[:len(cs.selections)-1]
 		cs.total -= out.point
 	}
-
-	//fmt.Println(DIF)
 	return result
 }
 
 /*
 [BERITH]
-예상 BC 선출 비율을 계산하는 함수
+A function to calculate the expected Block Creator election rate
 */
 func (cs *Candidates) getJoinRatio(address common.Address) float64 {
 	stake := uint64(0)
