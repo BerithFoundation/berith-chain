@@ -399,7 +399,6 @@ func TestKeyStore_GetPrivateKey(t *testing.T) {
 	}
 
 	pk, err := ks.GetPrivateKey(acc.Address.String(), pass)
-
 	if err != nil {
 		t.Fatal(err)
 	}

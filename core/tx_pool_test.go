@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/BerithFoundation/berith-chain/berith/staking"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
@@ -101,7 +100,7 @@ func TestTransactionValidate(t *testing.T) {
 		},
 	}
 
-	stkDB := new(stakingdb.StakingDB)
+	stkDB := new(staking.StakingDB)
 
 	if err := stkDB.CreateDB(os.TempDir()+"/stakingdb/", staking.NewStakers); err != nil {
 		t.Error(err)

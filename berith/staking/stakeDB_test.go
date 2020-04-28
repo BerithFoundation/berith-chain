@@ -1,17 +1,16 @@
-package stakingdb
+package staking
 
 import (
 	"errors"
 	"os"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
 func TestStakers(t *testing.T) {
 	db := new(StakingDB)
-	db.CreateDB(os.TempDir()+"/stakingdb/", staking.NewStakers)
+	db.CreateDB(os.TempDir()+"/stakingdb/", NewStakers)
 
 	err := errors.New("result is incorrect than expected")
 

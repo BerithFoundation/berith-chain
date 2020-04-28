@@ -20,6 +20,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"io"
 	"math/big"
 	mrand "math/rand"
@@ -27,7 +28,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
@@ -139,13 +139,13 @@ type BlockChain struct {
 	badBlocks      *lru.Cache              // Bad block cache
 	shouldPreserve func(*types.Block) bool // Function used to determine whether should preserve the given block.
 
-	stakingDB *stakingdb.StakingDB
+	stakingDB *staking.StakingDB
 }
 
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
-func NewBlockChain(stakingDB *stakingdb.StakingDB, db berithdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
+func NewBlockChain(stakingDB *staking.StakingDB, db berithdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{
 			TrieCleanLimit: 256,
@@ -601,7 +601,6 @@ func (bc *BlockChain) HasState(hash common.Hash) bool {
 func (bc *BlockChain) HasBlockAndState(hash common.Hash, number uint64) bool {
 	// Check first that the block itself is known
 	block := bc.GetBlock(hash, number)
-
 	if block == nil {
 		return false
 	}
@@ -1143,13 +1142,11 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 	block, err := it.next()
 
 	//블록 Body Validation
-
 	switch {
 	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(it)
-
-		// First block is future, shove it (and all children) to the future queue (unknown ancestor)
+	// First block is future, shove it (and all children) to the future queue (unknown ancestor)
 	case err == consensus.ErrFutureBlock || (err == consensus.ErrUnknownAncestor && bc.futureBlocks.Contains(it.first().ParentHash())):
 		for block != nil && (it.index == 0 || err == consensus.ErrUnknownAncestor) {
 			if err := bc.addFutureBlock(block); err != nil {
@@ -1162,11 +1159,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 		// If there are any still remaining, mark as ignored
 		return it.index, events, coalescedLogs, err
-
-		// First block (and state) is known
-		//   1. We did a roll-back, and should now do a re-import
-		//   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
-		// 	    from the canonical chain, which has not been verified.
+	// First block (and state) is known
+	//   1. We did a roll-back, and should now do a re-import
+	//   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
+	// 	    from the canonical chain, which has not been verified.
 	case err == ErrKnownBlock:
 		// Skip all known blocks that behind us
 		current := bc.CurrentBlock().NumberU64()
@@ -1176,8 +1172,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 			block, err = it.next()
 		}
 		// Falls through to the block import
-
-		// Some other error occurred, abort
+	// Some other error occurred, abort
 	case err != nil:
 		stats.ignored += len(it.chain)
 		bc.reportBlock(block, nil, err)
@@ -1209,7 +1204,6 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		// Process block using the parent state as reference point.
 		t0 := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)
-
 		t1 := time.Now()
 		if err != nil {
 			switch err.Error() {

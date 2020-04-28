@@ -22,14 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/staking"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
-
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/berith/filters"
 	"github.com/BerithFoundation/berith-chain/berith/gasprice"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/consensus"
@@ -94,7 +92,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightBerith, error) 
 	peers := newPeerSet()
 	quitSync := make(chan struct{})
 
-	stakingDB := &stakingdb.StakingDB{}
+	stakingDB := &staking.StakingDB{}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
