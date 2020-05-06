@@ -52,6 +52,7 @@ func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common
 	if state == nil || err != nil {
 		return nil, err
 	}
+
 	return (*hexutil.Big)(state.GetPoint(address)), state.Error()
 }
 

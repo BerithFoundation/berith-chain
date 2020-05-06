@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	MAX_MINERS = 10000
+	MaxMiner = 10000
 )
 
 var (
@@ -74,7 +74,7 @@ func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint
 		return result
 	}
 
-	for count := 1; count <= MAX_MINERS && queue.front != queue.rear; count++ {
+	for count := 1; count <= MaxMiner && queue.front != queue.rear; count++ {
 		r, err := queue.dequeue()
 		if err != nil {
 			fmt.Println(err)

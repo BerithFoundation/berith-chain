@@ -1072,8 +1072,8 @@ func (c *BSRR) getMaxMiningCandidates(holders int) int {
 		t = 1
 	}
 
-	if t > selection.MAX_MINERS {
-		t = selection.MAX_MINERS
+	if t > selection.MaxMiner {
+		t = selection.MaxMiner
 	}
 	return t
 }
