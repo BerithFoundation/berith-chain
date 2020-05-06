@@ -34,7 +34,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/berith/filters"
 	"github.com/BerithFoundation/berith-chain/berith/gasprice"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
@@ -100,16 +99,7 @@ type Berith struct {
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and berithbase)
 
-	/*
-	[BERITH]
-	database for staker infos
-	*/
-	stakingDB *stakingdb.StakingDB
-}
-
-func (s *Berith) AddLesServer(ls LesServer) {
-	s.lesServer = ls
-	ls.SetBloomBitsIndexer(s.bloomIndexer)
+	stakingDB *staking.StakingDB // [Berith] database for staker infos
 }
 
 // New creates a new Berith object (including the
@@ -137,7 +127,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
-	stakingDB := &stakingdb.StakingDB{}
+	stakingDB := &staking.StakingDB{}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
@@ -240,8 +230,13 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (berithdb.D
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Berith service
-func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
+func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *staking.StakingDB) consensus.Engine {
 	return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
+}
+
+func (s *Berith) AddLesServer(ls LesServer) {
+	s.lesServer = ls
+	ls.SetBloomBitsIndexer(s.bloomIndexer)
 }
 
 // APIs return the collection of RPC services the berith package offers.
@@ -439,7 +434,6 @@ func (s *Berith) StopMining() {
 
 func (s *Berith) IsMining() bool      { return s.miner.Mining() }
 func (s *Berith) Miner() *miner.Miner { return s.miner }
-
 func (s *Berith) AccountManager() *accounts.Manager  { return s.accountManager }
 func (s *Berith) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *Berith) TxPool() *core.TxPool               { return s.txPool }

@@ -756,7 +756,6 @@ func (c *BSRR) Close() error {
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	const (
-		defaultBlockCreationSec    = 10      // Blocks are created every 10 seconds by default.
 		blockNumberAt1Year         = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
 		defaultReward              = 26      // The basic reward is 26 tokens.
 		additionalReward           = 5       // Additional rewards are paid for one year.
@@ -771,7 +770,7 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	}
 
 	// Value to correct Reward when block creation time is changed.
-	correctionValue := float64(config.Bsrr.Period) / defaultBlockCreationSec
+	correctionValue := float64(config.Bsrr.Period) / common.DefaultBlockCreationSec
 	correctedBlockNumber := float64(number) * correctionValue
 
 	var addtional float64 = 0
@@ -1073,8 +1072,8 @@ func (c *BSRR) getMaxMiningCandidates(holders int) int {
 		t = 1
 	}
 
-	if t > selection.MAX_MINERS {
-		t = selection.MAX_MINERS
+	if t > selection.MaxMiner {
+		t = selection.MaxMiner
 	}
 	return t
 }

@@ -1,4 +1,4 @@
-package stakingdb
+package staking
 
 import (
 	"fmt"
@@ -6,20 +6,21 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/rlp"
 
-	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
+/*
+[Berith]
+Database that stores staker information
+*/
 type StakingDB struct {
 	creator createFunc
 	stakeDB *berithdb.LDBDatabase
 }
 
-type createFunc func() staking.Stakers
+// staker type creation function
+type createFunc func() Stakers
 
-/**
-DB Create
-*/
 func (s *StakingDB) CreateDB(filename string, creator createFunc) error {
 	if s.stakeDB != nil {
 		return nil
@@ -36,38 +37,34 @@ func (s *StakingDB) CreateDB(filename string, creator createFunc) error {
 	return nil
 }
 
-/**
-DB Get Value
+/*
+[Berith]
+Get staker data of a specific block.
 */
 func (s *StakingDB) getValue(key string) ([]byte, error) {
 	k := []byte(key)
 
-	bt, err := s.stakeDB.Get(k)
+	stakers, err := s.stakeDB.Get(k)
 	if err != nil {
 		return nil, err
 	}
-
-	return bt, nil
+	return stakers, nil
 }
 
-/**
-DB Insert Value
+/*
+[Berith]
+Save stakers data in database with block number as key
 */
-func (s *StakingDB) pushValue(k string, stakers staking.Stakers) error {
+func (s *StakingDB) pushValue(k string, stakers Stakers) error {
 	key := []byte(k)
 
 	v, err := rlp.EncodeToBytes(stakers)
-
 	if err != nil {
 		return err
 	}
-
 	return s.stakeDB.Put(key, v)
 }
 
-/**
-DB Close
-*/
 func (s *StakingDB) Close() {
 	if s.stakeDB == nil {
 		return
@@ -75,33 +72,38 @@ func (s *StakingDB) Close() {
 	s.stakeDB.Close()
 }
 
-func (s *StakingDB) GetStakers(key string) (staking.Stakers, error) {
+/*
+[Berith]
+After importing the staker data, it is processed into an appropriate data structure and returned.
+*/
+func (s *StakingDB) GetStakers(key string) (Stakers, error) {
 	val, err := s.getValue(key)
 	if err != nil {
 		return nil, err
 	}
 
 	holder := make([]common.Address, 0)
-
 	if err := rlp.DecodeBytes(val, &holder); err != nil {
 		return nil, err
 	}
 
 	stakers := s.creator()
-
 	stakers.FetchFromList(holder)
 
 	return stakers, nil
 }
 
-func (s *StakingDB) Commit(key string, value staking.Stakers) error {
+/*
+[Berith]
+Save stakers data in database with block number as key
+*/
+func (s *StakingDB) Commit(key string, value Stakers) error {
 	if err := s.pushValue(key, value); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (s *StakingDB) NewStakers() staking.Stakers {
+func (s *StakingDB) NewStakers() Stakers {
 	return s.creator()
 }

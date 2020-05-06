@@ -1,20 +1,16 @@
-/*
-[BERITH]
-New function implementation in berith
-Where to implement functions used by CLI and RPC
-*/
+// [BERITH]
+// New function implementation in berith
+// Where to implement functions used by CLI and RPC
 
 package brtapi
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"strconv"
-
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	"strconv"
 
 	"math/big"
 
@@ -36,80 +32,6 @@ type PrivateBerithAPI struct {
 
 /*
 [BERITH]
-SendTxArgs represents the arguments to sumbit a new transaction into the transaction pool.
-Specify the tx type by putting Base and Target in the existing transaction structure.
-*/
-type SendTxArgs struct {
-	From     common.Address  `json:"from"`
-	To       *common.Address `json:"to"`
-	Gas      *hexutil.Uint64 `json:"gas"`
-	GasPrice *hexutil.Big    `json:"gasPrice"`
-	Value    *hexutil.Big    `json:"value"`
-	Nonce    *hexutil.Uint64 `json:"nonce"`
-	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
-	// newer name and should be preferred by clients.
-	Data   *hexutil.Bytes  `json:"data"`
-	Input  *hexutil.Bytes  `json:"input"`
-	Base   types.JobWallet `json:"Base"`
-	Target types.JobWallet `json:"Target"`
-}
-
-// setDefaults is a helper function that fills in default values for unspecified tx fields.
-func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
-	if args.Gas == nil {
-		args.Gas = new(hexutil.Uint64)
-		*(*uint64)(args.Gas) = 90000
-	}
-	if args.GasPrice == nil {
-		price, err := b.SuggestPrice(ctx)
-		if err != nil {
-			return err
-		}
-		args.GasPrice = (*hexutil.Big)(price)
-	}
-	if args.Value == nil {
-		args.Value = new(hexutil.Big)
-	}
-	if args.Nonce == nil {
-		nonce, err := b.GetPoolNonce(ctx, args.From)
-		if err != nil {
-			return err
-		}
-		args.Nonce = (*hexutil.Uint64)(&nonce)
-	}
-	if args.Data != nil && args.Input != nil && !bytes.Equal(*args.Data, *args.Input) {
-		return errors.New(`Both "data" and "input" are set and not equal. Please use "input" to pass transaction call data.`)
-	}
-	if args.To == nil {
-		// Contract creation
-		var input []byte
-		if args.Data != nil {
-			input = *args.Data
-		} else if args.Input != nil {
-			input = *args.Input
-		}
-		if len(input) == 0 {
-			return errors.New(`contract creation without any data provided`)
-		}
-	}
-	return nil
-}
-
-func (args *SendTxArgs) toTransaction() *types.Transaction {
-	var input []byte
-	if args.Data != nil {
-		input = *args.Data
-	} else if args.Input != nil {
-		input = *args.Input
-	}
-	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.Base, args.Target)
-	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, args.Base, args.Target)
-}
-
-/*
-[BERITH]
 The first function called to register the implementation
 */
 func NewPrivateBerithAPI(b Backend, m *miner.Miner, nonceLock *AddrLocker) *PrivateBerithAPI {
@@ -121,39 +43,12 @@ func NewPrivateBerithAPI(b Backend, m *miner.Miner, nonceLock *AddrLocker) *Priv
 	}
 }
 
-// submitTransaction is a helper function that submits tx to txPool and logs a message.
-func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (common.Hash, error) {
-	if err := b.SendTx(ctx, tx); err != nil {
-		return common.Hash{}, err
-	}
-	if tx.To() == nil {
-		signer := types.MakeSigner(b.ChainConfig(), b.CurrentBlock().Number())
-		from, err := types.Sender(signer, tx)
-		if err != nil {
-			return common.Hash{}, err
-		}
-		addr := crypto.CreateAddress(from, tx.Nonce())
-		log.Info("Submitted contract creation", "fullhash", tx.Hash().Hex(), "contract", addr.Hex())
-	} else {
-		log.Info("Submitted transaction", "fullhash", tx.Hash().Hex(), "recipient", tx.To())
-	}
-	return tx.Hash(), nil
-}
-
-type WalletTxArgs struct {
-	From     common.Address  `json:"from"`
-	Value    *hexutil.Big    `json:"value"`
-	Gas      *hexutil.Uint64 `json:"gas"`
-	GasPrice *hexutil.Big    `json:"gasPrice"`
-	Nonce    *hexutil.Uint64 `json:"nonce"`
-}
-
 /*
 [BERITH]
-Function to check the elected point of the specified account
+Function to get the SelectionPoint of the specified account
 */
-func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
-	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
+func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common.Address, blockNumber rpc.BlockNumber) (*hexutil.Big, error) {
+	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNumber)
 	if state == nil || err != nil {
 		return nil, err
 	}
@@ -163,72 +58,73 @@ func (s *PrivateBerithAPI) GetSelectionPoint(ctx context.Context, address common
 
 /*
 [BERITH]
-- SendStaking creates a transaction for user staking
-- Function to handle berith.stake request
-- Create Tx with added base and target.
-- Includes pre-processing logic that returns less than 100,000 errors when staking early
-- WalletTxArg structure is a structure to limit Tx
+Stake creates a transaction for user staking
+Function to handle berith.stake request
+Create Tx with added base and target.
+WalletTxArgs structure is a structure to limit Tx
 */
-func (s *PrivateBerithAPI) Stake(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
-
+func (s *PrivateBerithAPI) Stake(ctx context.Context, wallet WalletTxArgs) (common.Hash, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	if state == nil || err != nil {
 		return common.Hash{}, err
 	}
-	stakedAmount := state.GetStakeBalance(args.From)
-	stakingAmount := args.Value.ToInt()
+
+	stakedAmount := state.GetStakeBalance(wallet.From)
+	stakingAmount := wallet.Value.ToInt()
 	totalStakingAmount := new(big.Int).Add(stakingAmount, stakedAmount)
 
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
-		if totalStakingAmount.Cmp(config.Bsrr.StakeMinimum) <= -1 {
-			minimum := new(big.Int).Div(config.Bsrr.StakeMinimum, common.UnitForBer)
-
-			log.Error("The minimum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
-			return common.Hash{}, errors.New("staking balance failed")
+		err := checkStakeMinimum(totalStakingAmount, config.Bsrr.StakeMinimum)
+		if err != nil {
+			return common.Hash{}, err
 		}
 	}
 
-	// Look up the wallet containing the requested signer
-	sendTx := new(SendTxArgs)
-
 	// Create transaction
-	sendTx.From = args.From
-	sendTx.To = &args.From
-	sendTx.Value = args.Value
-	sendTx.Base = types.Main
-	sendTx.Target = types.Stake
-	sendTx.Gas = args.Gas
-	sendTx.GasPrice = args.GasPrice
-	sendTx.Nonce = args.Nonce
-
+	sendTx := &SendTxArgs{
+		From: wallet.From,
+		To: &wallet.From,
+		Value: wallet.Value,
+		Base: types.Main,
+		Target: types.Stake,
+		Gas: wallet.Gas,
+		GasPrice: wallet.GasPrice,
+		Nonce: wallet.Nonce,
+	}
 	return s.sendTransaction(ctx, *sendTx)
+}
+
+func checkStakeMinimum(stakeAmount *big.Int, stakeMininum *big.Int) error {
+	if stakeAmount.Cmp(stakeMininum) <= -1 {
+		minimum := new(big.Int).Div(stakeMininum, common.UnitForBer)
+
+		log.Error("The mininum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
+		return errors.New("staking balance failed")
+	}
+	return nil
 }
 
 /*
 [BERITH]
-- SendStaking creates a transaction for user staking
-- When this function is called, all staking is released and returned to Main
-- After creating Tx and sending it, it is processed by Consensus.
+When this function is called, all staking is released and returned to Main
+After creating Tx and sending it, it is processed by Consensus.
 */
-func (s *PrivateBerithAPI) StopStaking(ctx context.Context, args WalletTxArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	sendTx := new(SendTxArgs)
-
-	sendTx.From = args.From
-	sendTx.To = &args.From
-	sendTx.Value = new(hexutil.Big)
-	sendTx.Base = types.Stake
-	sendTx.Target = types.Main
-	sendTx.Gas = args.Gas
-	sendTx.GasPrice = args.GasPrice
-
+func (s *PrivateBerithAPI) StopStaking(ctx context.Context, wallet WalletTxArgs) (common.Hash, error) {
+	sendTx := &SendTxArgs{
+		From: wallet.From,
+		To: &wallet.From,
+		Value: new(hexutil.Big),
+		Base: types.Stake,
+		Target: types.Main,
+		Gas: wallet.Gas,
+		GasPrice: wallet.GasPrice,
+	}
 	return s.sendTransaction(ctx, *sendTx)
 }
 
 /*
 [BERITH]
-- private trasaction function
-- Functions that deal with actual transactions
+Functions that deal with actual transactions
 */
 func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
 	account := accounts.Account{Address: args.From}
@@ -260,10 +156,38 @@ func (s *PrivateBerithAPI) sendTransaction(ctx context.Context, args SendTxArgs)
 	return submitTransaction(ctx, s.backend, signed)
 }
 
+// submitTransaction is a helper function that submits tx to txPool and logs a message.
+func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (common.Hash, error) {
+	if err := b.SendTx(ctx, tx); err != nil {
+		return common.Hash{}, err
+	}
+
+	if err := printTxLog(b, tx); err == nil {
+		return common.Hash{}, err
+	}
+	return tx.Hash(), nil
+}
+
+// printTxLog is a function that provides a log of transmitted transactions.
+func printTxLog(b Backend, tx *types.Transaction) error {
+	if tx.To() == nil {
+		signer := types.MakeSigner(b.ChainConfig(), b.CurrentBlock().Number())
+		from, err := types.Sender(signer, tx)
+		if err != nil {
+			return err
+		}
+		addr := crypto.CreateAddress(from, tx.Nonce())
+		log.Info("Submitted contract creation", "fullhash", tx.Hash().Hex(), "contract", addr.Hex())
+	} else {
+		log.Info("Submitted transaction", "fullhash", tx.Hash().Hex(), "recipient", tx.To())
+	}
+	return nil
+}
+
 /*
 [BERITH]
- - Function to check the staking quantity of the specified Account
- - Check and return the current local block status
+Function to check the staking quantity of the specified Account
+Check and return the current local block status
 */
 func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Big, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -275,17 +199,8 @@ func (s *PrivateBerithAPI) GetStakeBalance(ctx context.Context, address common.A
 
 /*
 [BERITH]
- - Structure for returning account information
-*/
-type AccountInfo struct {
-	Balance      *big.Int //main balance
-	StakeBalance *big.Int //staking balance
-}
-
-/*
-[BERITH]
-- Function to return account information (All Balance)
-- Functions created for convenience of information verification
+Function to return account information (All Balance)
+Functions created for convenience of information verification
 */
 func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*AccountInfo, error) {
 	state, _, err := s.backend.StateAndHeaderByNumber(ctx, blockNr)
@@ -304,8 +219,8 @@ func (s *PrivateBerithAPI) GetAccountInfo(ctx context.Context, address common.Ad
 
 /*
 [BERITH]
-- Function to change the keystore password
-- Made by user's request
+Function to change the keystore password
+Made by user's request
 */
 func (s *PrivateBerithAPI) UpdateAccount(ctx context.Context, address common.Address, passphrase, newPassphrase string) error {
 	return fetchKeystore(s.accountManager).Update(accounts.Account{Address: address}, passphrase, newPassphrase)
