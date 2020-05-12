@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/log"
 	"github.com/jackpal/go-nat-pmp"
 )
 

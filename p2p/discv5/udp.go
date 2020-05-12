@@ -24,12 +24,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/nat"
-	"github.com/BerithFoundation/berith-chain/p2p/netutil"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	"berith-chain/log"
+	"berith-chain/p2p/nat"
+	"berith-chain/p2p/netutil"
+	"berith-chain/rlp"
 )
 
 const Version = 4

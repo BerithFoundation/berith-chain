@@ -20,8 +20,8 @@ package rawdb
 import (
 	"encoding/binary"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/metrics"
+	"berith-chain/common"
+	"berith-chain/metrics"
 )
 
 // The fields below define the low level database schema prefixing.

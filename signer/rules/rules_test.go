@@ -22,13 +22,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
-	"github.com/BerithFoundation/berith-chain/signer/core"
-	"github.com/BerithFoundation/berith-chain/signer/storage"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
+	"berith-chain/internal/berithapi"
+	"berith-chain/signer/core"
+	"berith-chain/signer/storage"
 )
 
 const JS = `

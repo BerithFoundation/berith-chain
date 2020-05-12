@@ -1,7 +1,7 @@
 package selection
 
 import (
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 	"math/big"
 )
 

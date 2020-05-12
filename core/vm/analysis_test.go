@@ -19,7 +19,7 @@ package vm
 import (
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/crypto"
 )
 
 func TestJumpDestAnalysis(t *testing.T) {

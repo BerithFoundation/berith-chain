@@ -25,10 +25,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/cmd/utils"
-	"github.com/BerithFoundation/berith-chain/node"
-	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/gizak/termui"
+	"berith-chain/cmd/utils"
+	"berith-chain/node"
+	"berith-chain/rpc"
+	"github.com/gizak/termui/2.3.0" // Since the library does not support go module, it must be downloaded and installed
 	"gopkg.in/urfave/cli.v1"
 )
 

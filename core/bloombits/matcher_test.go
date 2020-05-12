@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 const testSectionSize = 4096

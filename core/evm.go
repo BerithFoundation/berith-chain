@@ -19,10 +19,10 @@ package core
 import (
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/consensus"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/core/vm"
+	"berith-chain/common"
+	"berith-chain/consensus"
+	"berith-chain/core/types"
+	"berith-chain/core/vm"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the

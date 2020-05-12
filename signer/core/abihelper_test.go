@@ -25,8 +25,8 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/BerithFoundation/berith-chain/accounts/abi"
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/accounts/abi"
+	"berith-chain/common"
 )
 
 func verify(t *testing.T, jsondata, calldata string, exp []interface{}) {

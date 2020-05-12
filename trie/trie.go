@@ -21,10 +21,10 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/metrics"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	"berith-chain/log"
+	"berith-chain/metrics"
 )
 
 var (

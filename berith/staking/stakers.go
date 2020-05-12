@@ -3,8 +3,8 @@ package staking
 import (
 	"io"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/rlp"
 )
 
 type stakers map[common.Address]struct{}

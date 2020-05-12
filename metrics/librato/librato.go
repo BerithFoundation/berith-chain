@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/metrics"
+	"berith-chain/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String

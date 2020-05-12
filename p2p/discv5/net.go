@@ -24,13 +24,13 @@ import (
 	"net"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/mclock"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/netutil"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/common/mclock"
+	"berith-chain/crypto"
+	"berith-chain/crypto/sha3"
+	"berith-chain/log"
+	"berith-chain/p2p/netutil"
+	"berith-chain/rlp"
 )
 
 var (

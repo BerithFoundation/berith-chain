@@ -28,14 +28,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common/mclock"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p"
-	"github.com/BerithFoundation/berith-chain/p2p/discv5"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/berithdb"
+	"berith-chain/common/mclock"
+	"berith-chain/crypto"
+	"berith-chain/log"
+	"berith-chain/p2p"
+	"berith-chain/p2p/discv5"
+	"berith-chain/p2p/enode"
+	"berith-chain/rlp"
 )
 
 const (

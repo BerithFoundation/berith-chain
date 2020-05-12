@@ -19,7 +19,7 @@ package berithapi
 import (
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 type AddrLocker struct {

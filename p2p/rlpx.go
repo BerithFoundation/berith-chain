@@ -35,12 +35,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/bitutil"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/crypto/ecies"
-	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
-	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common/bitutil"
+	"berith-chain/crypto"
+	"berith-chain/crypto/ecies"
+	"berith-chain/crypto/secp256k1"
+	"berith-chain/crypto/sha3"
+	"berith-chain/rlp"
 	"github.com/golang/snappy"
 )
 

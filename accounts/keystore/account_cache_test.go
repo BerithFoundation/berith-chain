@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/accounts"
+	"berith-chain/common"
 	"github.com/cespare/cp"
 	"github.com/davecgh/go-spew/spew"
 )

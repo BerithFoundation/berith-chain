@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.

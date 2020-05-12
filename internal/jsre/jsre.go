@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/internal/jsre/deps"
+	"berith-chain/common"
+	"berith-chain/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

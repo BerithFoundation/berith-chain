@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/internal/jsre"
-	"github.com/BerithFoundation/berith-chain/node"
+	"berith-chain/berith"
+	"berith-chain/common"
+	"berith-chain/core"
+	"berith-chain/internal/jsre"
+	"berith-chain/node"
 )
 
 const (

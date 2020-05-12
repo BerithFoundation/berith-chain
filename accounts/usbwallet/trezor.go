@@ -27,12 +27,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/accounts/usbwallet/internal/trezor"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/accounts/usbwallet/internal/trezor"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
+	"berith-chain/log"
 	"github.com/golang/protobuf/proto"
 )
 

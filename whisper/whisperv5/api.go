@@ -24,12 +24,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/crypto"
+	"berith-chain/log"
+	"berith-chain/p2p/enode"
+	"berith-chain/rpc"
 )
 
 var (

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/crypto"
 )
 
 // Method represents a callable given a `Name` and whether the method is a constant.

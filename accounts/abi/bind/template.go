@@ -16,7 +16,7 @@
 
 package bind
 
-import "github.com/BerithFoundation/berith-chain/accounts/abi"
+import "berith-chain/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {
@@ -68,12 +68,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/BerithFoundation/berith-chain"
-	"github.com/BerithFoundation/berith-chain/accounts/abi"
-	"github.com/BerithFoundation/berith-chain/accounts/abi/bind"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/event"
+	ethereum "berith-chain"
+	"berith-chain/accounts/abi"
+	"berith-chain/accounts/abi/bind"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

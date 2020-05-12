@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	berith_crypto "github.com/BerithFoundation/berith-chain/crypto"
+	berith_crypto "berith-chain/crypto"
 )
 
 var (

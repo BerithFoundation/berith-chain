@@ -23,7 +23,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

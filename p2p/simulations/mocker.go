@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	"berith-chain/log"
+	"berith-chain/p2p/enode"
+	"berith-chain/p2p/simulations/adapters"
 )
 
 //a map of mocker names to its function

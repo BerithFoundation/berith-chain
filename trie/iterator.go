@@ -21,8 +21,8 @@ import (
 	"container/heap"
 	"errors"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/rlp"
 )
 
 // Iterator is a key-value trie iterator that traverses a Trie.

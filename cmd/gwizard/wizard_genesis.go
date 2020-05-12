@@ -27,10 +27,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/common"
+	"berith-chain/core"
+	"berith-chain/log"
+	"berith-chain/params"
 )
 
 // makeGenesis creates a new genesis struct based on some user input.

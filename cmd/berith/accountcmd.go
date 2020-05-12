@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/accounts/keystore"
-	"github.com/BerithFoundation/berith-chain/cmd/utils"
-	"github.com/BerithFoundation/berith-chain/console"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/accounts/keystore"
+	"berith-chain/cmd/utils"
+	"berith-chain/console"
+	"berith-chain/crypto"
+	"berith-chain/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

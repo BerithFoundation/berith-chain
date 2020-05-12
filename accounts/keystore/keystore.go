@@ -34,11 +34,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/event"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/crypto"
+	"berith-chain/event"
 )
 
 var (

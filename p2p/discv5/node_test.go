@@ -27,8 +27,8 @@ import (
 	"testing/quick"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/common"
+	"berith-chain/crypto"
 )
 
 func ExampleNewNode() {

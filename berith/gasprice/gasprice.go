@@ -22,11 +22,11 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
-	"github.com/BerithFoundation/berith-chain/params"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/internal/berithapi"
+	"berith-chain/params"
+	"berith-chain/rpc"
 )
 
 var maxPrice = big.NewInt(500 * params.Gmin)

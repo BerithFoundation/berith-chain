@@ -21,13 +21,13 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/core/bloombits"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/core"
+	"berith-chain/core/bloombits"
+	"berith-chain/core/types"
+	"berith-chain/event"
+	"berith-chain/rpc"
 )
 
 type Backend interface {

@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/common"
+	"berith-chain/core/state"
+	"berith-chain/core/vm"
+	"berith-chain/params"
 )
 
 type account struct{}

@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/common"
+	"berith-chain/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

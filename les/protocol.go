@@ -24,12 +24,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/core/rawdb"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/core"
+	"berith-chain/core/rawdb"
+	"berith-chain/crypto"
+	"berith-chain/p2p/enode"
+	"berith-chain/rlp"
 )
 
 // Constants to match up protocol versions and messages

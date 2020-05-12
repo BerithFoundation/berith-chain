@@ -31,11 +31,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/crypto/ecies"
-	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/p2p/simulations/pipes"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/crypto"
+	"berith-chain/crypto/ecies"
+	"berith-chain/crypto/sha3"
+	"berith-chain/p2p/simulations/pipes"
+	"berith-chain/rlp"
 	"github.com/davecgh/go-spew/spew"
 )
 

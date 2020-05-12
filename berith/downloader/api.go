@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	berith "github.com/BerithFoundation/berith-chain"
-	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	berith "berith-chain"
+	"berith-chain/event"
+	"berith-chain/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.

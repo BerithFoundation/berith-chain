@@ -20,8 +20,8 @@ import (
 	"context"
 	"net"
 
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/netutil"
+	"berith-chain/log"
+	"berith-chain/p2p/netutil"
 )
 
 // ServeListener accepts connections on l, serving JSON-RPC on them.

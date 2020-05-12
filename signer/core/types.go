@@ -23,10 +23,10 @@ import (
 
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
 )
 
 type Accounts []Account

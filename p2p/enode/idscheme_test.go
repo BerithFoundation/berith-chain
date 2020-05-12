@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/p2p/enr"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/crypto"
+	"berith-chain/p2p/enr"
+	"berith-chain/rlp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

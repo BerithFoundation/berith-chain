@@ -21,8 +21,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
 )
 
 func hexAddr(a string) common.Address { return common.BytesToAddress(common.FromHex(a)) }

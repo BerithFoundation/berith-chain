@@ -21,8 +21,8 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/crypto"
+	"berith-chain/rlp"
 )
 
 func generateMessageParams() (*MessageParams, error) {

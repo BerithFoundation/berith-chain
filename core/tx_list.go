@@ -22,9 +22,9 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/log"
 )
 
 // nonceHeap is a heap.Interface implementation over 64bit unsigned integers for

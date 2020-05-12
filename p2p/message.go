@@ -25,9 +25,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/event"
+	"berith-chain/p2p/enode"
+	"berith-chain/rlp"
 )
 
 // Msg defines the structure of a p2p message.

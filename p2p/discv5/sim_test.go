@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 // In this test, nodes try to randomly resolve each other.

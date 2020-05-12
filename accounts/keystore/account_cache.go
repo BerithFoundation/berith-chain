@@ -27,9 +27,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/log"
 	mapset "github.com/deckarep/golang-set"
 )
 

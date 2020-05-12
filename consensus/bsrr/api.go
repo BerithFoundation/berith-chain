@@ -16,11 +16,11 @@ Consensus algorithm related API
 package bsrr
 
 import (
-	"github.com/BerithFoundation/berith-chain/berith/selection"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/consensus"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/berith/selection"
+	"berith-chain/common"
+	"berith-chain/consensus"
+	"berith-chain/core/types"
+	"berith-chain/rpc"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting

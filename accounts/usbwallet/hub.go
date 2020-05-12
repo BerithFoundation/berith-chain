@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/event"
+	"berith-chain/log"
 	"github.com/karalabe/hid"
 )
 

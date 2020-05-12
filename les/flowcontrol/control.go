@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"berith-chain/common/mclock"
 )
 
 const fcTimeConst = time.Millisecond

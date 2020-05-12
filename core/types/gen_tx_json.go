@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
 )
 
 var _ = (*txdataMarshaling)(nil)

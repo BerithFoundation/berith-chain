@@ -22,8 +22,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/math"
+	"berith-chain/common"
+	"berith-chain/common/math"
 )
 
 type JSONLogger struct {

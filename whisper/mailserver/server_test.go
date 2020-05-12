@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	whisper "github.com/BerithFoundation/berith-chain/whisper/whisperv6"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	whisper "berith-chain/whisper/whisperv6"
 )
 
 const powRequirement = 0.00001

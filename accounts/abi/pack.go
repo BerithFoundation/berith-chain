@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/math"
+	"berith-chain/common"
+	"berith-chain/common/math"
 )
 
 // packBytesSlice packs the given bytes as [L, V] as the canonical representation

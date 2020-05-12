@@ -20,14 +20,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/berith"
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/light"
-	"github.com/BerithFoundation/berith-chain/p2p"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/berith"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/core"
+	"berith-chain/light"
+	"berith-chain/p2p"
+	"berith-chain/p2p/enode"
+	"berith-chain/params"
 )
 
 // lesCommons contains fields needed by both server and client.

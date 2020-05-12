@@ -22,12 +22,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/metrics"
-	"github.com/BerithFoundation/berith-chain/p2p"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/common/hexutil"
+	"berith-chain/crypto"
+	"berith-chain/metrics"
+	"berith-chain/p2p"
+	"berith-chain/p2p/enode"
+	"berith-chain/rpc"
 )
 
 // PrivateAdminAPI is the collection of administrative API methods exposed only

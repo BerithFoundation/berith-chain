@@ -7,10 +7,10 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/common/math"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/common/math"
+	"berith-chain/params"
 )
 
 var _ = (*genesisSpecMarshaling)(nil)

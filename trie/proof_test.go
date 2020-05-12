@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/crypto"
 )
 
 func init() {

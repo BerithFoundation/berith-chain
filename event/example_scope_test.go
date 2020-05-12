@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/event"
+	"berith-chain/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/bitutil"
-	"github.com/BerithFoundation/berith-chain/light"
+	"berith-chain/common/bitutil"
+	"berith-chain/light"
 )
 
 const (

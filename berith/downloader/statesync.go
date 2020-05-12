@@ -22,13 +22,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/rawdb"
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/trie"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/core/rawdb"
+	"berith-chain/core/state"
+	"berith-chain/crypto/sha3"
+	"berith-chain/log"
+	"berith-chain/trie"
 )
 
 // stateReq represents a batch of state fetch requests grouped together into

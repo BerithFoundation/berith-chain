@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/common"
+	"berith-chain/crypto"
 )
 
 func TestNetwork_Lookup(t *testing.T) {

@@ -23,8 +23,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/mclock"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/common/mclock"
+	"berith-chain/log"
 )
 
 const (

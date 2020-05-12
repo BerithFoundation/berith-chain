@@ -19,7 +19,7 @@ package core
 import (
 	"runtime"
 
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/core/types"
 )
 
 // senderCacher is a concurrent transaction sender recoverer and cacher.

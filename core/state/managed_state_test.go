@@ -19,8 +19,8 @@ package state
 import (
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/berithdb"
+	"berith-chain/common"
 )
 
 var addr = common.BytesToAddress([]byte("test"))

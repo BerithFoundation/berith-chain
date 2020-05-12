@@ -23,8 +23,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/rlp"
 )
 
 // from bcValidBlockTest.json, "SimpleTx"

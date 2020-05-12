@@ -20,7 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/berithclient"
+	"berith-chain/berithclient"
 	cli "gopkg.in/urfave/cli.v1"
 	"math/big"
 	"math/rand"

@@ -11,14 +11,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
+	"berith-chain/rlp"
+	"berith-chain/rpc"
 	"github.com/gookit/color"
 
-	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"berith-chain/accounts/keystore"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

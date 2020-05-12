@@ -19,9 +19,9 @@ package state
 import (
 	"bytes"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/BerithFoundation/berith-chain/trie"
+	"berith-chain/common"
+	"berith-chain/rlp"
+	"berith-chain/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.

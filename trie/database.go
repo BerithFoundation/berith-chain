@@ -22,11 +22,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/metrics"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/log"
+	"berith-chain/metrics"
+	"berith-chain/rlp"
 	"github.com/allegro/bigcache"
 )
 

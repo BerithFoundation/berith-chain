@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"github.com/BerithFoundation/berith-chain/metrics"
+	"berith-chain/metrics"
 )
 
 var (

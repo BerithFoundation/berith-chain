@@ -25,10 +25,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/mclock"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/common"
+	"berith-chain/common/mclock"
+	"berith-chain/crypto"
+	"berith-chain/log"
 )
 
 const (

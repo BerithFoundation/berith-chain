@@ -7,19 +7,19 @@ package brtapi
 import (
 	"context"
 	"errors"
-	"github.com/BerithFoundation/berith-chain/accounts/keystore"
-	"github.com/BerithFoundation/berith-chain/miner"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/accounts/keystore"
+	"berith-chain/miner"
+	"berith-chain/rpc"
 	"strconv"
 
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
+	"berith-chain/crypto"
+	"berith-chain/log"
 )
 
 //PrivateBerithAPI struct of berith private apis

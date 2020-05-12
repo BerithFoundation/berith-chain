@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
+	"berith-chain/rlp"
+	"berith-chain/rpc"
 )
 
 // Client defines typed wrappers for the Berith RPC API.

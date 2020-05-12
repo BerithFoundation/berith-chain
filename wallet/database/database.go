@@ -4,9 +4,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/rlp"
 )
 
 // 로그인 계정 table ( key 값은 id 로 설정)

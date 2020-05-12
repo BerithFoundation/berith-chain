@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/common/math"
-	"github.com/BerithFoundation/berith-chain/core/vm"
+	"berith-chain/common/math"
+	"berith-chain/core/vm"
 )
 
 // Compiler contains information about the parsed source

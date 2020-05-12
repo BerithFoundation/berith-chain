@@ -33,10 +33,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	"berith-chain/p2p/enode"
+	"berith-chain/rlp"
 	"github.com/davecgh/go-spew/spew"
 )
 

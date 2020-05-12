@@ -19,10 +19,10 @@ package les
 import (
 	"context"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/light"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/berithdb"
+	"berith-chain/core"
+	"berith-chain/light"
+	"berith-chain/log"
 )
 
 // LesOdr implements light.OdrBackend

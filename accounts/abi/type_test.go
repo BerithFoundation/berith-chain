@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 	"github.com/davecgh/go-spew/spew"
 )
 

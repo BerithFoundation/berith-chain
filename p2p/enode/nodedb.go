@@ -25,8 +25,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/log"
+	"berith-chain/rlp"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"

@@ -21,11 +21,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"berith-chain/berith/downloader"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/log"
+	"berith-chain/p2p/enode"
 )
 
 const (

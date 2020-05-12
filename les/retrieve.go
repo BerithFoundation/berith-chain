@@ -26,8 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/mclock"
-	"github.com/BerithFoundation/berith-chain/light"
+	"berith-chain/common/mclock"
+	"berith-chain/light"
 )
 
 var (

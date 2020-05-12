@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"berith-chain/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

@@ -21,9 +21,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/internal/berithapi"
+	"berith-chain/log"
+	"berith-chain/rpc"
 )
 
 type StdIOUI struct {

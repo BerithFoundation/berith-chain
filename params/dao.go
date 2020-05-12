@@ -19,7 +19,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 // DAOForkBlockExtra is the block header extra-data field to set for the DAO fork

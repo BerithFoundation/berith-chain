@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/BerithFoundation/berith-chain/node"
-	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/BerithFoundation/berith-chain/wallet/database"
+	"berith-chain/node"
+	"berith-chain/rpc"
+	"berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"

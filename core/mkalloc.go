@@ -34,8 +34,8 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/core"
+	"berith-chain/rlp"
 )
 
 type allocItem struct{ Addr, Balance *big.Int }

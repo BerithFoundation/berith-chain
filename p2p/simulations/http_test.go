@@ -28,13 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/node"
-	"github.com/BerithFoundation/berith-chain/p2p"
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
-	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/event"
+	"berith-chain/log"
+	"berith-chain/node"
+	"berith-chain/p2p"
+	"berith-chain/p2p/enode"
+	"berith-chain/p2p/simulations/adapters"
+	"berith-chain/rpc"
 	colorable "github.com/mattn/go-colorable"
 )
 

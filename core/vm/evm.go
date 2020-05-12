@@ -21,11 +21,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/core/types"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	"berith-chain/params"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already

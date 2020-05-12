@@ -2,15 +2,15 @@ package brtapi
 
 import (
 	"context"
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/miner"
+	"berith-chain/core/state"
+	"berith-chain/miner"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/params"
-	"github.com/BerithFoundation/berith-chain/rpc"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/params"
+	"berith-chain/rpc"
 )
 
 //Backend backend of berith service

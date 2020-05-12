@@ -19,8 +19,8 @@ package les
 import (
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/common"
+	"berith-chain/core/types"
 )
 
 type ltrInfo struct {

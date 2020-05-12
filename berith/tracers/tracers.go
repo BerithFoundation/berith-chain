@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/BerithFoundation/berith-chain/berith/tracers/internal/tracers"
+	"berith-chain/berith/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.

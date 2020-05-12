@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/common/math"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/common/math"
 )
 
 var _ = (*genesisAccountMarshaling)(nil)

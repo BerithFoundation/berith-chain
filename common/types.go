@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"berith-chain/common/hexutil"
+	"berith-chain/crypto/sha3"
 )
 
 // Lengths of hashes and addresses in bytes.

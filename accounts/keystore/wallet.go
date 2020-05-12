@@ -19,9 +19,9 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/BerithFoundation/berith-chain"
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/core/types"
+	ethereum "berith-chain"
+	"berith-chain/accounts"
+	"berith-chain/core/types"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

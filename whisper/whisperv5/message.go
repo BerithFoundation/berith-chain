@@ -27,10 +27,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/crypto/ecies"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/common"
+	"berith-chain/crypto"
+	"berith-chain/crypto/ecies"
+	"berith-chain/log"
 )
 
 // MessageParams specifies the exact way a message should be wrapped into an Envelope.

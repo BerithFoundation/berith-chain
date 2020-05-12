@@ -25,8 +25,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/accounts"
+	"berith-chain/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 )

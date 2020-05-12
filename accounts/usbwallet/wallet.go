@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/BerithFoundation/berith-chain"
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/log"
+	ethereum "berith-chain"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/core/types"
+	"berith-chain/log"
 	"github.com/karalabe/hid"
 )
 

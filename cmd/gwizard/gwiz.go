@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

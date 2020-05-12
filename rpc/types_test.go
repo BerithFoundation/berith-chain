@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common/math"
+	"berith-chain/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

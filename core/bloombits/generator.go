@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/core/types"
 )
 
 var (

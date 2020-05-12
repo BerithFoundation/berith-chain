@@ -29,7 +29,7 @@ import (
 	"net"
 	"sort"
 
-	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/common"
 )
 
 const (

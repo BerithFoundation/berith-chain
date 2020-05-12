@@ -40,7 +40,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/BerithFoundation/berith-chain/rlp"
+	"berith-chain/rlp"
 )
 
 const SizeLimit = 300 // maximum encoded size of a node record in bytes

@@ -6,11 +6,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/gasprice"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/core"
+	"berith-chain/berith/downloader"
+	"berith-chain/berith/gasprice"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/core"
 )
 
 var _ = (*configMarshaling)(nil)

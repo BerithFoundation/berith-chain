@@ -17,17 +17,17 @@
 package runtime
 
 import (
-	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/core/types"
 	"math"
 	"math/big"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berithdb"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/berithdb"
+	"berith-chain/common"
+	"berith-chain/core/state"
+	"berith-chain/core/vm"
+	"berith-chain/crypto"
+	"berith-chain/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running

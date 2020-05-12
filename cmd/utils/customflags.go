@@ -27,7 +27,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/common/math"
+	"berith-chain/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 

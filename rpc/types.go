@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"berith-chain/common/hexutil"
 	mapset "github.com/deckarep/golang-set"
 )
 

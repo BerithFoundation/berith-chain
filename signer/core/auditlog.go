@@ -21,11 +21,11 @@ import (
 
 	"encoding/json"
 
-	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
-	"github.com/BerithFoundation/berith-chain/log"
+	"berith-chain/accounts"
+	"berith-chain/common"
+	"berith-chain/common/hexutil"
+	"berith-chain/internal/berithapi"
+	"berith-chain/log"
 )
 
 type AuditLogger struct {

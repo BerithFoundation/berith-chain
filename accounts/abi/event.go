@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/crypto"
+	"berith-chain/common"
+	"berith-chain/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

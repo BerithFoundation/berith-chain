@@ -1,6 +1,6 @@
 package discv5
 
-import "github.com/BerithFoundation/berith-chain/metrics"
+import "berith-chain/metrics"
 
 var (
 	ingressTrafficMeter = metrics.NewRegisteredMeter("discv5/InboundTraffic", nil)

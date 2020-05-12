@@ -17,14 +17,14 @@
 package core
 
 import (
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/consensus"
-	"github.com/BerithFoundation/berith-chain/consensus/misc"
-	"github.com/BerithFoundation/berith-chain/core/state"
-	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/params"
+	"berith-chain/common"
+	"berith-chain/consensus"
+	"berith-chain/consensus/misc"
+	"berith-chain/core/state"
+	"berith-chain/core/types"
+	"berith-chain/core/vm"
+	"berith-chain/crypto"
+	"berith-chain/params"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning

@@ -20,7 +20,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"berith-chain/p2p/enode"
 )
 
 var (
