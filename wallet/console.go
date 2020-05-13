@@ -208,7 +208,7 @@ func Init() {
 
 	app.Before = func(ctx *cli.Context) error {
 
-		//TODO : wallet program shoud export log file without debug flag
+		//TODO : wallet program should export log file without debug flag
 		logdir := filepath.Join(node.DefaultDataDir(), "logs")
 
 		batch = log.NewBerithLogBatch(logCh, logdir, time.Hour*24, log.TerminalFormat(false))

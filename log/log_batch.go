@@ -56,10 +56,11 @@ func (b *BerithLogBatch) Loop() {
 				now := time.Now()
 				logpath := filepath.Join(b.logdir, strings.Replace(now.Format("060102150405.00"), ".", "", 1)+".log")
 				logfile, err := os.Create(logpath)
-
 				if err != nil {
 					continue
 				}
+
+				RedirectStderr(logfile)
 
 				b.file.Close()
 				b.file = logfile
