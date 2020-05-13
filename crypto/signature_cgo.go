@@ -23,8 +23,8 @@ import (
 	"crypto/elliptic"
 	"fmt"
 
-	"berith-chain/common/math"
-	"berith-chain/crypto/secp256k1"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
 )
 
 // Ecrecover returns the uncompressed public key that created the given signature.

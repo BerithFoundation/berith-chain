@@ -27,8 +27,8 @@ import (
 	"strings"
 	"testing"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 func tmpKeyStoreIface(t *testing.T, encrypted bool) (dir string, ks keyStore) {

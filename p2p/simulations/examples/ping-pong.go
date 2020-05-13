@@ -25,13 +25,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"berith-chain/log"
-	"berith-chain/node"
-	"berith-chain/p2p"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/simulations"
-	"berith-chain/p2p/simulations/adapters"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 var adapterType = flag.String("adapter", "sim", `node adapter to use (one of "sim", "exec" or "docker")`)

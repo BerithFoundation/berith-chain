@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 const (

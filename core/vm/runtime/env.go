@@ -17,9 +17,9 @@
 package runtime
 
 import (
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/vm"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {

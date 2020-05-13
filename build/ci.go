@@ -59,8 +59,8 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/internal/build"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/internal/build"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 var (

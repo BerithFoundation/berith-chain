@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	mapset "github.com/deckarep/golang-set"
 	"golang.org/x/net/websocket"
 )

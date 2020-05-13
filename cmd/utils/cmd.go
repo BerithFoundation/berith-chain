@@ -27,16 +27,16 @@ import (
 	"strings"
 	"syscall"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
-	"berith-chain/internal/debug"
-	"berith-chain/log"
-	"berith-chain/node"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/internal/debug"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 const (

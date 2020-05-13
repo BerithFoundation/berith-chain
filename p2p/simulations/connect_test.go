@@ -19,9 +19,9 @@ package simulations
 import (
 	"testing"
 
-	"berith-chain/node"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/simulations/adapters"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/adapters"
 )
 
 func newTestNetwork(t *testing.T, nodeCount int) (*Network, []enode.ID) {

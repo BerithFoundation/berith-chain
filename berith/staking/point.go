@@ -8,7 +8,7 @@
 package staking
 
 import (
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 	"math/big"
 )
 

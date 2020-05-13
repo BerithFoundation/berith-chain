@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/core/vm"
 )
 
 // Iterator for disassembled EVM instructions

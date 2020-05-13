@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // StateDB is an EVM database for full state querying.

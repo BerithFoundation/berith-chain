@@ -20,12 +20,12 @@ import (
 	"bytes"
 	"context"
 
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var sha3_nil = crypto.Keccak256Hash(nil)

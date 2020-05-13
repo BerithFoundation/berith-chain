@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"regexp"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // The validation package contains validation checks for transactions

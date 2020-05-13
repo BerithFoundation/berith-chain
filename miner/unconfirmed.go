@@ -20,9 +20,9 @@ import (
 	"container/ring"
 	"sync"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 // chainRetriever is used by the unconfirmed block set to verify whether a previously

@@ -22,10 +22,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"berith-chain/accounts/keystore"
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 // NewTransactor is a utility method to easily create a transaction signer from

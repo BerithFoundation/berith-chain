@@ -25,14 +25,14 @@ import (
 	"net"
 	"os"
 
-	"berith-chain/cmd/utils"
-	"berith-chain/crypto"
-	"berith-chain/log"
-	"berith-chain/p2p/discover"
-	"berith-chain/p2p/discv5"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/nat"
-	"berith-chain/p2p/netutil"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/discover"
+	"github.com/BerithFoundation/berith-chain/p2p/discv5"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/nat"
+	"github.com/BerithFoundation/berith-chain/p2p/netutil"
 )
 
 func main() {

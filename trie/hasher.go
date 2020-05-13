@@ -20,9 +20,9 @@ import (
 	"hash"
 	"sync"
 
-	"berith-chain/common"
-	"berith-chain/crypto/sha3"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 type hasher struct {

@@ -25,7 +25,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	mapset "github.com/deckarep/golang-set"
 )
 

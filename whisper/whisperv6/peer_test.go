@@ -28,13 +28,13 @@ import (
 
 	"net"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/crypto"
-	"berith-chain/p2p"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/nat"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/nat"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var keys = []string{

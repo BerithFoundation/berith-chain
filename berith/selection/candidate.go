@@ -1,6 +1,6 @@
 package selection
 
-import "berith-chain/common"
+import "github.com/BerithFoundation/berith-chain/common"
 
 /*
 [BERITH]

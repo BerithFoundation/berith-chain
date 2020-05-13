@@ -19,8 +19,8 @@ package p2p
 import (
 	"fmt"
 
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
 )
 
 // Protocol represents a P2P subprotocol implementation.

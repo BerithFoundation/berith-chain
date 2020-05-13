@@ -24,10 +24,10 @@ import (
 	"strings"
 	"syscall"
 
-	"berith-chain/cmd/utils"
-	"berith-chain/console"
-	"berith-chain/node"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/console"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

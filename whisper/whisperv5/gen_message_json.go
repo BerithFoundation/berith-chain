@@ -5,7 +5,7 @@ package whisperv5
 import (
 	"encoding/json"
 
-	"berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 )
 
 var _ = (*messageOverride)(nil)

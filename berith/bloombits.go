@@ -20,13 +20,13 @@ import (
 	"context"
 	"time"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/common/bitutil"
-	"berith-chain/core"
-	"berith-chain/core/bloombits"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/bitutil"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/bloombits"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 const (

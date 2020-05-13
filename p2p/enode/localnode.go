@@ -26,9 +26,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"berith-chain/log"
-	"berith-chain/p2p/enr"
-	"berith-chain/p2p/netutil"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/p2p/netutil"
 )
 
 const (

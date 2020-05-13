@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 type (

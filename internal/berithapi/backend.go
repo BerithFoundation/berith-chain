@@ -21,17 +21,17 @@ import (
 	"context"
 	"math/big"
 
-	"berith-chain/accounts"
-	"berith-chain/berith/downloader"
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/core/vm"
-	"berith-chain/event"
-	"berith-chain/params"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // Backend interface provides the common API services (that are provided by

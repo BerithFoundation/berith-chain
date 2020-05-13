@@ -3,6 +3,7 @@ module berith-chain
 go 1.14
 
 require (
+    github.com/BerithFoundation/berith-chain v1.1.0
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
@@ -59,4 +60,8 @@ require (
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200316214253-d7b0ff38cac9
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
+)
+
+replace (
+	github.com/BerithFoundation/berith-chain => ./
 )

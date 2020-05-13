@@ -32,9 +32,9 @@ import (
 	"strings"
 	"sync"
 
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/log"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

@@ -22,15 +22,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"berith-chain/berith/downloader"
-	"berith-chain/common"
-	"berith-chain/consensus"
-	"berith-chain/core"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/event"
-	"berith-chain/log"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // Backend wraps all methods required for mining.

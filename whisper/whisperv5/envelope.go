@@ -26,11 +26,11 @@ import (
 	"math/big"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/crypto"
-	"berith-chain/crypto/ecies"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/ecies"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper

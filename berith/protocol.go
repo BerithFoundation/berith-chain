@@ -21,11 +21,11 @@ import (
 	"io"
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/types"
-	"berith-chain/event"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // Constants to match up protocol versions and messages

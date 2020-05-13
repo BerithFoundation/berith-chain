@@ -23,10 +23,10 @@ import (
 	"math/big"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/common/math"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // Storage represents a contract's storage.

@@ -3,10 +3,10 @@ package staking
 import (
 	"fmt"
 
-	"berith-chain/common"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/rlp"
 
-	"berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 )
 
 /*

@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"berith-chain/common"
-	"berith-chain/rlp"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 type DerivableList interface {

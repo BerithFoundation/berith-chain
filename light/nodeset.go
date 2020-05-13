@@ -20,10 +20,10 @@ import (
 	"errors"
 	"sync"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // NodeSet stores a set of trie nodes. It implements trie.Database and can also

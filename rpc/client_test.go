@@ -30,7 +30,7 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/davecgh/go-spew/spew"
 )
 

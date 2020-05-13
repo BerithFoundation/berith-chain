@@ -29,7 +29,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
 )
 
 // Lang is a target programming language selector to generate bindings for.

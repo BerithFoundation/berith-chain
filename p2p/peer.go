@@ -25,12 +25,12 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/common/mclock"
-	"berith-chain/event"
-	"berith-chain/log"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/enr"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var (

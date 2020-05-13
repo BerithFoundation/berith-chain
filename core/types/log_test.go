@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/davecgh/go-spew/spew"
 )
 

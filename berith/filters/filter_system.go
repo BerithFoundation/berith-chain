@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	berith "berith-chain"
-	"berith-chain/common"
-	"berith-chain/core"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
-	"berith-chain/event"
-	"berith-chain/log"
-	"berith-chain/rpc"
+	berith "github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // Type determines the kind of filter and is used to put the filter in to

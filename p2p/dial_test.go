@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/enr"
-	"berith-chain/p2p/netutil"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/p2p/netutil"
 	"github.com/davecgh/go-spew/spew"
 )
 

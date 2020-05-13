@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // The values in those tests are from the Transaction Tests

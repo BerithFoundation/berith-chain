@@ -19,8 +19,8 @@ package enode
 import (
 	"testing"
 
-	"berith-chain/crypto"
-	"berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
 )
 
 func newLocalNodeForTesting() (*LocalNode, *DB) {

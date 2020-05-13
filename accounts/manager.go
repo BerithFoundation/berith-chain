@@ -21,7 +21,7 @@ import (
 	"sort"
 	"sync"
 
-	"berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 // Manager is an overarching account manager that can communicate with various

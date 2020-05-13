@@ -20,14 +20,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/consensus"
-	"berith-chain/consensus/misc"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/core/vm"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/consensus/misc"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // BlockGen creates blocks for testing.

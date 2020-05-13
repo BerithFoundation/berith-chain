@@ -26,10 +26,10 @@ import (
 	"time"
 	"unsafe"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/crypto/sha3"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var (

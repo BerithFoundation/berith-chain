@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // Genesis hashes to enforce below configs on.

@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/core/types"
-	"berith-chain/crypto/sha3"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 var (

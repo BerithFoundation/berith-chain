@@ -22,13 +22,13 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/mclock"
-	"berith-chain/consensus"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
-	"berith-chain/light"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/light"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 const (

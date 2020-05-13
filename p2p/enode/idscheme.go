@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"io"
 
-	"berith-chain/common/math"
-	"berith-chain/crypto"
-	"berith-chain/crypto/sha3"
-	"berith-chain/p2p/enr"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // List of known secure identity schemes.

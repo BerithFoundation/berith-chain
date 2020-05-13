@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 const (

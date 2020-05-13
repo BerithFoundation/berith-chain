@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/mclock"
-	"berith-chain/core/types"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 // insertStats tracks and reports on block insertion.

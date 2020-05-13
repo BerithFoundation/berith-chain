@@ -29,9 +29,9 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/accounts"
-	"berith-chain/common"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/pborman/uuid"
 )
 

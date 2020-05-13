@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"berith-chain/accounts/keystore"
-	"berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

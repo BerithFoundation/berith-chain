@@ -25,9 +25,9 @@ import (
 	"runtime"
 	"strings"
 
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

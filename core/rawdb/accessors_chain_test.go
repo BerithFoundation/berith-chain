@@ -21,11 +21,11 @@ import (
 	"math/big"
 	"testing"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/crypto/sha3"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // Tests block header storage and retrieval operations.

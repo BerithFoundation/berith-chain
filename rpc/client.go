@@ -32,7 +32,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 var (

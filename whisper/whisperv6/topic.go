@@ -19,8 +19,8 @@
 package whisperv6
 
 import (
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 )
 
 // TopicType represents a cryptographically secure, probabilistic partial

@@ -30,9 +30,9 @@ import (
 
 	check "gopkg.in/check.v1"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to

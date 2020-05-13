@@ -28,17 +28,17 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/core"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/internal/berithapi"
-	"berith-chain/params"
-	"berith-chain/rlp"
-	"berith-chain/rpc"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 // PublicBerithAPI provides an API to access Berith full node-related

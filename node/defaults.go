@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"berith-chain/p2p"
-	"berith-chain/p2p/nat"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/nat"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 const (

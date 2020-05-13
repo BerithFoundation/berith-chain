@@ -21,11 +21,11 @@ import (
 	"errors"
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/crypto"
-	"berith-chain/crypto/bn256"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/bn256"
+	"github.com/BerithFoundation/berith-chain/params"
 	"golang.org/x/crypto/ripemd160"
 )
 

@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"berith-chain/accounts/usbwallet"
-	"berith-chain/log"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/accounts/usbwallet"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/robertkrimen/otto"
 )
 

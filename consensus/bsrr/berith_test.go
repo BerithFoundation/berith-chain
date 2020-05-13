@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/berith/selection"
-	"berith-chain/common"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/berith/selection"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 func TestGetMaxMiningCandidates(t *testing.T) {

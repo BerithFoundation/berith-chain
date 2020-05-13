@@ -4,9 +4,9 @@ import (
 	"io"
 	"math/big"
 
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rlp"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 type Stakers interface {

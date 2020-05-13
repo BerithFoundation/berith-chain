@@ -27,8 +27,8 @@ import (
 
 	"reflect"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 const jsondata = `

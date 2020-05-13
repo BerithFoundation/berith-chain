@@ -33,11 +33,11 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/log"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/netutil"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/netutil"
 )
 
 const (

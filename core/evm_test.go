@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/core/vm"
-	"berith-chain/crypto/secp256k1"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
 
-	"berith-chain/accounts/keystore"
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 type txdata struct {

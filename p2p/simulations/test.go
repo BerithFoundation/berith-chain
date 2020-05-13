@@ -3,10 +3,10 @@ package simulations
 import (
 	"testing"
 
-	"berith-chain/p2p"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/enr"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // NoopService is the service that does not do anything

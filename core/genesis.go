@@ -25,16 +25,16 @@ import (
 	"math/big"
 	"strings"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/common/math"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/params"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go

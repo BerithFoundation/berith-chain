@@ -22,12 +22,12 @@ import (
 	"math"
 	"math/big"
 
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/types"
 
-	"berith-chain/common"
-	"berith-chain/core/vm"
-	"berith-chain/log"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 var (
