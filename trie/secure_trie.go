@@ -19,8 +19,8 @@ package trie
 import (
 	"fmt"
 
-	"berith-chain/common"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all

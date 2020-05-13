@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"sync"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 type Filter struct {

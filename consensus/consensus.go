@@ -20,11 +20,11 @@ package consensus
 import (
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/params"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // ChainReader defines a small collection of methods needed to access the local

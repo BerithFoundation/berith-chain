@@ -17,10 +17,10 @@ package main
 
 import (
 	"fmt"
-	berith_chain "berith-chain"
-	"berith-chain/accounts"
-	"berith-chain/accounts/keystore"
-	"berith-chain/berithclient"
+	berith_chain "github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/berithclient"
 	"math/big"
 	"sync"
 	"time"

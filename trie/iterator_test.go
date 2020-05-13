@@ -22,8 +22,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 func TestIterator(t *testing.T) {

@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	berith_chain "berith-chain"
-	"berith-chain/common"
-	"berith-chain/core/types"
+	berith_chain "github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 var (

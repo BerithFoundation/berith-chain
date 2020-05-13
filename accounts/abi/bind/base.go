@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"berith-chain"
-	"berith-chain/accounts/abi"
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
-	"berith-chain/event"
+	"github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/accounts/abi"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to

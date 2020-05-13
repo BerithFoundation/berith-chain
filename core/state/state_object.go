@@ -24,9 +24,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)

@@ -22,10 +22,10 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/log"
-	"berith-chain/p2p"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/rlp"
 	mapset "github.com/deckarep/golang-set"
 )
 

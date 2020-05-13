@@ -28,13 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/accounts/keystore"
-	"berith-chain/cmd/utils"
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/core/types"
-	"berith-chain/internal/berithapi"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 //Used for testing

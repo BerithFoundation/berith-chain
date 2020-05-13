@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

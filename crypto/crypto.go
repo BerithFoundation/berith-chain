@@ -28,10 +28,10 @@ import (
 	"math/big"
 	"os"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/crypto/sha3"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto/sha3"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var (

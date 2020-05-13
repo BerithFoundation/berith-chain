@@ -23,13 +23,13 @@ import (
 	"net"
 	"sync"
 
-	"berith-chain/event"
-	"berith-chain/log"
-	"berith-chain/node"
-	"berith-chain/p2p"
-	"berith-chain/p2p/enode"
-	"berith-chain/p2p/simulations/pipes"
-	"berith-chain/rpc"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/p2p"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/simulations/pipes"
+	"github.com/BerithFoundation/berith-chain/rpc"
 )
 
 // SimAdapter is a NodeAdapter which creates in-memory simulation nodes and

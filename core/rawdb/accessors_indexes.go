@@ -17,10 +17,10 @@
 package rawdb
 
 import (
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // ReadTxLookupEntry retrieves the positional metadata associated with a transaction

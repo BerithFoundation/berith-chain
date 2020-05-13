@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 )
 
 // Tests that data bitset encoding and decoding works and is bijective.

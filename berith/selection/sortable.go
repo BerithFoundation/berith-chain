@@ -2,7 +2,7 @@ package selection
 
 import (
 	"bytes"
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 /*

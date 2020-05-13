@@ -29,9 +29,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/event"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 const (

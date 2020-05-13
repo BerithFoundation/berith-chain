@@ -22,7 +22,7 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 func TestEnvelopeOpenAcceptsOnlyOneKeyTypeInFilter(t *testing.T) {

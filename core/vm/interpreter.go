@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync/atomic"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // Config are the configuration options for the Interpreter

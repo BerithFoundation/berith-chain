@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"berith-chain/berith/downloader"
-	"berith-chain/core/rawdb"
-	"berith-chain/light"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/light"
 )
 
 // syncer is responsible for periodically synchronising with the network, both

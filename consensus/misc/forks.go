@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have

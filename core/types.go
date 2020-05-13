@@ -17,9 +17,9 @@
 package core
 
 import (
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation. It

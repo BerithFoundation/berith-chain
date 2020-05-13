@@ -23,10 +23,10 @@ import (
 	"net"
 	"time"
 
-	"berith-chain/common/math"
-	"berith-chain/crypto"
-	"berith-chain/crypto/secp256k1"
-	"berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
 )
 
 // node represents a host on the network.

@@ -25,11 +25,11 @@ import (
 	"time"
 	"unsafe"
 
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/core/vm"
-	"berith-chain/crypto"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
 	duktape "gopkg.in/olebedev/go-duktape.v3"
 )
 

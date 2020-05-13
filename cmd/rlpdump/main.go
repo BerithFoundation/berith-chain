@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 var (

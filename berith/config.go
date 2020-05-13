@@ -22,12 +22,12 @@ import (
 	"os/user"
 	"time"
 
-	"berith-chain/berith/downloader"
-	"berith-chain/berith/gasprice"
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/core"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/gasprice"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 var DefaultConfig = Config{

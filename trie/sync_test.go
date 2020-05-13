@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

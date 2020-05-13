@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

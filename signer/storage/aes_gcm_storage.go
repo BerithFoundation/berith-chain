@@ -26,7 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 type storedCredential struct {

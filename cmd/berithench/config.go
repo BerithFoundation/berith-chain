@@ -26,7 +26,7 @@ import (
 	"time"
 	"unicode"
 
-	"berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/naoina/toml"
 	cli "gopkg.in/urfave/cli.v1"
 )

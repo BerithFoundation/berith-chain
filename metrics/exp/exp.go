@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	"berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/metrics"
 )
 
 type exp struct {

@@ -24,9 +24,9 @@ import (
 
 	"sync"
 
-	"berith-chain/common/hexutil"
-	"berith-chain/internal/berithapi"
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/ssh/terminal"
 )

@@ -23,12 +23,12 @@ import (
 	"math/big"
 	"sort"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
-	"berith-chain/log"
-	"berith-chain/rlp"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 type revision struct {

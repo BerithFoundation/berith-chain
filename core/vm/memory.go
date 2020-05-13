@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/common/math"
 )
 
 // Memory implements a simple memory model for the berith virtual machine.

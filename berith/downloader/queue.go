@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/common"
-	"berith-chain/common/prque"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/prque"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/metrics"
 )
 
 var (

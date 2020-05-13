@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/accounts"
-	"berith-chain/common"
-	"berith-chain/event"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/event"
 )
 
 var testSigData = make([]byte, 32)

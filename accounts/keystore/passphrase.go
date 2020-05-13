@@ -38,9 +38,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"berith-chain/common"
-	"berith-chain/common/math"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/math"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"

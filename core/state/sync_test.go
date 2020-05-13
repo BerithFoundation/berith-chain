@@ -21,10 +21,10 @@ import (
 	"math/big"
 	"testing"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 // testAccount is the data associated with an account used by the state tests.

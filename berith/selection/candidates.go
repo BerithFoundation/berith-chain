@@ -3,8 +3,8 @@ package selection
 import (
 	"crypto/sha256"
 	"fmt"
-	"berith-chain/common"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/params"
 	"math/big"
 	"math/rand"
 )

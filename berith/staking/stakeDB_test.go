@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 func TestStakers(t *testing.T) {

@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/accounts/keystore"
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // Tests that the account management snippets work correctly.

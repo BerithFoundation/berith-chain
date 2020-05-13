@@ -19,10 +19,10 @@ package rawdb
 import (
 	"encoding/json"
 
-	"berith-chain/common"
-	"berith-chain/log"
-	"berith-chain/params"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // ReadDatabaseVersion retrieves the version number of the database.

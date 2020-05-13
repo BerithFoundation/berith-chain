@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"sync"
 
-	"berith-chain/log"
-	"berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
 )
 
 type TestPeer interface {

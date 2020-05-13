@@ -20,9 +20,9 @@ import (
 	"math/big"
 	"testing"
 
-	"berith-chain/common"
-	"berith-chain/core/state"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 type dummyContractRef struct {

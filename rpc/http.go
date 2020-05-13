@@ -31,7 +31,7 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/rs/cors"
 )
 

@@ -26,10 +26,10 @@ import (
 	"runtime"
 	"strings"
 
-	"berith-chain/cmd/internal/browser"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/cmd/internal/browser"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

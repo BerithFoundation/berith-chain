@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"berith-chain/p2p/enr"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/p2p/enr"
+	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

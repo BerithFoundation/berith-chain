@@ -21,7 +21,7 @@ import (
 	"io"
 	"net"
 
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // Entry is implemented by known node record entry types.

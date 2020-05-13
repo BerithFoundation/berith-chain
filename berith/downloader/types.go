@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.

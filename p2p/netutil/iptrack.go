@@ -19,7 +19,7 @@ package netutil
 import (
 	"time"
 
-	"berith-chain/common/mclock"
+	"github.com/BerithFoundation/berith-chain/common/mclock"
 )
 
 // IPTracker predicts the external endpoint, i.e. IP address and port, of the local host

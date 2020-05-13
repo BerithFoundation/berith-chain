@@ -21,10 +21,10 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.

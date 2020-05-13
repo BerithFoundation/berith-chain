@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/p2p/enode"
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
 )
 
 func TestMocker(t *testing.T) {

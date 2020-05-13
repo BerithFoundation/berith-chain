@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/crypto"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 func NewState(ctx context.Context, head *types.Header, odr OdrBackend) *state.StateDB {

@@ -28,12 +28,12 @@ import (
 	"io"
 	"math/big"
 
-	"berith-chain/accounts"
-	"berith-chain/common"
-	"berith-chain/common/hexutil"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/rlp"
 )
 
 // ledgerOpcode is an enumeration encoding the supported Ledger opcodes.

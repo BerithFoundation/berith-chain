@@ -24,16 +24,16 @@ import (
 	"math/big"
 	"time"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/common/bitutil"
-	"berith-chain/core"
-	"berith-chain/core/rawdb"
-	"berith-chain/core/types"
-	"berith-chain/log"
-	"berith-chain/params"
-	"berith-chain/rlp"
-	"berith-chain/trie"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common/bitutil"
+	"github.com/BerithFoundation/berith-chain/core"
+	"github.com/BerithFoundation/berith-chain/core/rawdb"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/trie"
 )
 
 // IndexerConfig includes a set of configs for chain indexers.

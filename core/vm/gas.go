@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // Gas costs

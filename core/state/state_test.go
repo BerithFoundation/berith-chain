@@ -21,9 +21,9 @@ import (
 	"math/big"
 	"testing"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 	checker "gopkg.in/check.v1"
 )
 

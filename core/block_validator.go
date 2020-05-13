@@ -19,10 +19,10 @@ package core
 import (
 	"fmt"
 
-	"berith-chain/consensus"
-	"berith-chain/core/state"
-	"berith-chain/core/types"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and

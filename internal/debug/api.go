@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 )
 
 // Handler is the global debugging handler.

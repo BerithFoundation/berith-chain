@@ -19,10 +19,10 @@ package shhclient
 import (
 	"context"
 
-	"berith-chain"
-	"berith-chain/common/hexutil"
-	"berith-chain/rpc"
-	whisper "berith-chain/whisper/whisperv6"
+	"github.com/BerithFoundation/berith-chain"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/rpc"
+	whisper "github.com/BerithFoundation/berith-chain/whisper/whisperv6"
 )
 
 // Client defines typed wrappers for the Whisper v6 RPC API.

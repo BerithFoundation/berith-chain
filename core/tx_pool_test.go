@@ -6,16 +6,16 @@ import (
 	"os"
 	"testing"
 
-	"berith-chain/berith/staking"
-	"berith-chain/berithdb"
-	"berith-chain/common/hexutil"
-	"berith-chain/consensus/bsrr"
-	"berith-chain/crypto/secp256k1"
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
+	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
+	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"berith-chain/common"
-	"berith-chain/core/types"
-	"berith-chain/core/vm"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/core/vm"
 )
 
 func TestTransactionValidate(t *testing.T) {

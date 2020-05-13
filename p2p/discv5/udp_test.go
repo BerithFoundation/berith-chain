@@ -25,9 +25,9 @@ import (
 	"sync"
 	"testing"
 
-	"berith-chain/common"
-	"berith-chain/crypto"
-	"berith-chain/rlp"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
+	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/davecgh/go-spew/spew"
 )
 

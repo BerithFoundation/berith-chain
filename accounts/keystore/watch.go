@@ -21,7 +21,7 @@ package keystore
 import (
 	"time"
 
-	"berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/rjeczalik/notify"
 )
 

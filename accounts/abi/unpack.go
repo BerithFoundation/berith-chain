@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"reflect"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 var (

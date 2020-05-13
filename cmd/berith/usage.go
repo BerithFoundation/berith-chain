@@ -24,8 +24,8 @@ import (
 
 	"strings"
 
-	"berith-chain/cmd/utils"
-	"berith-chain/internal/debug"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"github.com/BerithFoundation/berith-chain/internal/debug"
 	"gopkg.in/urfave/cli.v1"
 )
 

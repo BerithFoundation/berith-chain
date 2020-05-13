@@ -5,8 +5,8 @@ import (
 	uurl "net/url"
 	"time"
 
-	"berith-chain/log"
-	"berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/influxdata/influxdb/client"
 )
 

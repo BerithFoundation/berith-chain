@@ -9,12 +9,12 @@ import (
 	"math/big"
 	"sort"
 
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"berith-chain/berith/staking"
-	"berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/core/state"
 
-	"berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 /*

@@ -24,9 +24,9 @@ import (
 	"os"
 	"runtime"
 
-	"berith-chain/log"
-	"berith-chain/metrics"
-	"berith-chain/metrics/exp"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/BerithFoundation/berith-chain/metrics"
+	"github.com/BerithFoundation/berith-chain/metrics/exp"
 	"github.com/fjl/memsize/memsizeui"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"

@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"testing"
 
-	"berith-chain/params"
+	"github.com/BerithFoundation/berith-chain/params"
 
-	"berith-chain/berith/staking"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
 
-	"berith-chain/berithdb"
-	"berith-chain/common"
-	"berith-chain/core/state"
+	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/core/state"
 )
 
 /*
