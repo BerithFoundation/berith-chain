@@ -62,11 +62,9 @@ func (s *StakingDB) pushValue(k string, stakers Stakers) error {
 	key := []byte(k)
 
 	v, err := rlp.EncodeToBytes(stakers)
-
 	if err != nil {
 		return err
 	}
-
 	return s.stakeDB.Put(key, v)
 }
 
@@ -117,8 +115,6 @@ func (s *StakingDB) NewStakers() Stakers {
 }
 
 func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) error {
-	fmt.Println("Clean stakingDB")
-
 	for {
 		key := []byte(header.Hash().Hex())
 		exist, err := s.isExist(key)
@@ -128,8 +124,7 @@ func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) err
 
 		if !exist { break }
 
-		err = s.delete(key)
-		if err != nil {
+		if err = s.delete(key); err != nil {
 			return err
 		}
 		header = chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)

@@ -527,16 +527,14 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			To reduce disk usage, Staker information is periodically deleted.
 		*/
 		if new(big.Int).Mod(header.Number, big.NewInt(cleanCycle)).Cmp(common.Big0) == 0 {
-			err = c.stakingDB.Clean(chain, target)
-			if err != nil {
+			if err = c.stakingDB.Clean(chain, target); err != nil {
 				return nil, errCleanStakingDB
 			}
 		}
 	}
 
 	// [BERITH] Modify the data of StateDB based on the transaction information of the received block.
-	err = c.setStakersWithTxs(state, chain, stks, txs, header)
-	if err != nil {
+	if err = c.setStakersWithTxs(state, chain, stks, txs, header); err != nil {
 		return nil, errStakingList
 	}
 
