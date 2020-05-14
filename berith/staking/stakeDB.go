@@ -7,6 +7,9 @@ import (
 	"github.com/BerithFoundation/berith-chain/rlp"
 
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 /*
@@ -65,6 +68,9 @@ func (s *StakingDB) pushValue(k string, stakers Stakers) error {
 	return s.stakeDB.Put(key, v)
 }
 
+/**
+DB Close
+*/
 func (s *StakingDB) Close() {
 	if s.stakeDB == nil {
 		return
@@ -106,4 +112,30 @@ func (s *StakingDB) Commit(key string, value Stakers) error {
 
 func (s *StakingDB) NewStakers() Stakers {
 	return s.creator()
+}
+
+func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) error {
+	for {
+		key := []byte(header.Hash().Hex())
+		exist, err := s.isExist(key)
+		if err != nil {
+			return err
+		}
+
+		if !exist { break }
+
+		if err = s.delete(key); err != nil {
+			return err
+		}
+		header = chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	}
+	return s.stakeDB.LDB().CompactRange(util.Range{})
+}
+
+func (s *StakingDB) isExist(key []byte) (bool, error) {
+	return s.stakeDB.Has(key)
+}
+
+func (s *StakingDB) delete(key []byte) error {
+	return s.stakeDB.Delete(key)
 }
