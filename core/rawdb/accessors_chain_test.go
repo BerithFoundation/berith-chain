@@ -21,10 +21,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
 

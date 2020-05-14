@@ -1,6 +1,6 @@
 /*
 [BERITH]
-Tx 타입을 지정하기 위한 열거형
+Enumeration to specify Tx type
 */
 package types
 

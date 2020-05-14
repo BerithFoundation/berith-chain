@@ -63,5 +63,5 @@ func (a *ArithmeticGroup) GetGroupRange(groupOrder int) (int, int, error) {
 		return 1, 1, nil
 	}
 
-	return 2 + (groupOrder-2) * a.CommonDiff, 1 + (groupOrder-1) * a.CommonDiff, nil
+	return 2 + (groupOrder-2)*a.CommonDiff, 1 + (groupOrder-1)*a.CommonDiff, nil
 }

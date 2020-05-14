@@ -22,11 +22,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/crypto/sha3"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/trie"
 )

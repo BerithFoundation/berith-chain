@@ -21,8 +21,8 @@ func (t txdata) MarshalJSON() ([]byte, error) {
 		Recipient    *common.Address `json:"to"       rlp:"nil"`
 		Amount       *hexutil.Big    `json:"value"    gencodec:"required"`
 		Payload      hexutil.Bytes   `json:"input"    gencodec:"required"`
-		Base         JobWallet            `json:"base" gencodec:"required"`
-		Target       JobWallet            `json:"target" gencodec:"required"`
+		Base         JobWallet       `json:"base" gencodec:"required"`
+		Target       JobWallet       `json:"target" gencodec:"required"`
 		V            *hexutil.Big    `json:"v" gencodec:"required"`
 		R            *hexutil.Big    `json:"r" gencodec:"required"`
 		S            *hexutil.Big    `json:"s" gencodec:"required"`

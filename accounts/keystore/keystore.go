@@ -377,7 +377,6 @@ func (ks *KeyStore) Find(a accounts.Account) (accounts.Account, error) {
 
 //Public Key to Private Key
 func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
-
 	addr := common.HexToAddress(address)
 	path := ks.storage.JoinPath(keyFileName(addr))
 

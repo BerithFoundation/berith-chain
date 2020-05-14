@@ -111,7 +111,6 @@ func (it *insertIterator) print(typ string) {
 // next returns the next block in the iterator, along with any potential validation
 // error for that block. When the end is reached, it will return (nil, nil).
 func (it *insertIterator) next() (*types.Block, error) {
-	// it.print("NEXT")
 	if it.index+1 >= len(it.chain) {
 		it.index = len(it.chain)
 		return nil, nil
@@ -125,7 +124,6 @@ func (it *insertIterator) next() (*types.Block, error) {
 
 // current returns the current block that's being processed.
 func (it *insertIterator) current() *types.Block {
-	// it.print("CURRENT")
 	if it.index < 0 || it.index >= len(it.chain) {
 		return nil
 	}

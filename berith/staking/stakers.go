@@ -9,6 +9,10 @@ import (
 
 type stakers map[common.Address]struct{}
 
+func NewStakers() Stakers {
+	return make(stakers)
+}
+
 func (s stakers) Put(addr common.Address) {
 	if !s.IsContain(addr) {
 		s[addr] = struct{}{}
@@ -38,10 +42,6 @@ func (s stakers) FetchFromList(list []common.Address) {
 	for _, staker := range list {
 		s.Put(staker)
 	}
-}
-
-func NewStakers() Stakers {
-	return make(stakers)
 }
 
 func (s stakers) EncodeRLP(w io.Writer) error {

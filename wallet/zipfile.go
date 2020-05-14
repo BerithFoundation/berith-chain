@@ -22,7 +22,7 @@ func ZipSecure(source, target, password string) error {
 
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 
@@ -36,7 +36,7 @@ func ZipSecure(source, target, password string) error {
 		}
 
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 
@@ -44,7 +44,7 @@ func ZipSecure(source, target, password string) error {
 		if info.IsDir() {
 			_, err = bufferedWriter.CreateHeader(header)
 			if err != nil {
-				log.Println("Error occurred; ",err)
+				log.Println("Error occurred; ", err)
 				return err
 			}
 			return nil
@@ -52,14 +52,14 @@ func ZipSecure(source, target, password string) error {
 
 		fileToZip, err := os.Open(path)
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 		defer fileToZip.Close()
 
 		w, err := bufferedWriter.Encrypt(header.Name, password)
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 
@@ -71,7 +71,7 @@ func ZipSecure(source, target, password string) error {
 
 	newZipFile, err := os.Create(target)
 	if err != nil {
-		log.Println("Error occurred; ",err)
+		log.Println("Error occurred; ", err)
 		return err
 	}
 	newZipFile.Write(buf.Bytes())
@@ -99,24 +99,24 @@ func UnzipSecure(zipFilePath, outputDir, password string) error {
 		z.SetPassword(password)
 		rr, err := z.Open()
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 		content, err := ioutil.ReadAll(rr)
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 
 		er := writeFile(path, content)
 		if er != nil {
-			log.Println("Error occurred; ",er.Error())
+			log.Println("Error occurred; ", er.Error())
 			return er
 		}
 
 		_, err = io.Copy(os.Stdout, rr)
 		if err != nil {
-			log.Println("Error occurred; ",err)
+			log.Println("Error occurred; ", err)
 			return err
 		}
 		rr.Close()

@@ -27,6 +27,4 @@ var (
 	Big32  = big.NewInt(32)
 	Big256 = big.NewInt(256)
 	Big257 = big.NewInt(257)
-
-	UnitForBer = big.NewInt(1e+18) // Unit to make wei to ber
 )

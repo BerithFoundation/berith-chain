@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func TestClientRequest(t *testing.T) {
@@ -200,17 +200,17 @@ func TestClientSubscribeInvalidArg(t *testing.T) {
 		defer func() {
 			err := recover()
 			if shouldPanic && err == nil {
-				t.Errorf("EthSubscribe should've panicked for %#v", arg)
+				t.Errorf("BerithSubscribe should've panicked for %#v", arg)
 			}
 			if !shouldPanic && err != nil {
-				t.Errorf("EthSubscribe shouldn't have panicked for %#v", arg)
+				t.Errorf("BerithSubscribe shouldn't have panicked for %#v", arg)
 				buf := make([]byte, 1024*1024)
 				buf = buf[:runtime.Stack(buf, false)]
 				t.Error(err)
 				t.Error(string(buf))
 			}
 		}()
-		client.EthSubscribe(context.Background(), arg, "foo_bar")
+		client.BerithSubscribe(context.Background(), arg, "foo_bar")
 	}
 	check(true, nil)
 	check(true, 1)
@@ -228,7 +228,7 @@ func TestClientSubscribe(t *testing.T) {
 
 	nc := make(chan int)
 	count := 10
-	sub, err := client.EthSubscribe(context.Background(), nc, "someSubscription", count, 0)
+	sub, err := client.BerithSubscribe(context.Background(), nc, "someSubscription", count, 0)
 	if err != nil {
 		t.Fatal("can't subscribe:", err)
 	}
@@ -283,7 +283,7 @@ func TestClientSubscribeCustomNamespace(t *testing.T) {
 	}
 }
 
-// In this test, the connection drops while EthSubscribe is
+// In this test, the connection drops while BerithSubscribe is
 // waiting for a response.
 func TestClientSubscribeClose(t *testing.T) {
 	service := &NotificationTestService{
@@ -302,7 +302,7 @@ func TestClientSubscribeClose(t *testing.T) {
 		err  error
 	)
 	go func() {
-		sub, err = client.EthSubscribe(context.Background(), nc, "hangSubscription", 999)
+		sub, err = client.BerithSubscribe(context.Background(), nc, "hangSubscription", 999)
 		errc <- err
 	}()
 
@@ -313,13 +313,13 @@ func TestClientSubscribeClose(t *testing.T) {
 	select {
 	case err := <-errc:
 		if err == nil {
-			t.Errorf("EthSubscribe returned nil error after Close")
+			t.Errorf("BerithSubscribe returned nil error after Close")
 		}
 		if sub != nil {
-			t.Error("EthSubscribe returned non-nil subscription after Close")
+			t.Error("BerithSubscribe returned non-nil subscription after Close")
 		}
 	case <-time.After(1 * time.Second):
-		t.Fatalf("EthSubscribe did not return within 1s after Close")
+		t.Fatalf("BerithSubscribe did not return within 1s after Close")
 	}
 }
 
@@ -333,7 +333,7 @@ func TestClientCloseUnsubscribeRace(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		client := DialInProc(server)
 		nc := make(chan int)
-		sub, err := client.EthSubscribe(context.Background(), nc, "someSubscription", 3, 1)
+		sub, err := client.BerithSubscribe(context.Background(), nc, "someSubscription", 3, 1)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -362,7 +362,7 @@ func TestClientNotificationStorm(t *testing.T) {
 		// Subscribe on the server. It will start sending many notifications
 		// very quickly.
 		nc := make(chan int)
-		sub, err := client.EthSubscribe(ctx, nc, "someSubscription", count, 0)
+		sub, err := client.BerithSubscribe(ctx, nc, "someSubscription", count, 0)
 		if err != nil {
 			t.Fatal("can't subscribe:", err)
 		}

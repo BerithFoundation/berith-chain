@@ -53,7 +53,7 @@ var (
 	txLookupPrefix  = []byte("l") // txLookupPrefix + hash -> transaction/receipt lookup metadata
 	bloomBitsPrefix = []byte("B") // bloomBitsPrefix + bit (uint16 big endian) + section (uint64 big endian) + hash -> bloom bits
 
-	preimagePrefix = []byte("secure-key-")      // preimagePrefix + hash -> preimage
+	preimagePrefix = []byte("secure-key-")    // preimagePrefix + hash -> preimage
 	configPrefix   = []byte("berith-config-") // config prefix for the db
 
 	// Chain index prefixes (use `i` + single byte to avoid mixing data types).

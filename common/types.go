@@ -51,7 +51,10 @@ var (
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
 type Hash [HashLength]byte
 
-//CheckBerithfix 주소의 Prefix가 제대로 입력되었는지 확인하는 함수[BERITH]
+/*
+[BERITH]
+Function to check if the address prefix is entered correctly
+*/
 func CheckBerithPrefix(str string, start int) bool {
 	if len(str) > start+2 {
 		lower := strings.ToLower(AddressPrefix)
@@ -192,8 +195,6 @@ func (h *UnprefixedHash) UnmarshalText(input []byte) error {
 func (h UnprefixedHash) MarshalText() ([]byte, error) {
 	return []byte(hex.EncodeToString(h[:])), nil
 }
-
-/////////// Address
 
 // Address represents the 20 byte address of an Berith account.
 type Address [AddressLength]byte
@@ -365,9 +366,6 @@ func NewMixedcaseAddressFromString(hexaddr string) (*MixedcaseAddress, error) {
 
 // UnmarshalJSON parses MixedcaseAddress
 func (ma *MixedcaseAddress) UnmarshalJSON(input []byte) error {
-	//if err := hexutil.UnmarshalFixedJSON(addressT, input, ma.addr[:]); err != nil {
-	//	return err
-	//}
 	// [BERITH] Unmarshal directly because berith address has no hex prefix
 	if err := ma.addr.UnmarshalJSON(input); err != nil {
 		return err

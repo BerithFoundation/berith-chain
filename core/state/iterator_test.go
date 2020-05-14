@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

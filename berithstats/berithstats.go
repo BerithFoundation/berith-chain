@@ -30,12 +30,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/les"
 	"github.com/BerithFoundation/berith-chain/log"
@@ -69,10 +69,10 @@ type blockChain interface {
 // Service implements an Berith netstats reporting daemon that pushes local
 // chain statistics up to a monitoring server.
 type Service struct {
-	server *p2p.Server        // Peer-to-peer server to retrieve networking infos
-	e    *berith.Berith   // Full Berith service if monitoring a full node
+	server *p2p.Server      // Peer-to-peer server to retrieve networking infos
+	e      *berith.Berith   // Full Berith service if monitoring a full node
 	les    *les.LightBerith // Light Berith service if monitoring a light node
-	engine consensus.Engine   // Consensus engine to retrieve variadic block fields
+	engine consensus.Engine // Consensus engine to retrieve variadic block fields
 
 	node string // Name of the node to display on the monitoring page
 	pass string // Password to authorize access to the monitoring page
@@ -98,7 +98,7 @@ func New(url string, eServ *berith.Berith, lesServ *les.LightBerith) (*Service, 
 		engine = lesServ.Engine()
 	}
 	return &Service{
-		e:    eServ,
+		e:      eServ,
 		les:    lesServ,
 		engine: engine,
 		node:   parts[1],

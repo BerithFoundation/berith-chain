@@ -24,12 +24,12 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 		holders  int
 		expected int
 	}{
-		{0, 0},                     // no holders
-		{1, 1},                     // only one holders
-		{10, 3},                    // equals to 0 point
-		{8, 2},                     // less than 0.5 point
-		{9, 3},                     // greater than or equals 0.5 point
-		{35000, selection.MAX_MINERS}, // greater than staking.MAX_MINERS
+		{0, 0},                      // no holders
+		{1, 1},                      // only one holders
+		{10, 3},                     // equals to 0 point
+		{8, 2},                      // less than 0.5 point
+		{9, 3},                      // greater than or equals 0.5 point
+		{35000, selection.MaxMiner}, // greater than staking.MaxMiner
 	}
 
 	for i, test := range tests {

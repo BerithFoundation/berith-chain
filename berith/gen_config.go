@@ -6,11 +6,11 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 )
 
 var _ = (*configMarshaling)(nil)
@@ -30,7 +30,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		TrieCleanCache          int
 		TrieDirtyCache          int
 		TrieTimeout             time.Duration
-		Berithbase               common.Address `toml:",omitempty"`
+		Berithbase              common.Address `toml:",omitempty"`
 		MinerNotify             []string       `toml:",omitempty"`
 		MinerExtraData          hexutil.Bytes  `toml:",omitempty"`
 		MinerGasFloor           uint64
@@ -90,7 +90,7 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		TrieCleanCache          *int
 		TrieDirtyCache          *int
 		TrieTimeout             *time.Duration
-		Berithbase               *common.Address `toml:",omitempty"`
+		Berithbase              *common.Address `toml:",omitempty"`
 		MinerNotify             []string        `toml:",omitempty"`
 		MinerExtraData          *hexutil.Bytes  `toml:",omitempty"`
 		MinerGasFloor           *uint64

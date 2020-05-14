@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/les/flowcontrol"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/p2p"

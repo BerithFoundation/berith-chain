@@ -95,14 +95,11 @@ func (s *stateObject) empty() bool {
 	return s.data.Nonce == 0 && s.data.Balance.Sign() == 0 && bytes.Equal(s.data.CodeHash, emptyCodeHash)
 }
 
-// Account is the Berith consensus representation of accounts.
-// These objects are stored in the main account trie.
 /*
 [BERITH]
-어카운트 구조체
-StakeBalance 추가
-BehindBalance 추가
-Selection Point 추가
+Account is the Berith consensus representation of accounts.
+These objects are stored in the main account trie.
+Add StakeBalance, BehindBalance, Selection Point
 */
 type Account struct {
 	Nonce          uint64
@@ -119,19 +116,17 @@ type Account struct {
 
 /*
 [BERITH]
-내부 컴펌처리를 하기위한 Balance
-Behind Balance 구조체
+Balance for Reward Payment
 */
 type Behind struct {
 	Number  *big.Int
 	Balance *big.Int
 }
 
-// newObject creates a state object.
 /*
 [BERITH]
-stateObject 객체를 만드는 함수
-Account 의 초기화 처리
+Function to create stateObject object
+Account initialization processing
 */
 func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 	if data.Balance == nil {
@@ -360,10 +355,6 @@ func (self *stateObject) deepCopy(db *StateDB) *stateObject {
 	return stateObject
 }
 
-//
-// Attribute accessors
-//
-
 // Returns the address of the contract/account
 func (c *stateObject) Address() common.Address {
 	return c.address
@@ -450,10 +441,6 @@ func (self *stateObject) setStaking(amount, blockNumber *big.Int) {
 	self.data.StakeUpdated = blockNumber
 }
 
-/*
-[BERITH]
-StakeBalance Value 를 반환
-*/
 func (self *stateObject) StakeBalance() *big.Int {
 	return self.data.StakeBalance
 }
@@ -462,25 +449,16 @@ func (self *stateObject) StakeUpdated() *big.Int {
 	return self.data.StakeUpdated
 }
 
-/*
-[BERITH]
-StakeBalance 를 초기화 하는 함수
-*/
 func (c *stateObject) RemoveStakeBalance() {
 	stakeBalance := c.StakeBalance()
 	if stakeBalance.Sign() == 0 {
 		return
 	}
 
-	calcResult := new(big.Int).Sub(stakeBalance, stakeBalance)
-	c.SetStaking(calcResult, c.data.StakeUpdated)
+	c.SetStaking(common.Big0, c.data.StakeUpdated)
 	c.AddBalance(stakeBalance)
 }
 
-/*
-[BERITH]
-StakeBalance 를 추가 하는 함수
-*/
 func (c *stateObject) AddStakeBalance(amount, blockNumber *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.
@@ -488,7 +466,6 @@ func (c *stateObject) AddStakeBalance(amount, blockNumber *big.Int) {
 		if c.empty() {
 			c.touch()
 		}
-
 		return
 	}
 	c.SetStaking(new(big.Int).Add(c.StakeBalance(), amount), blockNumber)
@@ -496,8 +473,8 @@ func (c *stateObject) AddStakeBalance(amount, blockNumber *big.Int) {
 
 /*
 [BERITH]
-BehindBalance 값은 배열
-배열에 블록넘버 와 코인수량 을 포함한 Behind 객체를 추가 하는 함수
+BehindBalance values are arrays
+Function to add Behind object including block number and coin quantity to the array
 */
 func (c *stateObject) AddBehindBalance(number, amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
@@ -506,7 +483,6 @@ func (c *stateObject) AddBehindBalance(number, amount *big.Int) {
 		if c.empty() {
 			c.touch()
 		}
-
 		return
 	}
 	c.SetBehind(number, amount)
@@ -531,25 +507,18 @@ func (self *stateObject) setBehind(behind []Behind) {
 	self.data.BehindBalance = behind
 }
 
-/*
-[BERITH]
-BehindBalance 객체를 반환 하는 함수
-*/
 func (self *stateObject) BehindBalance() []Behind {
 	return self.data.BehindBalance
 }
 
 /*
 [BERITH]
-BehindBalance 배열에서 0번째를 반환 하는 함수
-FIFO 처리하기 위한 함수
+Function that returns 0th in BehindBalance array
+Function to process FIFO
 */
 func (self *stateObject) GetFirstBehindBalance() (Behind, error) {
 	behind := self.data.BehindBalance
-	if behind == nil {
-		return Behind{}, errors.New("nil behind")
-	}
-	if len(behind) == 0 {
+	if behind == nil || len(behind) == 0 {
 		return Behind{}, errors.New("nil behind")
 	}
 
@@ -558,8 +527,8 @@ func (self *stateObject) GetFirstBehindBalance() (Behind, error) {
 
 /*
 [BERITH]
-BehindBalance 배열에서 0번째 값을 삭제 하기 위한 함수
-FIFO 처리 하기 위한 함수
+Function to delete 0th value from BehindBalance array
+Function to process FIFO
 */
 func (self *stateObject) RemoveFirstBehindBalance() {
 	behind := self.data.BehindBalance
@@ -568,7 +537,7 @@ func (self *stateObject) RemoveFirstBehindBalance() {
 
 /*
 [BERITH]
-Selection Point 의 값을 대입해주는 함수
+Function to assign the value of Selection Point
 */
 func (self *stateObject) SetPoint(amount *big.Int) {
 	self.db.journal.append(pointChange{
@@ -584,7 +553,7 @@ func (self *stateObject) setPoint(amount *big.Int) {
 
 /*
 [BERITH]
-Selection Point 를 반환 하는 함수
+Function that returns Selection Point
 */
 func (self *stateObject) GetPoint() *big.Int {
 	return self.data.Point
@@ -592,7 +561,7 @@ func (self *stateObject) GetPoint() *big.Int {
 
 /*
 [BERITH]
-Selection Point 값에 해당 amount 값을 추가 해주는 함수
+Function to add the corresponding amount value to Selection Point value
 */
 func (c *stateObject) AddPoint(amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
@@ -601,7 +570,6 @@ func (c *stateObject) AddPoint(amount *big.Int) {
 		if c.empty() {
 			c.touch()
 		}
-
 		return
 	}
 	c.SetPoint(new(big.Int).Add(c.GetPoint(), amount))
@@ -609,25 +577,25 @@ func (c *stateObject) AddPoint(amount *big.Int) {
 
 /*
 [BERITH]
-Account 정보를 반환 하는 함수
+Function that returns Account information
 */
 func (self *stateObject) AccountInfo() Account {
 	return self.data
 }
 
-//[BERITH] Penalty 관련 함수 정의
+// [BERITH] Penalty-related function definition
 
-//Penalty [BERITH] 현재 패널티 값을 반환
+// [BERITH] Returns the current penalty value
 func (self *stateObject) Penalty() uint64 {
 	return self.data.Penalty
 }
 
-//PenaltyUpdated() [BERITH] 패널티가 마지막으로 변경된 블록 넘버를 반환
+// [BERITH] Returns the block number where the penalty was last changed
 func (self *stateObject) PenaltyUpdated() *big.Int {
 	return self.data.PenlatyUpdated
 }
 
-//AddPenalty [BERITH] 패널티를 1증가시키는 함수
+// [BERITH] Function to increase penalty by 1
 func (self *stateObject) AddPenalty(blockNumber *big.Int) {
 	self.db.journal.append(penaltyChange{
 		account:     &self.address,
@@ -637,7 +605,7 @@ func (self *stateObject) AddPenalty(blockNumber *big.Int) {
 	self.setPenalty(self.data.Penalty+1, blockNumber)
 }
 
-//RemovePenalty [BERITH] 특정 계정에 패널티를 없애는 함수
+// [BERITH] Function to remove penalty for a specific account
 func (self *stateObject) RemovePenalty(blockNumber *big.Int) {
 	self.db.journal.append(penaltyChange{
 		account:     &self.address,

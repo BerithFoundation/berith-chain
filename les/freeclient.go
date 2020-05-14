@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
 	"github.com/BerithFoundation/berith-chain/common/prque"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/rlp"
 )

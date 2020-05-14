@@ -19,8 +19,8 @@ package les
 import (
 	"context"
 
-	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/log"
 )
