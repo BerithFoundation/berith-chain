@@ -960,51 +960,23 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	}
 	triedb := bc.stateCache.TrieDB()
 
+	if err := triedb.Commit(root, false); err != nil {
+		return NonStatTy, err
+	}
+
 	// If we're running an archive node, always flush
-	if bc.cacheConfig.Disabled {
-		if err := triedb.Commit(root, false); err != nil {
-			return NonStatTy, err
-		}
-	} else {
-		// Full but not archive node, do proper garbage collection
-		triedb.Reference(root, common.Hash{}) // metadata reference to keep trie alive
-		bc.triegc.Push(root, -int64(block.NumberU64()))
+	if !bc.cacheConfig.Disabled && block.NumberU64() % uint64(common.CleanCycle) == 0 {
+		for targetNumber := block.NumberU64() - bc.triesInMemory - 1; targetNumber > 0; targetNumber-- {
+			targetHash := bc.GetHeaderByNumber(targetNumber).Root
 
-		if current := block.NumberU64(); current > bc.triesInMemory {
-			// If we exceeded our memory allowance, flush matured singleton nodes to disk
-			var (
-				nodes, imgs = triedb.Size()
-				limit       = common.StorageSize(bc.cacheConfig.TrieDirtyLimit) * 1024 * 1024
-			)
-			if nodes > limit || imgs > 4*1024*1024 {
-				triedb.Cap(limit - berithdb.IdealBatchSize)
-			}
-			// Find the next state trie we need to commit
-			header := bc.GetHeaderByNumber(current - bc.triesInMemory)
-			chosen := header.Number.Uint64()
+			isExist, _ := triedb.DiskDB().Has(targetHash[:])
+			if !isExist { break }
 
-			// If we exceeded out time allowance, flush an entire trie to disk
-			if bc.gcproc > bc.cacheConfig.TrieTimeLimit {
-				// If we're exceeding limits but haven't reached a large enough memory gap,
-				// warn the user that the system is becoming unstable.
-				if chosen < lastWrite+bc.triesInMemory && bc.gcproc >= 2*bc.cacheConfig.TrieTimeLimit {
-					log.Info("State in memory for too long, committing", "time", bc.gcproc, "allowance", bc.cacheConfig.TrieTimeLimit, "optimum", float64(chosen-lastWrite)/float64(bc.triesInMemory))
-				}
-				// Flush an entire trie and restart the counters
-				triedb.Commit(header.Root, true)
-				lastWrite = chosen
-				bc.gcproc = 0
-			}
-			// Garbage collect anything below our required write retention
-			for !bc.triegc.Empty() {
-				root, number := bc.triegc.Pop()
-				if uint64(-number) >= chosen {
-					bc.triegc.Push(root, number)
-					break
-				}
-				triedb.Dereference(root.(common.Hash))
+			if err := triedb.DiskDB().Delete(targetHash[:]); err != nil {
+				return NonStatTy, err
 			}
 		}
+		triedb.DiskDB().Compact()
 	}
 
 	// Write other block data using a batch.
