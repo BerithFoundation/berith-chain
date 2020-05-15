@@ -66,3 +66,8 @@ func (db *LDBDatabase) Meter(prefix string) {
 func (db *LDBDatabase) NewBatch() Batch {
 	return nil
 }
+
+func (db *LDBDatabase) Compact() {
+	// Do nothing
+}
+
