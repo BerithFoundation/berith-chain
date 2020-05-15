@@ -127,7 +127,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
-	stakingDB := &staking.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: config.NoPruning}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr

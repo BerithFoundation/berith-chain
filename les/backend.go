@@ -92,7 +92,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightBerith, error) 
 	peers := newPeerSet()
 	quitSync := make(chan struct{})
 
-	stakingDB := &staking.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: config.NoPruning}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr

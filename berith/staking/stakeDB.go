@@ -19,6 +19,7 @@ Database that stores staker information
 type StakingDB struct {
 	creator createFunc
 	stakeDB *berithdb.LDBDatabase
+	NoPruning bool
 }
 
 // staker type creation function
@@ -115,6 +116,11 @@ func (s *StakingDB) NewStakers() Stakers {
 }
 
 func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) error {
+	// If GC Mode is archive, stakingdb is not deleted.
+	if s.NoPruning {
+		return nil
+	}
+
 	for {
 		key := []byte(header.Hash().Hex())
 		exist, err := s.isExist(key)
