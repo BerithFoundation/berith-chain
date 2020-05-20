@@ -60,10 +60,11 @@ const (
 )
 
 var (
-	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
-	SlashRound   = uint64(2)
-	ForkFactor   = 1.0
+	RewardBlock          = big.NewInt(500)
+	StakeMinimum, _      = new(big.Int).SetString(params.StakeMinimum, 0)
+	LimitStakeBalance, _ = new(big.Int).SetString(params.LimitStakeBalance, 0)
+	SlashRound           = uint64(2)
+	ForkFactor           = 1.0
 
 	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -232,12 +233,12 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		conf.Rewards = RewardBlock
 	}
 
-	if conf.StakeMinimum != nil {
-		if conf.StakeMinimum.Cmp(big.NewInt(0)) == 0 {
-			conf.StakeMinimum = StakeMinimum
-		}
-	} else {
+	if conf.StakeMinimum == nil || conf.StakeMinimum.Cmp(big.NewInt(0)) == 0 {
 		conf.StakeMinimum = StakeMinimum
+	}
+
+	if conf.LimitStakeBalance == nil || conf.LimitStakeBalance.Cmp(big.NewInt(0)) == 0 {
+		conf.LimitStakeBalance = LimitStakeBalance
 	}
 
 	if conf.SlashRound != 0 {
@@ -790,9 +791,9 @@ func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
 	}
 
 	/*
-	[Berith]
-	The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
-	The same amount is deducted for every two sections.
+		[Berith]
+		The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
+		The same amount is deducted for every two sections.
 	*/
 	reward := (defaultReward - math.Round(correctedBlockNumber/blockSectionDivisionNumber)*groupingValue + addtional) * correctionValue
 	if reward <= 0 {

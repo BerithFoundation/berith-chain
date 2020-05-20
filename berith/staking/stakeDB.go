@@ -17,8 +17,8 @@ import (
 Database that stores staker information
 */
 type StakingDB struct {
-	creator createFunc
-	stakeDB *berithdb.LDBDatabase
+	creator   createFunc
+	stakeDB   *berithdb.LDBDatabase
 	NoPruning bool // When gc mode is archive, this value is true or false.
 }
 
@@ -128,7 +128,9 @@ func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) err
 			return err
 		}
 
-		if !exist { break }
+		if !exist {
+			break
+		}
 
 		if err = s.delete(key); err != nil {
 			return err

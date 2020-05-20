@@ -432,8 +432,8 @@ func (s *Berith) StopMining() {
 	s.miner.Stop()
 }
 
-func (s *Berith) IsMining() bool      { return s.miner.Mining() }
-func (s *Berith) Miner() *miner.Miner { return s.miner }
+func (s *Berith) IsMining() bool                     { return s.miner.Mining() }
+func (s *Berith) Miner() *miner.Miner                { return s.miner }
 func (s *Berith) AccountManager() *accounts.Manager  { return s.accountManager }
 func (s *Berith) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *Berith) TxPool() *core.TxPool               { return s.txPool }

@@ -15,7 +15,7 @@ type Queue struct {
 
 func (q *Queue) setQueueAsCandidates(candidateCount int) *Queue {
 	return &Queue{
-		storage: make([]Range, candidateCount + 1),
+		storage: make([]Range, candidateCount+1),
 		size:    candidateCount + 1,
 		front:   0,
 		rear:    0,
@@ -23,7 +23,7 @@ func (q *Queue) setQueueAsCandidates(candidateCount int) *Queue {
 }
 
 func (q *Queue) enqueue(r Range) error {
-	if (q.rear + 1) % q.size == q.front {
+	if (q.rear+1)%q.size == q.front {
 		return errors.New("Queue is full")
 	}
 

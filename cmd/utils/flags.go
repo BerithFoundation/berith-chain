@@ -789,8 +789,8 @@ func makeDatabaseHandles() int {
 // a key index in the key store to an internal account representation.
 func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error) {
 	/*
-	[BERITH]
-	Remove address prefix if exist, because prefix ist not hex prefix(0x)
+		[BERITH]
+		Remove address prefix if exist, because prefix ist not hex prefix(0x)
 	*/
 	if common.HasAddressPrefix(account) {
 		account = account[len(common.AddressPrefix):]
