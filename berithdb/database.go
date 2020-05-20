@@ -121,6 +121,10 @@ func (db *LDBDatabase) Delete(key []byte) error {
 	return db.db.Delete(key, nil)
 }
 
+func (db *LDBDatabase) Compact() {
+	db.db.CompactRange(util.Range{})
+}
+
 func (db *LDBDatabase) NewIterator() iterator.Iterator {
 	return db.db.NewIterator(nil, nil)
 }

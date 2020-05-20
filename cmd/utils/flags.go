@@ -1333,7 +1333,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
 
-	stakingDB := &staking.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: ctx.GlobalString(GCModeFlag.Name) == "archive"}
 	stakingDBPath := stack.ResolvePath("stakingDB")
 	stakingDB.CreateDB(stakingDBPath, staking.NewStakers)
 

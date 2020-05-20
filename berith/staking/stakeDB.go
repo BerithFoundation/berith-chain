@@ -2,6 +2,7 @@ package staking
 
 import (
 	"fmt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/rlp"
@@ -9,7 +10,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 /*
@@ -19,6 +19,7 @@ Database that stores staker information
 type StakingDB struct {
 	creator createFunc
 	stakeDB *berithdb.LDBDatabase
+	NoPruning bool // When gc mode is archive, this value is true or false.
 }
 
 // staker type creation function
@@ -115,6 +116,11 @@ func (s *StakingDB) NewStakers() Stakers {
 }
 
 func (s *StakingDB) Clean(chain consensus.ChainReader, header *types.Header) error {
+	// If GC Mode is archive, stakingdb is not deleted.
+	if s.NoPruning {
+		return nil
+	}
+
 	for {
 		key := []byte(header.Hash().Hex())
 		exist, err := s.isExist(key)

@@ -57,8 +57,6 @@ const (
 	groupDelay = 1 * time.Second        // Delay per groups
 
 	commonDiff = 3 // A constant that specifies the maximum number of people in a group when dividing a signer's candidates into multiple groups
-
-	cleanCycle = 100000 // Standard number of stakingDB clean cycle
 )
 
 var (
@@ -526,7 +524,7 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			[Berith]
 			To reduce disk usage, Staker information is periodically deleted.
 		*/
-		if new(big.Int).Mod(header.Number, big.NewInt(cleanCycle)).Cmp(common.Big0) == 0 {
+		if new(big.Int).Mod(header.Number, big.NewInt(common.CleanCycle)).Cmp(common.Big0) == 0 {
 			if err = c.stakingDB.Clean(chain, target); err != nil {
 				return nil, errCleanStakingDB
 			}

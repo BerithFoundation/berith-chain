@@ -326,6 +326,10 @@ func (db *countingDB) Get(key []byte) ([]byte, error) {
 	return db.Database.Get(key)
 }
 
+func (db *countingDB) Compact() {
+	// Do nothing
+}
+
 // TestCacheUnload checks that decoded nodes are unloaded after a
 // certain number of commit operations.
 func TestCacheUnload(t *testing.T) {

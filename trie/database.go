@@ -298,7 +298,7 @@ func NewDatabaseWithCache(diskdb berithdb.Database, cache int) *Database {
 }
 
 // DiskDB retrieves the persistent storage backing the trie database.
-func (db *Database) DiskDB() DatabaseReader {
+func (db *Database) DiskDB() berithdb.Database {
 	return db.diskdb
 }
 
