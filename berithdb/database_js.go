@@ -70,4 +70,3 @@ func (db *LDBDatabase) NewBatch() Batch {
 func (db *LDBDatabase) Compact() {
 	// Do nothing
 }
-

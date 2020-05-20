@@ -5,8 +5,8 @@
 package brtapi
 
 import (
+	"berith-chain/core"
 	"context"
-	"errors"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/rpc"
@@ -82,14 +82,14 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, wallet WalletTxArgs) (comm
 
 	// Create transaction
 	sendTx := &SendTxArgs{
-		From: wallet.From,
-		To: &wallet.From,
-		Value: wallet.Value,
-		Base: types.Main,
-		Target: types.Stake,
-		Gas: wallet.Gas,
+		From:     wallet.From,
+		To:       &wallet.From,
+		Value:    wallet.Value,
+		Base:     types.Main,
+		Target:   types.Stake,
+		Gas:      wallet.Gas,
 		GasPrice: wallet.GasPrice,
-		Nonce: wallet.Nonce,
+		Nonce:    wallet.Nonce,
 	}
 	return s.sendTransaction(ctx, *sendTx)
 }
@@ -99,7 +99,7 @@ func checkStakeMinimum(stakeAmount *big.Int, stakeMininum *big.Int) error {
 		minimum := new(big.Int).Div(stakeMininum, common.UnitForBer)
 
 		log.Error("The mininum number of stakes is " + strconv.Itoa(int(minimum.Uint64())))
-		return errors.New("staking balance failed")
+		return core.ErrUnderStakeBalance
 	}
 	return nil
 }
@@ -111,12 +111,12 @@ After creating Tx and sending it, it is processed by Consensus.
 */
 func (s *PrivateBerithAPI) StopStaking(ctx context.Context, wallet WalletTxArgs) (common.Hash, error) {
 	sendTx := &SendTxArgs{
-		From: wallet.From,
-		To: &wallet.From,
-		Value: new(hexutil.Big),
-		Base: types.Stake,
-		Target: types.Main,
-		Gas: wallet.Gas,
+		From:     wallet.From,
+		To:       &wallet.From,
+		Value:    new(hexutil.Big),
+		Base:     types.Stake,
+		Target:   types.Main,
+		Gas:      wallet.Gas,
 		GasPrice: wallet.GasPrice,
 	}
 	return s.sendTransaction(ctx, *sendTx)

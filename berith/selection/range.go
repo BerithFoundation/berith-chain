@@ -17,11 +17,11 @@ type Range struct {
 BinarySearch the Random value in width units.
 */
 func (r Range) binarySearch(q *Queue, cs *Candidates) common.Address {
-	if r.end - r.start <= 1 {
+	if r.end-r.start <= 1 {
 		return cs.selections[r.start].address
 	}
 
-	random := uint64(rand.Int63n(int64(r.max - r.min))) + r.min
+	random := uint64(rand.Int63n(int64(r.max-r.min))) + r.min
 	start := r.start
 	end := r.end
 	for {

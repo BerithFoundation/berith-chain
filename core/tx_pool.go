@@ -78,7 +78,8 @@ var (
 	// making the transaction invalid, rather a DOS protection.
 	ErrOversizedData = errors.New("oversized data")
 
-	ErrStakingBalance       = errors.New("staking balance failed")
+	ErrUnderStakeBalance    = errors.New("insufficient transaction value")
+	ErrExceedStakeLimit     = errors.New("exceeds stake balance limit")
 	ErrInvalidStakeReceiver = errors.New("berith account only can stake token on itself")
 )
 
@@ -645,11 +646,32 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	minimum := pool.chainconfig.Bsrr.StakeMinimum
 	if tx.Base() == types.Main && tx.Target() == types.Stake {
 		if totalStakingAmount.Cmp(minimum) == -1 {
-			return ErrStakingBalance
+			return ErrUnderStakeBalance
 		}
 	}
 
+	/*
+		[BERITH]
+		Check if the maximum value of Stake Balance is exceeded
+	*/
+	to := *tx.To()
+	stakedAmount = pool.currentState.GetStakeBalance(to)
+	totalStakingAmount = new(big.Int).Add(tx.Value(), stakedAmount)
+	limitStakeBalance := pool.chainconfig.Bsrr.LimitStakeBalance
+	isBIP4 := pool.chainconfig.IsBIP4(pool.chain.CurrentBlock().Header().Number)
+
+	if isBIP4 && tx.Target() == types.Stake && !CheckStakeBalanceAmount(totalStakingAmount, limitStakeBalance) {
+		return ErrExceedStakeLimit
+	}
 	return nil
+}
+
+/*
+	[BERITH]
+	Stake Balance limit exceeded check function
+*/
+func CheckStakeBalanceAmount(totalStakingAmount, maximum *big.Int) bool {
+	return totalStakingAmount.Cmp(maximum) != 1
 }
 
 // add validates a transaction and inserts it into the non-executable queue for

@@ -17,6 +17,7 @@
 package core
 
 import (
+	"berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/consensus/misc"
@@ -25,6 +26,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/params"
+	"math/big"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -89,6 +91,31 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
 		return nil, 0, err
+	}
+
+	/*
+		[Berith]
+		Logic for setting staking limit of hard fork BIP4
+	*/
+	stakedBalance := big.NewInt(0)
+	var recipient *common.Address
+	if tx.To() != nil {
+		recipient = tx.To()
+		stakedBalance = statedb.GetStakeBalance(*recipient)
+	}
+
+
+	if config.IsBIP4(header.Number) && stakedBalance.Cmp(config.Bsrr.LimitStakeBalance) == 1 {
+		// Adjust staking balance of accounts staking above the limit
+		difference := new(big.Int).Sub(stakedBalance, config.Bsrr.LimitStakeBalance)
+		statedb.AddStakeBalance(*recipient, new(big.Int).Neg(difference), header.Number)
+		statedb.AddBalance(*recipient, difference)
+
+		// Adjust selection point of accounts staking above the limit
+		currentBlock := header.Number
+		lastStkBlock := new(big.Int).Set(statedb.GetStakeUpdated(*recipient))
+		point := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
+		statedb.SetPoint(*recipient, point)
 	}
 
 	//[BERITH]

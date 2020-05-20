@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	blockYear = 3600000 // When generating a block every 10 seconds, 3600000 blocks are generated per year.
+	BlockYear = 3600000 // When generating a block every 10 seconds, 3600000 blocks are generated per year.
 )
 
 func CalcPointBigint(prevStake, addStake, nowBlock, stakeBlock *big.Int, period uint64) *big.Int {
 	correctionValue := float64(period) / common.DefaultBlockCreationSec // Value for correction when block creation time is different from the standard
-	referenceBlock := int64(blockYear / correctionValue)
+	referenceBlock := int64(BlockYear / correctionValue)
 
 	ratio := new(big.Int).Mul(nowBlock, big.NewInt(100))
 	ratio.Div(ratio, new(big.Int).Add(big.NewInt(referenceBlock), stakeBlock))

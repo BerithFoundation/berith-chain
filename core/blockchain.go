@@ -965,12 +965,14 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	}
 
 	// If we're running an archive node, always flush
-	if !bc.cacheConfig.Disabled && block.NumberU64() % uint64(common.CleanCycle) == 0 {
+	if !bc.cacheConfig.Disabled && block.NumberU64()%uint64(common.CleanCycle) == 0 {
 		for targetNumber := block.NumberU64() - bc.triesInMemory - 1; targetNumber > 0; targetNumber-- {
 			targetHash := bc.GetHeaderByNumber(targetNumber).Root
 
 			isExist, _ := triedb.DiskDB().Has(targetHash[:])
-			if !isExist { break }
+			if !isExist {
+				break
+			}
 
 			if err := triedb.DiskDB().Delete(targetHash[:]); err != nil {
 				return NonStatTy, err
