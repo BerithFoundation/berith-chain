@@ -18,6 +18,7 @@ package core
 
 import (
 	"berith-chain/berith/staking"
+	"errors"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/consensus/misc"
@@ -93,29 +94,10 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 		return nil, 0, err
 	}
 
-	/*
-		[Berith]
-		Logic for setting staking limit of hard fork BIP4
-	*/
-	stakedBalance := big.NewInt(0)
-	var recipient *common.Address
-	if tx.To() != nil {
-		recipient = tx.To()
-		stakedBalance = statedb.GetStakeBalance(*recipient)
-	}
+	adjustStateForBIP4(config, statedb, header, tx)
 
-
-	if config.IsBIP4(header.Number) && stakedBalance.Cmp(config.Bsrr.LimitStakeBalance) == 1 {
-		// Adjust staking balance of accounts staking above the limit
-		difference := new(big.Int).Sub(stakedBalance, config.Bsrr.LimitStakeBalance)
-		statedb.AddStakeBalance(*recipient, new(big.Int).Neg(difference), header.Number)
-		statedb.AddBalance(*recipient, difference)
-
-		// Adjust selection point of accounts staking above the limit
-		currentBlock := header.Number
-		lastStkBlock := new(big.Int).Set(statedb.GetStakeUpdated(*recipient))
-		point := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
-		statedb.SetPoint(*recipient, point)
+	if (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
+		return nil, 0, errors.New("Breaking transaction lock up condition was not met.")
 	}
 
 	//[BERITH]
@@ -152,4 +134,40 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
 	return receipt, gas, err
+}
+
+/*
+	[Berith]
+	adjust Stake balance and Selection point For hard fork BIP4
+*/
+func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, header *types.Header, tx *types.Transaction) {
+	stakedBalance := big.NewInt(0)
+	var recipient *common.Address
+	if tx.To() != nil {
+		recipient = tx.To()
+		stakedBalance = statedb.GetStakeBalance(*recipient)
+	}
+
+	if config.IsBIP4(header.Number) && stakedBalance.Cmp(config.Bsrr.LimitStakeBalance) == 1 {
+		// Adjust staking balance of accounts staking above the limit
+		difference := new(big.Int).Sub(stakedBalance, config.Bsrr.LimitStakeBalance)
+		statedb.AddStakeBalance(*recipient, new(big.Int).Neg(difference), header.Number)
+		statedb.AddBalance(*recipient, difference)
+
+		// Adjust selection selectionPoint of accounts staking above the limit
+		currentBlock := header.Number
+		lastStkBlock := new(big.Int).Set(statedb.GetStakeUpdated(*recipient))
+		selectionPoint := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
+		statedb.SetPoint(*recipient, selectionPoint)
+	}
+}
+
+/*
+	[Berith]
+	Check if the break transaction satisfies the lock up condition
+*/
+func checkBreakTransaction(msg types.Message, blockNumber *big.Int, period uint64) bool {
+	lockUpCondition := big.NewInt(int64((60 * 60 * 24 * 3) / period))
+	elapsedBlockNumber :=  new(big.Int).Sub(blockNumber, new(big.Int).SetBytes(msg.Data()))
+	return elapsedBlockNumber.Cmp(lockUpCondition) == 1
 }

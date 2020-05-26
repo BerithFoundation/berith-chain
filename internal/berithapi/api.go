@@ -1244,6 +1244,16 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 	if args.Data != nil && args.Input != nil && !bytes.Equal(*args.Data, *args.Input) {
 		return errors.New(`Both "data" and "input" are set and not equal. Please use "input" to pass transaction call data.`)
 	}
+
+	/*
+		[Berith]
+		In case of break transaction, block number is stored in input for lock up function.
+	*/
+	if types.ConvertJobWallet(args.Base) == types.Stake && types.ConvertJobWallet(args.Target) == types.Main {
+		args.Input = new(hexutil.Bytes)
+		*args.Input = b.CurrentBlock().Number().Bytes()
+	}
+
 	if args.To == nil {
 		// Contract creation
 		var input []byte
