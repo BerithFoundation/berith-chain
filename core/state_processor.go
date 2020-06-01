@@ -18,7 +18,6 @@ package core
 
 import (
 	"berith-chain/berith/staking"
-	"errors"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/consensus/misc"
@@ -96,8 +95,8 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 
 	adjustStateForBIP4(config, statedb, header, tx)
 
-	if (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
-		return nil, 0, errors.New("Breaking transaction lock up condition was not met.")
+	if config.IsBIP4(header.Number) && (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
+		return nil, 0, nil
 	}
 
 	//[BERITH]

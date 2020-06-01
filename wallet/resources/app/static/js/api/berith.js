@@ -15,6 +15,7 @@ let berith = {
     //         $('#loginID').val(message.payload)
     //     })
     // },
+
     blockNumber : async function (address) {
         result = await sendMessage2("callApi", "berith_blockNumber", []);
         var obj = JSON.parse(result.payload)

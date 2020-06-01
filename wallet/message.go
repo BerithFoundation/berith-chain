@@ -259,13 +259,33 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-	}
+	case "selectGCMode":
+		gcMode := make(walletdb.GCMode, 0)
 
+		err := WalletDB.Select([]byte(key[0]), &gcMode)
+		if err != nil {
+			return nil, err
+		}
+		return gcMode, nil
+	case "updateGCMode":
+		gcMode := make(walletdb.GCMode, 0)
+		gcMode[key[0]] = key[1]
+
+		err := WalletDB.Insert([]byte(key[0]), gcMode)
+		if err != nil {
+			return nil, err
+		}
+
+		err2 := WalletDB.Insert([]byte(common.KeyForGCModeChangYn), "true")
+		if err != nil {
+			return nil, err2
+		}
+		return gcMode, nil
+	}
 	return nil, nil
 }
 
 // 개인키 내보내기 함수
-
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName := "keystore.zip"
 	dir, err := stack.FetchKeystoreDir()
