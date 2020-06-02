@@ -1,4 +1,11 @@
 let database = {
+    keyForGCMode: "gcmode",
+    selectGCMode: function() {
+        return sendMessage("callDB" , "selectGCMode", [this.keyForGCMode])
+    },
+    updateGCMode: function(afterMode) {
+        return sendMessage("callDB" , "updateGCMode", [this.keyForGCMode, afterMode])
+    },
     selectContact : function () {
         return new Promise(resolve => {
             setTimeout(()=> {

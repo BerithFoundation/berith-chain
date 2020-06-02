@@ -654,14 +654,15 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		[BERITH]
 		Check if the maximum value of Stake Balance is exceeded
 	*/
-	to := *tx.To()
-	stakedAmount = pool.currentState.GetStakeBalance(to)
-	totalStakingAmount = new(big.Int).Add(tx.Value(), stakedAmount)
-	limitStakeBalance := pool.chainconfig.Bsrr.LimitStakeBalance
 	isBIP4 := pool.chainconfig.IsBIP4(pool.chain.CurrentBlock().Header().Number)
-
-	if isBIP4 && tx.Target() == types.Stake && !CheckStakeBalanceAmount(totalStakingAmount, limitStakeBalance) {
-		return ErrExceedStakeLimit
+	if isBIP4 && tx.Target() == types.Stake {
+		to := *tx.To()
+		stakedAmount = pool.currentState.GetStakeBalance(to)
+		totalStakingAmount = new(big.Int).Add(tx.Value(), stakedAmount)
+		limitStakeBalance := pool.chainconfig.Bsrr.LimitStakeBalance
+		if !CheckStakeBalanceAmount(totalStakingAmount, limitStakeBalance) {
+			return ErrExceedStakeLimit
+		}
 	}
 	return nil
 }

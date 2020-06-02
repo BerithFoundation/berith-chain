@@ -50,7 +50,7 @@ var (
 		BIP1Block:           big.NewInt(508000),
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
-		BIP4Block:           big.NewInt(3000000), // [kyumin] 블록 번호 설정 필요
+		BIP4Block:           big.NewInt(3500000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,

@@ -17,13 +17,16 @@
 package main
 
 import (
+	"berith-chain/common"
 	"bufio"
 	"errors"
 	"fmt"
+	walletdb "github.com/BerithFoundation/berith-chain/wallet/database"
 	"io"
 	"math/big"
 	"os"
 	"reflect"
+	"strings"
 	"unicode"
 
 	cli "gopkg.in/urfave/cli.v1"
@@ -127,7 +130,33 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	if err != nil {
 		utils.Fatalf("Failed to create the protocol stack: %v", err)
 	}
+
+	// Create WalletDB
+	dir, _ := stack.FetchKeystoreDir()
+	WalletDB, _ = walletdb.NewWalletDB(dir + "/test.ldb")
+
 	utils.SetBerithConfig(ctx, stack, &cfg.Ber)
+
+	// Run PoS in user selected mode
+	gcMode := make(walletdb.GCMode, 0)
+	err2 := WalletDB.Select([]byte(common.KeyForGCMode), &gcMode)
+	currentMode := strings.ToLower(gcMode[common.KeyForGCMode])
+	if err2 == nil {
+		if currentMode == common.GCModeArchive {
+			cfg.Ber.NoPruning = true
+		} else if currentMode == common.GCModeFull {
+			cfg.Ber.NoPruning = false
+		}
+	}
+
+	changeYn := ""
+	WalletDB.Select([]byte(common.KeyForGCModeChangYn), &changeYn)
+	if changeYn == "true" && currentMode == common.GCModeArchive {
+		WalletDB.Insert([]byte(common.KeyForGCModeChangYn), "false")
+		chaindataDir := stack.InstanceDir() + "\\chaindata"
+		common.RemoveContents(chaindataDir)
+	}
+
 	if ctx.GlobalIsSet(utils.BerithStatsURLFlag.Name) {
 		cfg.BerithStats.URL = ctx.GlobalString(utils.BerithStatsURLFlag.Name)
 	}

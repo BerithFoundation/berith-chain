@@ -96,8 +96,8 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 
 	adjustStateForBIP4(config, statedb, header, tx)
 
-	if (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
-		return nil, 0, errors.New("Breaking transaction lock up condition was not met.")
+	if config.IsBIP4(header.Number) && (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
+		return nil, 0, errors.New("Unstaking transactions are processed only after the lock up period.")
 	}
 
 	//[BERITH]
@@ -139,6 +139,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 /*
 	[Berith]
 	adjust Stake balance and Selection point For hard fork BIP4
+	Check the Recipient's Stake Balance of the transaction to be processed, and change it if it has more than the limit.
 */
 func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, header *types.Header, tx *types.Transaction) {
 	stakedBalance := big.NewInt(0)
@@ -165,9 +166,10 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 /*
 	[Berith]
 	Check if the break transaction satisfies the lock up condition
+	The Break Transaction has a three-day grace period.
 */
 func checkBreakTransaction(msg types.Message, blockNumber *big.Int, period uint64) bool {
-	lockUpCondition := big.NewInt(int64((60 * 60 * 24 * 3) / period))
+	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / period)) // 3 days
 	elapsedBlockNumber :=  new(big.Int).Sub(blockNumber, new(big.Int).SetBytes(msg.Data()))
-	return elapsedBlockNumber.Cmp(lockUpCondition) == 1
+	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1
 }

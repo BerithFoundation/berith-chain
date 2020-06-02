@@ -61,13 +61,69 @@
 			<div class="liability_txt">
 				<p class="center">Berith는 동일 기기에서 다수 계정 등록 및 사용으로 발생하는 문제에 대한 배상, 보상 및 기타 법적 책임을 부담하지 않습니다.</p>
 			</div>
-                
+
+            <div class="inp_group" id="modeGroup">
+                <h5 style="display: inline-block; margin-right: 5px;">실행모드</h5>
+                <select id="gc_mode" disabled style="background-color: white; font-size: 13px; border: 1px solid darkgray;">
+                    <option class="archive" value="archive" data-description="모든 과거 데이터를 저장하는 모드">Archive</option>
+                    <option class="full" value="full" data-description="필요한 데이터만 남기고 주기적으로 삭제하는 모드">Full</option>
+                </select>
+                <p id="guide" style="display: none; color: red; font-size: 13px;">변경한 모드를 적용하기 위해 프로그램을 재실행해주세요.</p>
+            </div>
         </div>
     </div><!-- e://wrap -->
 
     <script type = "text/javascript">
+        window.addEventListener('DOMContentLoaded', () => {
+            onPageload();
+            setGCModeChangeEvent();
+            setTimeout(() => displayCurrentGCMode(), 5000);
+        })
 
-        onPageload();
+        async function displayCurrentGCMode() {
+            let selectBox = document.getElementById("gc_mode");
+            selectBox.disabled = false;
+
+            let response = await selectGCMode();
+            if (response !== undefined) {
+                let currentMode = response.payload.gcmode;
+                let count = selectBox.options.length;
+
+                for (let i = 0; i < count; i++) {
+                    if (selectBox.options[i].value === currentMode) {
+                        selectBox.selectedIndex = i;
+                    }
+                }
+            }
+        }
+
+        function setGCModeChangeEvent() {
+            document.getElementById("gc_mode").addEventListener("change", async function() {
+                let selectBox = document.getElementById("gc_mode");
+                let response = await selectGCMode();
+                let beforeMode = response !== undefined ? response.payload.gcmode : null
+                let afterMode = selectBox.options[selectBox.selectedIndex].value;
+
+                if (response === undefined || beforeMode !== afterMode) {
+                    await updateGCMode(afterMode);
+                    document.querySelector("#modeGroup > #guide").style.display = "block";
+                }
+            })
+        }
+
+        function selectGCMode() {
+            return database.selectGCMode();
+        }
+
+        function updateGCMode(afterMode) {
+            let apiResult = database.updateGCMode(afterMode);
+            if (apiResult == undefined) {
+                console.error("Fail to update gc mode");
+            } else {
+                console.log("Success to update gc mode");
+            }
+        }
+
         function onPageload() {
             $('.login').keypress(function (e) {
                 if (e.keyCode == '13')

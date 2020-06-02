@@ -74,7 +74,6 @@ func SelectBlockCreator(config *params.ChainConfig, number uint64, hash common.H
 	[Berith]
 	A function that newly calculates the elected point advantage for holders who have exceeded the Stake Balance limit
 */
-// [kyumin] refactoring 필요함
 func calcAdvForExceededPoint(nowBlockNumber, stakeBlockNumber *big.Int, period uint64, limitStakeBalanceInBer *big.Float) *big.Int {
 	d := float64(period) / 10 //공식이 10초 단위 이기때문에 맞추기 위함 (perioid 를 제네시스로 변경하면 자동으로 변경되기 위함)
 

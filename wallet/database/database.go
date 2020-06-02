@@ -37,6 +37,8 @@ type Contact map[common.Address]string
 // 트랜잭션 리스트 Master table ( key 값은 해당 transaction을 전파받은 블록넘버값)
 type TxHistoryMaster map[string]string
 
+type GCMode map[string]string
+
 // Contact table RLP encode 함수
 func (c Contact) EncodeRLP(w io.Writer) error {
 	result := make([]string, 0)
@@ -52,6 +54,16 @@ func (c TxHistoryMaster) EncodeRLP(w io.Writer) error {
 	result := make([]string, 0)
 
 	for k, v := range c {
+		result = append(result, k+":"+v)
+	}
+	return rlp.Encode(w, result)
+}
+
+// GCMode RLP encode 함수
+func (g GCMode) EncodeRLP(w io.Writer) error {
+	result := make([]string, 0)
+
+	for k, v := range g {
 		result = append(result, k+":"+v)
 	}
 	return rlp.Encode(w, result)
@@ -93,6 +105,26 @@ func (c TxHistoryMaster) DecodeRLP(r *rlp.Stream) error {
 		val := inner[1]
 
 		c[key] = val
+	}
+	return nil
+}
+
+// GCMode RLP decode 함수
+func (g GCMode) DecodeRLP(r *rlp.Stream) error {
+	arr := make([]string, 0)
+
+	err := r.Decode(&arr)
+
+	if err != nil {
+		return err
+	}
+
+	for _, v := range arr {
+		inner := strings.Split(v, ":")
+		key := inner[0]
+		val := inner[1]
+
+		g[key] = val
 	}
 	return nil
 }
