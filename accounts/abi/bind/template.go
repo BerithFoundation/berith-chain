@@ -452,7 +452,7 @@ const tmplSourceJava = `
 package {{.Package}};
 
 import org.ethereum.berith.*;
-import org.ethereum.berith.internal.*;
+import org.ethereum.berith.internals.*;
 
 {{range $contract := .Contracts}}
 	public class {{.Type}} {

@@ -54,7 +54,7 @@
 
 	// step is invoked for every opcode that the VM executes.
 	step: function(log, db) {
-		// Skip any opcodes that are not internal calls
+		// Skip any opcodes that are not internals calls
 		var ct = this.callType(log.op.toString());
 		if (!ct) {
 			return;
@@ -63,7 +63,7 @@
 		if (isPrecompiled(toAddress(log.stack.peek(1).toString(16)))) {
 			return;
 		}
-		// Gather internal call details
+		// Gather internals call details
 		var inSz = log.stack.peek(ct + 1).valueOf();
 		if (inSz >= 4) {
 			var inOff = log.stack.peek(ct).valueOf();

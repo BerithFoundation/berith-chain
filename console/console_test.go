@@ -29,7 +29,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core"
-	"github.com/BerithFoundation/berith-chain/internal/jsre"
+	"berith-chain/internals/jsre"
 	"github.com/BerithFoundation/berith-chain/node"
 )
 

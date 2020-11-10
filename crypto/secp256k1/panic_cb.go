@@ -7,7 +7,7 @@ package secp256k1
 import "C"
 import "unsafe"
 
-// Callbacks for converting libsecp256k1 internal faults into
+// Callbacks for converting libsecp256k1 internals faults into
 // recoverable Go panics.
 
 //export secp256k1GoPanicIllegal
@@ -17,5 +17,5 @@ func secp256k1GoPanicIllegal(msg *C.char, data unsafe.Pointer) {
 
 //export secp256k1GoPanicError
 func secp256k1GoPanicError(msg *C.char, data unsafe.Pointer) {
-	panic("internal error: " + C.GoString(msg))
+	panic("internals error: " + C.GoString(msg))
 }

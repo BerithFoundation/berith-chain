@@ -3,12 +3,12 @@ module berith-chain
 go 1.14
 
 require (
-    github.com/BerithFoundation/berith-chain v1.1.0
+	github.com/BerithFoundation/berith-chain v1.1.0
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e
-	github.com/asticode/go-astikit v0.6.0 // indirect
+	//github.com/asticode/go-astikit v0.6.0 // indirect
 	github.com/asticode/go-astilectron v0.9.1
 	github.com/asticode/go-astilectron-bootstrap v0.1.0
 	github.com/asticode/go-astilog v1.2.0
@@ -23,7 +23,7 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/gizak/termui v3.1.0+incompatible
-	github.com/gizak/termui/v3 v3.1.0 // indirect
+	//github.com/gizak/termui/v3 v3.1.0 // indirect
 	github.com/go-stack/stack v1.8.0
 	github.com/golang/protobuf v1.4.1
 	github.com/golang/snappy v0.0.1
@@ -38,9 +38,11 @@ require (
 	github.com/maruel/panicparse v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.6
 	github.com/mattn/go-isatty v0.0.12
+	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/nsf/termbox-go v0.0.0-20201107200903-9b52a5faed9e // indirect
 	github.com/pborman/uuid v1.2.0
 	github.com/peterh/liner v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -62,6 +64,4 @@ require (
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
-replace (
-	github.com/BerithFoundation/berith-chain => ./
-)
+replace github.com/BerithFoundation/berith-chain => ./

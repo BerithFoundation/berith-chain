@@ -56,7 +56,7 @@ func (n *pmp) AddMapping(protocol string, extport, intport int, name string, lif
 
 func (n *pmp) DeleteMapping(protocol string, extport, intport int) (err error) {
 	// To destroy a mapping, send an add-port with an internalPort of
-	// the internal port to destroy, an external port of zero and a
+	// the internals port to destroy, an external port of zero and a
 	// time of zero.
 	_, err = n.c.AddPortMapping(strings.ToLower(protocol), intport, 0, 0)
 	return err

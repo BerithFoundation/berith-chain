@@ -680,7 +680,7 @@ func (w *Whisper) processQueue() {
 	}
 }
 
-// update loops until the lifetime of the whisper node, updating its internal
+// update loops until the lifetime of the whisper node, updating its internals
 // state by expiring stale messages from the pool.
 func (w *Whisper) update() {
 	// Start a ticker to check for expirations

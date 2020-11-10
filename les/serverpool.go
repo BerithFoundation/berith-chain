@@ -274,7 +274,7 @@ func (pool *serverPool) adjustResponseTime(entry *poolEntry, time time.Duration,
 	}
 }
 
-// eventLoop handles pool events and mutex locking for all internal functions
+// eventLoop handles pool events and mutex locking for all internals functions
 func (pool *serverPool) eventLoop() {
 	lookupCnt := 0
 	var convTime mclock.AbsTime

@@ -34,7 +34,7 @@ type PublicDownloaderAPI struct {
 	uninstallSyncSubscription chan *uninstallSyncSubscriptionRequest
 }
 
-// NewPublicDownloaderAPI create a new PublicDownloaderAPI. The API has an internal event loop that
+// NewPublicDownloaderAPI create a new PublicDownloaderAPI. The API has an internals event loop that
 // listens for events from the downloader through the global event mux. In case it receives one of
 // these events it broadcasts it to all syncing subscriptions that are installed through the
 // installSyncSubscription channel.

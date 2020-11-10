@@ -33,7 +33,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/berithclient"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/console"
-	"github.com/BerithFoundation/berith-chain/internal/debug"
+	"berith-chain/internals/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/node"

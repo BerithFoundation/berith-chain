@@ -361,7 +361,7 @@ func (d *Downloader) synchronise(id string, hash common.Hash, td *big.Int, mode 
 	if atomic.CompareAndSwapInt32(&d.notified, 0, 1) {
 		log.Info("Block synchronisation started")
 	}
-	// Reset the queue, peer set and wake channels to clean any internal leftover state
+	// Reset the queue, peer set and wake channels to clean any internals leftover state
 	d.queue.Reset()
 	d.peers.Reset()
 
@@ -1267,7 +1267,7 @@ func (d *Downloader) fetchParts(errCancel error, deliveryCh chan dataPack, deliv
 				if err := fetch(peer, request); err != nil {
 					// Although we could try and make an attempt to fix this, this error really
 					// means that we've double allocated a fetch task to a peer. If that is the
-					// case, the internal state of the downloader and the queue is very wrong so
+					// case, the internals state of the downloader and the queue is very wrong so
 					// better hard crash and note the error instead of silently accumulating into
 					// a much bigger issue.
 					panic(fmt.Sprintf("%v: %s fetch assignment failed", peer, kind))

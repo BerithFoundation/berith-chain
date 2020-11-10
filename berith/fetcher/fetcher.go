@@ -682,7 +682,7 @@ func (f *Fetcher) insert(peer string, block *types.Block) {
 }
 
 // forgetHash removes all traces of a block announcement from the fetcher's
-// internal state.
+// internals state.
 func (f *Fetcher) forgetHash(hash common.Hash) {
 	// Remove all pending announces and decrement DOS counters
 	for _, announce := range f.announced[hash] {
@@ -723,7 +723,7 @@ func (f *Fetcher) forgetHash(hash common.Hash) {
 	}
 }
 
-// forgetBlock removes all traces of a queued block from the fetcher's internal
+// forgetBlock removes all traces of a queued block from the fetcher's internals
 // state.
 func (f *Fetcher) forgetBlock(hash common.Hash) {
 	if insert := f.queued[hash]; insert != nil {

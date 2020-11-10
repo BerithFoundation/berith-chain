@@ -135,7 +135,7 @@ func (db *LDBDatabase) NewIteratorWithPrefix(prefix []byte) iterator.Iterator {
 }
 
 func (db *LDBDatabase) Close() {
-	// Stop the metrics collection to avoid internal database races
+	// Stop the metrics collection to avoid internals database races
 	db.quitLock.Lock()
 	defer db.quitLock.Unlock()
 
@@ -178,7 +178,7 @@ func (db *LDBDatabase) Meter(prefix string) {
 	go db.meter(3 * time.Second)
 }
 
-// meter periodically retrieves internal leveldb counters and reports them to
+// meter periodically retrieves internals leveldb counters and reports them to
 // the metrics subsystem.
 //
 // This is how a stats table look like (currently):

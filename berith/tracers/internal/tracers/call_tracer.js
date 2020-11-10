@@ -15,7 +15,7 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // callTracer is a full blown transaction tracer that extracts and reports all
-// the internal calls made by a transaction, along with any useful information.
+// the internals calls made by a transaction, along with any useful information.
 {
 	// callstack is the current recursive call stack of the EVM execution.
 	callstack: [{}],
@@ -42,7 +42,7 @@
 			var inOff = log.stack.peek(1).valueOf();
 			var inEnd = inOff + log.stack.peek(2).valueOf();
 
-			// Assemble the internal call report and store for completion
+			// Assemble the internals call report and store for completion
 			var call = {
 				type:    op,
 				from:    toHex(log.contract.getAddress()),
@@ -76,7 +76,7 @@
 			var inOff = log.stack.peek(2 + off).valueOf();
 			var inEnd = inOff + log.stack.peek(3 + off).valueOf();
 
-			// Assemble the internal call report and store for completion
+			// Assemble the internals call report and store for completion
 			var call = {
 				type:    op,
 				from:    toHex(log.contract.getAddress()),
@@ -126,7 +126,7 @@
 					call.to     = toHex(toAddress(ret.toString(16)));
 					call.output = toHex(db.getCode(toAddress(ret.toString(16))));
 				} else if (call.error === undefined) {
-					call.error = "internal failure"; // TODO(karalabe): surface these faults somehow
+					call.error = "internals failure"; // TODO(karalabe): surface these faults somehow
 				}
 			} else {
 				// If the call was a contract call, retrieve the gas usage and output
@@ -137,7 +137,7 @@
 					if (!ret.equals(0)) {
 						call.output = toHex(log.memory.slice(call.outOff, call.outOff + call.outLen));
 					} else if (call.error === undefined) {
-						call.error = "internal failure"; // TODO(karalabe): surface these faults somehow
+						call.error = "internals failure"; // TODO(karalabe): surface these faults somehow
 					}
 				}
 				delete call.gasIn; delete call.gasCost;

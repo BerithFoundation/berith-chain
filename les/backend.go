@@ -36,7 +36,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -235,7 +235,7 @@ func (s *LightBerith) Protocols() []p2p.Protocol {
 	return s.makeProtocols(ClientProtocolVersions)
 }
 
-// Start implements node.Service, starting all internal goroutines needed by the
+// Start implements node.Service, starting all internals goroutines needed by the
 // Berith protocol implementation.
 func (s *LightBerith) Start(srvr *p2p.Server) error {
 	log.Warn("Light client mode is an experimental feature")
@@ -248,7 +248,7 @@ func (s *LightBerith) Start(srvr *p2p.Server) error {
 	return nil
 }
 
-// Stop implements node.Service, terminating all internal goroutines used by the
+// Stop implements node.Service, terminating all internals goroutines used by the
 // Berith protocol.
 func (s *LightBerith) Stop() error {
 	s.odr.Stop()

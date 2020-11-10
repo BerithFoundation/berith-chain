@@ -211,7 +211,7 @@ func (s *Sync) Process(results []SyncResult) (bool, int, error) {
 	return committed, 0, nil
 }
 
-// Commit flushes the data stored in the internal membatch out to persistent
+// Commit flushes the data stored in the internals membatch out to persistent
 // storage, returning the number of items written and any occurred error.
 func (s *Sync) Commit(dbw berithdb.Putter) (int, error) {
 	// Dump the membatch into a database dbw

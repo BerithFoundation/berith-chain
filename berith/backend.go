@@ -44,7 +44,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -454,7 +454,7 @@ func (s *Berith) Protocols() []p2p.Protocol {
 	return append(s.protocolManager.SubProtocols, s.lesServer.Protocols()...)
 }
 
-// Start implements node.Service, starting all internal goroutines needed by the
+// Start implements node.Service, starting all internals goroutines needed by the
 // Berith protocol implementation.
 func (s *Berith) Start(srvr *p2p.Server) error {
 	// Start the bloom bits servicing goroutines
@@ -479,7 +479,7 @@ func (s *Berith) Start(srvr *p2p.Server) error {
 	return nil
 }
 
-// Stop implements node.Service, terminating all internal goroutines used by the
+// Stop implements node.Service, terminating all internals goroutines used by the
 // Berith protocol.
 func (s *Berith) Stop() error {
 	s.bloomIndexer.Close()

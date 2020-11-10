@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// Package utils contains internal helper functions for go-ethereum commands.
+// Package utils contains internals helper functions for go-ethereum commands.
 package utils
 
 import (
@@ -246,7 +246,7 @@ var (
 	// Performance tuning settings
 	CacheFlag = cli.IntFlag{
 		Name:  "cache",
-		Usage: "Megabytes of memory allocated to internal caching",
+		Usage: "Megabytes of memory allocated to internals caching",
 		Value: 1024,
 	}
 	CacheDatabaseFlag = cli.IntFlag{
@@ -786,7 +786,7 @@ func makeDatabaseHandles() int {
 }
 
 // MakeAddress converts an account specified directly as a hex encoded string or
-// a key index in the key store to an internal account representation.
+// a key index in the key store to an internals account representation.
 func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error) {
 	/*
 		[BERITH]

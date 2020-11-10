@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/internal/jsre/deps"
+	"berith-chain/internals/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

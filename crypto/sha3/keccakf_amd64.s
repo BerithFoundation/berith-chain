@@ -323,7 +323,7 @@
 TEXT ·keccakF1600(SB), 0, $200-8
 	MOVQ state+0(FP), rpState
 
-	// Convert the user state into an internal state
+	// Convert the user state into an internals state
 	NOTQ _be(rpState)
 	NOTQ _bi(rpState)
 	NOTQ _go(rpState)
@@ -379,7 +379,7 @@ TEXT ·keccakF1600(SB), 0, $200-8
 	mKeccakRound(rpState, rpStack, $0x0000000080000001, MOVQ_RBI_RCE, XORQ_RT1_RCA, XORQ_RT1_RCE, XORQ_RBA_RCU, XORQ_RT1_RCA, XORQ_RT1_RCE, XORQ_RBA_RCU, XORQ_RT1_RCA, XORQ_RT1_RCE, XORQ_RBE_RCU, XORQ_RDU_RCU, XORQ_RDA_RCA, XORQ_RDE_RCE)
 	mKeccakRound(rpStack, rpState, $0x8000000080008008, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP, NOP)
 
-	// Revert the internal state to the user state
+	// Revert the internals state to the user state
 	NOTQ _be(rpState)
 	NOTQ _bi(rpState)
 	NOTQ _go(rpState)
