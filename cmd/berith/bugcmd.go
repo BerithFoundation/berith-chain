@@ -26,7 +26,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/BerithFoundation/berith-chain/cmd/internal/browser"
+	"github.com/BerithFoundation/berith-chain/cmd/internals/browser"
 	"github.com/BerithFoundation/berith-chain/params"
 
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
