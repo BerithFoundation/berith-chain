@@ -1,8 +1,13 @@
 package selection
 
 import (
+	"fmt"
 	"math/big"
+	"sort"
+	"strconv"
 	"testing"
+
+	"github.com/BerithFoundation/berith-chain/params"
 
 	"github.com/BerithFoundation/berith-chain/berith/staking"
 
@@ -13,7 +18,7 @@ import (
 
 /*
 [BERITH]
-선출 로직 테스트
+Elected Logic Test
 */
 func TestSelectBlockCreator(t *testing.T) {
 	expectedResults := map[common.Address]VoteResult{
@@ -44,8 +49,7 @@ func TestSelectBlockCreator(t *testing.T) {
 	stks := staking.NewStakers()
 
 	blockNumber := big.NewInt(100)
-	eth := big.NewInt(1e+18)
-	value := new(big.Int).Mul(big.NewInt(100000), eth)
+	value := new(big.Int).Mul(big.NewInt(100000), common.UnitForBer)
 	for i := 0; i < 5; i++ {
 
 		addr := common.BigToAddress(big.NewInt(int64(i)))
@@ -53,8 +57,8 @@ func TestSelectBlockCreator(t *testing.T) {
 		st.AddStakeBalance(addr, value, blockNumber)
 		stks.Put(addr)
 
-		prevStake := new(big.Int).Div(st.GetStakeBalance(addr), big.NewInt(1e+18))
-		addStake := new(big.Int).Div(value, big.NewInt(1e+18))
+		prevStake := new(big.Int).Div(st.GetStakeBalance(addr), common.UnitForBer)
+		addStake := new(big.Int).Div(value, common.UnitForBer)
 		nowBlock := blockNumber
 		stakeBlock := new(big.Int).Set(st.GetStakeUpdated(addr))
 		period := uint64(40)
@@ -63,7 +67,11 @@ func TestSelectBlockCreator(t *testing.T) {
 		st.SetPoint(addr, point)
 	}
 
-	results := SelectBlockCreator(blockNumber.Uint64(), common.Hash{}, stks, st)
+	config := &params.ChainConfig{
+		BIP2Block: big.NewInt(0),
+	}
+
+	results := SelectBlockCreator(config, blockNumber.Uint64(), common.Hash{}, stks, st)
 
 	for addr, result := range results {
 		expected, ok := expectedResults[addr]
@@ -77,5 +85,83 @@ func TestSelectBlockCreator(t *testing.T) {
 
 	if len(results) < 5 {
 		t.Errorf("only %d user selected [expected : 5]", len(results))
+	}
+}
+
+func TestSeed(t *testing.T) {
+
+	configs := []*params.ChainConfig{
+		&params.ChainConfig{
+			BIP2Block: big.NewInt(0),
+		},
+		&params.ChainConfig{},
+	}
+
+	expected := []bool{false, true} // Check for duplicate hash values
+
+	cddts := NewCandidates()
+
+	for round, config := range configs {
+
+		seeds := make(map[int64]int)
+
+		for i := uint64(0); i <= uint64(100000); i++ {
+			seeds[cddts.GetSeed(config, i)]++
+		}
+
+		result := false
+
+		for _, v := range seeds {
+			if v > 1 {
+				result = true
+			}
+		}
+
+		if expected[round] != result {
+			t.Errorf("invalid result [round : %d, expected : %t, result : %t]", round, expected[round], result)
+			return
+		}
+	}
+
+}
+
+func TestScore(t *testing.T) {
+	stks := staking.NewStakers()
+	totalScore := make(map[common.Address]uint64)
+
+	value := big.NewInt(1000000)
+
+	for i := 0; i < 100; i++ {
+		addr := common.BytesToAddress([]byte(strconv.Itoa(i)))
+		stks.Put(addr)
+
+	}
+
+	list := sortableList(stks.AsList())
+	sort.Sort(list)
+
+	for blockNumber := uint64(600000); blockNumber < 700000; blockNumber++ {
+
+		cddts := NewCandidates()
+
+		for _, addr := range list {
+			cddts.Add(Candidate{
+				address: addr,
+				point:   value.Uint64(),
+				val:     value.Uint64(),
+			})
+		}
+
+		result := cddts.selectBIP3BlockCreator(params.MainnetChainConfig, blockNumber)
+
+		for k, v := range result {
+			if v.Rank <= 7 && v.Rank > 1 {
+				totalScore[k] += v.Score.Uint64()
+			}
+		}
+	}
+
+	for _, addr := range list {
+		fmt.Printf("[ADDR : %s, SCORE : %d]\n", addr.Hex(), totalScore[addr])
 	}
 }

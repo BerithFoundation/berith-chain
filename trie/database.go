@@ -22,12 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/allegro/bigcache"
-	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/berithdb"
+	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/allegro/bigcache"
 )
 
 var (
@@ -131,9 +131,11 @@ type rawShortNode struct {
 	Val node
 }
 
-func (n rawShortNode) canUnload(uint16, uint16) bool { panic("this should never end up in a live trie") }
-func (n rawShortNode) cache() (hashNode, bool)       { panic("this should never end up in a live trie") }
-func (n rawShortNode) fstring(ind string) string     { panic("this should never end up in a live trie") }
+func (n rawShortNode) canUnload(uint16, uint16) bool {
+	panic("this should never end up in a live trie")
+}
+func (n rawShortNode) cache() (hashNode, bool)   { panic("this should never end up in a live trie") }
+func (n rawShortNode) fstring(ind string) string { panic("this should never end up in a live trie") }
 
 // cachedNode is all the information we know about a single cached node in the
 // memory database write layer.
@@ -205,7 +207,7 @@ func gatherChildren(n node, children *[]common.Hash) {
 }
 
 // simplifyNode traverses the hierarchy of an expanded memory node and discards
-// all the internal caches, returning a node that only contains the raw data.
+// all the internals caches, returning a node that only contains the raw data.
 func simplifyNode(n node) node {
 	switch n := n.(type) {
 	case *shortNode:
@@ -298,7 +300,7 @@ func NewDatabaseWithCache(diskdb berithdb.Database, cache int) *Database {
 }
 
 // DiskDB retrieves the persistent storage backing the trie database.
-func (db *Database) DiskDB() DatabaseReader {
+func (db *Database) DiskDB() berithdb.Database {
 	return db.diskdb
 }
 
@@ -444,7 +446,7 @@ func (db *Database) secureKey(key []byte) []byte {
 }
 
 // Nodes retrieves the hashes of all the nodes cached within the memory database.
-// This method is extremely expensive and should only be used to validate internal
+// This method is extremely expensive and should only be used to validate internals
 // states in test code.
 func (db *Database) Nodes() []common.Hash {
 	db.lock.RLock()

@@ -372,7 +372,7 @@ func (api *PublicWhisperAPI) Messages(ctx context.Context, crit Criteria) (*rpc.
 	// create subscription and start waiting for message events
 	rpcSub := notifier.CreateSubscription()
 	go func() {
-		// for now poll internally, refactor whisper internal for channel support
+		// for now poll internally, refactor whisper internals for channel support
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
 
@@ -422,7 +422,7 @@ type messageOverride struct {
 	Dst     hexutil.Bytes
 }
 
-// ToWhisperMessage converts an internal message into an API version.
+// ToWhisperMessage converts an internals message into an API version.
 func ToWhisperMessage(message *ReceivedMessage) *Message {
 	msg := Message{
 		Payload:   message.Payload,

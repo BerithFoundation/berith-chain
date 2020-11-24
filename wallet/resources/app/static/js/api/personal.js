@@ -81,8 +81,8 @@ let personal = {
                 return
             }
             var obj2 = JSON.parse(obj)
-            console.log( "obj ::: " + obj)
-            console.log( "obj2 ::: " + obj2)
+            // console.log( "obj ::: " + obj)
+            // console.log( "obj2 ::: " + obj2)
             location.href="keystoreRestore2.html?importRawKey="+importRawKeyAdd+"&pwd="+importRawKeyPwd+"&add="+obj2;
         })
     },

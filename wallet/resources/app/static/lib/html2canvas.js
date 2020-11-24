@@ -5120,7 +5120,7 @@
         createIFrameClone(iframe: HTMLIFrameElement) {
             const tempIframe = <HTMLIFrameElement>iframe.cloneNode(false);
             const iframeKey = generateIframeKey();
-            tempIframe.setAttribute('data-html2canvas-internal-iframe-key', iframeKey);
+            tempIframe.setAttribute('data-html2canvas-internals-iframe-key', iframeKey);
 
             const {width, height} = parseBounds(iframe);
 

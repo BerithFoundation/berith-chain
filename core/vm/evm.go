@@ -398,7 +398,6 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	if evm.ChainConfig().IsEIP158(evm.BlockNumber) {
 		evm.StateDB.SetNonce(address, 1)
 	}
-	//evm.Transfer(evm.StateDB, caller.Address(), address, value)
 	//[BERITH]
 	evm.Transfer(evm.StateDB, caller.Address(), address, value, evm.BlockNumber, types.Main, types.Main)
 

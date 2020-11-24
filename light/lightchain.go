@@ -24,13 +24,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
@@ -394,7 +394,7 @@ func (self *LightChain) InsertHeaderChain(chain []*types.Header, checkFreq int) 
 }
 
 // CurrentHeader retrieves the current head header of the canonical chain. The
-// header is retrieved from the HeaderChain's internal cache.
+// header is retrieved from the HeaderChain's internals cache.
 func (self *LightChain) CurrentHeader() *types.Header {
 	return self.hc.CurrentHeader()
 }

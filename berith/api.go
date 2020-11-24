@@ -34,14 +34,11 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/BerithFoundation/berith-chain/trie"
-	
-	// "github.com/BerithFoundation/berith-chain/berith/stake"
-	// "github.com/BerithFoundation/berith-chain/log"
 )
 
 // PublicBerithAPI provides an API to access Berith full node-related
@@ -292,7 +289,7 @@ func (api *PublicDebugAPI) DumpBlock(blockNr rpc.BlockNumber) (state.Dump, error
 // the private debugging endpoint.
 type PrivateDebugAPI struct {
 	config *params.ChainConfig
-	e    *Berith
+	e      *Berith
 }
 
 // NewPrivateDebugAPI creates a new API definition for the full node-related
@@ -470,4 +467,3 @@ func (api *PrivateDebugAPI) getModifiedAccounts(startBlock, endBlock *types.Bloc
 	}
 	return dirty, nil
 }
-

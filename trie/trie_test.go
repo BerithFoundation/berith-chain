@@ -29,11 +29,11 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {
@@ -324,6 +324,10 @@ type countingDB struct {
 func (db *countingDB) Get(key []byte) ([]byte, error) {
 	db.gets[string(key)]++
 	return db.Database.Get(key)
+}
+
+func (db *countingDB) Compact() {
+	// Do nothing
 }
 
 // TestCacheUnload checks that decoded nodes are unloaded after a

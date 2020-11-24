@@ -49,3 +49,7 @@ func (dt *table) Delete(key []byte) error {
 func (dt *table) Close() {
 	// Do nothing; don't close the underlying DB.
 }
+
+func (dt *table) Compact() {
+	// Do nothing
+}

@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/les/flowcontrol"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/p2p"
@@ -195,7 +195,7 @@ func (p *peer) SendBlockBodiesRLP(reqID, bv uint64, bodies []rlp.RawValue) error
 	return sendResponse(p.rw, BlockBodiesMsg, reqID, bv, bodies)
 }
 
-// SendCodeRLP sends a batch of arbitrary internal data, corresponding to the
+// SendCodeRLP sends a batch of arbitrary internals data, corresponding to the
 // hashes requested.
 func (p *peer) SendCode(reqID, bv uint64, data [][]byte) error {
 	return sendResponse(p.rw, CodeMsg, reqID, bv, data)

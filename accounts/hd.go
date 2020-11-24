@@ -59,7 +59,7 @@ var DefaultLedgerBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000
 type DerivationPath []uint32
 
 // ParseDerivationPath converts a user specified derivation path string to the
-// internal binary representation.
+// internals binary representation.
 //
 // Full derivation paths need to start with the `m/` prefix, relative derivation
 // paths (which will get appended to the default root path) must not have prefixes

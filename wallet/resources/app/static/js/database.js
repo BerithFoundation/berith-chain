@@ -1,4 +1,11 @@
 let database = {
+    keyForGCMode: "gcmode",
+    selectGCMode: function() {
+        return sendMessage("callDB" , "selectGCMode", [this.keyForGCMode])
+    },
+    updateGCMode: function(afterMode) {
+        return sendMessage("callDB" , "updateGCMode", [this.keyForGCMode, afterMode])
+    },
     selectContact : function () {
         return new Promise(resolve => {
             setTimeout(()=> {
@@ -39,13 +46,13 @@ let database = {
         asticode.loader.show()
         astilectron.sendMessage(message , function (message) {
             asticode.loader.hide()
-            console.log("member :: " + message.payload)
+            // // console.log("member :: " + message.payload)
             var obj = message.payload
             $('#memberData').empty()
             var contents = ''
-            console.log("ADD :: " + obj.Address)
-            console.log("id :: " + obj.ID)
-            console.log("pwd :: " + obj.Password)
+            // // console.log("ADD :: " + obj.Address)
+            // // console.log("id :: " + obj.ID)
+            // // console.log("pwd :: " + obj.Password)
             contents += '<tr>'
             contents += '<td><input type="text" value="'+obj.Address+'"></td>'
             contents += '<td><input type="text" value="'+obj.ID+'"></td>'
@@ -68,7 +75,7 @@ let database = {
                 return
             }
             var obj = message.payload
-            console.log( "insertTxInfo ::: " + obj)
+            // // console.log( "insertTxInfo ::: " + obj)
             // resolve(obj)
         })
     },
@@ -84,7 +91,7 @@ let database = {
                 astilectron.sendMessage(message , function (message) {
                     asticode.loader.hide()
                     var obj = message.payload
-                    console.log( "insertContact ::: " + obj)
+                    // // console.log( "insertContact ::: " + obj)
                     resolve(obj)
                 })
             }) // settimeout
@@ -117,7 +124,7 @@ let database = {
         astilectron.sendMessage(message , function (message) {
             asticode.loader.hide()
             var obj = message.payload
-            console.log("obj :::  " + obj)
+            // // console.log("obj :::  " + obj)
             if (obj != "" || obj != undefined){
                 succesChange()
             }
@@ -138,10 +145,10 @@ let database = {
                 $('#err1').html("이미 존재하는 아이디 입니다.")
                 return
             }else{
-                console.log("ADD :: " + obj.Address)
-                console.log("id :: " + obj.ID)
-                console.log("pwd :: " + obj.Password)
-                console.log("private :: " + obj.PrivateKey)
+                // console.log("ADD :: " + obj.Address)
+                // console.log("id :: " + obj.ID)
+                // console.log("pwd :: " + obj.Password)
+                // console.log("private :: " + obj.PrivateKey)
                 location.href="createAccountConfirm.html?Address="+obj.Address+"&ID="+obj.ID+"&PrivateKey="+obj.PrivateKey;
             }
         });
@@ -161,10 +168,10 @@ let database = {
                 $('#err1').html("키스토어 복원에 실패하였습니다.")
                 return
             }else{
-                console.log("ADD :: " + obj.Address)
-                console.log("id :: " + obj.ID)
-                console.log("pwd :: " + obj.Password)
-                console.log("private :: " + obj.PrivateKey)
+                // console.log("ADD :: " + obj.Address)
+                // console.log("id :: " + obj.ID)
+                // console.log("pwd :: " + obj.Password)
+                // console.log("private :: " + obj.PrivateKey)
                 location.href="keystoreRestoreConfirm.html";
             }
         });

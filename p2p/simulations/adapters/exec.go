@@ -35,12 +35,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/docker/docker/pkg/reexec"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/p2p/enode"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	"github.com/docker/docker/pkg/reexec"
 	"golang.org/x/net/websocket"
 )
 

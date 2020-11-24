@@ -54,11 +54,12 @@ func (w *wizard) makeGenesis() {
 	// In the case of bsrr, configure the consensus parameters
 	genesis.Difficulty = big.NewInt(1)
 	genesis.Config.Bsrr = &params.BSRRConfig{
-		Period:       30,
-		Epoch:        300,
-		Rewards:      big.NewInt(500),
-		StakeMinimum: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
-		SlashRound:   uint64(1),
+		Period:            30,
+		Epoch:             300,
+		Rewards:           big.NewInt(500),
+		StakeMinimum:      new(big.Int).Mul(common.StringToBig(params.StakeMinimum), big.NewInt(1)),
+		LimitStakeBalance: new(big.Int).Mul(common.StringToBig(params.LimitStakeBalance), big.NewInt(1)),
+		SlashRound:        uint64(1),
 	}
 
 	fmt.Println()
@@ -106,6 +107,23 @@ func (w *wizard) makeGenesis() {
 	fmt.Println()
 	fmt.Println("Specify your chain/network ID if you want an explicit one (default = random)")
 	genesis.Config.ChainID = new(big.Int).SetUint64(uint64(w.readDefaultInt(rand.Intn(65536))))
+
+	// Set hard fork block number
+	fmt.Println()
+	fmt.Println("Specify hard fork block number for BIP1 (default = 0)")
+	genesis.Config.BIP1Block = w.readDefaultBigInt(big.NewInt(0))
+
+	fmt.Println()
+	fmt.Println("Specify hard fork block number for BIP2 (default = 0)")
+	genesis.Config.BIP2Block = w.readDefaultBigInt(big.NewInt(0))
+
+	fmt.Println()
+	fmt.Println("Specify hard fork block number for BIP3 (default = 0)")
+	genesis.Config.BIP3Block = w.readDefaultBigInt(big.NewInt(0))
+
+	fmt.Println()
+	fmt.Println("Specify hard fork block number for BIP4 (default = 0)")
+	genesis.Config.BIP4Block = w.readDefaultBigInt(big.NewInt(0))
 
 	// All done.
 	log.Info("Configured new genesis block")

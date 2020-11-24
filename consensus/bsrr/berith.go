@@ -11,11 +11,11 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 
 /**
 [BERITH]
-- 합의 알고리즘 인터페이스 구현체로 Berith 합의 절차를 여기서 처리함
-- 해더 검증및 바디 데이터 검증을 함
-- 바디 데이터 검증
-  BC 체크, 그룹체크, 우선순위 검증
-- 바디의 Tx를 확인 하여 Staking DB 에 기록 하고 선출
+- The consensus algorithm interface implementation handles the Berith consensus process here.
+- Header verification and body data verification
+- Body data verification
+  BC check, group check, priority verification
+- Check the Tx of the body and record it in the Staking DB and select it
 **/
 
 package bsrr
@@ -55,13 +55,16 @@ const (
 
 	termDelay  = 100 * time.Millisecond // Delay per signer in the same group
 	groupDelay = 1 * time.Second        // Delay per groups
+
+	commonDiff = 3 // A constant that specifies the maximum number of people in a group when dividing a signer's candidates into multiple groups
 )
 
 var (
-	RewardBlock  = big.NewInt(500)
-	StakeMinimum = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18))
-	SlashRound   = uint64(2)
-	ForkFactor   = 1.0
+	RewardBlock          = big.NewInt(500)
+	StakeMinimum, _      = new(big.Int).SetString(params.StakeMinimum, 0)
+	LimitStakeBalance, _ = new(big.Int).SetString(params.LimitStakeBalance, 0)
+	SlashRound           = uint64(2)
+	ForkFactor           = 1.0
 
 	epochLength = uint64(360) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -69,12 +72,6 @@ var (
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
-
-	//diffInTurn = big.NewInt(20000000) // Block difficulty for in-turn signatures
-	//diffNoTurn = big.NewInt(10000000) // Block difficulty for out-of-turn signatures
-
-	delays = []int{0, 3}
-	groups = []int{1, 5}
 
 	diffWithoutStaker = int64(1234)
 )
@@ -132,6 +129,10 @@ var (
 	errStakingList = errors.New("not found staking list")
 
 	errMissingState = errors.New("state missing")
+
+	errCleanStakingDB = errors.New("fail to clean stakingDB")
+
+	errBIP1 = errors.New("error when fork network to BIP1")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -197,26 +198,27 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 type BSRR struct {
 	config *params.BSRRConfig // Consensus engine configuration parameters
 	db     berithdb.Database  // Database to store and retrieve snapshot checkpoints
-	//[BERITH] stakingDB clique 구조체에 추가
-	stakingDB staking.DataBase //stakingList를 저장하는 DB
-	cache     *lru.ARCCache    //stakingList를 저장하는 cache
+	//[BERITH] add to stakingDB clique structure
+	stakingDB staking.DataBase // DB storing stakingList
+	cache     *lru.ARCCache    // cache to store stakingList
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
-
-	proposals map[common.Address]bool // Current list of proposals we are pushing
 
 	signer common.Address // Berith address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
 
+	proposals map[common.Address]bool // Current list of proposals we are pushing
+
 	// The fields below are for testing only
-	fakeDiff  bool                 // Skip difficulty verifications
 	rankGroup common.SequenceGroup // grouped by rank
 }
 
-//[BERITH]
-//New 새로운 BSRR 구조체를 만드는 함수
+/*
+[BERITH]
+Function to create a new BSRR structure
+*/
 func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	conf := config
 	if conf.Epoch == 0 {
@@ -231,12 +233,12 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		conf.Rewards = RewardBlock
 	}
 
-	if conf.StakeMinimum != nil {
-		if conf.StakeMinimum.Cmp(big.NewInt(0)) == 0 {
-			conf.StakeMinimum = StakeMinimum
-		}
-	} else {
+	if conf.StakeMinimum == nil || conf.StakeMinimum.Cmp(big.NewInt(0)) == 0 {
 		conf.StakeMinimum = StakeMinimum
+	}
+
+	if conf.LimitStakeBalance == nil || conf.LimitStakeBalance.Cmp(big.NewInt(0)) == 0 {
+		conf.LimitStakeBalance = LimitStakeBalance
 	}
 
 	if conf.SlashRound != 0 {
@@ -253,7 +255,7 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
-	//[BERITH] 캐쉬 인스턴스 생성및 사이즈 지정
+	//[BERITH] Cache instance creation and sizing
 	cache, _ := lru.NewARC(inmemorySigners)
 
 	return &BSRR{
@@ -263,12 +265,14 @@ func New(config *params.BSRRConfig, db berithdb.Database) *BSRR {
 		signatures: signatures,
 		cache:      cache,
 		proposals:  make(map[common.Address]bool),
-		rankGroup:  &common.ArithmeticGroup{CommonDiff: 3},
+		rankGroup:  &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}
 }
 
-//[BERITH]
-//NewCliqueWithStakingDB StakingDB를 받아 새로운 BSRR 구조체를 생성하는 함수
+/*
+[BERITH]
+Function that receives StakingDB and creates new BSRR structure
+*/
 func NewCliqueWithStakingDB(stakingDB staking.DataBase, config *params.BSRRConfig, db berithdb.Database) *BSRR {
 	engine := New(config, db)
 	engine.stakingDB = stakingDB
@@ -353,15 +357,6 @@ func (c *BSRR) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 		return errInvalidNonce
 	}
 
-	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	//if number > 0 {
-	//	if header.Difficulty == nil || header.Difficulty.Uint64() > diffInTurn.Uint64() {
-	//		return errInvalidDifficulty
-	//	}
-	//	if header.Difficulty == nil || (header.Difficulty.Cmp(diffInTurn) != 0 && header.Difficulty.Cmp(diffNoTurn) != 0) {
-	//		return errInvalidDifficulty
-	//	}
-	//}
 	// If all checks passed, validate any special fields for hard forks
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
@@ -393,12 +388,7 @@ func (c *BSRR) verifyCascadingFields(chain consensus.ChainReader, header *types.
 	if parent.Time.Uint64()+c.config.Period > header.Time.Uint64() {
 		return ErrInvalidTimestamp
 	}
-	// TODO : Check environments that have different time server
-	delayed := c.getDelay(int(header.Nonce.Uint64()))
-	if parent.Time.Int64()+int64(c.config.Period)+int64(delayed.Seconds()) > time.Now().Unix() {
-		log.Warn("found invalid timestamp header", "number", header.Number.Uint64(), "hash", header.Hash().Hex(), "rank", header.Nonce.Uint64())
-		//return ErrInvalidTimestamp
-	}
+
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
@@ -422,32 +412,18 @@ func (c *BSRR) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 // consensus protocol requirements. The method accepts an optional list of parent
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
+/*
+	[Berith]
+	verifySeal method is necessary to implement Engine interface but not used.
+	The logic that verifies the signature contained in the header is in the Finalize method.
+*/
 func (c *BSRR) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
 	number := header.Number
 	if number.Uint64() == 0 {
 		return errUnknownBlock
 	}
-	//signers := c.getSigners(chain, header)
 
-	// Resolve the authorization key and check against signers
-	// signer, err := ecrecover(header, c.signatures)
-	// if err != nil {
-	// 	return err
-	// }
-	// if _, ok := signers.signersMap()[signer]; !ok {
-	// 	return errUnauthorizedSigner
-	// }
-
-	// if !c.fakeDiff {
-	// 	inturn := signers[(header.Number.Uint64()%c.config.Epoch)%uint64(len(signers))] == signer
-	// 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-	// 		return errWrongDifficulty
-	// 	}
-	// }
 	return nil
 }
 
@@ -476,7 +452,6 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	// nonce is used to check order of staking list
 	header.Nonce = types.EncodeNonce(uint64(rank))
 
-	// FIXME : will remove extra data used in clique because of no meanings in bsrr consensus
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
@@ -498,31 +473,27 @@ func (c *BSRR) Prepare(chain consensus.ChainReader, header *types.Header) error 
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	//[Berith] 부모블록의 StakingList를 얻어온다.
+	// [Berith] Retrieves the parent block's StakingList.
+	var stks staking.Stakers
 	stks, err := c.getStakers(chain, header.Number.Uint64()-1, header.ParentHash)
 	if err != nil {
 		return nil, errStakingList
 	}
-	/*
-		font := color.Yellow
-		if bytes.Compare(header.Coinbase.Bytes(), c.signer.Bytes()) == 0 {
-			font = color.Green
-		}
-		font.Println("##############[FINALIZE]##############")
-		font.Println("NUMBER : ", header.Number.String())
-		font.Println("HASH : ", header.Hash().Hex())
-		font.Println("COINBASE : ", header.Coinbase.Hex())
-		font.Println("DIFFICULTY : ", header.Difficulty.String())
-		font.Println("UNCLES : ", header.UncleHash.Hex())
-		font.Println("######################################")
-	*/
 
 	if header.Coinbase != common.HexToAddress("0") {
 		var signers signers
-		//Diff
 
 		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-		// target, exist := c.getAncestor(chain, int64(c.config.Epoch), parent)
+		if parent == nil {
+			log.Warn("unknown ancestor", "parent", "nil")
+		}
+
+		if chain.Config().IsBIP1Block(header.Number) {
+			stks, err = c.supportBIP1(chain, parent, stks)
+			if err != nil {
+				return nil, errBIP1
+			}
+		}
 		target, exist := c.getStakeTargetBlock(chain, parent)
 		if !exist {
 			return nil, consensus.ErrUnknownAncestor
@@ -543,26 +514,33 @@ func (c *BSRR) Finalize(chain consensus.ChainReader, header *types.Header, state
 			return nil, errUnauthorizedSigner
 		}
 
-		//font = color.Blue
-		//font.Println("Remote :: " + header.Difficulty.String() + "\tLocal :: " + predicted.String())
 		if predicted.Cmp(header.Difficulty) != 0 {
 			return nil, errInvalidDifficulty
 		}
 		if header.Nonce.Uint64() != uint64(rank) {
 			return nil, errInvalidNonce
 		}
+
+		/*
+			[Berith]
+			To reduce disk usage, Staker information is periodically deleted.
+		*/
+		if new(big.Int).Mod(header.Number, big.NewInt(common.CleanCycle)).Cmp(common.Big0) == 0 {
+			if err = c.stakingDB.Clean(chain, target); err != nil {
+				return nil, errCleanStakingDB
+			}
+		}
 	}
 
-	//[BERITH] 전달받은 블록의 트랜잭션을 정보를 토대로 StateDB의 데이터를 수정한다.
-	err = c.setStakersWithTxs(state, chain, stks, txs, header)
-	if err != nil {
+	// [BERITH] Modify the data of StateDB based on the transaction information of the received block.
+	if err = c.setStakersWithTxs(state, chain, stks, txs, header); err != nil {
 		return nil, errStakingList
 	}
 
-	//Reward 보상
+	// Reward
 	c.accumulateRewards(chain, state, header)
 
-	//[BERITH] 수정된 StateDB의 데이터를 commit한다.
+	//[BERITH] Commit the modified StateDB data.
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -622,7 +600,12 @@ func (c *BSRR) Seal(chain consensus.ChainReader, block *types.Block, results cha
 		return errUnauthorizedSigner
 	}
 
-	delay += c.getDelay(rank)
+	//delay += c.getDelay(rank)
+	temp, err := c.getDelay(rank)
+	if err != nil {
+		return err
+	}
+	delay += temp
 
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
@@ -675,10 +658,13 @@ func (c *BSRR) getAncestor(chain consensus.ChainReader, n int64, header *types.H
 	return target, chain.HasBlockAndState(target.Hash(), target.Number.Uint64())
 }
 
-// [BERITH] getStakeTargetBlock 주어진 parent header에 대하여 miner를 결정 할 target block을 반환한다.
-// 1) [0, epoch-1] : target == 블록 넘버 0(즉, genesis block) 인 블록
-// 2) [epoch, 2epoch] : target == 블록 넘버 epoch 인 블록
-// 3) [2epoch +1, ~) : target == 블록 넘버 - epoch 인 블록
+/*
+[BERITH]
+Returns the target block to determine the miner for a given parent header.
+1) [0 ~ epoch-1]      : target == block number 0(genesis block)
+2) [epoch ~ 2epoch-1] : target == epoch block number
+3) [2epoch ~ ...)     : target == block number - epoch
+*/
 func (c *BSRR) getStakeTargetBlock(chain consensus.ChainReader, parent *types.Header) (*types.Header, bool) {
 	if parent == nil {
 		return &types.Header{}, false
@@ -711,56 +697,68 @@ func (c *BSRR) SealHash(header *types.Header) common.Hash {
 	return sigHash(header)
 }
 
-// [BERITH] calcDifficultyAndRank 주어진 address에 대하여 블록을 생성할 때의 난이도, 순위를 반환하는 메서드
-// 1) [0, epoch] -> genesis block의 extra data에서 추출 후
-// ==> (1234,1) or (0, -1) 반환
-// 2) [epoch+1, ~) -> target의 블록까지 존재하는 스테이킹 리스트기반 (diff, rank) 반환
-// ==> (diff,rank) or (0, -1) 반환
+/*
+[BERITH]
+Method to return the difficulty and rank when creating a block for a given address
+1) [0, epoch] -> After extraction from extra data of genesis block ==> return (1234,1) or (0, -1)
+2) [epoch+1, ~) -> Returns the staking list based on the target block (diff, rank) ==> return (diff,rank) or (0, -1)
+*/
 func (c *BSRR) calcDifficultyAndRank(signer common.Address, chain consensus.ChainReader, time uint64, target *types.Header) (*big.Int, int) {
 	// extract diff and rank from genesis's extra data
 	if target.Number.Cmp(big.NewInt(0)) == 0 {
+		log.Info("default difficulty and rank", "diff", diffWithoutStaker, "rank", 1)
 		return big.NewInt(diffWithoutStaker), 1
 	}
 
 	stks, err := c.getStakers(chain, target.Number.Uint64(), target.Hash())
-
 	if err != nil {
+		log.Error("failed to get stakers", "err", err.Error())
 		return big.NewInt(0), -1
 	}
 
 	stateDB, err := chain.StateAt(target.Root)
-
 	if err != nil {
+		log.Error("failed to get state", "err", err.Error())
 		return big.NewInt(0), -1
 	}
 
-	results := selection.SelectBlockCreator(target.Number.Uint64(), target.Hash(), stks, stateDB)
+	results := selection.SelectBlockCreator(chain.Config(), target.Number.Uint64(), target.Hash(), stks, stateDB)
 
 	max := c.getMaxMiningCandidates(len(results))
 
 	if results[signer].Rank > max {
+		log.Warn("out of rank", "hash", target.Hash().Hex(), "rank", results[signer].Rank, "max", max)
 		return big.NewInt(0), -1
 	}
 
 	return results[signer].Score, results[signer].Rank
 }
 
-// getDelay 주어진 rank에 따라 블록 Sealing에 대한 지연 시간을 반환한다.
-// 항상 0보다 크거나 같은 값을 반환
-func (c *BSRR) getDelay(rank int) time.Duration {
+/*
+[Berith]
+Returns the delay time for block sealing according to the given rank.
+Always returns a value greater than or equal to 0
+*/
+func (c *BSRR) getDelay(rank int) (time.Duration, error) {
 	if rank <= 1 {
-		return time.Duration(0)
+		return time.Duration(0), nil
 	}
 
-	// 각 그룹별 지연시간
-	groupOrder, _ := c.rankGroup.GetGroupOrder(rank)
+	// Delay time for each group
+	groupOrder, err := c.rankGroup.GetGroupOrder(rank)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay := time.Duration(groupOrder-1) * groupDelay
 
-	// 그룹 내 지연 시간
-	startRank, _, _ := c.rankGroup.GetGroupRange(groupOrder)
+	// Delay time in group
+	startRank, _, err := c.rankGroup.GetGroupRange(groupOrder)
+	if err != nil {
+		return time.Duration(0), err
+	}
 	delay += time.Duration(rank-startRank) * termDelay
 
-	return delay
+	return delay, nil
 }
 
 // Close implements consensus.Engine. It's a noop for clique as there are no background threads.
@@ -769,40 +767,49 @@ func (c *BSRR) Close() error {
 }
 
 func getReward(config *params.ChainConfig, header *types.Header) *big.Int {
+	const (
+		blockNumberAt1Year         = 3150000 // If a block is created every 10 seconds, this number of the block created at the time of 1 year.
+		defaultReward              = 26      // The basic reward is 26 tokens.
+		additionalReward           = 5       // Additional rewards are paid for one year.
+		blockSectionDivisionNumber = 7370000 // Reference value for dividing a block into 50 sections
+		groupingValue              = 0.5     // Constant for grouping two groups to have the same Reward Subtract
+	)
+
 	number := header.Number.Uint64()
-	// 특정 블록 이후로 보상을 지급
+	// Reward after a specific block
 	if number < config.Bsrr.Rewards.Uint64() {
 		return big.NewInt(0)
 	}
 
-	//공식이 10초 단위 이기때문
-	d := float64(config.Bsrr.Period) / 10
-	n := float64(number) * d
+	// Value to correct Reward when block creation time is changed.
+	correctionValue := float64(config.Bsrr.Period) / common.DefaultBlockCreationSec
+	correctedBlockNumber := float64(number) * correctionValue
 
-	var z float64 = 0
-	if n <= 3150000 {
-		z = 5
+	var addtional float64 = 0
+	if correctedBlockNumber <= blockNumberAt1Year {
+		addtional = additionalReward
 	}
 
-	re := (26 - math.Round(n/(7370000))*0.5 + z) * d
-	if re <= 0 {
-		re = 0
-
+	/*
+		[Berith]
+		The reward payment decreases as the time increases, and for this purpose, the block is divided into 50 sections.
+		The same amount is deducted for every two sections.
+	*/
+	reward := (defaultReward - math.Round(correctedBlockNumber/blockSectionDivisionNumber)*groupingValue + addtional) * correctionValue
+	if reward <= 0 {
 		return big.NewInt(0)
-	} else {
-		temp := re * 1e+10
-		return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+18))
 	}
+	temp := reward * 1e+10
+	return new(big.Int).Mul(big.NewInt(int64(temp)), big.NewInt(1e+8))
 }
 
 // AccumulateRewards credits the coinbase of the given block with the mining
-// reward. The total reward consists of the static block reward and rewards for
-// included uncles. The coinbase of each uncle block is also rewarded.
+// reward.
 func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.StateDB, header *types.Header) {
 	config := chain.Config()
 	state.AddBehindBalance(header.Coinbase, header.Number, getReward(config, header))
 
-	//과거 시점의 블록 생성자 가져온다.
+	// Get the block constructor of the past point.
 	target, exist := c.getAncestor(chain, int64(config.Bsrr.Epoch), header)
 	if !exist {
 		return
@@ -836,7 +843,32 @@ func (c *BSRR) accumulateRewards(chain consensus.ChainReader, state *state.State
 	}
 }
 
-//[BERITH] 캐쉬나 db에서 stakingList를 불러오기 위한 메서드 생성
+func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, stks staking.Stakers) (staking.Stakers, error) {
+	st, err := chain.StateAt(parent.Root)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, addr := range stks.AsList() {
+		if st.GetStakeBalance(addr).Cmp(c.config.StakeMinimum) < 0 {
+			stks.Remove(addr)
+		}
+	}
+
+	bytes, err := json.Marshal(stks)
+	if err != nil {
+		return nil, err
+	}
+	c.cache.Add(parent.Hash(), bytes)
+	err = c.stakingDB.Commit(parent.Hash().Hex(), stks)
+	if err != nil {
+		return nil, err
+	}
+
+	return stks, nil
+}
+
+//[BERITH] Method to call stakingList from cache or db
 func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.Stakers, error) {
 	var (
 		list   staking.Stakers
@@ -846,9 +878,9 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 	prevNum := number
 	prevHash := hash
 
-	//[BERITH] 입력받은 블록에서 가장가까운 StakingList를 찾는다.
+	//[BERITH] Find the nearest StakingList in the input block.
 	for list == nil {
-		//[BERITH] cache에 저장된 StakingList를 찾은 경우
+		//[BERITH] When StakingList stored in cache is found
 		if val, ok := c.cache.Get(prevHash); ok {
 			bytes := val.([]byte)
 
@@ -859,14 +891,13 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 			c.cache.Remove(prevHash)
 		}
 
-		//[BERITH] StakingList가 저장되지 않은 경우
+		//[BERITH] StakingList is not saved
 		if prevNum == 0 {
 			list = c.stakingDB.NewStakers()
 			break
 		}
 
-		//[BERITH] DB에 저장된 StakingList를 찾은 경우
-
+		//[BERITH] When finding StakingList stored in DB
 		var err error
 		list, err = c.stakingDB.GetStakers(prevHash.Hex())
 		if err == nil {
@@ -902,12 +933,15 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 		return nil, err
 	}
 	c.cache.Add(hash, bytes)
-	c.stakingDB.Commit(hash.Hex(), list)
+	err = c.stakingDB.Commit(hash.Hex(), list)
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }
 
-//[BERITH] 블록을 확인하여 stakingList에 값을 세팅하기 위한 메서드 생성
+//[BERITH] Method to check the block and set the value in stakingList
 func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, blocks []*types.Block) error {
 	if len(blocks) == 0 {
 		return nil
@@ -922,7 +956,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, bl
 	return nil
 }
 
-//[BERITH] 트랜잭션 배열을 조사하여 stakingList에 값을 세팅하기 위한 메서드 생성
+//[BERITH] Method to examine transaction array and set value in stakingList
 func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainReader, stks staking.Stakers, txs []*types.Transaction, header *types.Header) error {
 	number := header.Number
 
@@ -946,20 +980,18 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			return err
 		}
 
-		//Main -> Main (일반 TX)
+		// General Transaction
 		if msg.Base() == types.Main && msg.Target() == types.Main {
 			continue
 		}
 
 		//[BERITH] 2019-09-03
-		//마지막 Staking의 블록번호가 저장되도록 수정
-		//일반 Tx가 아닌 경우 Stake or Unstake
-		if msg.Base() == types.Main && msg.Target() == types.Stake {
-			stkChanged[msg.From()] = true
-		} else if msg.Base() == types.Stake && msg.Base() == types.Main {
+		// Fix to save the last staking block number
+		// Stake or Unstake in case of not normal Tx
+		if chain.Config().IsBIP1(number) && msg.Base() == types.Stake && msg.Target() == types.Main {
 			stkChanged[msg.From()] = false
-		} else {
-			continue
+		} else if msg.Base() == types.Main && msg.Target() == types.Stake {
+			stkChanged[msg.From()] = true
 		}
 	}
 
@@ -968,8 +1000,8 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 			point := big.NewInt(0)
 			currentStkBal := state.GetStakeBalance(addr)
 			if currentStkBal.Cmp(big.NewInt(0)) == 1 {
-				currentStkBal = new(big.Int).Div(currentStkBal, big.NewInt(1e+18))
-				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), big.NewInt(1e+18))
+				currentStkBal = new(big.Int).Div(currentStkBal, common.UnitForBer)
+				prevStkBal := new(big.Int).Div(prevState.GetStakeBalance(addr), common.UnitForBer)
 				additionalStkBal := new(big.Int).Sub(currentStkBal, prevStkBal)
 				currentBlock := header.Number
 				lastStkBlock := new(big.Int).Set(state.GetStakeUpdated(addr))
@@ -986,29 +1018,6 @@ func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainRead
 		}
 
 	}
-
-	// info, err := list.GetInfo(header.Coinbase)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if info.Value().Cmp(big.NewInt(0)) > 0 {
-
-	// 	input := stakingInfo{
-	// 		address:     info.Address(),
-	// 		value:       info.Value(),
-	// 		blockNumber: info.BlockNumber(),
-	// 	}
-
-	// 	list.SetInfo(input)
-	// }
-
-	// list.SetMiner(header.Coinbase)
-	// sr := c.config.SlashRound
-	// if header.Number.Uint64()%(sr*c.config.Epoch) == 0 {
-	// 	return c.slashBadSigner(chain, header, list, state)
-	// }
 	return nil
 }
 
@@ -1022,9 +1031,9 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
-//[BERITH] 입력받은 블록넘버에, 블록생성이 가능한 계정의 목록을 반환하는 메서드.
-// 1) [0, epoch number) -> genesis의 extra 데이터에서 추출 한 signers 반환
-// 2) [epoch nunber ~ ) -> staking list 에서 추출 한 signers 반환
+//[BERITH] Method that returns a list of accounts that can create a block of the received block number
+// 1) [0, epoch number) -> Return signers extracted from extra data of genesis
+// 2) [epoch nunber ~ ) -> Return signers extracted from staking list
 func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (signers, error) {
 	// extract signers from genesis block's extra data if block number equals to 0
 	if target.Number.Cmp(big.NewInt(0)) == 0 {
@@ -1043,13 +1052,13 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	}
 
 	result := list.AsList()
-	if len(result) <= 0 {
+	if len(result) == 0 {
 		return make([]common.Address, 0), nil
 	}
 	return result, nil
 }
 
-//[BERITH] getSignersFromExtraData extra data 필드로 부터 signers를 반환한다.
+//[BERITH] Returns signers from the extra data field.
 func (c *BSRR) getSignersFromExtraData(header *types.Header) (signers, error) {
 	n := (len(header.Extra) - extraVanity - extraSeal) / common.AddressLength
 	if n < 1 {
@@ -1063,7 +1072,7 @@ func (c *BSRR) getSignersFromExtraData(header *types.Header) (signers, error) {
 	return signers, nil
 }
 
-// [BERITH] getMaxMiningCandidates 주어진 스테이킹 리스트 수에서 블록을 생성 할 수 있는 후보자의 수를 반환한다.
+// [BERITH] Returns the number of candidates who can create a block at a given number of stakers.
 func (c *BSRR) getMaxMiningCandidates(holders int) int {
 	if holders == 0 {
 		return 0
@@ -1075,15 +1084,15 @@ func (c *BSRR) getMaxMiningCandidates(holders int) int {
 		t = 1
 	}
 
-	if t > selection.MAX_MINERS {
-		t = selection.MAX_MINERS
+	if t > selection.MaxMiner {
+		t = selection.MaxMiner
 	}
 	return t
 }
 
 /*
 [BERITH]
-선출확율 반환 함수
+Elected probability return function
 */
 func (c *BSRR) getJoinRatio(stks staking.Stakers, address common.Address, hash common.Hash, blockNumber uint64, states *state.StateDB) (float64, error) {
 	var total float64

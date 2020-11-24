@@ -11,7 +11,7 @@
                 <span id = "txDetailState">Break</span><!-- white/gray -->
             </p>
             <p class="state">
-                <span class="success red"><i class="icon"></i>전송 완료</span><!-- request blue / fail gray / success red-->
+                <span id="status" class=""></span><!-- request blue / fail gray / success red-->
                 <span class="date" id = "txDetailDate" >2019.04.18 15:00:00</span>
             </p>
         </div>
@@ -29,6 +29,18 @@
                     <th>Block Height</th>
                     <td><p id = "txDetailBlockNumber"></p></td>
                 </tr>
+                <tr class="dtl_send">
+                    <th>보낸 주소</th>
+                    <td><a href="javascript:navigator.clipboard.writeText($('#txDetailFrom').text())"><p id = "txDetailFrom"></p></a></td>
+                </tr>
+                <tr class="dtl_send">
+                    <th>받는 주소</th>
+                    <td><a href="javascript:navigator.clipboard.writeText($('#txDetailTo').text())"><p id = "txDetailTo"></p></a></td>
+                </tr>
+                <tr>
+                    <th>Nonce</th>
+                    <td><p id = "txDetailNonce"></p></td>
+                </tr>
                 <tr>
                     <th>기본수수료</th>
                     <td><p id = "txDetailGasLimit"></p></td>
@@ -39,12 +51,14 @@
                 </tr>
                 <tr>
                     <th>실제 사용 수수료</th>
-                    <td><em><p id = "txDetailGasUsed"></p>BER</em></td>
+                    <td><em><p id = "txDetailGasUsed"></p>BERS</em></td>
                 </tr>
             </tbody>
         </table>
     </div>
     <div class="pop_footer">
+        <a class="btn white on pending" href="javascript:toggleResendPopup(false,$('#txDetailHash').text(),$('#txDetailGasPrice').text())">재전송</a>    
+        <a class="btn white on pending" href="javascript:toggleCancelPopup(false,$('#txDetailHash').text())">거래 취소</a>    
         <a class="btn red on" href="#!" onclick="togglePopUp('txListDetailPopup')">확인</a>
     </div>
 </div><!-- e://pop_wrap  -->

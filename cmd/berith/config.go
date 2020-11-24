@@ -28,8 +28,8 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/berith"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/params"
 	whisper "github.com/BerithFoundation/berith-chain/whisper/whisperv6"
@@ -75,10 +75,10 @@ type berithStatsConfig struct {
 }
 
 type berConfig struct {
-	Ber       berith.Config
-	Shh       whisper.Config
-	Node      node.Config
-	BerithStats  berithStatsConfig
+	Ber         berith.Config
+	Shh         whisper.Config
+	Node        node.Config
+	BerithStats berithStatsConfig
 }
 
 func loadConfig(file string, cfg *berConfig) error {
@@ -109,9 +109,9 @@ func defaultNodeConfig() node.Config {
 func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	// Load defaults.
 	cfg := berConfig{
-		Ber:       berith.DefaultConfig,
-		Shh:       whisper.DefaultConfig,
-		Node:      defaultNodeConfig(),
+		Ber:  berith.DefaultConfig,
+		Shh:  whisper.DefaultConfig,
+		Node: defaultNodeConfig(),
 	}
 
 	// Load config file.

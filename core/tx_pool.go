@@ -78,7 +78,8 @@ var (
 	// making the transaction invalid, rather a DOS protection.
 	ErrOversizedData = errors.New("oversized data")
 
-	ErrStakingBalance       = errors.New("staking balance failed")
+	ErrUnderStakeBalance    = errors.New("insufficient transaction value")
+	ErrExceedStakeLimit     = errors.New("exceeds stake balance limit")
 	ErrInvalidStakeReceiver = errors.New("berith account only can stake token on itself")
 )
 
@@ -405,7 +406,7 @@ func (pool *TxPool) reset(oldHead, newHead *types.Header) {
 			reinject = types.TxDifference(discarded, included)
 		}
 	}
-	// Initialize the internal state to the current head
+	// Initialize the internals state to the current head
 	if newHead == nil {
 		newHead = pool.chain.CurrentBlock().Header() // Special case during testing
 	}
@@ -601,7 +602,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	/*
 		[BERITH]
-		Remote 상의 Tx 도 처리 하기 위해 TxPool 에서 타입 및 Tx 검증
+		Type and Tx verification in TxPool to process Tx on Remote
 		cost == V + GP * GL
 	*/
 
@@ -637,19 +638,41 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	/*
 		[BERITH]
-		악의 적인 Stake 를 막기 위함. (여기에 걸린다면 소스를 수정 했다고 봐야함)
-		- Genesis 에 적힌 최소 스테이킹 수량 체크
+		Logic to prevent malicious stake
+		Check the minimum staking quantity written on Genesis
 	*/
 	stakedAmount := pool.currentState.GetStakeBalance(from)
 	totalStakingAmount := tx.Value().Add(tx.Value(), stakedAmount)
 	minimum := pool.chainconfig.Bsrr.StakeMinimum
 	if tx.Base() == types.Main && tx.Target() == types.Stake {
 		if totalStakingAmount.Cmp(minimum) == -1 {
-			return ErrStakingBalance
+			return ErrUnderStakeBalance
 		}
 	}
 
+	/*
+		[BERITH]
+		Check if the maximum value of Stake Balance is exceeded
+	*/
+	isBIP4 := pool.chainconfig.IsBIP4(pool.chain.CurrentBlock().Header().Number)
+	if isBIP4 && tx.Target() == types.Stake {
+		to := *tx.To()
+		stakedAmount = pool.currentState.GetStakeBalance(to)
+		totalStakingAmount = new(big.Int).Add(tx.Value(), stakedAmount)
+		limitStakeBalance := pool.chainconfig.Bsrr.LimitStakeBalance
+		if !CheckStakeBalanceAmount(totalStakingAmount, limitStakeBalance) {
+			return ErrExceedStakeLimit
+		}
+	}
 	return nil
+}
+
+/*
+	[BERITH]
+	Stake Balance limit exceeded check function
+*/
+func CheckStakeBalanceAmount(totalStakingAmount, maximum *big.Int) bool {
+	return totalStakingAmount.Cmp(maximum) != 1
 }
 
 // add validates a transaction and inserts it into the non-executable queue for
@@ -734,7 +757,6 @@ func (pool *TxPool) add(tx *types.Transaction, local bool) (bool, error) {
 }
 
 // enqueueTx inserts a new transaction into the non-executable transaction queue.
-//
 // Note, this method assumes the pool lock is held!
 func (pool *TxPool) enqueueTx(hash common.Hash, tx *types.Transaction) (bool, error) {
 	// Try to insert the transaction into the future queue
@@ -880,7 +902,7 @@ func (pool *TxPool) addTxsLocked(txs []*types.Transaction, local bool) []error {
 			dirty[from] = struct{}{}
 		}
 	}
-	// Only reprocess the internal state if something was actually added
+	// Only reprocess the internals state if something was actually added
 	if len(dirty) > 0 {
 		addrs := make([]common.Address, 0, len(dirty))
 		for addr := range dirty {
@@ -1249,8 +1271,8 @@ func (as *accountSet) flatten() []common.Address {
 //
 // Note, although this type is properly protected against concurrent access, it
 // is **not** a type that should ever be mutated or even exposed outside of the
-// transaction pool, since its internal state is tightly coupled with the pools
-// internal mechanisms. The sole purpose of the type is to permit out-of-bound
+// transaction pool, since its internals state is tightly coupled with the pools
+// internals mechanisms. The sole purpose of the type is to permit out-of-bound
 // peeking into the pool in TxPool.Get without having to acquire the widely scoped
 // TxPool.mu mutex.
 type txLookup struct {

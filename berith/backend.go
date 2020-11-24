@@ -34,7 +34,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/berith/filters"
 	"github.com/BerithFoundation/berith-chain/berith/gasprice"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
@@ -45,7 +44,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -65,7 +64,6 @@ type LesServer interface {
 /*
 [BERITH]
 Berith implements the Berith full node service.
-풀노드 구조체
 */
 type Berith struct {
 	config      *Config
@@ -101,14 +99,7 @@ type Berith struct {
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and berithbase)
 
-	//[BERITH]
-	//스테이킹 디비
-	stakingDB *stakingdb.StakingDB
-}
-
-func (s *Berith) AddLesServer(ls LesServer) {
-	s.lesServer = ls
-	ls.SetBloomBitsIndexer(s.bloomIndexer)
+	stakingDB *staking.StakingDB // [Berith] database for staker infos
 }
 
 // New creates a new Berith object (including the
@@ -136,7 +127,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Berith, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
-	stakingDB := &stakingdb.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: config.NoPruning}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
@@ -239,16 +230,21 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (berithdb.D
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Berith service
-func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *stakingdb.StakingDB) consensus.Engine {
+func CreateConsensusEngine(chainConfig *params.ChainConfig, db berithdb.Database, stakingDB *staking.StakingDB) consensus.Engine {
 	return bsrr.NewCliqueWithStakingDB(stakingDB, chainConfig.Bsrr, db)
+}
+
+func (s *Berith) AddLesServer(ls LesServer) {
+	s.lesServer = ls
+	ls.SetBloomBitsIndexer(s.bloomIndexer)
 }
 
 // APIs return the collection of RPC services the berith package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 /*
 [BERITH]
-각 서비스 구현체 등록
-서비스 : miner, admin, berith...등등
+Registration of each service implementation
+services : miner, admin, berith, etc...
 */
 func (s *Berith) APIs() []rpc.API {
 	apis := berithapi.GetAPIs(s.APIBackend)
@@ -436,9 +432,8 @@ func (s *Berith) StopMining() {
 	s.miner.Stop()
 }
 
-func (s *Berith) IsMining() bool      { return s.miner.Mining() }
-func (s *Berith) Miner() *miner.Miner { return s.miner }
-
+func (s *Berith) IsMining() bool                     { return s.miner.Mining() }
+func (s *Berith) Miner() *miner.Miner                { return s.miner }
 func (s *Berith) AccountManager() *accounts.Manager  { return s.accountManager }
 func (s *Berith) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *Berith) TxPool() *core.TxPool               { return s.txPool }
@@ -459,7 +454,7 @@ func (s *Berith) Protocols() []p2p.Protocol {
 	return append(s.protocolManager.SubProtocols, s.lesServer.Protocols()...)
 }
 
-// Start implements node.Service, starting all internal goroutines needed by the
+// Start implements node.Service, starting all internals goroutines needed by the
 // Berith protocol implementation.
 func (s *Berith) Start(srvr *p2p.Server) error {
 	// Start the bloom bits servicing goroutines
@@ -484,7 +479,7 @@ func (s *Berith) Start(srvr *p2p.Server) error {
 	return nil
 }
 
-// Stop implements node.Service, terminating all internal goroutines used by the
+// Stop implements node.Service, terminating all internals goroutines used by the
 // Berith protocol.
 func (s *Berith) Stop() error {
 	s.bloomIndexer.Close()

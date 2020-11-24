@@ -12,30 +12,31 @@ import (
 func TestGetMaxMiningCandidates(t *testing.T) {
 	var c = &BSRR{
 		config: &params.BSRRConfig{
-			Period:       10,
-			Epoch:        360,
-			Rewards:      common.StringToBig("20000"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   1000,
-			ForkFactor:   0.3,
+			Period:            10,
+			Epoch:             360,
+			Rewards:           common.StringToBig("20000"),
+			StakeMinimum:      common.StringToBig(params.StakeMinimum),
+			LimitStakeBalance: common.StringToBig(params.LimitStakeBalance),
+			SlashRound:        1000,
+			ForkFactor:        0.3,
 		},
 	}
 	tests := []struct {
 		holders  int
 		expected int
 	}{
-		{0, 0},                     // no holders
-		{1, 1},                     // only one holders
-		{10, 3},                    // equals to 0 point
-		{8, 2},                     // less than 0.5 point
-		{9, 3},                     // greater than or equals 0.5 point
-		{30, selection.MAX_MINERS}, // greater than staking.MAX_MINERS
+		{0, 0},                      // no holders
+		{1, 1},                      // only one holders
+		{10, 3},                     // equals to 0 point
+		{8, 2},                      // less than 0.5 point
+		{9, 3},                      // greater than or equals 0.5 point
+		{35000, selection.MaxMiner}, // greater than staking.MaxMiner
 	}
 
-	for i, tt := range tests {
-		result := c.getMaxMiningCandidates(tt.holders)
-		if result != tt.expected {
-			t.Errorf("test #%d: expected : %d but %d", i, tt.expected, result)
+	for i, test := range tests {
+		result := c.getMaxMiningCandidates(test.holders)
+		if result != test.expected {
+			t.Errorf("test #%d: expected : %d but %d", i, test.expected, result)
 		}
 	}
 }
@@ -43,14 +44,15 @@ func TestGetMaxMiningCandidates(t *testing.T) {
 func TestGetDelay(t *testing.T) {
 	var c = &BSRR{
 		config: &params.BSRRConfig{
-			Period:       0,
-			Epoch:        360,
-			Rewards:      common.StringToBig("20000"),
-			StakeMinimum: common.StringToBig("100000000000000000000000"),
-			SlashRound:   1000,
-			ForkFactor:   1.0,
+			Period:            0,
+			Epoch:             360,
+			Rewards:           common.StringToBig("20000"),
+			StakeMinimum:      common.StringToBig(params.StakeMinimum),
+			LimitStakeBalance: common.StringToBig(params.LimitStakeBalance),
+			SlashRound:        1000,
+			ForkFactor:        1.0,
 		},
-		rankGroup: &common.ArithmeticGroup{CommonDiff: 3},
+		rankGroup: &common.ArithmeticGroup{CommonDiff: commonDiff},
 	}
 
 	tests := []struct {
@@ -71,7 +73,7 @@ func TestGetDelay(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		result := c.getDelay(tt.rank)
+		result, _ := c.getDelay(tt.rank)
 		if result != tt.delay {
 			t.Errorf("test #%d: rank : %d expected : %d but %d", i, tt.rank, tt.delay, result)
 		}

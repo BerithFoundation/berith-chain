@@ -198,7 +198,7 @@ func (m *txSortedMap) Len() int {
 }
 
 // Flatten creates a nonce-sorted slice of transactions based on the loosely
-// sorted internal representation. The result of the sorting is cached in case
+// sorted internals representation. The result of the sorting is cached in case
 // it's requested again before any modifications are made to the contents.
 func (m *txSortedMap) Flatten() types.Transactions {
 	// If the sorting was not cached yet, create and cache it
@@ -297,12 +297,12 @@ func (l *txList) Filter(mainbal *big.Int, gasLimit uint64) (types.Transactions, 
 
 	// Filter out all the transactions above the account's funds
 	/*
-	[BERITH]
-	Transcaion Filter 로직 정의
-	TX 타입을 구분하여 기준 연산이 틀려짐
+		[BERITH]
+		Transcaion Filter Logic Definition
+		Standard operation is different by classifying TX type
 	*/
 	removed := l.txs.Filter(func(tx *types.Transaction) bool {
-		if tx.Base() == types.Main{
+		if tx.Base() == types.Main {
 			return tx.Cost().Cmp(mainbal) > 0 || tx.Gas() > gasLimit
 		} else {
 			return tx.MainFee().Cmp(mainbal) > 0 || tx.Gas() > gasLimit
@@ -368,7 +368,7 @@ func (l *txList) Empty() bool {
 }
 
 // Flatten creates a nonce-sorted slice of transactions based on the loosely
-// sorted internal representation. The result of the sorting is cached in case
+// sorted internals representation. The result of the sorting is cached in case
 // it's requested again before any modifications are made to the contents.
 func (l *txList) Flatten() types.Transactions {
 	return l.txs.Flatten()

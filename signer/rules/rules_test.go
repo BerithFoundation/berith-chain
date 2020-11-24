@@ -26,7 +26,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/signer/core"
 	"github.com/BerithFoundation/berith-chain/signer/storage"
 )
@@ -482,7 +482,7 @@ func dummySigned(value *big.Int) *types.Transaction {
 	gas := uint64(21000)
 	gasPrice := big.NewInt(2000000)
 	data := make([]byte, 0)
-	return types.NewTransaction(3, to, value, gas, gasPrice, data)
+	return types.NewTransaction(3, to, value, gas, gasPrice, data, types.Main, types.Main)
 
 }
 func TestLimitWindow(t *testing.T) {

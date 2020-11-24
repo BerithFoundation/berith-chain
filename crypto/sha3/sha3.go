@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	// maxRate is the maximum size of the internal buffer. SHAKE-256
+	// maxRate is the maximum size of the internals buffer. SHAKE-256
 	// currently needs the largest buffer.
 	maxRate = 168
 )
@@ -52,7 +52,7 @@ func (d *state) BlockSize() int { return d.rate }
 // Size returns the output size of the hash function in bytes.
 func (d *state) Size() int { return d.outputLen }
 
-// Reset clears the internal state by zeroing the sponge state and
+// Reset clears the internals state by zeroing the sponge state and
 // the byte buffer, and setting Sponge.state to absorbing.
 func (d *state) Reset() {
 	// Zero the permutation's state.

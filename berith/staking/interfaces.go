@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"github.com/BerithFoundation/berith-chain/consensus"
+	"github.com/BerithFoundation/berith-chain/core/types"
 	"io"
 	"math/big"
 
@@ -21,7 +23,7 @@ type Stakers interface {
 
 /*
 [BERITH]
-스테이킹 정보를 관리 하는 인터페이스
+Interface to manage staking information
 */
 type StakingInfo interface {
 	Address() common.Address
@@ -31,11 +33,12 @@ type StakingInfo interface {
 
 /*
 [BERITH]
-스테이킹 리스트 데이터 베이스 인터페이스
+Interface for stakingDB
 */
 type DataBase interface {
 	GetStakers(key string) (Stakers, error)
 	Commit(key string, stks Stakers) error
 	NewStakers() Stakers
 	Close()
+	Clean(chain consensus.ChainReader, header *types.Header) error
 }

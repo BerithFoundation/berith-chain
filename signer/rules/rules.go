@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/signer/core"
 	"github.com/BerithFoundation/berith-chain/signer/rules/deps"

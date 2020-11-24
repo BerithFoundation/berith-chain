@@ -20,6 +20,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"io"
 	"math/big"
 	mrand "math/rand"
@@ -27,7 +28,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
@@ -64,7 +64,6 @@ const (
 	maxFutureBlocks     = 256
 	maxTimeFutureBlocks = 30
 	badBlockLimit       = 10
-	triesInMemory       = 128
 
 	// BlockChainVersion ensures that an incompatible database forces a resync from scratch.
 	BlockChainVersion = 3
@@ -139,13 +138,15 @@ type BlockChain struct {
 	badBlocks      *lru.Cache              // Bad block cache
 	shouldPreserve func(*types.Block) bool // Function used to determine whether should preserve the given block.
 
-	stakingDB *stakingdb.StakingDB
+	stakingDB *staking.StakingDB
+
+	triesInMemory uint64 // Number of blocks to be saved in db without being erased when gc mode is not archive
 }
 
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
-func NewBlockChain(stakingDB *stakingdb.StakingDB, db berithdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
+func NewBlockChain(stakingDB *staking.StakingDB, db berithdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{
 			TrieCleanLimit: 256,
@@ -177,6 +178,7 @@ func NewBlockChain(stakingDB *stakingdb.StakingDB, db berithdb.Database, cacheCo
 		vmConfig:       vmConfig,
 		badBlocks:      badBlocks,
 		stakingDB:      stakingDB,
+		triesInMemory:  chainConfig.Bsrr.Epoch,
 	}
 	bc.SetValidator(NewBlockValidator(chainConfig, bc, engine))
 	bc.SetProcessor(NewStateProcessor(chainConfig, bc, engine))
@@ -360,13 +362,13 @@ func (bc *BlockChain) GasLimit() uint64 {
 }
 
 // CurrentBlock retrieves the current head block of the canonical chain. The
-// block is retrieved from the blockchain's internal cache.
+// block is retrieved from the blockchain's internals cache.
 func (bc *BlockChain) CurrentBlock() *types.Block {
 	return bc.currentBlock.Load().(*types.Block)
 }
 
 // CurrentFastBlock retrieves the current fast-sync head block of the canonical
-// chain. The block is retrieved from the blockchain's internal cache.
+// chain. The block is retrieved from the blockchain's internals cache.
 func (bc *BlockChain) CurrentFastBlock() *types.Block {
 	return bc.currentFastBlock.Load().(*types.Block)
 }
@@ -601,7 +603,6 @@ func (bc *BlockChain) HasState(hash common.Hash) bool {
 func (bc *BlockChain) HasBlockAndState(hash common.Hash, number uint64) bool {
 	// Check first that the block itself is known
 	block := bc.GetBlock(hash, number)
-
 	if block == nil {
 		return false
 	}
@@ -714,7 +715,7 @@ func (bc *BlockChain) Stop() {
 	if !bc.cacheConfig.Disabled {
 		triedb := bc.stateCache.TrieDB()
 
-		for _, offset := range []uint64{0, 1, triesInMemory - 1} {
+		for _, offset := range []uint64{0, 1, bc.triesInMemory} {
 			if number := bc.CurrentBlock().NumberU64(); number > offset {
 				recent := bc.GetBlockByNumber(number - offset)
 
@@ -959,51 +960,25 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	}
 	triedb := bc.stateCache.TrieDB()
 
+	if err := triedb.Commit(root, false); err != nil {
+		return NonStatTy, err
+	}
+
 	// If we're running an archive node, always flush
-	if bc.cacheConfig.Disabled {
-		if err := triedb.Commit(root, false); err != nil {
-			return NonStatTy, err
-		}
-	} else {
-		// Full but not archive node, do proper garbage collection
-		triedb.Reference(root, common.Hash{}) // metadata reference to keep trie alive
-		bc.triegc.Push(root, -int64(block.NumberU64()))
+	if !bc.cacheConfig.Disabled && block.NumberU64()%uint64(common.CleanCycle) == 0 {
+		for targetNumber := block.NumberU64() - bc.triesInMemory - 1; targetNumber > 0; targetNumber-- {
+			targetHash := bc.GetHeaderByNumber(targetNumber).Root
 
-		if current := block.NumberU64(); current > triesInMemory {
-			// If we exceeded our memory allowance, flush matured singleton nodes to disk
-			var (
-				nodes, imgs = triedb.Size()
-				limit       = common.StorageSize(bc.cacheConfig.TrieDirtyLimit) * 1024 * 1024
-			)
-			if nodes > limit || imgs > 4*1024*1024 {
-				triedb.Cap(limit - berithdb.IdealBatchSize)
+			isExist, _ := triedb.DiskDB().Has(targetHash[:])
+			if !isExist {
+				break
 			}
-			// Find the next state trie we need to commit
-			header := bc.GetHeaderByNumber(current - triesInMemory)
-			chosen := header.Number.Uint64()
 
-			// If we exceeded out time allowance, flush an entire trie to disk
-			if bc.gcproc > bc.cacheConfig.TrieTimeLimit {
-				// If we're exceeding limits but haven't reached a large enough memory gap,
-				// warn the user that the system is becoming unstable.
-				if chosen < lastWrite+triesInMemory && bc.gcproc >= 2*bc.cacheConfig.TrieTimeLimit {
-					log.Info("State in memory for too long, committing", "time", bc.gcproc, "allowance", bc.cacheConfig.TrieTimeLimit, "optimum", float64(chosen-lastWrite)/triesInMemory)
-				}
-				// Flush an entire trie and restart the counters
-				triedb.Commit(header.Root, true)
-				lastWrite = chosen
-				bc.gcproc = 0
-			}
-			// Garbage collect anything below our required write retention
-			for !bc.triegc.Empty() {
-				root, number := bc.triegc.Pop()
-				if uint64(-number) > chosen {
-					bc.triegc.Push(root, number)
-					break
-				}
-				triedb.Dereference(root.(common.Hash))
+			if err := triedb.DiskDB().Delete(targetHash[:]); err != nil {
+				return NonStatTy, err
 			}
 		}
+		triedb.DiskDB().Compact()
 	}
 
 	// Write other block data using a batch.
@@ -1100,7 +1075,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	return n, err
 }
 
-// insertChain is the internal implementation of insertChain, which assumes that
+// insertChain is the internals implementation of insertChain, which assumes that
 // 1) chains are contiguous, and 2) The chain mutex is held.
 //
 // This method is split out so that import batches that require re-injecting
@@ -1143,13 +1118,11 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 	block, err := it.next()
 
 	//블록 Body Validation
-
 	switch {
 	// First block is pruned, insert as sidechain and reorg only if TD grows enough
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(it)
-
-		// First block is future, shove it (and all children) to the future queue (unknown ancestor)
+	// First block is future, shove it (and all children) to the future queue (unknown ancestor)
 	case err == consensus.ErrFutureBlock || (err == consensus.ErrUnknownAncestor && bc.futureBlocks.Contains(it.first().ParentHash())):
 		for block != nil && (it.index == 0 || err == consensus.ErrUnknownAncestor) {
 			if err := bc.addFutureBlock(block); err != nil {
@@ -1162,11 +1135,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 
 		// If there are any still remaining, mark as ignored
 		return it.index, events, coalescedLogs, err
-
-		// First block (and state) is known
-		//   1. We did a roll-back, and should now do a re-import
-		//   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
-		// 	    from the canonical chain, which has not been verified.
+	// First block (and state) is known
+	//   1. We did a roll-back, and should now do a re-import
+	//   2. The block is stored as a sidechain, and is lying about it's stateroot, and passes a stateroot
+	// 	    from the canonical chain, which has not been verified.
 	case err == ErrKnownBlock:
 		// Skip all known blocks that behind us
 		current := bc.CurrentBlock().NumberU64()
@@ -1176,8 +1148,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 			block, err = it.next()
 		}
 		// Falls through to the block import
-
-		// Some other error occurred, abort
+	// Some other error occurred, abort
 	case err != nil:
 		stats.ignored += len(it.chain)
 		bc.reportBlock(block, nil, err)
@@ -1209,7 +1180,6 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		// Process block using the parent state as reference point.
 		t0 := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)
-
 		t1 := time.Now()
 		if err != nil {
 			switch err.Error() {
@@ -1221,7 +1191,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 			default:
 				bc.reportBlock(block, receipts, err)
 			}
-			//return it.index, events, coalescedLogs, err
+			return it.index, events, coalescedLogs, err
 		}
 		// Validate the state using the default validator
 		if err := bc.Validator().ValidateState(block, parent, state, receipts, usedGas); err != nil {
@@ -1652,7 +1622,7 @@ func (bc *BlockChain) writeHeader(header *types.Header) error {
 }
 
 // CurrentHeader retrieves the current head header of the canonical chain. The
-// header is retrieved from the HeaderChain's internal cache.
+// header is retrieved from the HeaderChain's internals cache.
 func (bc *BlockChain) CurrentHeader() *types.Header {
 	return bc.hc.CurrentHeader()
 }

@@ -23,11 +23,11 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/rlp"
+	mapset "github.com/deckarep/golang-set"
 )
 
 var (
@@ -274,7 +274,7 @@ func (p *peer) SendBlockBodiesRLP(bodies []rlp.RawValue) error {
 	return p2p.Send(p.rw, BlockBodiesMsg, bodies)
 }
 
-// SendNodeDataRLP sends a batch of arbitrary internal data, corresponding to the
+// SendNodeDataRLP sends a batch of arbitrary internals data, corresponding to the
 // hashes requested.
 func (p *peer) SendNodeData(data [][]byte) error {
 	return p2p.Send(p.rw, NodeDataMsg, data)

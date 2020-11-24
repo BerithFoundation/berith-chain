@@ -45,7 +45,7 @@ type lightFetcher struct {
 	odr   *LesOdr
 	chain *light.LightChain
 
-	lock            sync.Mutex // lock protects access to the fetcher's internal state variables except sent requests
+	lock            sync.Mutex // lock protects access to the fetcher's internals state variables except sent requests
 	maxConfirmedTd  *big.Int
 	peers           map[*peer]*fetcherPeerInfo
 	lastUpdateStats *updateStatsEntry

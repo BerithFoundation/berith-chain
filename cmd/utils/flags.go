@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// Package utils contains internal helper functions for go-ethereum commands.
+// Package utils contains internals helper functions for go-ethereum commands.
 package utils
 
 import (
@@ -36,7 +36,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/berith/gasprice"
 	"github.com/BerithFoundation/berith-chain/berith/staking"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/berithstats"
 	"github.com/BerithFoundation/berith-chain/common"
@@ -101,7 +100,6 @@ func NewAppWithHelpTemplate(gitCommit, usage string, changeTemplate bool) *cli.A
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.Author = ""
-	//app.Authors = nil
 	app.Email = ""
 	app.Version = params.VersionWithMeta
 	if len(gitCommit) >= 8 {
@@ -248,7 +246,7 @@ var (
 	// Performance tuning settings
 	CacheFlag = cli.IntFlag{
 		Name:  "cache",
-		Usage: "Megabytes of memory allocated to internal caching",
+		Usage: "Megabytes of memory allocated to internals caching",
 		Value: 1024,
 	}
 	CacheDatabaseFlag = cli.IntFlag{
@@ -788,9 +786,12 @@ func makeDatabaseHandles() int {
 }
 
 // MakeAddress converts an account specified directly as a hex encoded string or
-// a key index in the key store to an internal account representation.
+// a key index in the key store to an internals account representation.
 func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error) {
-	// Remove address prefix if exist, because prefix ist not hex prefix(0x) [BERITH]
+	/*
+		[BERITH]
+		Remove address prefix if exist, because prefix ist not hex prefix(0x)
+	*/
 	if common.HasAddressPrefix(account) {
 		account = account[len(common.AddressPrefix):]
 	}
@@ -1332,7 +1333,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
 
-	stakingDB := &stakingdb.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: ctx.GlobalString(GCModeFlag.Name) == "archive"}
 	stakingDBPath := stack.ResolvePath("stakingDB")
 	stakingDB.CreateDB(stakingDBPath, staking.NewStakers)
 

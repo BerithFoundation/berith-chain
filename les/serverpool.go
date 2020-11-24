@@ -28,9 +28,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common/mclock"
 	"github.com/BerithFoundation/berith-chain/crypto"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/p2p/discv5"
@@ -274,7 +274,7 @@ func (pool *serverPool) adjustResponseTime(entry *poolEntry, time time.Duration,
 	}
 }
 
-// eventLoop handles pool events and mutex locking for all internal functions
+// eventLoop handles pool events and mutex locking for all internals functions
 func (pool *serverPool) eventLoop() {
 	lookupCnt := 0
 	var convTime mclock.AbsTime

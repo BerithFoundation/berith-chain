@@ -11,7 +11,7 @@ let admin = {
         astilectron.sendMessage(message, function(message) {
             // Init
             asticode.loader.hide();
-            console.log($('#text'))
+            // console.log($('#text'))
             $('#nodeInfo').val(message.payload)
         })
     },

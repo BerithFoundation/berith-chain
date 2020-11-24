@@ -22,14 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/berith/staking"
-	"github.com/BerithFoundation/berith-chain/berith/stakingdb"
-
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
 	"github.com/BerithFoundation/berith-chain/berith/filters"
 	"github.com/BerithFoundation/berith-chain/berith/gasprice"
+	"github.com/BerithFoundation/berith-chain/berith/staking"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/consensus"
@@ -38,7 +36,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -94,7 +92,7 @@ func New(ctx *node.ServiceContext, config *berith.Config) (*LightBerith, error) 
 	peers := newPeerSet()
 	quitSync := make(chan struct{})
 
-	stakingDB := &stakingdb.StakingDB{}
+	stakingDB := &staking.StakingDB{NoPruning: config.NoPruning}
 	stakingDBPath := ctx.ResolvePath("stakingDB")
 	if stkErr := stakingDB.CreateDB(stakingDBPath, staking.NewStakers); stkErr != nil {
 		return nil, stkErr
@@ -237,7 +235,7 @@ func (s *LightBerith) Protocols() []p2p.Protocol {
 	return s.makeProtocols(ClientProtocolVersions)
 }
 
-// Start implements node.Service, starting all internal goroutines needed by the
+// Start implements node.Service, starting all internals goroutines needed by the
 // Berith protocol implementation.
 func (s *LightBerith) Start(srvr *p2p.Server) error {
 	log.Warn("Light client mode is an experimental feature")
@@ -250,7 +248,7 @@ func (s *LightBerith) Start(srvr *p2p.Server) error {
 	return nil
 }
 
-// Stop implements node.Service, terminating all internal goroutines used by the
+// Stop implements node.Service, terminating all internals goroutines used by the
 // Berith protocol.
 func (s *LightBerith) Stop() error {
 	s.odr.Stop()

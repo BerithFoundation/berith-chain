@@ -102,7 +102,7 @@ func (h *Header) Hash() common.Hash {
 	return rlpHash(h)
 }
 
-// Size returns the approximate memory used by all internal contents. It is used
+// Size returns the approximate memory used by all internals contents. It is used
 // to approximate and limit the memory consumption of various caches.
 func (h *Header) Size() common.StorageSize {
 	return common.StorageSize(unsafe.Sizeof(*h)) + common.StorageSize(len(h.Extra)+(h.Difficulty.BitLen()+h.Number.BitLen()+h.Time.BitLen())/8)

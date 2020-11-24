@@ -28,7 +28,7 @@
     <div class="content">
         <h4>정보입력</h4>
         <div class="inp_group readonly "><!-- 읽기전용 readonly 추가-->
-            <h5>수량 - BER<span class="info">보낼 수량은 Stake Balance의 전체 수량입니다.</span></h5>
+            <h5>수량 - BERS<span class="info">보낼 수량은 Stake Balance의 전체 수량입니다.</span></h5>
             <div class="row_group">
                 <div class="box_inp">
                     <span class="inp_wrap">
@@ -56,7 +56,7 @@
                     <h5>수수료가격</h5>
                     <div class="box_inp">
                         <span class="inp_wrap">
-                            <input class="inp" type="text" id = "breakGasPrice" value=21000 />
+                            <input class="inp" type="text" id = "breakGasPrice" value=1 />
                             <a class="del" href="#!">삭제</a>
                         </span>
                     </div>
@@ -77,6 +77,28 @@
                 </div>
             </div>
         </div>
+        <!-- 191217 : Nonce 설정추가 [s] -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div id="nonceErrContainer" class="inp_group"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <div id="onoff" class="onoff_group off"><!-- 버튼 클릭시 on  -->
+                        <div class="tit_onoff"><button id="nonce_btn" type="button" class="btn_onoff"><span class="ico_arr"></span>Nonce 설정</button><span class="info">Nonce를 지정하지 않아도 자동으로 Nonce가 지정되어 트랜잭션이 전송됩니다.</span></div>
+                        <div class="onbox">
+                            <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text" id="nonce" />
+                                </span>
+                                <a class="del" href="#!">삭제</a>
+                            </div>
+                            <p id="nonceErrMsg" class="error_txt">
+                            0이나 자연수의 값을 입력하세요.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 191217 : Nonce 설정추가 [e] -->
         <div class="btn_area right">
             <a class="btn red medium on" href="#!" onclick="breakConfirmation()">다음</a>
         </div>
@@ -95,15 +117,16 @@
 
     onBreakLoad();
     async function onBreakLoad() {
-        let mainBalance = await berith.getBalance(account);
-        let mainBalanceContent = "<em>" + getWholePart(mainBalance) + "</em><em>" + getDecimalPart(mainBalance) + "</em> BER";
-        $('#mainBalance').html(mainBalanceContent);
+        $('#stakeBalance').change(() => {
+            $("#stakedBalance").val($("#stakeBalance").text()); // input field
+        });
 
-        let stakeBalance = await berith.getStakeBalance(account);
-        let stakeBalanceContent = "<em>" + getWholePart(stakeBalance) + "</em><em>" + getDecimalPart(stakeBalance) + "</em> BER";
-        $('#stakeBalance').html(stakeBalanceContent);
-
-        $("#stakedBalance").val(stakeBalance); // input field
+        getRealtimeBalance("berith_getBalance",sessionStorage.getItem("account"),$('#mainBalance'));
+        getRealtimeBalance("berith_getStakeBalance",sessionStorage.getItem("account"),$('#stakeBalance'));
+        $("#nonce_btn").click(() => {
+            $("#onoff").toggleClass("on");
+            $("#onoff").toggleClass("off");
+        });
     }
 
     async function next() {
@@ -116,9 +139,14 @@
     }
     async function fnBreak(){
         let breakGasLimit = $('#breakGasLimit').val()
-        let breakGasPrice = $('#breakGasPrice').val()
+        let breakGasPrice = $('#breakGasPrice').val() * 1000000000
         let breakAmount   = $('#stakedBalance').val()
-        let result = await berith.stopStaking(breakGasLimit,breakGasPrice)
+        if( breakGasLimit == "") {breakGasLimit = 21000}
+        if( breakGasPrice == "") {breakGasPrice = 1000000000}
+
+        let nonce = $("#nonce").val()
+
+        let result = await berith.stopStaking(breakGasLimit,breakGasPrice,nonce)
         togglePopUp("breakConfirmPop");
         if( result.name == "error"){
             alert(result.payload);
@@ -128,7 +156,7 @@
             $("#breakDate").text(date.toISOString()); //TODO:: spit time and date
             $('#breakAmountSuccess').text(breakAmount)
             $('#breakGasLimitSuccess').text(breakGasLimit)
-            $('#breakGasPriceSuccess').text(breakGasPrice)
+            $('#breakGasPriceSuccess').text((breakGasPrice/1000000000).toFixed(1))
             togglePopUp("breakSuccessPop")
         }
     }
@@ -142,13 +170,13 @@
             }
             let breakAmount   = $('#stakedBalance').val()
             let breakGasLimit = $('#breakGasLimit').val()
-            let breakGasPrice = $('#breakGasPrice').val()
+            let breakGasPrice = $('#breakGasPrice').val()*1000000000
             if( breakGasLimit == "") {breakGasLimit = 21000}
-            if( breakGasPrice == "") {breakGasPrice = 21000}
+            if( breakGasPrice == "") {breakGasPrice = 1000000000}
 
             $('#breakAmountConfirmaion').html(breakAmount)
             $('#breakGasLimitConfirmation').html(breakGasLimit)
-            $('#breakGasPriceConfirmation').html(breakGasPrice)
+            $('#breakGasPriceConfirmation').html($('#breakGasPrice').val())
             // console.log("break ok!! ")
             togglePopUp('breakConfirmPop');
         }
@@ -161,17 +189,22 @@
     async function validateAmount() {
         let gasLimit = $('#breakGasLimit').val()
         let gasPrice = $('#breakGasPrice').val()
+        let nonce = $("#nonce").val()
 
         if(!isDecimalNumber(gasLimit)){
             $('#breakGasLimit').val(21000)
             $('#breakGasL').addClass("error")
             return false
         }else if(!isDecimalNumber(gasPrice)) {
-            $('#breakGasPrice').val(21000)
+            $('#breakGasPrice').val(1)
             $('#breakGasL').removeClass("error")
             $('#breakGasP').addClass("error")
             return false
+        } else if(nonce.trim() != "" && !isDecimalNumber(nonce)) {
+            $("#nonceErrContainer").addClass("error");
+            return false;
         }else {
+            $("#nonceErrContainer").removeClass("error")
             return true
         }
     }

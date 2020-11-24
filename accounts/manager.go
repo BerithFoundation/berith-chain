@@ -70,7 +70,7 @@ func NewManager(backends ...Backend) *Manager {
 	return am
 }
 
-// Close terminates the account manager's internal notification processes.
+// Close terminates the account manager's internals notification processes.
 func (am *Manager) Close() error {
 	errc := make(chan error)
 	am.quit <- errc

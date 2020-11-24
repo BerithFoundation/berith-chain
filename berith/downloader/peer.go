@@ -125,7 +125,7 @@ func newPeerConnection(id string, version int, peer Peer, logger log.Logger) *pe
 	}
 }
 
-// Reset clears the internal state of a peer entity.
+// Reset clears the internals state of a peer entity.
 func (p *peerConnection) Reset() {
 	p.lock.Lock()
 	defer p.lock.Unlock()

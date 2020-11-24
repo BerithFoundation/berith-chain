@@ -10,12 +10,13 @@ Y8888P' Y88888P 88   YD Y888888P    YP    YP   YP
 */
 /*
 [BERITH]
-합의 알고리즘 에 관련된 함수를 이용하여 반환해야 할시 이곳에 API 구현
+Consensus algorithm related API
 */
 
 package bsrr
 
 import (
+	"github.com/BerithFoundation/berith-chain/berith/selection"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core/types"
@@ -29,9 +30,46 @@ type API struct {
 	bsrr  *BSRR
 }
 
+func (api *API) GetCandidates(number *rpc.BlockNumber) (*selection.JSONCandidates, error) {
+	var header *types.Header
+	if number == nil || *number == rpc.LatestBlockNumber {
+		header = api.chain.CurrentHeader()
+	} else {
+		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	}
+
+	if header == nil {
+		return nil, errUnknownBlock
+	}
+
+	parent := api.chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return nil, consensus.ErrUnknownAncestor
+	}
+
+	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
+	if !exist {
+		return nil, consensus.ErrUnknownAncestor
+	}
+
+	stat, err := api.chain.StateAt(target.Root)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stks, err := api.bsrr.getStakers(api.chain, target.Number.Uint64(), target.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	return selection.GetCandidates(parent.Number.Uint64(), parent.Hash(), stks, stat), nil
+
+}
+
 /*
 [BERITH]
-현재 로컬 블록상 의 선출된 BC 를 반환 하는 함수
+Function that returns the selected Block Creator on the current local block
 */
 func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, error) {
 	var header *types.Header
@@ -50,7 +88,6 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
@@ -66,7 +103,7 @@ func (api *API) GetBlockCreators(number *rpc.BlockNumber) ([]common.Address, err
 
 /*
 [BERITH]
-BC 선출 확율을 반환하는 함수
+A function that returns the probability of Block Creator election
 */
 func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (float64, error) {
 	// Retrieve the requested block number (or current if none requested)
@@ -85,14 +122,9 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 	num = header.Number.Int64()
 
 	epoch := int64(api.bsrr.config.Epoch)
-
 	if num <= epoch {
 		return 0, errNoData
 	}
-
-	//p := header.ParentHash
-	//uint64(num - epoch - 2)
-	//	prev_header := api.chain.GetHeaderByNumber(5740)
 
 	stks, err := api.bsrr.getStakers(api.chain, uint64(num), header.Hash())
 	if err != nil {
@@ -104,7 +136,6 @@ func (api *API) GetJoinRatio(address common.Address, number *rpc.BlockNumber) (f
 		return 0, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return 0, consensus.ErrUnknownAncestor
@@ -135,14 +166,12 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
-	// target, exist := api.bsrr.getAncestor(api.chain, int64(api.bsrr.config.Epoch), parent)
 	target, exist := api.bsrr.getStakeTargetBlock(api.chain, parent)
 	if !exist {
 		return nil, consensus.ErrUnknownAncestor
 	}
 
 	signers, err := api.bsrr.getSigners(api.chain, target)
-	//snap, err := api.bsrr.snapshot(api.chain, header.Number.Uint64(), header.Hash(), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -59,7 +59,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BerithFoundation/berith-chain/internal/build"
+	"berith-chain/internals/build"
 	"github.com/BerithFoundation/berith-chain/params"
 )
 

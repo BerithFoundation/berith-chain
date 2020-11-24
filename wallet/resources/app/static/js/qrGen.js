@@ -1,6 +1,6 @@
 let qrcode = {
     qrgen :  function(qrtext) {
-        console.log("qrtext :: " + qrtext)
+        // console.log("qrtext :: " + qrtext)
         var qrcode = new QRCode(document.getElementById("qrcode"), {
             text : qrtext,
             width: 128,

@@ -137,7 +137,7 @@ type Backend interface {
 	// means that no base seeds are decrypted, and for hardware wallets that no actual
 	// connection is established.
 	//
-	// The resulting wallet list will be sorted alphabetically based on its internal
+	// The resulting wallet list will be sorted alphabetically based on its internals
 	// URL assigned by the backend. Since wallets (especially hardware) may come and
 	// go, the same wallet might appear at a different positions in the list during
 	// subsequent retrievals.

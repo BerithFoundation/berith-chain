@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith/tracers"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core"
@@ -35,8 +36,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/berith/tracers"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"

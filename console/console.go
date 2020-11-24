@@ -28,8 +28,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/BerithFoundation/berith-chain/internal/jsre"
-	"github.com/BerithFoundation/berith-chain/internal/web3ext"
+	"berith-chain/internals/jsre"
+	"berith-chain/internals/web3ext"
 	"github.com/BerithFoundation/berith-chain/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
@@ -119,7 +119,7 @@ func (c *Console) init(preload []string) error {
 	consoleObj.Object().Set("log", c.consoleOutput)
 	consoleObj.Object().Set("error", c.consoleOutput)
 
-	// Load all the internal utility JavaScript libraries
+	// Load all the internals utility JavaScript libraries
 	if err := c.jsre.Compile("bignumber.js", jsre.BigNumber_JS); err != nil {
 		return fmt.Errorf("bignumber.js: %v", err)
 	}

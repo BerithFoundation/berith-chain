@@ -26,13 +26,13 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"
+	mapset "github.com/deckarep/golang-set"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/sync/syncmap"
@@ -889,7 +889,7 @@ func (whisper *Whisper) processQueue() {
 	}
 }
 
-// update loops until the lifetime of the whisper node, updating its internal
+// update loops until the lifetime of the whisper node, updating its internals
 // state by expiring stale messages from the pool.
 func (whisper *Whisper) update() {
 	// Start a ticker to check for expirations

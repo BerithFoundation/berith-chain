@@ -30,6 +30,7 @@ var (
 	node_testnet   = flag.String("testnet", "", "testnet")
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
+	nodeConfig     = flag.String("nodeconfig", "", "config file path")
 	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
 	w        *astilectron.Window
 	WalletDB *walletdb.WalletDB
@@ -72,7 +73,6 @@ func start_ui() {
 			VersionAstilectron: VersionAstilectron,
 			VersionElectron:    VersionElectron,
 			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
-
 		},
 		Debug: *debuging,
 		MenuOptions: []*astilectron.MenuItemOptions{{
@@ -91,8 +91,6 @@ func start_ui() {
 					case "client":
 						client = nodeChannel.v.(*rpc.Client)
 						stack = nodeChannel.stack.(*node.Node)
-						dir, _ := stack.FetchKeystoreDir()
-						WalletDB, _ = walletdb.NewWalletDB(dir + "/test.ldb")
 						ctx = context.TODO()
 						if err := bootstrap.SendMessage(w, "notify_hide", ""); err != nil {
 							astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))

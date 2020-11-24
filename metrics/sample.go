@@ -545,7 +545,7 @@ func newExpDecaySampleHeap(reservoirSize int) *expDecaySampleHeap {
 }
 
 // expDecaySampleHeap is a min-heap of expDecaySamples.
-// The internal implementation is copied from the standard library's container/heap
+// The internals implementation is copied from the standard library's container/heap
 type expDecaySampleHeap struct {
 	s []expDecaySample
 }

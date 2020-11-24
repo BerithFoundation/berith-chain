@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 )
+
 var (
 	WalletDB2 *walletdb.WalletDB
 )
@@ -39,7 +40,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		//ch2 <- true
 		startPolling()
 		break
-	case  "stopPolling" :
+	case "stopPolling":
 		//ch2 <- false
 		fmt.Print("logout!!!!")
 
@@ -48,7 +49,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		payload, err = callNodeApi(api, args...)
 		break
 	case "callDB":
-		payload , err = callDB(api , args...)
+		payload, err = callDB(api, args...)
 		break
 	case "exportKeystore":
 		args := info["args"].([]interface{})
@@ -120,8 +121,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-
-		break
 	case "selectMember":
 		var member walletdb.Member
 
@@ -130,7 +129,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
 	case "insertContact":
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte("c"+acc), &contact)
@@ -141,7 +139,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-		break
 	case "updateContact":
 		contact := make(walletdb.Contact, 0)
 		WalletDB.Select([]byte("c"+acc), &contact)
@@ -151,15 +148,14 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return contact, nil
-		break
 	case "restoreMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[1]), &mem)
 		if err == nil {
 			mem = walletdb.Member{
-				Address: common.HexToAddress(key[0]),
-				ID : key[1],
-				Password: key[2],
+				Address:    common.HexToAddress(key[0]),
+				ID:         key[1],
+				Password:   key[2],
 				PrivateKey: key[3],
 			}
 			return mem, nil
@@ -175,7 +171,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
 	case "updateMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)
@@ -188,7 +183,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return mem, nil
-		break
 	case "selectTxInfo":
 		txMaster := make(walletdb.TxHistoryMaster, 0)
 		err := WalletDB.Select([]byte("t"+acc), &txMaster)
@@ -205,7 +199,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			txDetails = append(txDetails, txDetail)
 		}
 		return txDetails, nil
-		break
 	case "insertTxInfo":
 		var tempTxInfo walletdb.TxHistory
 		err := WalletDB.Select([]byte(key[0]), &tempTxInfo)
@@ -220,23 +213,21 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		txinfo := walletdb.TxHistory{
-			TxBlockNumber : key[0],
-			TxAddress: common.HexToAddress(key[1]),
-			TxType: key[2],
-			TxAmount: key[3],
-			Txtime: time.Now().Format("2006-01-02 15:04:05"),
-			Hash: common.HexToHash(key[4]),
-			GasLimit: key[5],
-			GasPrice: key[6],
-			GasUsed: key[7],
+			TxBlockNumber: key[0],
+			TxAddress:     common.HexToAddress(key[1]),
+			TxType:        key[2],
+			TxAmount:      key[3],
+			Txtime:        time.Now().Format("2006-01-02 15:04:05"),
+			Hash:          common.HexToHash(key[4]),
+			GasLimit:      key[5],
+			GasPrice:      key[6],
+			GasUsed:       key[7],
 		}
 		err = WalletDB.Insert([]byte(key[0]), txinfo)
 		if err != nil {
 			return nil, err
 		}
 		return txinfo, nil
-
-		break
 	case "insertMember":
 		var mem walletdb.Member
 		err := WalletDB.Select([]byte(key[0]), &mem)
@@ -244,12 +235,12 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return "err", err
 		}
 		newAcc, err := callNodeApi("personal_newAccount", key[1])
-		newAcc = strings.Replace(newAcc, "\"", "" ,-1)
+		newAcc = strings.Replace(newAcc, "\"", "", -1)
 		privateKey, err := callNodeApi("personal_privateKey", newAcc, key[1])
-		privateKey = strings.Replace(privateKey, "\"", "" , -1)
+		privateKey = strings.Replace(privateKey, "\"", "", -1)
 		member := walletdb.Member{
-			Address: common.HexToAddress(newAcc),
-			ID:      key[0],
+			Address:    common.HexToAddress(newAcc),
+			ID:         key[0],
 			Password:   key[1],
 			PrivateKey: privateKey,
 		}
@@ -260,8 +251,6 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
-
 	case "checkLogin":
 		var member walletdb.Member
 
@@ -270,31 +259,50 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 			return nil, err
 		}
 		return member, nil
-		break
-	}
+	case "selectGCMode":
+		gcMode := make(walletdb.GCMode, 0)
 
+		err := WalletDB.Select([]byte(key[0]), &gcMode)
+		if err != nil {
+			return nil, err
+		}
+		return gcMode, nil
+	case "updateGCMode":
+		gcMode := make(walletdb.GCMode, 0)
+		gcMode[key[0]] = key[1]
+
+		err := WalletDB.Insert([]byte(key[0]), gcMode)
+		if err != nil {
+			return nil, err
+		}
+
+		err2 := WalletDB.Insert([]byte(common.KeyForGCModeChangYn), "true")
+		if err != nil {
+			return nil, err2
+		}
+		return gcMode, nil
+	}
 	return nil, nil
 }
 
 // 개인키 내보내기 함수
-
 func exportKeystore(args []interface{}) (interface{}, error) {
 	tempFileName := "keystore.zip"
 	dir, err := stack.FetchKeystoreDir()
 	if err != nil {
 		return nil, err
 	}
-	tmmp,_ := ioutil.TempDir(dir, "tmp")
+	tmmp, _ := ioutil.TempDir(dir, "tmp")
 
 	// export 하는 계정에 대한 keysotre 파일만 exportTemp 폴더로 이동하는 부분
-	keyAccount:= strings.Replace( args[0].(string), "Bx" , "",-1)
-	tempFile,_ := ioutil.ReadDir(dir)
+	keyAccount := strings.Replace(args[0].(string), "Bx", "", -1)
+	tempFile, _ := ioutil.ReadDir(dir)
 	for i, value := range tempFile {
 		value.Name()
-		if strings.Contains(value.Name(),keyAccount){
-			dir3 := tmmp +"/"+value.Name()
+		if strings.Contains(value.Name(), keyAccount) {
+			dir3 := tmmp + "/" + value.Name()
 			os.Create(dir3)
-			bytes, err := ioutil.ReadFile(dir+"/"+value.Name())
+			bytes, err := ioutil.ReadFile(dir + "/" + value.Name())
 			if err != nil {
 				panic(err)
 			}
@@ -304,18 +312,18 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 				panic(err)
 			}
 		}
-		fmt.Println("name[",i, "]  :", value.Name())
+		fmt.Println("name[", i, "]  :", value.Name())
 	}
 	// 끝
 	// export 하는 계정에 관련된 db 정보만 따로 추출하는 부분
-	WalletDB2 ,_ = walletdb.NewWalletDB(tmmp+"/test.ldb")
+	WalletDB2, _ = walletdb.NewWalletDB(tmmp + "/test.ldb")
 	var mem walletdb.Member
 	var txInfo walletdb.TxHistory
 	contact := make(walletdb.Contact, 0)
 	txMaster := make(walletdb.TxHistoryMaster, 0)
 	WalletDB.Select([]byte("c"+args[0].(string)), &contact)
 	WalletDB.Select([]byte("t"+args[0].(string)), &txMaster)
-	for key , _ := range txMaster{
+	for key, _ := range txMaster {
 		WalletDB.Select([]byte(key), &txInfo)
 		WalletDB2.Insert([]byte(key), txInfo)
 	}
@@ -334,7 +342,7 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 	err = WalletDB2.Insert([]byte("t"+args[0].(string)), txMaster)
 	if err != nil {
 		return nil, err
-	}// 끝
+	} // 끝
 	password := args[1].(string)
 	targetPath := dir + string(os.PathSeparator) + tempFileName
 	er := ZipSecure(tmmp, targetPath, password)
@@ -352,12 +360,12 @@ func exportKeystore(args []interface{}) (interface{}, error) {
 	}
 
 	zippedFile.Close()
-	fmt.Println("targetPath :: " ,targetPath )
-	fmt.Println("dir2 :: " ,dir+string(os.PathSeparator)+"exportTemp"  )
+	fmt.Println("targetPath :: ", targetPath)
+	fmt.Println("dir2 :: ", dir+string(os.PathSeparator)+"exportTemp")
 	os.Remove(targetPath)
 	WalletDB2.CloseDB()
-	result :=os.RemoveAll(tmmp)
-	fmt.Println("result :: " , result)
+	result := os.RemoveAll(tmmp)
+	fmt.Println("result :: ", result)
 	return body, nil
 }
 
@@ -381,4 +389,3 @@ func importKeystore(args []interface{}) error {
 	log.Info("Successfully imported keystore folder")
 	return err
 }
-

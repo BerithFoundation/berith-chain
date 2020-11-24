@@ -21,6 +21,9 @@ import (
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
+	"github.com/BerithFoundation/berith-chain/berith/downloader"
+	"github.com/BerithFoundation/berith-chain/berith/gasprice"
+	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/math"
 	"github.com/BerithFoundation/berith-chain/core"
@@ -29,9 +32,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/berith/downloader"
-	"github.com/BerithFoundation/berith-chain/berith/gasprice"
-	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
 	"github.com/BerithFoundation/berith-chain/light"
 	"github.com/BerithFoundation/berith-chain/params"
@@ -39,7 +39,7 @@ import (
 )
 
 type LesApiBackend struct {
-	e *LightBerith
+	e   *LightBerith
 	gpo *gasprice.Oracle
 }
 

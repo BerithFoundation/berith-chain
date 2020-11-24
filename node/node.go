@@ -29,7 +29,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/event"
-	"github.com/BerithFoundation/berith-chain/internal/debug"
+	"berith-chain/internals/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/p2p"
 	"github.com/BerithFoundation/berith-chain/rpc"
@@ -246,7 +246,7 @@ func (n *Node) openDataDir() error {
 	return nil
 }
 
-func (n *Node) GetRpcApis() []rpc.API{
+func (n *Node) GetRpcApis() []rpc.API {
 	return n.rpcAPIs
 }
 
@@ -623,8 +623,9 @@ func (n *Node) apis() []rpc.API {
 		},
 	}
 }
+
 // returns the final configuration being used
-func (n *Node) Config() *Config{
+func (n *Node) Config() *Config {
 	return n.config
 }
 

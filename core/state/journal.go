@@ -256,7 +256,6 @@ func (ch addPreimageChange) dirtied() *common.Address {
 	return nil
 }
 
-//[Berith]
 func (ch stakingChange) revert(s *StateDB) {
 	s.getStateObject(*ch.account).setStaking(ch.prevBalance, ch.prevBlock)
 }

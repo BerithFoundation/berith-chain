@@ -28,7 +28,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/gizak/termui"
+	"github.com/gizak/termui/2.3.0" // Since the library does not support go module, it must be downloaded and installed
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -55,7 +55,7 @@ var (
 		ArgsUsage: " ",
 		Category:  "MONITOR COMMANDS",
 		Description: `
-The Berith monitor is a tool to collect and visualize various internal metrics
+The Berith monitor is a tool to collect and visualize various internals metrics
 gathered by the node, supporting different chart types as well as the capacity
 to display multiple metrics simultaneously.
 `,

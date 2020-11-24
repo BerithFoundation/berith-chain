@@ -24,10 +24,10 @@ import (
 
 	"sync"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
-	"github.com/BerithFoundation/berith-chain/internal/berithapi"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

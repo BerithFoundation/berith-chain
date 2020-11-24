@@ -34,7 +34,7 @@ type PublicDownloaderAPI struct {
 	uninstallSyncSubscription chan *uninstallSyncSubscriptionRequest
 }
 
-// NewPublicDownloaderAPI create a new PublicDownloaderAPI. The API has an internal event loop that
+// NewPublicDownloaderAPI create a new PublicDownloaderAPI. The API has an internals event loop that
 // listens for events from the downloader through the global event mux. In case it receives one of
 // these events it broadcasts it to all syncing subscriptions that are installed through the
 // installSyncSubscription channel.
@@ -121,7 +121,7 @@ func (api *PublicDownloaderAPI) Syncing(ctx context.Context) (*rpc.Subscription,
 
 // SyncingResult provides information about the current synchronisation status for this node.
 type SyncingResult struct {
-	Syncing bool                  `json:"syncing"`
+	Syncing bool                `json:"syncing"`
 	Status  berith.SyncProgress `json:"status"`
 }
 
