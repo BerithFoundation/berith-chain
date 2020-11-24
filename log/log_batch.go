@@ -60,8 +60,6 @@ func (b *BerithLogBatch) Loop() {
 					continue
 				}
 
-				RedirectStderr(logfile)
-
 				b.file.Close()
 				b.file = logfile
 				b.time = now
