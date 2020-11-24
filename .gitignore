@@ -22,7 +22,6 @@ berith/history
 cmd/berith/debug
 node_modules
 .clef/
-bind*.go
 
 wallet/Berith/*
 wallet/vendor/
