@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	StakeMinimum      = "100000000000000000000000"   // 100 thousand ber
+	StakeMinimum      = "30000000000000000000000"   // 30 thousand ber
 	LimitStakeBalance = "50000000000000000000000000" // 50 million ber
 )
 
