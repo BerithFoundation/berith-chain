@@ -25,7 +25,7 @@ import (
 
 const (
 	StakeMinimum      = "30000000000000000000000"   // 30 thousand ber
-	LimitStakeBalance = "50000000000000000000000000" // 50 million ber
+	LimitStakeBalance = "100000000000000000000000000" // 100 million ber
 )
 
 // Genesis hashes to enforce below configs on.
