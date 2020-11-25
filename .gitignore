@@ -30,6 +30,7 @@ berith/keystore
 berith/history
 berith/berith
 cmd/berith/password.txt
+*bind_windows_amd64.go
 
 
 #*
