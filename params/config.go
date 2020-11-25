@@ -50,7 +50,7 @@ var (
 		BIP1Block:           big.NewInt(508000),
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
-		BIP4Block:           big.NewInt(6110000),
+		BIP4Block:           big.NewInt(6125000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,
