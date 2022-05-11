@@ -525,3 +525,5 @@ func toCallArg(msg berith_chain.CallMsg) interface{} {
 	}
 	return arg
 }
+
+// TODO: peristalsis contract
