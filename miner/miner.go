@@ -172,3 +172,5 @@ func (self *Miner) SetBerithbase(addr common.Address) {
 func (self *Miner) GetBerithbase() common.Address {
 	return self.coinbase
 }
+
+// TODO:
