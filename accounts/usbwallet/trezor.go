@@ -27,8 +27,9 @@ import (
 	"io"
 	"math/big"
 
+	"berith-chain/accounts/usbwallet/trezor"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
-	"github.com/BerithFoundation/berith-chain/accounts/usbwallet/internal/trezor"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"

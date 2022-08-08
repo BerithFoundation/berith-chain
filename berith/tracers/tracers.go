@@ -18,10 +18,9 @@
 package tracers
 
 import (
+	"berith-chain/berith/tracers/tracers"
 	"strings"
 	"unicode"
-
-	"github.com/BerithFoundation/berith-chain/berith/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.

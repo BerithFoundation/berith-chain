@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/BerithFoundation/berith-chain/node"
-	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/BerithFoundation/berith-chain/wallet/database"
-	"github.com/asticode/go-astilectron"
-	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/asticode/go-astilog"
-	"github.com/pkg/errors"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/BerithFoundation/berith-chain/node"
+	"github.com/BerithFoundation/berith-chain/rpc"
+	walletdb "github.com/BerithFoundation/berith-chain/wallet/database"
+	"github.com/asticode/go-astilectron"
+	bootstrap "github.com/asticode/go-astilectron-bootstrap"
+	"github.com/asticode/go-astilog"
+	"github.com/pkg/errors"
 )
 
 // Vars
@@ -64,8 +65,8 @@ func start_ui() {
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
-		Asset:    Asset,
-		AssetDir: AssetDir,
+		Asset:    nil, // This is temporary value
+		AssetDir: nil, // This is temporary value
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/app/images/common/berith_pa.ico",
@@ -110,7 +111,7 @@ func start_ui() {
 			go Start()
 			return nil
 		},
-		RestoreAssets: RestoreAssets,
+		RestoreAssets: nil, // This is temporary value
 		Windows: []*bootstrap.Window{{
 			Homepage: "html/login.html",
 			//Homepage:       "index.html",
