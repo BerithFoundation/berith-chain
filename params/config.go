@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	StakeMinimum      = "30000000000000000000000"   // 30 thousand ber
+	// StakeMinimum = "30000000000000000000000" // 30 thousand ber
+	StakeMinimum      = "1000000000000000000"         // 1 ber
 	LimitStakeBalance = "100000000000000000000000000" // 100 million ber
 )
 
@@ -47,10 +48,10 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: big.NewInt(0),
-		BIP1Block:           big.NewInt(508000),
-		BIP2Block:           big.NewInt(545000),
-		BIP3Block:           big.NewInt(1168000),
-		BIP4Block:           big.NewInt(6130000),
+		BIP1Block:           big.NewInt(0),
+		BIP2Block:           big.NewInt(0),
+		BIP3Block:           big.NewInt(0),
+		BIP4Block:           big.NewInt(4),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,

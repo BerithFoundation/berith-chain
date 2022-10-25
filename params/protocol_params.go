@@ -52,6 +52,11 @@ const (
 	NetSstoreResetRefund      uint64 = 4800  // Once per SSTORE operation for resetting to the original non-zero value
 	NetSstoreResetClearRefund uint64 = 19800 // Once per SSTORE operation for resetting to the original zero value
 
+	SstoreSentryGasEIP2200            uint64 = 2300  // Minimum gas required to be present for an SSTORE call, not consumed
+	SstoreSetGasEIP2200               uint64 = 20000 // Once per SSTORE operation from clean zero to non-zero
+	SstoreResetGasEIP2200             uint64 = 5000  // Once per SSTORE operation from clean non-zero to something else
+	SstoreClearsScheduleRefundEIP2200 uint64 = 15000 // Once per SSTORE operation for clearing an originally existing storage slot
+
 	JumpdestGas      uint64 = 1     // Refunded gas, once per SSTORE operation if the zeroness changes to zero.
 	EpochDuration    uint64 = 30000 // Duration between proof-of-work epochs.
 	CallGas          uint64 = 40    // Once per CALL operation & message call transaction.
@@ -85,6 +90,26 @@ const (
 	Bn256ScalarMulGas       uint64 = 40000  // Gas needed for an elliptic curve scalar multiplication
 	Bn256PairingBaseGas     uint64 = 100000 // Base price for an elliptic curve pairing check
 	Bn256PairingPerPointGas uint64 = 80000  // Per-point price for an elliptic curve pairing check
+
+	SloadGasEIP1884       uint64 = 800 // Cost of SLOAD after EIP 1884 (part of Istanbul)
+	SloadGasEIP2200       uint64 = 800 // Cost of SLOAD after EIP 2200 (part of Istanbul)
+	BalanceGasEIP1884     uint64 = 700 // The cost of a BALANCE operation after EIP 1884 (part of Istanbul)
+	ExtcodeHashGasEIP1884 uint64 = 700 // Cost of EXTCODEHASH after EIP 1884 (part in Istanbul)
+
+	CallGasEIP150                uint64 = 700 // Static portion of gas for CALL-derivates after EIP 150 (Tangerine)
+	CallGasFrontier              uint64 = 40  // Once per CALL operation & message call transaction.
+	BalanceGasFrontier           uint64 = 20  // The cost of a BALANCE operation
+	ExtcodeSizeGasFrontier       uint64 = 20  // Cost of EXTCODESIZE before EIP 150 (Tangerine)
+	ExtcodeHashGasConstantinople uint64 = 400 // Cost of EXTCODEHASH (introduced in Constantinople)
+	SloadGasFrontier             uint64 = 50
+	ExtcodeCopyBaseFrontier      uint64 = 20
+
+	SelfdestructGasEIP150   uint64 = 5000  // Cost of SELFDESTRUCT post EIP 150 (Tangerine)
+	SelfdestructRefundGas   uint64 = 24000 // Refunded following a selfdestruct operation.
+	CreateBySelfdestructGas uint64 = 25000
+
+	ExpByteFrontier uint64 = 10 // was set to 10 in Frontier
+
 )
 
 var (

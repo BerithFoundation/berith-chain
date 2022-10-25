@@ -40,6 +40,9 @@ func ReadTxLookupEntry(db DatabaseReader, hash common.Hash) (common.Hash, uint64
 
 // WriteTxLookupEntries stores a positional metadata for every transaction from
 // a block, enabling hash based transaction and receipt lookups.
+//
+// WriteTxLookupEntries는 블록의 모든 트랜잭션에 대한 위치 메타데이터를 저장하여
+// 해시 기반 트랜잭션 및 영수증 검색을 활성화한다.
 func WriteTxLookupEntries(db DatabaseWriter, block *types.Block) {
 	for i, tx := range block.Transactions() {
 		entry := TxLookupEntry{

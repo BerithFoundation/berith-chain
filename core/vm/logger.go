@@ -18,6 +18,7 @@ package vm
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -140,7 +141,7 @@ func (l *StructLogger) CaptureStart(from common.Address, to common.Address, crea
 func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost uint64, memory *Memory, stack *Stack, contract *Contract, depth int, err error) error {
 	// check if already accumulated the specified number of logs
 	if l.cfg.Limit != 0 && l.cfg.Limit <= len(l.logs) {
-		return ErrTraceLimitReached
+		return errors.New("ErrTraceLimitReached")
 	}
 
 	// initialise new changed values storage container for this contract
@@ -153,8 +154,8 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	// it in the local storage container.
 	if op == SSTORE && stack.len() >= 2 {
 		var (
-			value   = common.BigToHash(stack.data[stack.len()-2])
-			address = common.BigToHash(stack.data[stack.len()-1])
+			value   = common.Hash(stack.data[stack.len()-2].Bytes32())
+			address = common.Hash(stack.data[stack.len()-1].Bytes32())
 		)
 		l.changedValues[contract.Address()][address] = value
 	}
@@ -169,7 +170,7 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	if !l.cfg.DisableStack {
 		stck = make([]*big.Int, len(stack.Data()))
 		for i, item := range stack.Data() {
-			stck[i] = new(big.Int).Set(item)
+			stck[i] = new(big.Int).Set(item.ToBig())
 		}
 	}
 	// Copy a snapshot of the current storage to a new container

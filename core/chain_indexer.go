@@ -49,6 +49,7 @@ type ChainIndexerBackend interface {
 }
 
 // ChainIndexerChain interface is used for connecting the indexer to a blockchain
+// ChainIndexerChain interface는 인덱서를 블록체인에 연결하기 위해 사용된다.
 type ChainIndexerChain interface {
 	// CurrentHeader retrieves the latest locally known header.
 	CurrentHeader() *types.Header
@@ -62,29 +63,43 @@ type ChainIndexerChain interface {
 // connected to the blockchain through the event system by starting a
 // ChainHeadEventLoop in a goroutine.
 //
+// ChainIndexer는 표준 체인의 동일한 크기의 섹션 (BloomBits, CHT 등)에 대한 후 처리 작업을 수행한다.
+//
 // Further child ChainIndexers can be added which use the output of the parent
 // section indexer. These child indexers receive new head notifications only
 // after an entire section has been finished or in case of rollbacks that might
 // affect already finished sections.
+//
+// 상위 섹션 인덱서의 아웃풋을 사용하는 하위 체인 인덱서를 추가할 수 있다.
+// 이러한 하위 인덱서는 전체 섹션을 완료한 후 또는 이미 완료된 섹션에
+// 영향을 줄 수 있는 롤백의 경우에만 새 헤드 알림을 받는다.
 type ChainIndexer struct {
 	chainDb  berithdb.Database   // Chain database to index the data from
 	indexDb  berithdb.Database   // Prefixed table-view of the db to write index metadata into
 	backend  ChainIndexerBackend // Background processor generating the index data content
 	children []*ChainIndexer     // Child indexers to cascade chain updates to
 
-	active    uint32          // Flag whether the event loop was started
-	update    chan struct{}   // Notification channel that headers should be processed
+	// 루프가 시작되었는지에 대한 플래그
+	active uint32 // Flag whether the event loop was started
+
+	// 헤더가 작업되어야 하는지 알리는 채널
+	update chan struct{} // Notification channel that headers should be processed
+
 	quit      chan chan error // Quit channel to tear down running goroutines
 	ctx       context.Context
 	ctxCancel func()
 
+	// 처리해야 할 단일 체인 세그먼트의 블록 수 4096으로 초기화
 	sectionSize uint64 // Number of blocks in a single chain segment to process
+
+	// 완료된 세그먼트를 처리하기 전의 확인 수
 	confirmsReq uint64 // Number of confirmations before processing a completed segment
 
 	storedSections uint64 // Number of sections successfully indexed into the database
 	knownSections  uint64 // Number of sections known to be complete (block wise)
 	cascadedHead   uint64 // Block number of the last completed section cascaded to subindexers
 
+	// 체크포인트가 적용되는 세션 수
 	checkpointSections uint64      // Number of sections covered by the checkpoint
 	checkpointHead     common.Hash // Section head belonging to the checkpoint
 
@@ -141,6 +156,8 @@ func (c *ChainIndexer) AddCheckpoint(section uint64, shead common.Hash) {
 // Start creates a goroutine to feed chain head events into the indexer for
 // cascading background processing. Children do not need to be started, they
 // are notified about new events by their parents.
+// ChainIndexer.Start()는 백그라운드 처리에 종속되어있는 (Bloom)인덱서에게
+// 체인헤드 이벤트를 공급하기 위한 고루틴을 생성한다.
 func (c *ChainIndexer) Start(chain ChainIndexerChain) {
 	events := make(chan ChainHeadEvent, 10)
 	sub := chain.SubscribeChainHeadEvent(events)
@@ -190,6 +207,9 @@ func (c *ChainIndexer) Close() error {
 // eventLoop is a secondary - optional - event loop of the indexer which is only
 // started for the outermost indexer to push chain head events into a processing
 // queue.
+//
+// eventLoop는 가장 바깥쪽 인덱서가 체인 헤드 이벤트를 프로세싱 큐로
+// 밀어넣기 위해 시작되는 인덱서의 옵셔널한 이벤트 루프이다.
 func (c *ChainIndexer) eventLoop(currentHeader *types.Header, events chan ChainHeadEvent, sub event.Subscription) {
 	// Mark the chain indexer as active, requiring an additional teardown
 	atomic.StoreUint32(&c.active, 1)
@@ -197,6 +217,7 @@ func (c *ChainIndexer) eventLoop(currentHeader *types.Header, events chan ChainH
 	defer sub.Unsubscribe()
 
 	// Fire the initial new head event to start any outstanding processing
+	// 초기 새 헤드 이벤트를 발생시켜 미처리 작업을 시작한다.
 	c.newHead(currentHeader.Number.Uint64(), false)
 
 	var (
@@ -221,7 +242,7 @@ func (c *ChainIndexer) eventLoop(currentHeader *types.Header, events chan ChainH
 			if header.ParentHash != prevHash {
 				// Reorg to the common ancestor if needed (might not exist in light sync mode, skip reorg then)
 				// TODO(karalabe, zsfelfoldi): This seems a bit brittle, can we detect this case explicitly?
-
+				// 새로 수신된 ChainHeader 이벤트의 블록과 기존 블록이 공통으로 가지는 상위 블록을 찾는다.
 				if rawdb.ReadCanonicalHash(c.chainDb, prevHeader.Number.Uint64()) != prevHash {
 					if h := rawdb.FindCommonAncestor(c.chainDb, prevHeader, header); h != nil {
 						c.newHead(h.Number.Uint64(), true)
@@ -241,9 +262,10 @@ func (c *ChainIndexer) newHead(head uint64, reorg bool) {
 	defer c.lock.Unlock()
 
 	// If a reorg happened, invalidate all sections until that point
+	// 재편성되면, 해당 시점까지 모든 섹션을 무효화한다.
 	if reorg {
 		// Revert the known section number to the reorg point
-		known := head / c.sectionSize
+		known := head / c.sectionSize // 현재 블록이 몇 번 째 섹션인가?
 		stored := known
 		if known < c.checkpointSections {
 			known = 0
@@ -270,6 +292,7 @@ func (c *ChainIndexer) newHead(head uint64, reorg bool) {
 		return
 	}
 	// No reorg, calculate the number of newly known sections and update if high enough
+	// 재편성하지 않는다면, 새로 알려진 섹션들의 수만 계산하고 체인이 충분히 높다면 업데이트한다.
 	var sections uint64
 	if head >= c.confirmsReq {
 		sections = (head + 1 - c.confirmsReq) / c.sectionSize
@@ -289,6 +312,7 @@ func (c *ChainIndexer) newHead(head uint64, reorg bool) {
 
 			select {
 			case c.update <- struct{}{}:
+				fmt.Println("ChainIndexer.newHead() / c.update 데이터 전달")
 			default:
 			}
 		}
@@ -379,6 +403,9 @@ func (c *ChainIndexer) updateLoop() {
 // ensuring the continuity of the passed headers. Since the chain mutex is not
 // held while processing, the continuity can be broken by a long reorg, in which
 // case the function returns with an error.
+//
+// processSection은 전달된 헤더들의 연속성을 보장하면서 백엔드 함수들을 호출하여 전체 섹션을 처리한다.
+// 처리하는 동안 체인 뮤텍스가 유지되지 않기 때문에 재편성이 길어지면 연속성이 깨질수 있다.
 func (c *ChainIndexer) processSection(section uint64, lastHead common.Hash) (common.Hash, error) {
 	c.log.Trace("Processing new chain section", "section", section)
 

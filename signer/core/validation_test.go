@@ -1,31 +1,55 @@
 // Copyright 2018 The go-ethereum Authors
-// This file is part of go-ethereum.
+// This file is part of the go-ethereum library.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// The go-ethereum library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 
 	"github.com/BerithFoundation/berith-chain/common"
+
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 )
 
-func hexAddr(a string) common.Address { return common.BytesToAddress(common.FromHex(a)) }
+func TestPasswordValidation(t *testing.T) {
+	testcases := []struct {
+		pw         string
+		shouldFail bool
+	}{
+		{"test", true},
+		{"testtest\xbd\xb2\x3d\xbc\x20\xe2\x8c\x98", true},
+		{"placeOfInterest⌘", true},
+		{"password\nwith\nlinebreak", true},
+		{"password\twith\vtabs", true},
+		// Ok passwords
+		{"password WhichIsOk", false},
+		{"passwordOk!@#$%^&*()", false},
+		{"12301203123012301230123012", false},
+	}
+	for _, test := range testcases {
+		err := ValidatePasswordFormat(test.pw)
+		if err == nil && test.shouldFail {
+			t.Errorf("password '%v' should fail validation", test.pw)
+		} else if err != nil && !test.shouldFail {
+
+			t.Errorf("password '%v' shound not fail validation, but did: %v", test.pw, err)
+		}
+	}
+}
 func mixAddr(a string) (*common.MixedcaseAddress, error) {
 	return common.NewMixedcaseAddressFromString(a)
 }
@@ -74,11 +98,10 @@ type txtestcase struct {
 	numMessages                     int
 }
 
-func TestValidator(t *testing.T) {
+func TestTransactionValidation(t *testing.T) {
 	var (
 		// use empty db, there are other tests for the abi-specific stuff
-		db, _ = NewEmptyAbiDB()
-		v     = NewValidator(db)
+		db = newEmpty()
 	)
 	testcases := []txtestcase{
 		// Invalid to checksum
@@ -110,11 +133,11 @@ func TestValidator(t *testing.T) {
 			n: "0x01", g: "0x20", gp: "0x40", value: "0x01", d: "0x01", numMessages: 1},
 	}
 	for i, test := range testcases {
-		msgs, err := v.ValidateTransaction(dummyTxArgs(test), nil)
+		msgs, err := db.ValidateTransaction(nil, dummyTxArgs(test))
 		if err == nil && test.expectErr {
 			t.Errorf("Test %d, expected error", i)
 			for _, msg := range msgs.Messages {
-				fmt.Printf("* %s: %s\n", msg.Typ, msg.Message)
+				t.Logf("* %s: %s", msg.Typ, msg.Message)
 			}
 		}
 		if err != nil && !test.expectErr {
@@ -124,42 +147,16 @@ func TestValidator(t *testing.T) {
 			got := len(msgs.Messages)
 			if got != test.numMessages {
 				for _, msg := range msgs.Messages {
-					fmt.Printf("* %s: %s\n", msg.Typ, msg.Message)
+					t.Logf("* %s: %s", msg.Typ, msg.Message)
 				}
 				t.Errorf("Test %d, expected %d messages, got %d", i, test.numMessages, got)
 			} else {
 				//Debug printout, remove later
 				for _, msg := range msgs.Messages {
-					fmt.Printf("* [%d] %s: %s\n", i, msg.Typ, msg.Message)
+					t.Logf("* [%d] %s: %s", i, msg.Typ, msg.Message)
 				}
-				fmt.Println()
+				t.Log()
 			}
-		}
-	}
-}
-
-func TestPasswordValidation(t *testing.T) {
-	testcases := []struct {
-		pw         string
-		shouldFail bool
-	}{
-		{"test", true},
-		{"testtest\xbd\xb2\x3d\xbc\x20\xe2\x8c\x98", true},
-		{"placeOfInterest⌘", true},
-		{"password\nwith\nlinebreak", true},
-		{"password\twith\vtabs", true},
-		// Ok passwords
-		{"password WhichIsOk", false},
-		{"passwordOk!@#$%^&*()", false},
-		{"12301203123012301230123012", false},
-	}
-	for _, test := range testcases {
-		err := ValidatePasswordFormat(test.pw)
-		if err == nil && test.shouldFail {
-			t.Errorf("password '%v' should fail validation", test.pw)
-		} else if err != nil && !test.shouldFail {
-
-			t.Errorf("password '%v' shound not fail validation, but did: %v", test.pw, err)
 		}
 	}
 }

@@ -17,11 +17,14 @@
 package vm
 
 import (
+	"errors"
 	"math/big"
 	"sync/atomic"
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/core/types"
+	"github.com/BerithFoundation/berith-chain/log"
+	"github.com/holiman/uint256"
 
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/crypto"
@@ -65,9 +68,11 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 				evm.interpreter = interpreter
 			}
 			return interpreter.Run(contract, input, readOnly)
+		} else {
+			log.Error("Cannot run contract code", "Contract", contract.CodeAddr.Hex())
 		}
 	}
-	return nil, ErrNoCompatibleInterpreter
+	return nil, errors.New("no compatible interpreter")
 }
 
 // Context provides the EVM with auxiliary information. Once provided
@@ -100,6 +105,10 @@ type Context struct {
 // revert-state-and-consume-all-gas operation, no checks on
 // specific errors should ever be performed. The interpreter makes
 // sure that any errors generated are to be considered faulty code.
+//
+// EVM은 이더리움 가상머신 기본 객체이며, 제공된 컨텍스트와 함께 주어진 상태 계약을 실행하기 위한 필수적인 도구들을 제공한다.
+// 어떠한 호출을 통해 발생하는 오류는 복귀 상태 및 모든 가스 소비 동작으로 간주되어야 하며,
+// 특정 오류에 대한 점검은 수행되어서는 안 된다는 점에 유의해야 한다. 인터프리터는 생성된 모든 오류가 잘못된 코드로 간주되는지 확인합니다.
 //
 // The EVM should never be reused and is not thread safe.
 type EVM struct {
@@ -181,7 +190,12 @@ func (evm *EVM) Interpreter() Interpreter {
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
+//
+// Call은 주어진 입력을 매개 변수로 하여 addr과 연관된 계약을 실행한다.
+// 또한 필요한 값 전송을 처리하고 계정을 만드는 데 필요한 단계를 수행하며
+// 실행 오류 또는 값 전송 실패 시 상태를 반전시킨다.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, base types.JobWallet, target types.JobWallet) (ret []byte, leftOverGas uint64, err error) {
+
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -216,6 +230,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	}
 	//evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value, evm.BlockNumber, base, target)
+
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
 	contract := NewContract(caller, to, value, gas)
@@ -233,11 +248,11 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}()
 	}
 	ret, err = run(evm, contract, input, false)
-
 	// When an error was returned by the EVM or when setting the creation code
 	// above we revert to the snapshot and consume any gas remaining. Additionally
 	// when we're in homestead this also counts for code storage gas errors.
 	if err != nil {
+		log.Error("Evm.Call", "Err", err)
 		evm.StateDB.RevertToSnapshot(snapshot)
 		if err != errExecutionReverted {
 			contract.UseGas(contract.Gas)
@@ -382,6 +397,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		return nil, common.Address{}, gas, ErrDepth
 	}
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value, types.Main) {
+		log.Error("Evm.create / Cannot transfer")
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
 	nonce := evm.StateDB.GetNonce(caller.Address())
@@ -390,6 +406,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	// Ensure there's no existing contract already at the designated address
 	contractHash := evm.StateDB.GetCodeHash(address)
 	if evm.StateDB.GetNonce(address) != 0 || (contractHash != (common.Hash{}) && contractHash != emptyCodeHash) {
+		log.Error("Evm.create / already exit contract.", "Nonce", evm.StateDB.GetNonce(address), "contract Hash", contractHash)
 		return nil, common.Address{}, 0, ErrContractAddressCollision
 	}
 	// Create a new account on the state
@@ -463,9 +480,9 @@ func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.I
 //
 // The different between Create2 with Create is Create2 uses sha3(0xff ++ msg.sender ++ salt ++ sha3(init_code))[12:]
 // instead of the usual sender-and-nonce-hash as the address where the contract is initialized at.
-func (evm *EVM) Create2(caller ContractRef, code []byte, gas uint64, endowment *big.Int, salt *big.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error) {
+func (evm *EVM) Create2(caller ContractRef, code []byte, gas uint64, endowment *big.Int, salt *uint256.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error) {
 	codeAndHash := &codeAndHash{code: code}
-	contractAddr = crypto.CreateAddress2(caller.Address(), common.BigToHash(salt), codeAndHash.Hash().Bytes())
+	contractAddr = crypto.CreateAddress2(caller.Address(), salt.Bytes32(), codeAndHash.Hash().Bytes())
 	return evm.create(caller, codeAndHash, gas, endowment, contractAddr)
 }
 
