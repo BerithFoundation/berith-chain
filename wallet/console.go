@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-
 package main
 
 import (
 	"fmt"
-	"github.com/BerithFoundation/berith-chain/berith"
 	"math"
 	"os"
 	godebug "runtime/debug"
@@ -28,12 +26,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/BerithFoundation/berith-chain/berith"
+
+	"berith-chain/internal/debug"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/berithclient"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/console"
-	"github.com/BerithFoundation/berith-chain/internal/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -231,8 +232,6 @@ func Init() {
 	}
 }
 
-
-
 func Start() {
 
 	if err := app.Run(os.Args); err != nil {
@@ -240,7 +239,6 @@ func Start() {
 		os.Exit(1)
 	}
 }
-
 
 // berith is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
@@ -287,8 +285,8 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		}
 		stateReader := berithclient.NewClient(rpcClient)
 		ch <- NodeMsg{
-			t: "client",
-			v: rpcClient,
+			t:     "client",
+			v:     rpcClient,
 			stack: stack,
 		}
 
@@ -346,6 +344,5 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}
-
 
 }

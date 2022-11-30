@@ -26,7 +26,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/BerithFoundation/berith-chain/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )
