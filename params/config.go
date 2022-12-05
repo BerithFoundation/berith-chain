@@ -35,7 +35,7 @@ var (
 	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
 )
 
-//[BERITH] Config Setting
+// [BERITH] Config Setting
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{

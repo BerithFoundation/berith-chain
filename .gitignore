@@ -10,7 +10,8 @@
 *un~
 .DS_Store
 */**/.DS_Store
-cmd/berith/Berith/*
+cmd/berith/bdata
+cmd/berith/genesis.json
 berith/berith/*
 cmd/berith/berith.exe
 cmd/berith/password.txt
