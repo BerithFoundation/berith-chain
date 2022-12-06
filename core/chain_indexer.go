@@ -312,7 +312,6 @@ func (c *ChainIndexer) newHead(head uint64, reorg bool) {
 
 			select {
 			case c.update <- struct{}{}:
-				fmt.Println("ChainIndexer.newHead() / c.update 데이터 전달")
 			default:
 			}
 		}

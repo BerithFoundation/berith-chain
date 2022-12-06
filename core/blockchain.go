@@ -951,7 +951,6 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	currentBlock := bc.CurrentBlock() // block.Number() - 1
 	localTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
 	externTd := new(big.Int).Add(block.Difficulty(), ptd)
-	fmt.Println("Local current total difficulty : ", localTd, "External : ", externTd)
 
 	// Irrelevant of the canonical status, write the block itself to the database
 	// 표준 상태와 무관하게 DB에 블록 자체를 기록한다.
@@ -996,7 +995,6 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	// Please refer to http://www.cs.cornell.edu/~ie53/publications/btcProcFC.pdf
 	// 외부 체인의 Td가 더 높으면 재편성
 	reorg := externTd.Cmp(localTd) > 0
-	fmt.Println("externTd > localTd ? ", reorg)
 	currentBlock = bc.CurrentBlock()
 	if !reorg && externTd.Cmp(localTd) == 0 {
 		// Split same-difficulty blocks by number, then preferentially select
@@ -1004,7 +1002,6 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 		if block.NumberU64() < currentBlock.NumberU64() {
 			//총 난이도는 같은데 새로 추가할 블럭의 체인이 더 짧으면 재편성
 			reorg = true
-			fmt.Printf("block.Number %d < currentBlock.Number %d\nreorg = true\n", block.NumberU64(), currentBlock.NumberU64())
 		} else if block.NumberU64() == currentBlock.NumberU64() {
 			var currentPreserve, blockPreserve bool
 			fmt.Printf("block.Number %d == currentBlock.Number %d\n", block.NumberU64(), currentBlock.NumberU64())
@@ -1014,11 +1011,9 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 				fmt.Printf(`currentPreserve : %v, blockPreserve : %v\n`, currentPreserve, blockPreserve)
 			}
 			reorg = !currentPreserve && (blockPreserve || mrand.Float64() < 0.5)
-			fmt.Printf("reorg = %v\n", reorg)
 		}
 	}
 	if reorg {
-		fmt.Println("WriteBlockWithState / Reorg : ", reorg)
 		// Reorganise the chain if the parent is not the head block
 		if block.ParentHash() != currentBlock.Hash() { // 다른체인
 			if err := bc.reorg(currentBlock, block); err != nil {
@@ -1031,7 +1026,6 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 
 		status = CanonStatTy
 	} else {
-		fmt.Println("WriteBlockWithState / Reorg : ", reorg)
 		status = SideStatTy
 	}
 	if err := batch.Write(); err != nil {
