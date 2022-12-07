@@ -29,6 +29,8 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/consensus/bsrr"
 
+	"berith-chain/internals/berithapi"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/berith/brtapi"
 	"github.com/BerithFoundation/berith-chain/berith/downloader"
@@ -44,7 +46,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/event"
-	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -296,6 +297,11 @@ func (s *Berith) APIs() []rpc.API {
 			Namespace: "net",
 			Version:   "1.0",
 			Service:   s.netRPCService,
+			Public:    true,
+		}, {
+			Namespace: "eth",
+			Version:   "1.0",
+			Service:   NewPublicEthAPI(s),
 			Public:    true,
 		},
 	}...)

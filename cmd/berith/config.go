@@ -98,8 +98,10 @@ func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
 	cfg.Version = params.VersionWithCommit(gitCommit)
-	cfg.HTTPModules = append(cfg.HTTPModules, "berith")
-	cfg.WSModules = append(cfg.WSModules, "berith")
+	// [Berith]
+	// Added for using "eth_" prefix for metamask connection
+	cfg.HTTPModules = append(cfg.HTTPModules, []string{"berith", "eth"}...)
+	cfg.WSModules = append(cfg.WSModules, []string{"berith", "eth"}...)
 	cfg.IPCPath = "ber.ipc"
 	return cfg
 }
@@ -110,7 +112,6 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 		Ber:  berith.DefaultConfig,
 		Node: defaultNodeConfig(),
 	}
-
 	// Load config file.
 	if file := ctx.GlobalString(configFileFlag.Name); file != "" {
 		if err := loadConfig(file, &cfg); err != nil {
