@@ -52,6 +52,7 @@ var (
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
 		BIP4Block:           big.NewInt(6130000),
+		BIP5Block:           big.NewInt(18000000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,
@@ -141,6 +142,7 @@ type ChainConfig struct {
 	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
 	BIP3Block *big.Int    `json:"bip3Block,omitempty"`
 	BIP4Block *big.Int    `json:"bip4Block,omitempty"`
+	BIP5Block *big.Int    `json:"bip5Block,omitempty"`
 }
 
 type BSRRConfig struct {
@@ -166,7 +168,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v BIP5: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -180,6 +182,7 @@ func (c *ChainConfig) String() string {
 		c.BIP2Block,
 		c.BIP3Block,
 		c.BIP4Block,
+		c.BIP5Block,
 		engine,
 	)
 }
@@ -233,6 +236,10 @@ func (c *ChainConfig) IsBIP3(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP4(num *big.Int) bool {
 	return isForked(c.BIP4Block, num)
+}
+
+func (c *ChainConfig) IsBIP5(num *big.Int) bool {
+	return isForked(c.BIP5Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -326,6 +333,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.BIP4Block, newcfg.BIP4Block, head) {
 		return newCompatError("bip4 fork block", c.BIP4Block, newcfg.BIP4Block)
+	}
+	if isForkIncompatible(c.BIP5Block, newcfg.BIP5Block, head) {
+		return newCompatError("bip5 fork block", c.BIP5Block, newcfg.BIP5Block)
 	}
 	return nil
 }

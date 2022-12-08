@@ -812,7 +812,7 @@ func SetReceiptsData(config *params.ChainConfig, block *types.Block, receipts ty
 		}
 		// The used gas can be calculated based on previous receipts
 		if j == 0 {
-			receipts[j].GasUsed = receipts[j].CumulativeGasUsed
+			receipts[j].GasUsed = receipts[j].GasUsed
 		} else {
 			receipts[j].GasUsed = receipts[j].CumulativeGasUsed - receipts[j-1].CumulativeGasUsed
 		}
@@ -1213,6 +1213,8 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		}
 		// Validate the state using the default validator
 		if err := bc.Validator().ValidateState(block, parent, state, receipts, usedGas); err != nil {
+			// [Berith]
+			// 에러 발생 지점 - invalid gas used
 			bc.reportBlock(block, receipts, err)
 			return it.index, events, coalescedLogs, err
 		}

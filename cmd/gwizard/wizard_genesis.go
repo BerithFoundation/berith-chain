@@ -125,6 +125,10 @@ func (w *wizard) makeGenesis() {
 	fmt.Println("Specify hard fork block number for BIP4 (default = 0)")
 	genesis.Config.BIP4Block = w.readDefaultBigInt(big.NewInt(0))
 
+	fmt.Println()
+	fmt.Println("Specify hard fork block number for BIP5 (default = 0)")
+	genesis.Config.BIP5Block = w.readDefaultBigInt(big.NewInt(0))
+
 	// All done.
 	log.Info("Configured new genesis block")
 	w.conf.Genesis = genesis

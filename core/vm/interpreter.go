@@ -114,12 +114,14 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 	}
 	// [Berith]
 	// To use recently added opcode
-	cfg.ExtraEips = append(cfg.ExtraEips, []int{2929, 2200, 1884, 1344}...)
-	for i, eip := range cfg.ExtraEips {
-		if err := EnableEIP(eip, &cfg.JumpTable); err != nil {
-			// Disable it, so caller can check if it's activated or not
-			cfg.ExtraEips = append(cfg.ExtraEips[:i], cfg.ExtraEips[i+1:]...)
-			log.Error("EIP activation failed", "eip", eip, "error", err)
+	if evm.ChainConfig().IsBIP5(evm.BlockNumber) {
+		cfg.ExtraEips = append(cfg.ExtraEips, []int{2929, 2200, 1884, 1344}...)
+		for i, eip := range cfg.ExtraEips {
+			if err := EnableEIP(eip, &cfg.JumpTable); err != nil {
+				// Disable it, so caller can check if it's activated or not
+				cfg.ExtraEips = append(cfg.ExtraEips[:i], cfg.ExtraEips[i+1:]...)
+				log.Error("EIP activation failed", "eip", eip, "error", err)
+			}
 		}
 	}
 
@@ -128,22 +130,6 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 		cfg:      cfg,
 		gasTable: evm.ChainConfig().GasTable(evm.BlockNumber),
 	}
-}
-
-func (in *EVMInterpreter) enforceRestrictions(op OpCode, operation operation, stack *Stack) error {
-	if in.evm.chainRules.IsByzantium {
-		if in.readOnly {
-			// If the interpreter is operating in readonly mode, make sure no
-			// state-modifying operation is performed. The 3rd stack item
-			// for a call operation is the value. Transferring value from one
-			// account to the others means the state is modified and should also
-			// return with an error.
-			if operation.writes || (op == CALL && stack.Back(2).BitLen() > 0) {
-				return errWriteProtection
-			}
-		}
-	}
-	return nil
 }
 
 // Run loops and evaluates the contract's code with the given input data and returns
@@ -187,6 +173,7 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		pcCopy  uint64 // needed for the deferred Tracer
 		gasCopy uint64 // for Tracer to log gas remaining before execution
 		logged  bool   // deferred Tracer should ignore already logged steps
+		res     []byte // result of the opcode execution function
 	)
 	// Don't move this deferrred function, it's placed before the capturestate-deferred method,
 	// so that it get's executed _after_: the capturestate needs the stacks before
@@ -220,84 +207,78 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		// Get the operation from the jump table and validate the stack to ensure there are
 		// enough stack items available to perform the operation.
 		op = contract.GetOp(pc)
-
 		operation := in.cfg.JumpTable[op]
-		if &operation == nil {
-			log.Error("EVMInterpreter.Run / Invalid op error ", "error", err, "CodeByte", contract.Code)
-			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
+		cost = operation.constantGas
+		// Validate stack
+		before := contract.Gas
+		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
+		if sLen := stack.len(); sLen < operation.minStack {
+			fmt.Println("Previous op", contract.GetOp(pc-1), "Next op", contract.GetOp(pc+1))
+			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
+		} else if sLen > operation.maxStack {
+			return nil, &ErrStackOverflow{stackLen: sLen, limit: operation.maxStack}
 		}
 
-		if stack.len() > operation.maxStack {
-			log.Error("EVMInterpreter.Run / Stack Overflow", "error", err, "Stack.len()", stack.len(), "Operation", operation)
-			return nil, err
-		} else if stack.len() < operation.minStack {
-			log.Error("EVMInterpreter.Run / Stack Underflow", "error", err)
-			return nil, err
-		}
-		// If the operation is valid, enforce and write restrictions
-		if err := in.enforceRestrictions(op, operation, stack); err != nil {
-			log.Error("EVMInterpreter.Run / Enforce Restriction error", "error", err)
-			return nil, err
+		if !contract.UseGas(cost) {
+			return nil, ErrOutOfGas
 		}
 
-		var memorySize uint64
-		// calculate the new memory size and expand the memory to fit
-		// the operation
-		if operation.memorySize != nil {
-			memSize, overflow := operation.memorySize(stack)
-			if overflow {
-				log.Error("Overflow !")
-				return nil, errGasUintOverflow
+		if operation.dynamicGas != nil {
+			// All ops with a dynamic memory usage also has a dynamic gas cost.
+			var memorySize uint64
+			// calculate the new memory size and expand the memory to fit
+			// the operation
+			// Memory check needs to be done prior to evaluating the dynamic gas portion,
+			// to detect calculation overflows
+			if operation.memorySize != nil {
+				memSize, overflow := operation.memorySize(stack)
+				if overflow {
+					log.Error("Overflow !")
+					return nil, errGasUintOverflow
+				}
+				// memory is expanded in words of 32 bytes. Gas
+				// is also calculated in words.
+				if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
+					log.Error("Gas Overflow !")
+					return nil, errGasUintOverflow
+				}
 			}
-			// memory is expanded in words of 32 bytes. Gas
-			// is also calculated in words.
-			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
-				log.Error("Gas Overflow !")
-				return nil, errGasUintOverflow
-			}
-		}
-		// consume the gas and return an error if not enough gas is available.
-		// cost is explicitly set so that the capture state defer method can get the proper cost
-		//
-		// 가스를 소비하고 충분한 가스가 없을 경우 오류를 반환한다.
-		//
-		// [Berith]
-		// cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)
-		// if err != nil || !contract.UseGas(cost) {
-		// 	return nil, ErrOutOfGas
-		// }
-		if memorySize > 0 {
-			mem.Resize(memorySize)
-		}
 
-		// [Berith]
-		// cost => operation.constantGas
-		if in.cfg.Debug {
-			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, operation.constantGas, mem, stack, contract, in.evm.depth, err)
+			// Consume the gas and return an error if not enough gas is available.
+			// cost is explicitly set so that the capture state defer method can get the proper cost
+			var dynamicCost uint64
+			dynamicCost, err = operation.dynamicGas(in.gasTable, in.evm, contract, stack, mem, memorySize)
+			cost += dynamicCost // for tracing
+			if err != nil || !contract.UseGas(dynamicCost) {
+				return nil, ErrOutOfGas
+			}
+			// Do tracing before memory expansion
+			if in.cfg.Debug {
+				in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
+				logged = true
+			}
+			if memorySize > 0 {
+				mem.Resize(memorySize)
+			}
+		} else if in.cfg.Debug {
+			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 			logged = true
 		}
-
+		after := contract.Gas
+		fmt.Println(" Used Gas : ", before-after)
 		// execute the operation
-		res, err := operation.execute(&pc, in, contract, mem, stack)
-
-		// if the operation clears the return data (e.g. it has returning data)
-		// set the last return to the result of the operation.
-		if operation.returns {
-			in.returnData = res
+		res, err = operation.execute(&pc, in, contract, mem, stack)
+		if err != nil {
+			break
 		}
-
-		switch {
-		case err != nil:
-			return nil, err
-		case operation.reverts:
-			return res, errExecutionReverted
-		case operation.halts:
-			return res, nil
-		case !operation.jumps:
-			pc++
-		}
+		pc++
 	}
-	return nil, nil
+
+	if err == errStopToken {
+		err = nil // clear stop token error
+	}
+
+	return res, err
 }
 
 // CanRun tells if the contract, passed as an argument, can be
