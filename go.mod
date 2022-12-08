@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.15.0
-	github.com/BerithFoundation/berith-chain v1.1.0
+	github.com/BerithFoundation/berith-chain v0.0.0-00010101000000-000000000000
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e
@@ -20,7 +20,7 @@ require (
 	github.com/elastic/gosigar v0.10.5
 	github.com/fatih/color v1.9.0
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
-	github.com/gizak/termui v3.1.0+incompatible
+	github.com/gizak/termui v2.3.0+incompatible
 	//github.com/gizak/termui/v3 v3.1.0 // indirect
 	github.com/go-stack/stack v1.8.0
 	github.com/golang/protobuf v1.4.1
