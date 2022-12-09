@@ -106,6 +106,10 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 			cfg.JumpTable = constantinopleInstructionSet
 		case evm.ChainConfig().IsByzantium(evm.BlockNumber):
 			cfg.JumpTable = byzantiumInstructionSet
+		case evm.ChainConfig().IsEIP158(evm.BlockNumber):
+			cfg.JumpTable = spuriousDragonInstructionSet
+		case evm.ChainConfig().IsEIP150(evm.BlockNumber):
+			cfg.JumpTable = tangerineWhistleInstructionSet
 		case evm.ChainConfig().IsHomestead(evm.BlockNumber):
 			cfg.JumpTable = homesteadInstructionSet
 		default:
@@ -210,8 +214,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		operation := in.cfg.JumpTable[op]
 		cost = operation.constantGas
 		// Validate stack
-		before := contract.Gas
-		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
+		// before := contract.Gas
+		// fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
 		if sLen := stack.len(); sLen < operation.minStack {
 			fmt.Println("Previous op", contract.GetOp(pc-1), "Next op", contract.GetOp(pc+1))
 			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
@@ -234,20 +238,20 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 				memSize, overflow := operation.memorySize(stack)
 				if overflow {
 					log.Error("Overflow !")
-					return nil, errGasUintOverflow
+					return nil, ErrGasUintOverflow
 				}
 				// memory is expanded in words of 32 bytes. Gas
 				// is also calculated in words.
 				if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
 					log.Error("Gas Overflow !")
-					return nil, errGasUintOverflow
+					return nil, ErrGasUintOverflow
 				}
 			}
 
 			// Consume the gas and return an error if not enough gas is available.
 			// cost is explicitly set so that the capture state defer method can get the proper cost
 			var dynamicCost uint64
-			dynamicCost, err = operation.dynamicGas(in.gasTable, in.evm, contract, stack, mem, memorySize)
+			dynamicCost, err = operation.dynamicGas(in.evm, contract, stack, mem, memorySize)
 			cost += dynamicCost // for tracing
 			if err != nil || !contract.UseGas(dynamicCost) {
 				return nil, ErrOutOfGas
@@ -264,8 +268,9 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 			logged = true
 		}
-		after := contract.Gas
-		fmt.Println(" Used Gas : ", before-after)
+		// after := contract.Gas
+		// fmt.Println(" Used Gas : ", before-after)
+
 		// execute the operation
 		res, err = operation.execute(&pc, in, contract, mem, stack)
 		if err != nil {
@@ -277,7 +282,7 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 	if err == errStopToken {
 		err = nil // clear stop token error
 	}
-
+	// fmt.Println("Total used gas : ", contract.Gas)
 	return res, err
 }
 

@@ -17,18 +17,17 @@
 package vm
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/BerithFoundation/berith-chain/params"
 )
 
 type (
-	executionFunc  func(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error)
-	gasFunc        func(params.GasTable, *EVM, *Contract, *Stack, *Memory, uint64) (uint64, error) // last parameter is the requested memory size as a uint64
+	executionFunc func(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error)
+	gasFunc       func(*EVM, *Contract, *Stack, *Memory, uint64) (uint64, error) // last parameter is the requested memory size as a uint64	memorySizeFunc func(*Stack) (size uint64, overflow bool)
+	// memorySizeFunc returns the required size, and whether the operation overflowed a uint64
 	memorySizeFunc func(*Stack) (size uint64, overflow bool)
 )
-
-var errGasUintOverflow = errors.New("gas uint64 overflow")
 
 type operation struct {
 	// execute is the operation function
@@ -51,11 +50,29 @@ type operation struct {
 	returns bool // determines whether the operations sets the return data content
 }
 
+func validate(jt [256]operation) [256]operation {
+
+	for i, op := range jt {
+		// The interpreter has an assumption that if the memorySize function is
+		// set, then the dynamicGas function is also set. This is a somewhat
+		// arbitrary assumption, and can be removed if we need to -- but it
+		// allows us to avoid a condition check. As long as we have that assumption
+		// in there, this little sanity check prevents us from merging in a
+		// change which violates it.
+		if op.memorySize != nil && op.dynamicGas == nil {
+			panic(fmt.Sprintf("op %v has dynamic memory but not dynamic gas", OpCode(i).String()))
+		}
+	}
+	return jt
+}
+
 var (
-	frontierInstructionSet       = newFrontierInstructionSet()
-	homesteadInstructionSet      = newHomesteadInstructionSet()
-	byzantiumInstructionSet      = newByzantiumInstructionSet()
-	constantinopleInstructionSet = newConstantinopleInstructionSet()
+	frontierInstructionSet         = newFrontierInstructionSet()
+	homesteadInstructionSet        = newHomesteadInstructionSet()
+	tangerineWhistleInstructionSet = newTangerineWhistleInstructionSet()
+	spuriousDragonInstructionSet   = newSpuriousDragonInstructionSet()
+	byzantiumInstructionSet        = newByzantiumInstructionSet()
+	constantinopleInstructionSet   = newConstantinopleInstructionSet()
 )
 
 // NewConstantinopleInstructionSet returns the frontier, homestead
@@ -104,7 +121,7 @@ func newConstantinopleInstructionSet() [256]operation {
 // byzantium instructions.
 func newByzantiumInstructionSet() [256]operation {
 	// instructions that can be executed during the homestead phase.
-	instructionSet := newHomesteadInstructionSet()
+	instructionSet := newSpuriousDragonInstructionSet()
 	instructionSet[STATICCALL] = operation{
 		execute:     opStaticCall,
 		constantGas: params.CallGasEIP150,
@@ -138,6 +155,26 @@ func newByzantiumInstructionSet() [256]operation {
 		returns:    true,
 	}
 	return instructionSet
+}
+
+// EIP 158 a.k.a Spurious Dragon
+func newSpuriousDragonInstructionSet() [256]operation {
+	instructionSet := newTangerineWhistleInstructionSet()
+	instructionSet[EXP].dynamicGas = gasExpEIP158
+	return validate(instructionSet)
+}
+
+// EIP 150 a.k.a Tangerine Whistle
+func newTangerineWhistleInstructionSet() [256]operation {
+	instructionSet := newHomesteadInstructionSet()
+	instructionSet[BALANCE].constantGas = params.BalanceGasEIP150
+	instructionSet[EXTCODESIZE].constantGas = params.ExtcodeSizeGasEIP150
+	instructionSet[SLOAD].constantGas = params.SloadGasEIP150
+	instructionSet[EXTCODECOPY].constantGas = params.ExtcodeCopyBaseEIP150
+	instructionSet[CALL].constantGas = params.CallGasEIP150
+	instructionSet[CALLCODE].constantGas = params.CallGasEIP150
+	instructionSet[DELEGATECALL].constantGas = params.CallGasEIP150
+	return validate(instructionSet)
 }
 
 // NewHomesteadInstructionSet returns the frontier and homestead
@@ -299,13 +336,13 @@ func newFrontierInstructionSet() [256]operation {
 			minStack:    minStack(2, 1),
 			maxStack:    maxStack(2, 1),
 		},
-		SHA3: {
-			execute:     opSha3,
-			constantGas: params.Sha3Gas,
-			dynamicGas:  gasSha3,
+		KECCAK256: {
+			execute:     opKeccak256,
+			constantGas: params.Keccak256Gas,
+			dynamicGas:  gasKeccak256,
 			minStack:    minStack(2, 1),
 			maxStack:    maxStack(2, 1),
-			memorySize:  memorySha3,
+			memorySize:  memoryKeccak256,
 		},
 		ADDRESS: {
 			execute:     opAddress,

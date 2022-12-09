@@ -40,10 +40,10 @@ require (
 	github.com/status-im/keycard-go v0.0.0-20220906070205-e43cb0f06ae9
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
-	golang.org/x/sys v0.0.0-20211117180635-dee7805ff2e1
-	golang.org/x/text v0.3.7
+	golang.org/x/crypto v0.4.0
+	golang.org/x/net v0.3.0
+	golang.org/x/sys v0.3.0
+	golang.org/x/text v0.5.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6

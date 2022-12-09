@@ -404,6 +404,7 @@ type Rules struct {
 	ChainID                                   *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158 bool
 	IsByzantium, IsConstantinople             bool
+	IsBIP1, IsBIP2, IsBIP3, IsBIP4, IsBIP5    bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -420,5 +421,10 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsEIP158:         c.IsEIP158(num),
 		IsByzantium:      c.IsByzantium(num),
 		IsConstantinople: c.IsConstantinople(num),
+		IsBIP1:           c.IsBIP1(num),
+		IsBIP2:           c.IsBIP2(num),
+		IsBIP3:           c.IsBIP3(num),
+		IsBIP4:           c.IsBIP4(num),
+		IsBIP5:           c.IsBIP5(num),
 	}
 }
