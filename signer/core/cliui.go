@@ -24,8 +24,9 @@ import (
 
 	"sync"
 
-	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"berith-chain/internals/berithapi"
+
+	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/ssh/terminal"
@@ -153,9 +154,9 @@ func (ui *CommandlineUI) ApproveTx(request *SignTxRequest) (SignTxResponse, erro
 	showMetadata(request.Meta)
 	fmt.Printf("-------------------------------------------\n")
 	if !ui.confirm() {
-		return SignTxResponse{request.Transaction, false, ""}, nil
+		return SignTxResponse{request.Transaction, false}, nil
 	}
-	return SignTxResponse{request.Transaction, true, ui.readPassword()}, nil
+	return SignTxResponse{request.Transaction, true}, nil
 }
 
 // ApproveSignData prompt the user for confirmation to request to sign data

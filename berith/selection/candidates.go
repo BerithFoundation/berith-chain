@@ -2,11 +2,11 @@ package selection
 
 import (
 	"crypto/sha256"
-	"fmt"
-	"github.com/BerithFoundation/berith-chain/common"
-	"github.com/BerithFoundation/berith-chain/params"
 	"math/big"
 	"math/rand"
+
+	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/params"
 )
 
 const (
@@ -70,14 +70,12 @@ func (cs *Candidates) selectBlockCreator(config *params.ChainConfig, number uint
 		end:   candidateCount,
 	})
 	if err != nil {
-		fmt.Println(err)
 		return result
 	}
 
 	for count := 1; count <= MaxMiner && queue.front != queue.rear; count++ {
 		r, err := queue.dequeue()
 		if err != nil {
-			fmt.Println(err)
 			return result
 		}
 		account := r.binarySearch(queue, cs)

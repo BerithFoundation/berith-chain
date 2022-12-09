@@ -19,6 +19,9 @@ package core
 import (
 	"berith-chain/berith/staking"
 	"errors"
+	"fmt"
+	"math/big"
+
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/consensus/misc"
@@ -27,7 +30,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/crypto"
 	"github.com/BerithFoundation/berith-chain/params"
-	"math/big"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -52,6 +54,9 @@ func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consen
 // Process processes the state changes according to the Berith rules by running
 // the transaction messages using the statedb and applying any rewards to both
 // the processor (coinbase) and any included uncles.
+//
+// Process는 statedb를 사용하는 트랜잭션 메세지의 Berith 규칙에 따라 state를 변경하고
+// 프로세서와 포함된 엉클블록 모두에게 보상을 적용한다.
 //
 // Process returns the receipts and logs accumulated during the process and
 // returns the amount of gas that was used in the process. If any of the
@@ -88,6 +93,9 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 // and uses the input parameters for its environment. It returns the receipt
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
+//
+// ApplyTransaction은 주어진 state DB로 트랜잭션 적용을 시도하고 해당 환경으로 인풋 파라미터를 사용한다.
+// 트랜잭션에 대한 영수증을 반환하는데, 사용된 가스와 트랜잭션 실패시 반환되는 에러등을 알 수 있다.
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, uint64, error) {
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -96,6 +104,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 
 	adjustStateForBIP4(config, statedb, header, tx)
 
+	// unstaking 하려면 3일 기다려야 함
 	if config.IsBIP4(header.Number) && (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
 		return nil, 0, errors.New("Unstaking transactions are processed only after the lock up period.")
 	}
@@ -126,6 +135,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.TxHash = tx.Hash()
 	receipt.GasUsed = gas
 	// if the transaction created a contract, store the creation address in the receipt.
+	// 트랜잭션이 컨트랙트를 생성했다면, 생성된 주소를 영수증에 저장한다.
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
 	}
@@ -137,9 +147,12 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 }
 
 /*
-	[Berith]
-	adjust Stake balance and Selection point For hard fork BIP4
-	Check the Recipient's Stake Balance of the transaction to be processed, and change it if it has more than the limit.
+[Berith]
+adjust Stake balance and Selection point For hard fork BIP4
+Check the Recipient's Stake Balance of the transaction to be processed, and change it if it has more than the limit.
+
+스테이크 밸런스와 BIP4하드포크를 가리키는 셀렉션 포인트를 수정한다.
+처리할 거래의 수취인 지분 잔액을 확인하고 한도를 초과하는 경우 변경한다.
 */
 func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, header *types.Header, tx *types.Transaction) {
 	stakedBalance := big.NewInt(0)
@@ -161,15 +174,23 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 		selectionPoint := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
 		statedb.SetPoint(*recipient, selectionPoint)
 	}
+
 }
 
 /*
-	[Berith]
-	Check if the break transaction satisfies the lock up condition
-	The Break Transaction has a three-day grace period.
+[Berith]
+Check if the break transaction satisfies the lock up condition
+The Break Transaction has a three-day grace period.
 */
 func checkBreakTransaction(msg types.Message, blockNumber *big.Int, period uint64) bool {
-	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / period)) // 3 days
-	elapsedBlockNumber :=  new(big.Int).Sub(blockNumber, new(big.Int).SetBytes(msg.Data()))
+	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / period)) // Created blocks in 3 days
+	elapsedBlockNumber := new(big.Int).Sub(blockNumber, new(big.Int).SetBytes(msg.Data()))
+	if msg.Base() == types.Stake && msg.Target() == types.Main {
+		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
+	}
+
+	//Temp value
+	lockUpPeriod = big.NewInt(1)
+
 	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1
 }

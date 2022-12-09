@@ -28,13 +28,14 @@ import (
 	"strings"
 	"time"
 
+	"berith-chain/internals/berithapi"
+
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/rawdb"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/types"
-	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"
@@ -466,4 +467,24 @@ func (api *PrivateDebugAPI) getModifiedAccounts(startBlock, endBlock *types.Bloc
 		dirty = append(dirty, common.BytesToAddress(key))
 	}
 	return dirty, nil
+}
+
+// [Berith] Use eth_method as an exception for metamask connections.
+type PublicEthAPI struct {
+	e *Berith
+}
+
+// NewPublicEthAPI creates a new Eth protocol API for full nodes.
+func NewPublicEthAPI(e *Berith) *PublicBerithAPI {
+	return &PublicBerithAPI{e}
+}
+
+// ChainId is the EIP-155 replay-protection chain id for the current berith chain config.
+// But this method called by eth_ prefix.
+func (api *PublicEthAPI) ChainId() hexutil.Uint64 {
+	chainID := new(big.Int)
+	if config := api.e.chainConfig; config.IsEIP155(api.e.blockchain.CurrentBlock().Number()) {
+		chainID = config.ChainID
+	}
+	return (hexutil.Uint64)(chainID.Uint64())
 }
