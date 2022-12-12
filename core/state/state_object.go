@@ -118,7 +118,7 @@ type Account struct {
 	Root           common.Hash // merkle root of the storage trie
 	CodeHash       []byte      // 스마트 컨트랙트 바이트 코드의 해시
 	StakeBalance   *big.Int    //brt staking balance
-	StakeUpdated   *big.Int    //Block number when the stake balance was updated
+	StakeUpdated   StakeRecord //Block number when the stake balance was updated
 	Point          *big.Int    //selection Point, 스테이킹에 대한 Point
 	BehindBalance  []Behind    //behind balance
 	Penalty        uint64

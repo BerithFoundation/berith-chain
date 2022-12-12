@@ -17,7 +17,6 @@
 package vm
 
 import (
-	"fmt"
 	"hash"
 	"sync/atomic"
 
@@ -217,7 +216,6 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		// before := contract.Gas
 		// fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
 		if sLen := stack.len(); sLen < operation.minStack {
-			fmt.Println("Previous op", contract.GetOp(pc-1), "Next op", contract.GetOp(pc+1))
 			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
 		} else if sLen > operation.maxStack {
 			return nil, &ErrStackOverflow{stackLen: sLen, limit: operation.maxStack}
