@@ -1,0 +1,8 @@
+{
+  "app_name": "wallet",
+  "icon_path_darwin": "resources/app/images/common/berith_pa.ico",
+  "icon_path_linux": "resources/icon.png",
+  "icon_path_windows": "resources/app/images/common/berith_pa.ico",
+  "version_astilectron": "0.56.0",
+  "version_electron": "11.4.3"
+}

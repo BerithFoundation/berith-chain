@@ -1,0 +1,92 @@
+
+<h1><a class="logo" href="#">베리드 월렛</a></h1>
+<span class="txt_ver" id="version"></span><!-- 191217 : 버전 추가 -->
+<div class="nav">
+    <ul>
+        <!-- 191217 : Peer , 현재블록 추가  [S] -->
+        <li id = "peer" class="peer zero"><!-- 0일때 zero 클래스 추가 -->
+            <span class="ico_state">Peer 상태</span>Peer : <em><i id = "peerCount">0</i> / 10</em>
+            <div id = "peerErrMsg" class="box_zerom"><p class="error_txt">연결된 Peer가 존재하지 않아 Wallet 사용이 불가합니다.</p></div>
+        </li>	
+        <li>현재 블록 : <em id="hd_bn">0</em></li>
+        <!-- 191217 : Peer , 현재블록 추가  [E] -->	
+        <!-- <li>선출될 확률 : <em id = "hd_roi"> - </em></li>
+        <li>참여 수 : <em id = "hd_stks"> - </em></li> -->
+    </ul>
+    <a class="btn_export" onclick="headerPopup('exportPop')">Export</a>
+    <a class="btn_contact" onclick="openContactList()">Contact</a>
+    <a class="btn_setting" onclick="headerPopup('mySetting')">Setting</a>
+
+</div>
+<!--contact Pop -->
+<div id = "contactPop"> </div>
+<!--contact Add Pop  -->
+<div id = "contactAddPop" class="ly_pop hide"></div>
+<!--mySetting Pop  -->
+<div id = "mySetting" class="ly_pop hide"> </div>
+<!--export Pop  -->
+<div id = "exportPop" class="ly_pop hide"></div>
+
+<script type="text/javascript">
+
+    $("#contactPop").load("contactList.html");
+    $("#contactAddPop").load("contactAdd.html");
+    $('#mySetting').load('mySetting.html');
+    $('#exportPop').load('export.html');
+
+    $("document").ready(function() {
+        $("#version").text(VERSION);
+        setInterval(function(){
+            sendMessage2("callApi","net_peerCount",[]).then(result => {
+                if(result && result.payload) {
+                    var peers = parseInt(JSON.parse(result.payload));
+                    if(peers > 0) {
+                        if($("#peer").hasClass("zero"))
+                            $("#peer").removeClass("zero");
+                        $("#peerCount").text(peers);
+                        if(!$("#peerErrMsg").hasClass("hidden"))
+                            $("#peerErrMsg").addClass("hidden")
+                        return Promise.resolve("success");
+                    }
+                }
+                return Promise.reject(new Error("no peer"));
+            }).catch(err => {
+                if(!$("#peer").hasClass("zero"))
+                    $("#peer").addClass("zero");
+                $("#peerCount").text("0");
+                if($("#peerErrMsg").hasClass("hidden"))
+                    $("#peerErrMsg").removeClass("hidden")
+            });
+        },1000);
+
+        setInterval(async function() {
+            var bn = await berith.blockNumber();
+            $("#hd_bn").text(Number(bn).toFixed());
+        },1000)
+
+        // setInterval(async function() {
+        //     var account = sessionStorage.getItem("account");
+        //     if(Number($("hd_bn").text()) <= 360)
+        //         return;
+        //     var roi = await sendMessage2("callApi","bsrr_getJoinRatio",[account]);
+        //     if(roi && roi.payload)
+        //         $("#hd_roi").text(JSON.parse(roi.payload) + "%");
+        //     var stakers = await sendMessage2("callApi","bsrr_getBlockCreators",[]);
+        //     if(stakers && stakers.payload)
+        //         $("#hd_stks").text(JSON.parse(stakers.payload).length);
+        // },1000)
+
+    });
+
+    function headerPopup(htmlName) {
+        let selector = "#" + htmlName
+        if ($(selector).hasClass("view")) {
+            $(selector).removeClass("view");
+            $(selector).addClass("hide");
+        } else {
+            $(selector).removeClass("hide");
+            $(selector).addClass("view");
+        }
+        registerEvents()
+    }
+</script>

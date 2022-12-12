@@ -1,0 +1,15 @@
+<div class="gnb">
+    <ul class="gnb_menu">
+        <li><a class="btn_mywallet" href="#!" onclick="loadMainContent('main.html');">My Wallet</a></li>
+        <li><a class="btn_send" href="#!" onclick="loadMainContent('send.html');">Send</a></li>
+        <li><a class="btn_transaction" href="#!" onclick="loadMainContent('transactionList.html')">Transactions</a></li>
+    </ul>
+    <span class="logout"><a class="btn_logout"  onclick="fnLogout()">로그아웃</a></span>
+</div><!-- e://gnb -->
+
+<script type="text/javascript" >
+    function fnLogout() {
+        berith.stopPolling()
+        location.href = "login.html" ;
+    }
+</script>

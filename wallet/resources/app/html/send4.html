@@ -1,0 +1,43 @@
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>전송요청 완료</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('successPopup')">close</a>
+    </div>
+    <div class="pop_body">
+        <p class="pop_con_top">
+            전송요청이 완료되었습니다.
+            <span class="date"><p id = "sendSuccessDate"></p></span>
+        </p>
+        <table class="pop_table">
+            <tbody>
+            <tr>
+                <th>받는 주소</th>
+                <td><p id = "sendSuccessAdd"></p></td>
+            </tr>
+            <tr>
+                <th>보낼 수량</th>
+                <td><em class="red"><p id = "sendSuccessAmt"></p></em></td>
+            </tr>
+            <tr>
+                <th>기본수수료</th>
+                <td><p id = "sendGasLimitSuccess"></p></td>
+            </tr>
+            <tr>
+                <th>수수료가격</th>
+                <td><p id = "sendGasPriceSucess"></p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pop_footer">
+        <a class="btn red on" href="#!" onclick="closeAllPop()">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->
+<script type="text/javascript" >
+    function closeAllPop() {
+        togglePopUp('successPopup')
+        togglePopUp('sendInputPwdPopup')
+        togglePopUp('confirmationPopup')
+    }
+</script>

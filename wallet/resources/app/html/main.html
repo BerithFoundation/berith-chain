@@ -1,0 +1,156 @@
+<div class="container main">
+    <div class="aside">
+        <h2 id="loginName">MY WALLET</h2>
+        <div class="txt_wrap">
+            <strong>My Address</strong>
+            <!-- 1217 지갑 주소 줄바꿈 -->
+            <p class="addr txt_overline" id="myAdd"></p>
+            <span><a class="copy" onclick="copyToClipboard('#myAdd')">복사</a><a class="qr" onclick="qrCreate()">qr</a></span>
+        </div>
+        <hr/>
+        <div class="one_sec_wrap hide" id="popCopy"><!-- view/hide -->
+            <div class="bg"></div>
+            <p class="complete">복사 완료</p>
+        </div>
+
+        <!--1119 법적 책임 문구 추가-->
+        <div class="liability_txt_wrap">	
+            <div class="liability_txt">
+                <p>Berith는 동일 기기에서 다수 계정 등록 및 사용으로 발생하는 </br>문제에 대한 배상, 보상 및 기타 법적 책임을 </br>부담하지 않습니다.</p>
+            </div>
+        </div>
+        
+
+    </div><!-- e://aside -->
+
+    <div class="content">
+        <div class="top_area">
+            <div class="txt_wrap">
+                <strong>Total Balance</strong>
+                <p class="coin"><em id="totBalance">0.00000000</em> BERS</p>
+            </div>
+        </div><!-- e://top_area -->
+        <div class="middle_area">
+            <div class="left">
+                <div class="con_box">
+                    <div class="txt_wrap">
+                        <strong>Main Balance</strong>
+                        <p class="coin"><em id="mainBalance">0.00000000</em> BERS</p>
+                        <a class="btn_send" href="#!" onclick="loadMainContent('send.html');">Send</a>
+                    </div>
+                </div>
+            </div>
+            <div class="right">
+                <div class="con_box">
+                    <div class="txt_wrap">
+                        <strong>Stake Balance</strong>
+                        <p class="coin"><em id="stakeBalance">0.00000000</em> BERS</p>
+                        <span><a class="btn_stake" href="#!" onclick="loadMainContent('stake.html')">Stake</a>
+                            <a class="btn_break" href="#!" onclick="loadMainContent('break.html')">Break</a></span>
+                    </div>
+                </div>
+            </div>
+        </div><!-- e://middle_area -->
+        <ul class="info"><!-- location move 0906 -->
+            <li><strong>Stake</strong><span>Main Balance<i class="arrow"></i>Stake Balance</span></li>
+            <li><strong>Break</strong><span>Stake Balance<i class="arrow"></i>Main Balance</span></li>
+        </ul>
+    </div><!-- e://content -->
+
+</div><!-- e://container -->
+
+<div class="ly_pop hide" id = "qrPop"><!-- view/hide -->
+    <div class="bg_dimmedbg_dimmed"></div>
+    <div class="pop_wrap">
+        <div class="pop_header">
+            <h5>QR코드</h5>
+            <a class="btn_close" onclick="qrPopClose()">close</a>
+        </div>
+        <div class="pop_body" >
+            <div class="pop_con_top" id = "qrcode"></div>
+        </div>
+        <div class="pop_footer">
+            <a class="btn red on" id = "download">이미지 저장</a>
+        </div>
+    </div><!-- e://pop_wrap  -->
+</div>
+<script type="text/javascript">
+
+    function balanceChanged() {
+        // console.log("EVENT COMMING");
+        var mainBalance = $("#mainBalance").text()
+        var stakeBalance = $("#stakeBalance").text()
+
+        // console.log("main "+mainBalance);
+        // console.log("stake "+stakeBalance);
+
+        var total = (BigInt(mainBalance.replace(".","")) + BigInt(stakeBalance.replace(".",""))).toString();
+        var additionalZero = "";
+        for (var left = DISPLAY_UNIT - total.length ; left >= 0 ; left--) {
+            additionalZero += "0";
+        }
+        total = additionalZero + total;
+        total = total.substr(0,total.length-DISPLAY_UNIT)+"."+total.substr(total.length-DISPLAY_UNIT);
+        $('#totBalance').text(total);
+    }
+
+    $(document).ready(function() {
+        account = sessionStorage.getItem("account");
+
+        $("#mainBalance").change(balanceChanged)
+        $("#stakeBalance").change(balanceChanged)
+
+        getRealtimeBalance("berith_getBalance",account,$("#mainBalance"));
+        getRealtimeBalance("berith_getStakeBalance",account,$("#stakeBalance"));
+        
+    });
+
+    onMainContentLoad();
+
+    // 메인페이지 로드 함수
+    async function onMainContentLoad() {
+        //마이닝 시작
+        miner.miningStart()
+        // 세션정보 가져오기
+        account = sessionStorage.getItem('account'); // setting global variable value
+        loginId = sessionStorage.getItem('loginId');
+        loginPwd = sessionStorage.getItem('loginPwd');
+
+        $('#myAdd').text(account);
+        $('#loginName').text(loginId);
+
+        
+    };
+
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(element).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+        $('#popCopy').removeClass('hide')
+        $('#popCopy').addClass('view')
+        setTimeout(function () {
+            $('#popCopy').removeClass('view')
+            $('#popCopy').addClass('hide')
+        }, 1000);
+    }
+
+    function qrCreate() {
+        $('#qrPop').removeClass('hide')
+        $('#qrPop').addClass('view')
+        qrcode.qrgen(sessionStorage.getItem('account'))
+    }
+
+    function qrPopClose() {
+        $("#qrcode").empty();
+        $('#qrPop').removeClass('view')
+        $('#qrPop').addClass('hide')
+    }
+
+    $("#download").click(function () {
+        this.href = $('#qrcode').find('img:first').attr("src");
+        this.download = "QrCode"
+    });
+
+</script>

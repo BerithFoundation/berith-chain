@@ -16,6 +16,7 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
+	github.com/gizak/termui v2.3.0+incompatible // indirect
 	github.com/go-stack/stack v1.8.1
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.3
@@ -27,9 +28,12 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/karalabe/hid v1.0.0
+	github.com/maruel/panicparse v1.6.2 // indirect
 	github.com/mattn/go-colorable v0.1.7
 	github.com/mattn/go-isatty v0.0.12
+	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
+	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/pborman/uuid v1.2.1
 	github.com/peterh/liner v1.2.2
 	github.com/pkg/errors v0.9.1
