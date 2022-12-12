@@ -5,8 +5,12 @@ go 1.14
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
 	github.com/BerithFoundation/berith-chain v0.0.0-00010101000000-000000000000
+	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e
+	github.com/asticode/go-astilectron v0.9.1
+	github.com/asticode/go-astilectron-bootstrap v0.1.0
+	github.com/asticode/go-astilog v1.2.0
 	github.com/btcsuite/btcd v0.22.0-beta
 	github.com/cespare/cp v1.1.1
 	github.com/davecgh/go-spew v1.1.1
@@ -16,7 +20,7 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
-	github.com/gizak/termui v2.3.0+incompatible // indirect
+	github.com/gizak/termui v2.3.0+incompatible
 	github.com/go-stack/stack v1.8.1
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.3
@@ -46,6 +50,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954
 	golang.org/x/crypto v0.4.0
 	golang.org/x/net v0.3.0
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/sys v0.3.0
 	golang.org/x/text v0.5.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
