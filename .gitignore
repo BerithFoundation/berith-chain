@@ -15,6 +15,7 @@
 /cmd/berith/berith
 /cmd/berith/berith.exe
 /cmd/berith/password.txt
+cmd/berith/password
 wallet/Berith/*
 wallet/vendor/
 wallet/output/
@@ -57,4 +58,4 @@ cmd/berith/password.txt
 **/yarn-error.log
 wallet/bind_darwin_amd64.go
 wallet/wallet
-cmd/berith/password
+cmd/berith/__debug_bin
