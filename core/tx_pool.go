@@ -639,10 +639,14 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if err != nil {
 		return fmt.Errorf("cannot conver tx to message %v", err)
 	}
-	unStakable, leftBlocks := checkBreakTransaction(msg, currentBlockNumber, period)
-	// unstaking 하려면 3일 기다려야 함
-	if pool.chainconfig.IsBIP4(currentBlockNumber) && (msg.Base() == types.Stake && msg.Target() == types.Main) && !unStakable {
-		return fmt.Errorf("cannot unstake yet, %v hours left", (leftBlocks * int64(period) / 3600))
+
+	if pool.chainconfig.IsBIP4(currentBlockNumber) && (tx.Base() == types.Stake && tx.Target() == types.Main) {
+		lastStakedBlock := pool.currentState.GetStakeUpdated(from)
+		unStakable, leftBlocks := checkBreakTransaction(msg, lastStakedBlock, currentBlockNumber, period)
+		// unstaking 하려면 3일 기다려야 함
+		if !unStakable {
+			return fmt.Errorf("cannot unstake yet, %v blocks (%dH) left", leftBlocks, (uint64(leftBlocks)*period)/(3600))
+		}
 	}
 
 	if tx.Base() == types.Main {

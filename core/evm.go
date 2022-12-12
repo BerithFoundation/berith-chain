@@ -108,6 +108,7 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount, blockNumb
 			db.AddStakeBalance(recipient, amount, blockNumber)
 		}
 	case types.Stake:
+		// unstaking은 모든 staking balance를 환급한다.
 		if target == types.Main {
 			db.RemoveStakeBalance(sender)
 		}

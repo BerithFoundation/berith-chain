@@ -113,14 +113,15 @@ Account는 Berith에서 합의된 계정 표현이다.
 StakeBalance, BehindBalance, SelectionPoint를 더한다.
 */
 type Account struct {
-	Nonce          uint64
-	Balance        *big.Int
-	Root           common.Hash // merkle root of the storage trie
-	CodeHash       []byte      // 스마트 컨트랙트 바이트 코드의 해시
-	StakeBalance   *big.Int    //brt staking balance
-	StakeUpdated   StakeRecord //Block number when the stake balance was updated
-	Point          *big.Int    //selection Point, 스테이킹에 대한 Point
-	BehindBalance  []Behind    //behind balance
+	Nonce        uint64
+	Balance      *big.Int
+	Root         common.Hash // merkle root of the storage trie
+	CodeHash     []byte      // 스마트 컨트랙트 바이트 코드의 해시
+	StakeBalance *big.Int    //brt staking balance
+	StakeUpdated *big.Int    //Block number when the stake balance was updated
+	// StakeUpdated   *stakeRecord    // record staking amount by blockNumber
+	Point          *big.Int //selection Point, 스테이킹에 대한 Point
+	BehindBalance  []Behind //behind balance
 	Penalty        uint64
 	PenlatyUpdated *big.Int //Block Number when the penalty was updated
 }

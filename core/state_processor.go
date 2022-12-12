@@ -18,7 +18,6 @@ package core
 
 import (
 	"berith-chain/berith/staking"
-	"errors"
 	"fmt"
 	"math/big"
 
@@ -104,11 +103,6 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 
 	adjustStateForBIP4(config, statedb, header, tx)
 
-	// unstaking 하려면 3일 기다려야 함
-	if config.IsBIP4(header.Number) && (msg.Base() == types.Stake && msg.Target() == types.Main) && !checkBreakTransaction(msg, header.Number, config.Bsrr.Period) {
-		return nil, 0, errors.New("Unstaking transactions are processed only after the lock up period.")
-	}
-
 	//[BERITH]
 	// Create a new context to be used in the EVM environment
 	context := NewEVMContext(msg, header, bc, author)
@@ -182,9 +176,9 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 Check if the break transaction satisfies the lock up condition
 The Break Transaction has a three-day grace period.
 */
-func checkBreakTransaction(msg types.Message, blockNumber *big.Int, period uint64) (bool, int64) {
+func checkBreakTransaction(msg types.Message, lastBlock, blockNumber *big.Int, period uint64) (bool, int64) {
 	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
-	elapsedBlockNumber := new(big.Int).Sub(blockNumber, new(big.Int).SetBytes(msg.Data()))
+	elapsedBlockNumber := new(big.Int).Sub(blockNumber, lastBlock)
 	if msg.Base() == types.Stake && msg.Target() == types.Main {
 		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
 	}
