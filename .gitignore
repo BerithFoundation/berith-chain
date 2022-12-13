@@ -54,3 +54,5 @@ cmd/berith/password.txt
 ./wallet/resources/app/.vscode
 
 **/yarn-error.log
+wallet/bind_darwin_amd64.go
+wallet/wallet
