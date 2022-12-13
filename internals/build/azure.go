@@ -22,11 +22,11 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/azure-storage-blob-go/2018-03-28/azblob"
 )
 
 // AzureBlobstoreConfig is an authentication and configuration struct containing
-// the data needed by the Azure SDK to interact with a specific container in the
+// the data needed by the Azure SDK to interact with a speicifc container in the
 // blobstore.
 type AzureBlobstoreConfig struct {
 	Account   string // Account name to authorize API requests with
@@ -73,22 +73,16 @@ func AzureBlobstoreList(config AzureBlobstoreConfig) ([]azblob.BlobItem, error) 
 	u, _ := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", config.Account))
 	service := azblob.NewServiceURL(*u, pipeline)
 
-	var allBlobs []azblob.BlobItem
 	// List all the blobs from the container and return them
 	container := service.NewContainerURL(config.Container)
-	nextMarker := azblob.Marker{}
-	for nextMarker.NotDone() {
-		res, err := container.ListBlobsFlatSegment(context.Background(), nextMarker, azblob.ListBlobsSegmentOptions{
-			MaxResults: 5000, // The server only gives max 5K items
-		})
-		if err != nil {
-			return nil, err
-		}
-		allBlobs = append(allBlobs, res.Segment.BlobItems...)
-		nextMarker = res.NextMarker
 
+	res, err := container.ListBlobsFlatSegment(context.Background(), azblob.Marker{}, azblob.ListBlobsSegmentOptions{
+		MaxResults: 1024 * 1024 * 1024, // Yes, fetch all of them
+	})
+	if err != nil {
+		return nil, err
 	}
-	return allBlobs, nil
+	return res.Segment.BlobItems, nil
 }
 
 // AzureBlobstoreDelete iterates over a list of files to delete and removes them
@@ -115,7 +109,6 @@ func AzureBlobstoreDelete(config AzureBlobstoreConfig, blobs []azblob.BlobItem) 
 		if _, err := blockblob.Delete(context.Background(), azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{}); err != nil {
 			return err
 		}
-		fmt.Printf("deleted  %s (%s)\n", blob.Name, blob.Properties.LastModified)
 	}
 	return nil
 }

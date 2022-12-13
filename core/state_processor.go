@@ -53,9 +53,6 @@ func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consen
 // the transaction messages using the statedb and applying any rewards to both
 // the processor (coinbase) and any included uncles.
 //
-// Process는 statedb를 사용하는 트랜잭션 메세지의 Berith 규칙에 따라 state를 변경하고
-// 프로세서와 포함된 엉클블록 모두에게 보상을 적용한다.
-//
 // Process returns the receipts and logs accumulated during the process and
 // returns the amount of gas that was used in the process. If any of the
 // transactions failed to execute due to insufficient gas it will return an error.
@@ -91,9 +88,6 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 // and uses the input parameters for its environment. It returns the receipt
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
-//
-// ApplyTransaction은 주어진 state DB로 트랜잭션 적용을 시도하고 해당 환경으로 인풋 파라미터를 사용한다.
-// 트랜잭션에 대한 영수증을 반환하는데, 사용된 가스와 트랜잭션 실패시 반환되는 에러등을 알 수 있다.
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, uint64, error) {
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -128,7 +122,6 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.TxHash = tx.Hash()
 	receipt.GasUsed = gas
 	// if the transaction created a contract, store the creation address in the receipt.
-	// 트랜잭션이 컨트랙트를 생성했다면, 생성된 주소를 영수증에 저장한다.
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
 	}
@@ -164,7 +157,6 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 		selectionPoint := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
 		statedb.SetPoint(*recipient, selectionPoint)
 	}
-
 }
 
 /*

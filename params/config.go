@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	StakeMinimum      = "1000000000000000000"         // 1 ber
+	StakeMinimum      = "30000000000000000000000"   // 30 thousand ber
 	LimitStakeBalance = "100000000000000000000000000" // 100 million ber
 )
 
@@ -34,7 +34,7 @@ var (
 	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
 )
 
-// [BERITH] Config Setting
+//[BERITH] Config Setting
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
@@ -51,7 +51,6 @@ var (
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
 		BIP4Block:           big.NewInt(6130000),
-		BIP5Block:           big.NewInt(18000000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,
@@ -141,7 +140,6 @@ type ChainConfig struct {
 	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
 	BIP3Block *big.Int    `json:"bip3Block,omitempty"`
 	BIP4Block *big.Int    `json:"bip4Block,omitempty"`
-	BIP5Block *big.Int    `json:"bip5Block,omitempty"`
 }
 
 type BSRRConfig struct {
@@ -167,7 +165,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v BIP5: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -181,7 +179,6 @@ func (c *ChainConfig) String() string {
 		c.BIP2Block,
 		c.BIP3Block,
 		c.BIP4Block,
-		c.BIP5Block,
 		engine,
 	)
 }
@@ -235,10 +232,6 @@ func (c *ChainConfig) IsBIP3(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP4(num *big.Int) bool {
 	return isForked(c.BIP4Block, num)
-}
-
-func (c *ChainConfig) IsBIP5(num *big.Int) bool {
-	return isForked(c.BIP5Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -333,9 +326,6 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.BIP4Block, newcfg.BIP4Block, head) {
 		return newCompatError("bip4 fork block", c.BIP4Block, newcfg.BIP4Block)
 	}
-	if isForkIncompatible(c.BIP5Block, newcfg.BIP5Block, head) {
-		return newCompatError("bip5 fork block", c.BIP5Block, newcfg.BIP5Block)
-	}
 	return nil
 }
 
@@ -403,7 +393,6 @@ type Rules struct {
 	ChainID                                   *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158 bool
 	IsByzantium, IsConstantinople             bool
-	IsBIP1, IsBIP2, IsBIP3, IsBIP4, IsBIP5    bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -420,10 +409,5 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsEIP158:         c.IsEIP158(num),
 		IsByzantium:      c.IsByzantium(num),
 		IsConstantinople: c.IsConstantinople(num),
-		IsBIP1:           c.IsBIP1(num),
-		IsBIP2:           c.IsBIP2(num),
-		IsBIP3:           c.IsBIP3(num),
-		IsBIP4:           c.IsBIP4(num),
-		IsBIP5:           c.IsBIP5(num),
 	}
 }

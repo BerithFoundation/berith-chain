@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 
 	"github.com/BerithFoundation/berith-chain/common"
@@ -31,6 +32,7 @@ func (s *StakingDB) CreateDB(filename string, creator createFunc) error {
 
 	db, err := berithdb.NewLDBDatabase(filename, 128, 1024)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
@@ -67,8 +69,7 @@ func (s *StakingDB) pushValue(k string, stakers Stakers) error {
 	return s.stakeDB.Put(key, v)
 }
 
-/*
-*
+/**
 DB Close
 */
 func (s *StakingDB) Close() {

@@ -23,7 +23,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/params"
-	"github.com/holiman/uint256"
 )
 
 type dummyContractRef struct {
@@ -57,8 +56,8 @@ func TestStoreCapture(t *testing.T) {
 		stack    = newstack()
 		contract = NewContract(&dummyContractRef{}, &dummyContractRef{}, new(big.Int), 0)
 	)
-	stack.push(uint256.NewInt(1))
-	stack.push(uint256.NewInt(0))
+	stack.push(big.NewInt(1))
+	stack.push(big.NewInt(0))
 	var index common.Hash
 	logger.CaptureState(env, 0, SSTORE, 0, 0, mem, stack, contract, 0, nil)
 	if len(logger.changedValues[contract.Address()]) == 0 {

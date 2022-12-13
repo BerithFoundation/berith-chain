@@ -33,23 +33,23 @@ var emptyCodeHash = crypto.Keccak256(nil)
 
 type Code []byte
 
-func (s Code) String() string {
-	return string(s) //strings.Join(Disassemble(s), " ")
+func (self Code) String() string {
+	return string(self) //strings.Join(Disassemble(self), " ")
 }
 
 type Storage map[common.Hash]common.Hash
 
-func (s Storage) String() (str string) {
-	for key, value := range s {
+func (self Storage) String() (str string) {
+	for key, value := range self {
 		str += fmt.Sprintf("%X : %X\n", key, value)
 	}
 
 	return
 }
 
-func (s Storage) Copy() Storage {
+func (self Storage) Copy() Storage {
 	cpy := make(Storage)
-	for key, value := range s {
+	for key, value := range self {
 		cpy[key] = value
 	}
 
@@ -57,15 +57,11 @@ func (s Storage) Copy() Storage {
 }
 
 // stateObject represents an Ethereum account which is being modified.
+//
 // The usage pattern is as follows:
 // First you need to obtain a state object.
-// Finally, call CommitTrie to write the modified storage trie into a database.
 // Account values can be accessed and modified through the object.
-//
-// stateObjecct는 수정중인 베리드 계정을 대변한다
-// 먼저 state object를 얻어야한다.
-// 계정값은 객체를 통해 접근되고 수정될 수 있다.
-// 마지막으로 CommitTrie를 호출하여 수정된 스토리지 트리를 DB에 기록한다.
+// Finally, call CommitTrie to write the modified storage trie into a database.
 type stateObject struct {
 	address  common.Address
 	addrHash common.Hash // hash of berith address of the account
@@ -83,11 +79,8 @@ type stateObject struct {
 	trie Trie // storage trie, which becomes non-nil on first access
 	code Code // contract bytecode, which gets set when code is loaded
 
-	// 마지막 stateCommit에 따른 Storage 상태
 	originStorage Storage // Storage cache of original entries to dedup rewrites
-
-	// 수정된 상태를 저장한다.
-	dirtyStorage Storage // Storage entries that need to be flushed to disk
+	dirtyStorage  Storage // Storage entries that need to be flushed to disk
 
 	// Cache flags.
 	// When an object is marked suicided it will be delete from the trie
@@ -107,20 +100,16 @@ func (s *stateObject) empty() bool {
 Account is the Berith consensus representation of accounts.
 These objects are stored in the main account trie.
 Add StakeBalance, BehindBalance, Selection Point
-
-Account는 Berith에서 합의된 계정 표현이다.
-이 객체는 메인 어카운트 트리에 저장되고
-StakeBalance, BehindBalance, SelectionPoint를 더한다.
 */
 type Account struct {
 	Nonce          uint64
 	Balance        *big.Int
 	Root           common.Hash // merkle root of the storage trie
-	CodeHash       []byte      // 스마트 컨트랙트 바이트 코드의 해시
-	StakeBalance   *big.Int    //brt staking balance
-	StakeUpdated   *big.Int    //Block number when the stake balance was updated
-	Point          *big.Int    //selection Point, 스테이킹에 대한 Point
-	BehindBalance  []Behind    //behind balance
+	CodeHash       []byte
+	StakeBalance   *big.Int //brt staking balance
+	StakeUpdated   *big.Int //Block number when the stake balance was updated
+	Point          *big.Int //selection Point
+	BehindBalance  []Behind //behind balance
 	Penalty        uint64
 	PenlatyUpdated *big.Int //Block Number when the penalty was updated
 }
@@ -153,6 +142,7 @@ func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 	if data.StakeUpdated == nil {
 		data.StakeUpdated = new(big.Int)
 	}
+
 	if data.Point == nil {
 		data.Point = new(big.Int)
 	}
@@ -181,14 +171,14 @@ func (c *stateObject) EncodeRLP(w io.Writer) error {
 }
 
 // setError remembers the first non-nil error it is called with.
-func (s *stateObject) setError(err error) {
-	if s.dbErr == nil {
-		s.dbErr = err
+func (self *stateObject) setError(err error) {
+	if self.dbErr == nil {
+		self.dbErr = err
 	}
 }
 
-func (s *stateObject) markSuicided() {
-	s.suicided = true
+func (self *stateObject) markSuicided() {
+	self.suicided = true
 }
 
 func (c *stateObject) touch() {
@@ -215,99 +205,99 @@ func (c *stateObject) getTrie(db Database) Trie {
 }
 
 // GetState retrieves a value from the account storage trie.
-func (s *stateObject) GetState(db Database, key common.Hash) common.Hash {
+func (self *stateObject) GetState(db Database, key common.Hash) common.Hash {
 	// If we have a dirty value for this state entry, return it
-	value, dirty := s.dirtyStorage[key]
+	value, dirty := self.dirtyStorage[key]
 	if dirty {
 		return value
 	}
 	// Otherwise return the entry's original value
-	return s.GetCommittedState(db, key)
+	return self.GetCommittedState(db, key)
 }
 
 // GetCommittedState retrieves a value from the committed account storage trie.
-func (s *stateObject) GetCommittedState(db Database, key common.Hash) common.Hash {
+func (self *stateObject) GetCommittedState(db Database, key common.Hash) common.Hash {
 	// If we have the original value cached, return that
-	value, cached := s.originStorage[key]
+	value, cached := self.originStorage[key]
 	if cached {
 		return value
 	}
 	// Otherwise load the value from the database
-	enc, err := s.getTrie(db).TryGet(key[:])
+	enc, err := self.getTrie(db).TryGet(key[:])
 	if err != nil {
-		s.setError(err)
+		self.setError(err)
 		return common.Hash{}
 	}
 	if len(enc) > 0 {
 		_, content, _, err := rlp.Split(enc)
 		if err != nil {
-			s.setError(err)
+			self.setError(err)
 		}
 		value.SetBytes(content)
 	}
-	s.originStorage[key] = value
+	self.originStorage[key] = value
 	return value
 }
 
 // SetState updates a value in account storage.
-func (s *stateObject) SetState(db Database, key, value common.Hash) {
+func (self *stateObject) SetState(db Database, key, value common.Hash) {
 	// If the new value is the same as old, don't set
-	prev := s.GetState(db, key)
+	prev := self.GetState(db, key)
 	if prev == value {
 		return
 	}
 	// New value is different, update and journal the change
-	s.db.journal.append(storageChange{
-		account:  &s.address,
+	self.db.journal.append(storageChange{
+		account:  &self.address,
 		key:      key,
 		prevalue: prev,
 	})
-	s.setState(key, value)
+	self.setState(key, value)
 }
 
-func (s *stateObject) setState(key, value common.Hash) {
-	s.dirtyStorage[key] = value
+func (self *stateObject) setState(key, value common.Hash) {
+	self.dirtyStorage[key] = value
 }
 
 // updateTrie writes cached storage modifications into the object's storage trie.
-func (s *stateObject) updateTrie(db Database) Trie {
-	tr := s.getTrie(db)
-	for key, value := range s.dirtyStorage {
-		delete(s.dirtyStorage, key)
+func (self *stateObject) updateTrie(db Database) Trie {
+	tr := self.getTrie(db)
+	for key, value := range self.dirtyStorage {
+		delete(self.dirtyStorage, key)
 
 		// Skip noop changes, persist actual changes
-		if value == s.originStorage[key] {
+		if value == self.originStorage[key] {
 			continue
 		}
-		s.originStorage[key] = value
+		self.originStorage[key] = value
 
 		if (value == common.Hash{}) {
-			s.setError(tr.TryDelete(key[:]))
+			self.setError(tr.TryDelete(key[:]))
 			continue
 		}
 		// Encoding []byte cannot fail, ok to ignore the error.
 		v, _ := rlp.EncodeToBytes(bytes.TrimLeft(value[:], "\x00"))
-		s.setError(tr.TryUpdate(key[:], v))
+		self.setError(tr.TryUpdate(key[:], v))
 	}
 	return tr
 }
 
 // UpdateRoot sets the trie root to the current root hash of
-func (s *stateObject) updateRoot(db Database) {
-	s.updateTrie(db)
-	s.data.Root = s.trie.Hash()
+func (self *stateObject) updateRoot(db Database) {
+	self.updateTrie(db)
+	self.data.Root = self.trie.Hash()
 }
 
 // CommitTrie the storage trie of the object to db.
 // This updates the trie root.
-func (s *stateObject) CommitTrie(db Database) error {
-	s.updateTrie(db)
-	if s.dbErr != nil {
-		return s.dbErr
+func (self *stateObject) CommitTrie(db Database) error {
+	self.updateTrie(db)
+	if self.dbErr != nil {
+		return self.dbErr
 	}
-	root, err := s.trie.Commit(nil)
+	root, err := self.trie.Commit(nil)
 	if err == nil {
-		s.data.Root = root
+		self.data.Root = root
 	}
 	return err
 }
@@ -336,32 +326,32 @@ func (c *stateObject) SubBalance(amount *big.Int) {
 	c.SetBalance(new(big.Int).Sub(c.Balance(), amount))
 }
 
-func (s *stateObject) SetBalance(amount *big.Int) {
-	s.db.journal.append(balanceChange{
-		account: &s.address,
-		prev:    new(big.Int).Set(s.data.Balance),
+func (self *stateObject) SetBalance(amount *big.Int) {
+	self.db.journal.append(balanceChange{
+		account: &self.address,
+		prev:    new(big.Int).Set(self.data.Balance),
 	})
-	s.setBalance(amount)
+	self.setBalance(amount)
 }
 
-func (s *stateObject) setBalance(amount *big.Int) {
-	s.data.Balance = amount
+func (self *stateObject) setBalance(amount *big.Int) {
+	self.data.Balance = amount
 }
 
 // Return the gas back to the origin. Used by the Virtual machine or Closures
 func (c *stateObject) ReturnGas(gas *big.Int) {}
 
-func (s *stateObject) deepCopy(db *StateDB) *stateObject {
-	stateObject := newObject(db, s.address, s.data)
-	if s.trie != nil {
-		stateObject.trie = db.db.CopyTrie(s.trie)
+func (self *stateObject) deepCopy(db *StateDB) *stateObject {
+	stateObject := newObject(db, self.address, self.data)
+	if self.trie != nil {
+		stateObject.trie = db.db.CopyTrie(self.trie)
 	}
-	stateObject.code = s.code
-	stateObject.dirtyStorage = s.dirtyStorage.Copy()
-	stateObject.originStorage = s.originStorage.Copy()
-	stateObject.suicided = s.suicided
-	stateObject.dirtyCode = s.dirtyCode
-	stateObject.deleted = s.deleted
+	stateObject.code = self.code
+	stateObject.dirtyStorage = self.dirtyStorage.Copy()
+	stateObject.originStorage = self.originStorage.Copy()
+	stateObject.suicided = self.suicided
+	stateObject.dirtyCode = self.dirtyCode
+	stateObject.deleted = self.deleted
 	return stateObject
 }
 
@@ -371,65 +361,65 @@ func (c *stateObject) Address() common.Address {
 }
 
 // Code returns the contract code associated with this object, if any.
-func (s *stateObject) Code(db Database) []byte {
-	if s.code != nil {
-		return s.code
+func (self *stateObject) Code(db Database) []byte {
+	if self.code != nil {
+		return self.code
 	}
-	if bytes.Equal(s.CodeHash(), emptyCodeHash) {
+	if bytes.Equal(self.CodeHash(), emptyCodeHash) {
 		return nil
 	}
-	code, err := db.ContractCode(s.addrHash, common.BytesToHash(s.CodeHash()))
+	code, err := db.ContractCode(self.addrHash, common.BytesToHash(self.CodeHash()))
 	if err != nil {
-		s.setError(fmt.Errorf("can't load code hash %x: %v", s.CodeHash(), err))
+		self.setError(fmt.Errorf("can't load code hash %x: %v", self.CodeHash(), err))
 	}
-	s.code = code
+	self.code = code
 	return code
 }
 
-func (s *stateObject) SetCode(codeHash common.Hash, code []byte) {
-	prevcode := s.Code(s.db.db)
-	s.db.journal.append(codeChange{
-		account:  &s.address,
-		prevhash: s.CodeHash(),
+func (self *stateObject) SetCode(codeHash common.Hash, code []byte) {
+	prevcode := self.Code(self.db.db)
+	self.db.journal.append(codeChange{
+		account:  &self.address,
+		prevhash: self.CodeHash(),
 		prevcode: prevcode,
 	})
-	s.setCode(codeHash, code)
+	self.setCode(codeHash, code)
 }
 
-func (s *stateObject) setCode(codeHash common.Hash, code []byte) {
-	s.code = code
-	s.data.CodeHash = codeHash[:]
-	s.dirtyCode = true
+func (self *stateObject) setCode(codeHash common.Hash, code []byte) {
+	self.code = code
+	self.data.CodeHash = codeHash[:]
+	self.dirtyCode = true
 }
 
-func (s *stateObject) SetNonce(nonce uint64) {
-	s.db.journal.append(nonceChange{
-		account: &s.address,
-		prev:    s.data.Nonce,
+func (self *stateObject) SetNonce(nonce uint64) {
+	self.db.journal.append(nonceChange{
+		account: &self.address,
+		prev:    self.data.Nonce,
 	})
-	s.setNonce(nonce)
+	self.setNonce(nonce)
 }
 
-func (s *stateObject) setNonce(nonce uint64) {
-	s.data.Nonce = nonce
+func (self *stateObject) setNonce(nonce uint64) {
+	self.data.Nonce = nonce
 }
 
-func (s *stateObject) CodeHash() []byte {
-	return s.data.CodeHash
+func (self *stateObject) CodeHash() []byte {
+	return self.data.CodeHash
 }
 
-func (s *stateObject) Balance() *big.Int {
-	return s.data.Balance
+func (self *stateObject) Balance() *big.Int {
+	return self.data.Balance
 }
 
-func (s *stateObject) Nonce() uint64 {
-	return s.data.Nonce
+func (self *stateObject) Nonce() uint64 {
+	return self.data.Nonce
 }
 
 // Never called, but must be present to allow stateObject to be used
 // as a vm.Account interface that also satisfies the vm.ContractRef
 // interface. Interfaces are awesome.
-func (s *stateObject) Value() *big.Int {
+func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
 
@@ -437,26 +427,26 @@ func (s *stateObject) Value() *big.Int {
 [BERITH]
 set staking balance
 */
-func (s *stateObject) SetStaking(amount, blockNumber *big.Int) {
-	s.db.journal.append(stakingChange{
-		account:     &s.address,
-		prevBalance: new(big.Int).Set(s.data.StakeBalance),
-		prevBlock:   new(big.Int).Set(s.data.StakeUpdated),
+func (self *stateObject) SetStaking(amount, blockNumber *big.Int) {
+	self.db.journal.append(stakingChange{
+		account:     &self.address,
+		prevBalance: new(big.Int).Set(self.data.StakeBalance),
+		prevBlock:   new(big.Int).Set(self.data.StakeUpdated),
 	})
-	s.setStaking(amount, blockNumber)
+	self.setStaking(amount, blockNumber)
 }
 
-func (s *stateObject) setStaking(amount, blockNumber *big.Int) {
-	s.data.StakeBalance = amount
-	s.data.StakeUpdated = blockNumber
+func (self *stateObject) setStaking(amount, blockNumber *big.Int) {
+	self.data.StakeBalance = amount
+	self.data.StakeUpdated = blockNumber
 }
 
-func (s *stateObject) StakeBalance() *big.Int {
-	return s.data.StakeBalance
+func (self *stateObject) StakeBalance() *big.Int {
+	return self.data.StakeBalance
 }
 
-func (s *stateObject) StakeUpdated() *big.Int {
-	return s.data.StakeUpdated
+func (self *stateObject) StakeUpdated() *big.Int {
+	return self.data.StakeUpdated
 }
 
 func (c *stateObject) RemoveStakeBalance() {
@@ -498,27 +488,27 @@ func (c *stateObject) AddBehindBalance(number, amount *big.Int) {
 	c.SetBehind(number, amount)
 }
 
-func (s *stateObject) SetBehind(number, amount *big.Int) {
+func (self *stateObject) SetBehind(number, amount *big.Int) {
 
 	ch := behindChange{}
-	ch.account = &s.address
+	ch.account = &self.address
 
 	behind := Behind{}
 	behind.Number = number
 	behind.Balance = amount
 
 	ch.prev = append(ch.prev, behind)
-	s.db.journal.append(ch)
+	self.db.journal.append(ch)
 
-	s.setBehind(append(s.data.BehindBalance, behind))
+	self.setBehind(append(self.data.BehindBalance, behind))
 }
 
-func (s *stateObject) setBehind(behind []Behind) {
-	s.data.BehindBalance = behind
+func (self *stateObject) setBehind(behind []Behind) {
+	self.data.BehindBalance = behind
 }
 
-func (s *stateObject) BehindBalance() []Behind {
-	return s.data.BehindBalance
+func (self *stateObject) BehindBalance() []Behind {
+	return self.data.BehindBalance
 }
 
 /*
@@ -526,8 +516,8 @@ func (s *stateObject) BehindBalance() []Behind {
 Function that returns 0th in BehindBalance array
 Function to process FIFO
 */
-func (s *stateObject) GetFirstBehindBalance() (Behind, error) {
-	behind := s.data.BehindBalance
+func (self *stateObject) GetFirstBehindBalance() (Behind, error) {
+	behind := self.data.BehindBalance
 	if behind == nil || len(behind) == 0 {
 		return Behind{}, errors.New("nil behind")
 	}
@@ -540,33 +530,33 @@ func (s *stateObject) GetFirstBehindBalance() (Behind, error) {
 Function to delete 0th value from BehindBalance array
 Function to process FIFO
 */
-func (s *stateObject) RemoveFirstBehindBalance() {
-	behind := s.data.BehindBalance
-	s.setBehind(behind[1:])
+func (self *stateObject) RemoveFirstBehindBalance() {
+	behind := self.data.BehindBalance
+	self.setBehind(behind[1:])
 }
 
 /*
 [BERITH]
 Function to assign the value of Selection Point
 */
-func (s *stateObject) SetPoint(amount *big.Int) {
-	s.db.journal.append(pointChange{
-		account: &s.address,
-		prev:    new(big.Int).Set(s.data.Point),
+func (self *stateObject) SetPoint(amount *big.Int) {
+	self.db.journal.append(pointChange{
+		account: &self.address,
+		prev:    new(big.Int).Set(self.data.Point),
 	})
-	s.setPoint(amount)
+	self.setPoint(amount)
 }
 
-func (s *stateObject) setPoint(amount *big.Int) {
-	s.data.Point = amount
+func (self *stateObject) setPoint(amount *big.Int) {
+	self.data.Point = amount
 }
 
 /*
 [BERITH]
 Function that returns Selection Point
 */
-func (s *stateObject) GetPoint() *big.Int {
-	return s.data.Point
+func (self *stateObject) GetPoint() *big.Int {
+	return self.data.Point
 }
 
 /*
@@ -589,44 +579,44 @@ func (c *stateObject) AddPoint(amount *big.Int) {
 [BERITH]
 Function that returns Account information
 */
-func (s *stateObject) AccountInfo() Account {
-	return s.data
+func (self *stateObject) AccountInfo() Account {
+	return self.data
 }
 
 // [BERITH] Penalty-related function definition
 
 // [BERITH] Returns the current penalty value
-func (s *stateObject) Penalty() uint64 {
-	return s.data.Penalty
+func (self *stateObject) Penalty() uint64 {
+	return self.data.Penalty
 }
 
 // [BERITH] Returns the block number where the penalty was last changed
-func (s *stateObject) PenaltyUpdated() *big.Int {
-	return s.data.PenlatyUpdated
+func (self *stateObject) PenaltyUpdated() *big.Int {
+	return self.data.PenlatyUpdated
 }
 
 // [BERITH] Function to increase penalty by 1
-func (s *stateObject) AddPenalty(blockNumber *big.Int) {
-	s.db.journal.append(penaltyChange{
-		account:     &s.address,
-		prevPenalty: s.data.Penalty,
-		prevBlock:   s.data.PenlatyUpdated,
+func (self *stateObject) AddPenalty(blockNumber *big.Int) {
+	self.db.journal.append(penaltyChange{
+		account:     &self.address,
+		prevPenalty: self.data.Penalty,
+		prevBlock:   self.data.PenlatyUpdated,
 	})
-	s.setPenalty(s.data.Penalty+1, blockNumber)
+	self.setPenalty(self.data.Penalty+1, blockNumber)
 }
 
 // [BERITH] Function to remove penalty for a specific account
-func (s *stateObject) RemovePenalty(blockNumber *big.Int) {
-	s.db.journal.append(penaltyChange{
-		account:     &s.address,
-		prevPenalty: s.data.Penalty,
-		prevBlock:   s.data.PenlatyUpdated,
+func (self *stateObject) RemovePenalty(blockNumber *big.Int) {
+	self.db.journal.append(penaltyChange{
+		account:     &self.address,
+		prevPenalty: self.data.Penalty,
+		prevBlock:   self.data.PenlatyUpdated,
 	})
 
-	s.setPenalty(0, blockNumber)
+	self.setPenalty(0, blockNumber)
 }
 
-func (s *stateObject) setPenalty(amount uint64, blockNumber *big.Int) {
-	s.data.Penalty = amount
-	s.data.PenlatyUpdated = blockNumber
+func (self *stateObject) setPenalty(amount uint64, blockNumber *big.Int) {
+	self.data.Penalty = amount
+	self.data.PenlatyUpdated = blockNumber
 }

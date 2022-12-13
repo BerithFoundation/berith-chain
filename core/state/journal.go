@@ -35,12 +35,8 @@ type journalEntry interface {
 // journal contains the list of state modifications applied since the last state
 // commit. These are tracked to be able to be reverted in case of an execution
 // exception or revertal request.
-//
-// journal은 마지막 state 커밋 이래로 적용된 상태 변경 리스트를 포함한다.
-// 이들은 예외적인 처리나, 되돌리기 요청에 되돌려 줄 수 있도록 추적된다.
 type journal struct {
-	entries []journalEntry // Current changes tracked by the journal
-	// dirty account는 마지막 state commit 이후 상태가 수정된 account를 말함
+	entries []journalEntry         // Current changes tracked by the journal
 	dirties map[common.Address]int // Dirty accounts and the number of changes
 }
 

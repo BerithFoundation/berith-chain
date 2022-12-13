@@ -71,15 +71,9 @@ func NewLedgerHub() (*Hub, error) {
 	return newHub(LedgerScheme, 0x2c97, []uint16{0x0000 /* Ledger Blue */, 0x0001 /* Ledger Nano S */}, 0xffa0, 0, newLedgerDriver)
 }
 
-// NewTrezorHubWithHID creates a new hardware wallet manager for Trezor devices.
-func NewTrezorHubWithHID() (*Hub, error) {
+// NewTrezorHub creates a new hardware wallet manager for Trezor devices.
+func NewTrezorHub() (*Hub, error) {
 	return newHub(TrezorScheme, 0x534c, []uint16{0x0001 /* Trezor 1 */}, 0xff00, 0, newTrezorDriver)
-}
-
-// NewTrezorHubWithWebUSB creates a new hardware wallet manager for Trezor devices with
-// firmware version > 1.8.0
-func NewTrezorHubWithWebUSB() (*Hub, error) {
-	return newHub(TrezorScheme, 0x1209, []uint16{0x53c1 /* Trezor WebUSB */}, 0xffff /* No usage id on webusb, don't match unset (0) */, 0, newTrezorDriver)
 }
 
 // newHub creates a new hardware wallet manager for generic USB devices.
@@ -116,8 +110,6 @@ func (hub *Hub) Wallets() []accounts.Wallet {
 
 // refreshWallets scans the USB devices attached to the machine and updates the
 // list of wallets based on the found devices.
-//
-// refreshWallets은 머신에 부착된 USB 디바이스를 스캔하고 디바이스에 저장된 지갑들을 기반으로 지갑 목록을 업데이트한다.
 func (hub *Hub) refreshWallets() {
 	// Don't scan the USB like crazy it the user fetches wallets in a loop
 	hub.stateLock.RLock()

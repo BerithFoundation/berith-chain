@@ -67,17 +67,17 @@ const (
 	INFO = "Info"
 )
 
-func (vs *ValidationMessages) Crit(msg string) {
+func (vs *ValidationMessages) crit(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{CRIT, msg})
 }
-func (vs *ValidationMessages) Warn(msg string) {
+func (vs *ValidationMessages) warn(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{WARN, msg})
 }
-func (vs *ValidationMessages) Info(msg string) {
+func (vs *ValidationMessages) info(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{INFO, msg})
 }
 
-// / getWarnings returns an error with all messages of type WARN of above, or nil if no warnings were present
+/// getWarnings returns an error with all messages of type WARN of above, or nil if no warnings were present
 func (v *ValidationMessages) getWarnings() error {
 	var messages []string
 	for _, msg := range v.Messages {

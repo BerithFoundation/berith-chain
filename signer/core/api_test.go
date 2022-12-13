@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+//
 package core
 
 import (
@@ -27,71 +28,67 @@ import (
 	"testing"
 	"time"
 
-	"berith-chain/internals/berithapi"
-
-	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/BerithFoundation/berith-chain/signer/storage"
 )
 
-// Used for testing
-type headlessUi struct {
-	approveCh chan string // to send approve/deny
-	inputCh   chan string // to send password
+//Used for testing
+type HeadlessUI struct {
+	controller chan string
 }
 
-func (ui *headlessUi) OnInputRequired(info UserInputRequest) (UserInputResponse, error) {
+func (ui *HeadlessUI) OnInputRequired(info UserInputRequest) (UserInputResponse, error) {
 	return UserInputResponse{}, errors.New("not implemented")
 }
 
-func (ui *headlessUi) OnSignerStartup(info StartupInfo) {
+func (ui *HeadlessUI) OnSignerStartup(info StartupInfo) {
 }
 
-func (ui *headlessUi) OnApprovedTx(tx berithapi.SignTransactionResult) {
+func (ui *HeadlessUI) OnApprovedTx(tx berithapi.SignTransactionResult) {
 	fmt.Printf("OnApproved()\n")
 }
 
-func (ui *headlessUi) ApproveTx(request *SignTxRequest) (SignTxResponse, error) {
+func (ui *HeadlessUI) ApproveTx(request *SignTxRequest) (SignTxResponse, error) {
 
-	switch <-ui.approveCh {
+	switch <-ui.controller {
 	case "Y":
-		return SignTxResponse{request.Transaction, true}, nil
-	case "M": // modify
-		// The headless UI always modifies the transaction
+		return SignTxResponse{request.Transaction, true, <-ui.controller}, nil
+	case "M": //Modify
 		old := big.Int(request.Transaction.Value)
 		newVal := big.NewInt(0).Add(&old, big.NewInt(1))
 		request.Transaction.Value = hexutil.Big(*newVal)
-		return SignTxResponse{request.Transaction, true}, nil
+		return SignTxResponse{request.Transaction, true, <-ui.controller}, nil
 	default:
-		return SignTxResponse{request.Transaction, false}, nil
+		return SignTxResponse{request.Transaction, false, ""}, nil
 	}
 }
 
-func (ui *headlessUi) ApproveSignData(request *SignDataRequest) (SignDataResponse, error) {
-	if "Y" == <-ui.approveCh {
-		return SignDataResponse{true, <-ui.approveCh}, nil
+func (ui *HeadlessUI) ApproveSignData(request *SignDataRequest) (SignDataResponse, error) {
+	if "Y" == <-ui.controller {
+		return SignDataResponse{true, <-ui.controller}, nil
 	}
 	return SignDataResponse{false, ""}, nil
 }
 
-func (ui *headlessUi) ApproveExport(request *ExportRequest) (ExportResponse, error) {
-	return ExportResponse{<-ui.approveCh == "Y"}, nil
+func (ui *HeadlessUI) ApproveExport(request *ExportRequest) (ExportResponse, error) {
+	return ExportResponse{<-ui.controller == "Y"}, nil
 
 }
 
-func (ui *headlessUi) ApproveImport(request *ImportRequest) (ImportResponse, error) {
-	if "Y" == <-ui.approveCh {
-		return ImportResponse{true, <-ui.approveCh, <-ui.approveCh}, nil
+func (ui *HeadlessUI) ApproveImport(request *ImportRequest) (ImportResponse, error) {
+	if "Y" == <-ui.controller {
+		return ImportResponse{true, <-ui.controller, <-ui.controller}, nil
 	}
 	return ImportResponse{false, "", ""}, nil
 }
 
-func (ui *headlessUi) ApproveListing(request *ListRequest) (ListResponse, error) {
-	switch <-ui.approveCh {
+func (ui *HeadlessUI) ApproveListing(request *ListRequest) (ListResponse, error) {
+	switch <-ui.controller {
 	case "A":
 		return ListResponse{request.Accounts}, nil
 	case "1":
@@ -103,19 +100,19 @@ func (ui *headlessUi) ApproveListing(request *ListRequest) (ListResponse, error)
 	}
 }
 
-func (ui *headlessUi) ApproveNewAccount(request *NewAccountRequest) (NewAccountResponse, error) {
-	if "Y" == <-ui.approveCh {
-		return NewAccountResponse{true, <-ui.approveCh}, nil
+func (ui *HeadlessUI) ApproveNewAccount(request *NewAccountRequest) (NewAccountResponse, error) {
+	if "Y" == <-ui.controller {
+		return NewAccountResponse{true, <-ui.controller}, nil
 	}
 	return NewAccountResponse{false, ""}, nil
 }
 
-func (ui *headlessUi) ShowError(message string) {
+func (ui *HeadlessUI) ShowError(message string) {
 	//stdout is used by communication
 	fmt.Fprintln(os.Stderr, message)
 }
 
-func (ui *headlessUi) ShowInfo(message string) {
+func (ui *HeadlessUI) ShowInfo(message string) {
 	//stdout is used by communication
 	fmt.Fprintln(os.Stderr, message)
 }
@@ -132,20 +129,30 @@ func tmpDirName(t *testing.T) string {
 	return d
 }
 
-func setup(t *testing.T) (*SignerAPI, *headlessUi) {
-	db, err := NewFourbytes()
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	ui := &headlessUi{make(chan string, 20), make(chan string, 20)}
-	am := StartClefAccountManager(tmpDirName(t), true, true, "")
-	api := NewSignerAPI(am, 1337, true, ui, db, true, &storage.NoStorage{})
-	return api, ui
+func setup(t *testing.T) (*SignerAPI, chan string) {
 
+	controller := make(chan string, 20)
+
+	db, err := NewAbiDBFromFile("../../cmd/clef/4byte.json")
+	if err != nil {
+		utils.Fatalf(err.Error())
+	}
+	var (
+		ui  = &HeadlessUI{controller}
+		api = NewSignerAPI(
+			1,
+			tmpDirName(t),
+			true,
+			ui,
+			db,
+			true, true)
+	)
+	return api, controller
 }
-func createAccount(ui *headlessUi, api *SignerAPI, t *testing.T) {
-	ui.approveCh <- "Y"
-	ui.inputCh <- "a_long_password"
+func createAccount(control chan string, api *SignerAPI, t *testing.T) {
+
+	control <- "Y"
+	control <- "a_long_password"
 	_, err := api.New(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -154,48 +161,48 @@ func createAccount(ui *headlessUi, api *SignerAPI, t *testing.T) {
 	time.Sleep(250 * time.Millisecond)
 }
 
-func failCreateAccountWithPassword(ui *headlessUi, api *SignerAPI, password string, t *testing.T) {
+func failCreateAccountWithPassword(control chan string, api *SignerAPI, password string, t *testing.T) {
 
-	ui.approveCh <- "Y"
-	// We will be asked three times to provide a suitable password
-	ui.inputCh <- password
-	ui.inputCh <- password
-	ui.inputCh <- password
+	control <- "Y"
+	control <- password
+	control <- "Y"
+	control <- password
+	control <- "Y"
+	control <- password
 
-	addr, err := api.New(context.Background())
+	acc, err := api.New(context.Background())
 	if err == nil {
 		t.Fatal("Should have returned an error")
 	}
-	if addr != (accounts.Account{}) {
+	if acc.Address != (common.Address{}) {
 		t.Fatal("Empty address should be returned")
 	}
 }
 
-func failCreateAccount(ui *headlessUi, api *SignerAPI, t *testing.T) {
-	ui.approveCh <- "N"
-	addr, err := api.New(context.Background())
+func failCreateAccount(control chan string, api *SignerAPI, t *testing.T) {
+	control <- "N"
+	acc, err := api.New(context.Background())
 	if err != ErrRequestDenied {
 		t.Fatal(err)
 	}
-	if addr != (accounts.Account{}) {
+	if acc.Address != (common.Address{}) {
 		t.Fatal("Empty address should be returned")
 	}
 }
 
-func list(ui *headlessUi, api *SignerAPI, t *testing.T) ([]common.Address, error) {
-	ui.approveCh <- "A"
-	return api.List(context.Background())
-
+func list(control chan string, api *SignerAPI, t *testing.T) []common.Address {
+	control <- "A"
+	list, err := api.List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return list
 }
 
 func TestNewAcc(t *testing.T) {
 	api, control := setup(t)
 	verifyNum := func(num int) {
-		list, err := list(control, api, t)
-		if err != nil {
-			t.Errorf("Unexpected error %v", err)
-		}
-		if len(list) != num {
+		if list := list(control, api, t); len(list) != num {
 			t.Errorf("Expected %d accounts, got %d", num, len(list))
 		}
 	}
@@ -219,7 +226,7 @@ func TestNewAcc(t *testing.T) {
 
 	// Testing listing:
 	// Listing one Account
-	control.approveCh <- "1"
+	control <- "1"
 	list, err := api.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -228,7 +235,7 @@ func TestNewAcc(t *testing.T) {
 		t.Fatalf("List should only show one Account")
 	}
 	// Listing denied
-	control.approveCh <- "Nope"
+	control <- "Nope"
 	list, err = api.List(context.Background())
 	if len(list) != 0 {
 		t.Fatalf("List should be empty")
@@ -243,15 +250,15 @@ func TestSignData(t *testing.T) {
 	//Create two accounts
 	createAccount(control, api, t)
 	createAccount(control, api, t)
-	control.approveCh <- "1"
+	control <- "1"
 	list, err := api.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 	a := common.NewMixedcaseAddress(list[0])
 
-	control.approveCh <- "Y"
-	control.approveCh <- "wrongpassword"
+	control <- "Y"
+	control <- "wrongpassword"
 	h, err := api.Sign(context.Background(), a, []byte("EHLO world"))
 	if h != nil {
 		t.Errorf("Expected nil-data, got %x", h)
@@ -259,7 +266,7 @@ func TestSignData(t *testing.T) {
 	if err != keystore.ErrDecrypt {
 		t.Errorf("Expected ErrLocked! %v", err)
 	}
-	control.approveCh <- "No way"
+	control <- "No way"
 	h, err = api.Sign(context.Background(), a, []byte("EHLO world"))
 	if h != nil {
 		t.Errorf("Expected nil-data, got %x", h)
@@ -267,8 +274,8 @@ func TestSignData(t *testing.T) {
 	if err != ErrRequestDenied {
 		t.Errorf("Expected ErrRequestDenied! %v", err)
 	}
-	control.approveCh <- "Y"
-	control.approveCh <- "a_long_password"
+	control <- "Y"
+	control <- "a_long_password"
 	h, err = api.Sign(context.Background(), a, []byte("EHLO world"))
 	if err != nil {
 		t.Fatal(err)
@@ -304,7 +311,7 @@ func TestSignTx(t *testing.T) {
 
 	api, control := setup(t)
 	createAccount(control, api, t)
-	control.approveCh <- "A"
+	control <- "A"
 	list, err = api.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -314,8 +321,8 @@ func TestSignTx(t *testing.T) {
 	methodSig := "test(uint)"
 	tx := mkTestTx(a)
 
-	control.approveCh <- "Y"
-	control.approveCh <- "wrongpassword"
+	control <- "Y"
+	control <- "wrongpassword"
 	res, err = api.SignTransaction(context.Background(), tx, &methodSig)
 	if res != nil {
 		t.Errorf("Expected nil-response, got %v", res)
@@ -323,7 +330,7 @@ func TestSignTx(t *testing.T) {
 	if err != keystore.ErrDecrypt {
 		t.Errorf("Expected ErrLocked! %v", err)
 	}
-	control.approveCh <- "No way"
+	control <- "No way"
 	res, err = api.SignTransaction(context.Background(), tx, &methodSig)
 	if res != nil {
 		t.Errorf("Expected nil-response, got %v", res)
@@ -331,8 +338,8 @@ func TestSignTx(t *testing.T) {
 	if err != ErrRequestDenied {
 		t.Errorf("Expected ErrRequestDenied! %v", err)
 	}
-	control.approveCh <- "Y"
-	control.approveCh <- "a_long_password"
+	control <- "Y"
+	control <- "a_long_password"
 	res, err = api.SignTransaction(context.Background(), tx, &methodSig)
 
 	if err != nil {
@@ -345,8 +352,8 @@ func TestSignTx(t *testing.T) {
 	if parsedTx.Value().Cmp(tx.Value.ToInt()) != 0 {
 		t.Errorf("Expected value to be unchanged, expected %v got %v", tx.Value, parsedTx.Value())
 	}
-	control.approveCh <- "Y"
-	control.approveCh <- "a_long_password"
+	control <- "Y"
+	control <- "a_long_password"
 
 	res2, err = api.SignTransaction(context.Background(), tx, &methodSig)
 	if err != nil {
@@ -357,8 +364,8 @@ func TestSignTx(t *testing.T) {
 	}
 
 	//The tx is modified by the UI
-	control.approveCh <- "M"
-	control.approveCh <- "a_long_password"
+	control <- "M"
+	control <- "a_long_password"
 
 	res2, err = api.SignTransaction(context.Background(), tx, &methodSig)
 	if err != nil {

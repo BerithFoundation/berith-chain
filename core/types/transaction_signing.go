@@ -52,20 +52,6 @@ func MakeSigner(config *params.ChainConfig, blockNumber *big.Int) Signer {
 	return signer
 }
 
-// LatestSignerForChainID returns the 'most permissive' Signer available. Specifically,
-// this enables support for EIP-155 replay protection and all implemented EIP-2718
-// transaction types if chainID is non-nil.
-//
-// Use this in transaction-handling code where the current block number and fork
-// configuration are unknown. If you have a ChainConfig, use LatestSigner instead.
-// If you have a ChainConfig and know the current block number, use MakeSigner instead.
-func LatestSignerForChainID(chainID *big.Int) Signer {
-	if chainID == nil {
-		return HomesteadSigner{}
-	}
-	return NewEIP2930Signer(chainID)
-}
-
 // SignTx signs the transaction using the given signer and private key
 func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, error) {
 	h := s.Hash(tx)
@@ -83,10 +69,8 @@ func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, err
 // Sender may cache the address, allowing it to be used regardless of
 // signing method. The cache is invalidated if the cached signer does
 // not match the signer used in the current call.
-//
-// Sender는 서명으로부터 주소를 추출해 에러와 함께 반환한다.
 func Sender(signer Signer, tx *Transaction) (common.Address, error) {
-	if sc := tx.from.Load(); sc != nil { // tx의 from도 atomic Value라는건, 다른 어디에선가와 충돌을 피하기 위함이 아닐까?
+	if sc := tx.from.Load(); sc != nil {
 		sigCache := sc.(sigCache)
 		// If the signer used to derive from in a previous
 		// call is not the same as used current, invalidate
@@ -106,8 +90,6 @@ func Sender(signer Signer, tx *Transaction) (common.Address, error) {
 
 // Signer encapsulates transaction signature handling. Note that this interface is not a
 // stable API and may change at any time to accommodate new protocol rules.
-//
-// Signer는 트랜잭션 서명 처리를 캡슐화한다.
 type Signer interface {
 	// Sender returns the sender address of the transaction.
 	Sender(tx *Transaction) (common.Address, error)
@@ -120,16 +102,7 @@ type Signer interface {
 	Equal(Signer) bool
 }
 
-type eip2930Signer struct{ EIP155Signer }
-
-// NewEIP2930Signer returns a signer that accepts EIP-2930 access list transactions,
-// EIP-155 replay protected transactions, and legacy Homestead transactions.
-func NewEIP2930Signer(chainId *big.Int) Signer {
-	return eip2930Signer{NewEIP155Signer(chainId)}
-}
-
 // EIP155Transaction implements Signer using the EIP155 rules.
-// EIP155 rules를 사용하여 Signer 인터페이스를 구현하는 객체
 type EIP155Signer struct {
 	chainId, chainIdMul *big.Int
 }

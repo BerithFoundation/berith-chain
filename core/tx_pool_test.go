@@ -47,8 +47,8 @@ func TestTransactionValidate(t *testing.T) {
 			nonce:    0,
 		},
 		txdata{
-			to:       common.Address{},
-			value:    big.NewInt(10000),
+			to:       common.BytesToAddress([]byte("to")),
+			value:    big.NewInt(100000),
 			gas:      21000,
 			gasPrice: big.NewInt(100000),
 			data:     make([]byte, 0),
@@ -57,7 +57,7 @@ func TestTransactionValidate(t *testing.T) {
 			nonce:    0,
 		},
 		txdata{
-			to:       common.Address{},
+			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,
 			gasPrice: big.NewInt(100000),
@@ -78,13 +78,13 @@ func TestTransactionValidate(t *testing.T) {
 		},
 	}
 
-	// results := []error{
-	// 	types.ErrInvalidJobWallet,
-	// 	types.ErrInvalidJobWallet,
-	// 	types.ErrInvalidJobWallet,
-	// 	ErrInvalidStakeReceiver,
-	// 	ErrInvalidStakeReceiver,
-	// }
+	results := []error{
+		types.ErrInvalidJobWallet,
+		types.ErrInvalidJobWallet,
+		types.ErrInvalidJobWallet,
+		ErrInvalidStakeReceiver,
+		ErrInvalidStakeReceiver,
+	}
 
 	genesis := &Genesis{
 		Config:     params.MainnetChainConfig,
@@ -129,7 +129,7 @@ func TestTransactionValidate(t *testing.T) {
 
 	signer := types.NewEIP155Signer(big.NewInt(206))
 
-	for _, tx := range txs {
+	for i, tx := range txs {
 
 		transaction := types.NewTransaction(tx.nonce, tx.to, tx.value, tx.gas, tx.gasPrice, tx.data, tx.base, tx.target)
 		transaction, err = types.SignTx(transaction, signer, pvk)
@@ -139,10 +139,7 @@ func TestTransactionValidate(t *testing.T) {
 		}
 
 		err = pool.AddLocal(transaction)
-		// if err != results[i] {
-		// 	t.Error(err)
-		// }
-		if err != nil {
+		if err != results[i] {
 			t.Error(err)
 		}
 	}

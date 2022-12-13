@@ -22,9 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"berith-chain/internals/berithapi"
-
 	"github.com/BerithFoundation/berith-chain/common"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/signer/core"
 	"github.com/BerithFoundation/berith-chain/signer/rules/deps"
@@ -151,7 +150,9 @@ func (r *rulesetUI) ApproveTx(request *core.SignTxRequest) (core.SignTxResponse,
 	if approved {
 		return core.SignTxResponse{
 				Transaction: request.Transaction,
-				Approved:    true},
+				Approved:    true,
+				Password:    r.lookupPassword(request.Transaction.From.Address()),
+			},
 			nil
 	}
 	return core.SignTxResponse{Approved: false}, err

@@ -241,8 +241,7 @@ func DeleteBody(db DatabaseDeleter, hash common.Hash, number uint64) {
 
 // ReadTd retrieves a block's total difficulty corresponding to the hash.
 func ReadTd(db DatabaseReader, hash common.Hash, number uint64) *big.Int {
-	htdkey := headerTDKey(number, hash)
-	data, _ := db.Get(htdkey)
+	data, _ := db.Get(headerTDKey(number, hash))
 	if len(data) == 0 {
 		return nil
 	}

@@ -24,9 +24,8 @@ import (
 
 	"strings"
 
-	"berith-chain/internals/debug"
-
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
+	"berith-chain/internals/debug"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -153,13 +152,6 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.JSpathFlag,
 			utils.ExecFlag,
 			utils.PreloadJSFlag,
-			utils.HTTPEnabledFlag,
-			utils.HTTPListenAddrFlag,
-			utils.HTTPPortFlag,
-			utils.HTTPApiFlag,
-			utils.HTTPPathPrefixFlag,
-			utils.HTTPCORSDomainFlag,
-			utils.HTTPVirtualHostsFlag,
 		},
 	},
 	{
@@ -227,6 +219,10 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MetricsInfluxDBPasswordFlag,
 			utils.MetricsInfluxDBHostTagFlag,
 		},
+	},
+	{
+		Name:  "WHISPER (EXPERIMENTAL)",
+		Flags: whisperFlags,
 	},
 	{
 		Name: "DEPRECATED",

@@ -82,9 +82,7 @@ type Header struct {
 	Time        *big.Int       `json:"timestamp"        gencodec:"required"`
 	Extra       []byte         `json:"extraData"        gencodec:"required"`
 	MixDigest   common.Hash    `json:"mixHash"`
-	// 64비트 해시인 Nonce와 256비트 해시인 MixDigest는 함께 사용되어
-	// 블록 생성을 위한 마이닝 작업 시 충분한 계산을 수행하는 데 이용된다.
-	Nonce BlockNonce `json:"nonce"`
+	Nonce       BlockNonce     `json:"nonce"`
 }
 
 // field type overrides for gencodec

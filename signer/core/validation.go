@@ -1,18 +1,18 @@
 // Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// This file is part of go-ethereum.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
+// go-ethereum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// go-ethereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
+// GNU General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -26,7 +26,137 @@ import (
 	"github.com/BerithFoundation/berith-chain/common"
 )
 
-var printable7BitAscii = regexp.MustCompile("^[A-Za-z0-9!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ]+$")
+// The validation package contains validation checks for transactions
+// - ABI-data validation
+// - Transaction semantics validation
+// The package provides warnings for typical pitfalls
+
+type Validator struct {
+	db *AbiDb
+}
+
+func NewValidator(db *AbiDb) *Validator {
+	return &Validator{db}
+}
+func testSelector(selector string, data []byte) (*decodedCallData, error) {
+	if selector == "" {
+		return nil, fmt.Errorf("selector not found")
+	}
+	abiData, err := MethodSelectorToAbi(selector)
+	if err != nil {
+		return nil, err
+	}
+	info, err := parseCallData(data, string(abiData))
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+
+}
+
+// validateCallData checks if the ABI-data + methodselector (if given) can be parsed and seems to match
+func (v *Validator) validateCallData(msgs *ValidationMessages, data []byte, methodSelector *string) {
+	if len(data) == 0 {
+		return
+	}
+	if len(data) < 4 {
+		msgs.warn("Tx contains data which is not valid ABI")
+		return
+	}
+	if arglen := len(data) - 4; arglen%32 != 0 {
+		msgs.warn(fmt.Sprintf("Not ABI-encoded data; length should be a multiple of 32 (was %d)", arglen))
+	}
+	var (
+		info *decodedCallData
+		err  error
+	)
+	// Check the provided one
+	if methodSelector != nil {
+		info, err = testSelector(*methodSelector, data)
+		if err != nil {
+			msgs.warn(fmt.Sprintf("Tx contains data, but provided ABI signature could not be matched: %v", err))
+		} else {
+			msgs.info(info.String())
+			//Successfull match. add to db if not there already (ignore errors there)
+			v.db.AddSignature(*methodSelector, data[:4])
+		}
+		return
+	}
+	// Check the db
+	selector, err := v.db.LookupMethodSelector(data[:4])
+	if err != nil {
+		msgs.warn(fmt.Sprintf("Tx contains data, but the ABI signature could not be found: %v", err))
+		return
+	}
+	info, err = testSelector(selector, data)
+	if err != nil {
+		msgs.warn(fmt.Sprintf("Tx contains data, but provided ABI signature could not be matched: %v", err))
+	} else {
+		msgs.info(info.String())
+	}
+}
+
+// validateSemantics checks if the transactions 'makes sense', and generate warnings for a couple of typical scenarios
+func (v *Validator) validate(msgs *ValidationMessages, txargs *SendTxArgs, methodSelector *string) error {
+	// Prevent accidental erroneous usage of both 'input' and 'data'
+	if txargs.Data != nil && txargs.Input != nil && !bytes.Equal(*txargs.Data, *txargs.Input) {
+		// This is a showstopper
+		return errors.New(`Ambiguous request: both "data" and "input" are set and are not identical`)
+	}
+	var (
+		data []byte
+	)
+	// Place data on 'data', and nil 'input'
+	if txargs.Input != nil {
+		txargs.Data = txargs.Input
+		txargs.Input = nil
+	}
+	if txargs.Data != nil {
+		data = *txargs.Data
+	}
+
+	if txargs.To == nil {
+		//Contract creation should contain sufficient data to deploy a contract
+		// A typical error is omitting sender due to some quirk in the javascript call
+		// e.g. https://github.com/BerithFoundation/berith-chain/issues/16106
+		if len(data) == 0 {
+			if txargs.Value.ToInt().Cmp(big.NewInt(0)) > 0 {
+				// Sending ether into black hole
+				return errors.New("Tx will create contract with value but empty code!")
+			}
+			// No value submitted at least
+			msgs.crit("Tx will create contract with empty code!")
+		} else if len(data) < 40 { //Arbitrary limit
+			msgs.warn(fmt.Sprintf("Tx will will create contract, but payload is suspiciously small (%d b)", len(data)))
+		}
+		// methodSelector should be nil for contract creation
+		if methodSelector != nil {
+			msgs.warn("Tx will create contract, but method selector supplied; indicating intent to call a method.")
+		}
+
+	} else {
+		if !txargs.To.ValidChecksum() {
+			msgs.warn("Invalid checksum on to-address")
+		}
+		// Normal transaction
+		if bytes.Equal(txargs.To.Address().Bytes(), common.Address{}.Bytes()) {
+			// Sending to 0
+			msgs.crit("Tx destination is the zero address!")
+		}
+		// Validate calldata
+		v.validateCallData(msgs, data, methodSelector)
+	}
+	return nil
+}
+
+// ValidateTransaction does a number of checks on the supplied transaction, and returns either a list of warnings,
+// or an error, indicating that the transaction should be immediately rejected
+func (v *Validator) ValidateTransaction(txArgs *SendTxArgs, methodSelector *string) (*ValidationMessages, error) {
+	msgs := &ValidationMessages{}
+	return msgs, v.validate(msgs, txArgs, methodSelector)
+}
+
+var Printable7BitAscii = regexp.MustCompile("^[A-Za-z0-9!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ]+$")
 
 // ValidatePasswordFormat returns an error if the password is too short, or consists of characters
 // outside the range of the printable 7bit ascii set
@@ -34,98 +164,8 @@ func ValidatePasswordFormat(password string) error {
 	if len(password) < 10 {
 		return errors.New("password too short (<10 characters)")
 	}
-	if !printable7BitAscii.MatchString(password) {
+	if !Printable7BitAscii.MatchString(password) {
 		return errors.New("password contains invalid characters - only 7bit printable ascii allowed")
 	}
 	return nil
-}
-
-// ValidateTransaction does a number of checks on the supplied transaction, and
-// returns either a list of warnings, or an error (indicating that the transaction
-// should be immediately rejected).
-func (db *Database) ValidateTransaction(selector *string, tx *SendTxArgs) (*ValidationMessages, error) {
-	messages := new(ValidationMessages)
-
-	// Prevent accidental erroneous usage of both 'input' and 'data' (show stopper)
-	if tx.Data != nil && tx.Input != nil && !bytes.Equal(*tx.Data, *tx.Input) {
-		return nil, errors.New(`ambiguous request: both "data" and "input" are set and are not identical`)
-	}
-	// Place data on 'data', and nil 'input'
-	var data []byte
-	if tx.Input != nil {
-		tx.Data = tx.Input
-		tx.Input = nil
-	}
-	if tx.Data != nil {
-		data = *tx.Data
-	}
-	// Contract creation doesn't validate call data, handle first
-	if tx.To == nil {
-		// Contract creation should contain sufficient data to deploy a contract. A
-		// typical error is omitting sender due to some quirk in the javascript call
-		// e.g. https://github.com/ethereum/go-ethereum/issues/16106.
-		if len(data) == 0 {
-			// Prevent sending ether into black hole (show stopper)
-			if tx.Value.ToInt().Cmp(big.NewInt(0)) > 0 {
-				return nil, errors.New("transaction will create a contract with value but empty code")
-			}
-			// No value submitted at least, critically Warn, but don't blow up
-			messages.Crit("Transaction will create a contract with empty code")
-		} else if len(data) < 40 { // arbitrary heuristic limit
-			messages.Warn(fmt.Sprintf("Transaction will create a contract, but the payload is suspiciously small (%d bytes)", len(data)))
-		}
-		// Method selector should be nil for contract creation
-		if selector != nil {
-			messages.Warn("Transaction will create a contract, but method selector supplied, indicating an intent to call a method")
-		}
-		return messages, nil
-	}
-	// Not a contract creation, validate as a plain transaction
-	if !tx.To.ValidChecksum() {
-		messages.Warn("Invalid checksum on recipient address")
-	}
-	if bytes.Equal(tx.To.Address().Bytes(), common.Address{}.Bytes()) {
-		messages.Crit("Transaction recipient is the zero address")
-	}
-	// Semantic fields validated, try to make heads or tails of the call data
-	db.ValidateCallData(selector, data, messages)
-	return messages, nil
-}
-
-// ValidateCallData checks if the ABI call-data + method selector (if given) can
-// be parsed and seems to match.
-func (db *Database) ValidateCallData(selector *string, data []byte, messages *ValidationMessages) {
-	// If the data is empty, we have a plain value transfer, nothing more to do
-	if len(data) == 0 {
-		return
-	}
-	// Validate the call data that it has the 4byte prefix and the rest divisible by 32 bytes
-	if len(data) < 4 {
-		messages.Warn("Transaction data is not valid ABI (missing the 4 byte call prefix)")
-		return
-	}
-	if n := len(data) - 4; n%32 != 0 {
-		messages.Warn(fmt.Sprintf("Transaction data is not valid ABI (length should be a multiple of 32 (was %d))", n))
-	}
-	// If a custom method selector was provided, validate with that
-	if selector != nil {
-		if info, err := verifySelector(*selector, data); err != nil {
-			messages.Warn(fmt.Sprintf("Transaction contains data, but provided ABI signature could not be matched: %v", err))
-		} else {
-			messages.Info(fmt.Sprintf("Transaction invokes the following method: %q", info.String()))
-			db.AddSelector(*selector, data[:4])
-		}
-		return
-	}
-	// No method selector was provided, check the database for embedded ones
-	embedded, err := db.Selector(data[:4])
-	if err != nil {
-		messages.Warn(fmt.Sprintf("Transaction contains data, but the ABI signature could not be found: %v", err))
-		return
-	}
-	if info, err := verifySelector(embedded, data); err != nil {
-		messages.Warn(fmt.Sprintf("Transaction contains data, but provided ABI signature could not be verified: %v", err))
-	} else {
-		messages.Info(fmt.Sprintf("Transaction invokes the following method: %q", info.String()))
-	}
 }

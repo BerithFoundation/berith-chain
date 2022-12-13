@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+//
 package rules
 
 import (
@@ -21,12 +22,11 @@ import (
 	"strings"
 	"testing"
 
-	"berith-chain/internals/berithapi"
-
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"
+	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/signer/core"
 	"github.com/BerithFoundation/berith-chain/signer/storage"
 )
@@ -86,7 +86,7 @@ func (alwaysDenyUI) OnMasterPassword(request *core.PasswordRequest) (core.Passwo
 }
 
 func (alwaysDenyUI) ApproveTx(request *core.SignTxRequest) (core.SignTxResponse, error) {
-	return core.SignTxResponse{Transaction: request.Transaction, Approved: false}, nil
+	return core.SignTxResponse{Transaction: request.Transaction, Approved: false, Password: ""}, nil
 }
 
 func (alwaysDenyUI) ApproveSignData(request *core.SignDataRequest) (core.SignDataResponse, error) {
@@ -262,7 +262,7 @@ func (d *dummyUI) OnMasterPassword(request *core.PasswordRequest) (core.Password
 func (d *dummyUI) OnSignerStartup(info core.StartupInfo) {
 }
 
-// TestForwarding tests that the rule-engine correctly dispatches requests to the next caller
+//TestForwarding tests that the rule-engine correctly dispatches requests to the next caller
 func TestForwarding(t *testing.T) {
 
 	js := ""
@@ -581,7 +581,7 @@ func (d *dontCallMe) OnApprovedTx(tx berithapi.SignTransactionResult) {
 	d.t.Fatalf("Did not expect next-handler to be called")
 }
 
-// TestContextIsCleared tests that the rule-engine does not retain variables over several requests.
+//TestContextIsCleared tests that the rule-engine does not retain variables over several requests.
 // if it does, that would be bad since developers may rely on that to store data,
 // instead of using the disk-based data storage
 func TestContextIsCleared(t *testing.T) {
