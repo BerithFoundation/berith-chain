@@ -347,15 +347,6 @@ func (pool *TxPool) loop() {
 	}
 }
 
-// lockedReset is a wrapper around reset to allow calling it in a thread safe
-// manner. This method is only ever used in the tester!
-func (pool *TxPool) lockedReset(oldHead, newHead *types.Header) {
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
-
-	pool.reset(oldHead, newHead)
-}
-
 // reset retrieves the current state of the blockchain and ensures the content
 // of the transaction pool is valid with regard to the chain state.
 func (pool *TxPool) reset(oldHead, newHead *types.Header) {
@@ -610,7 +601,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return err
 	}
 
-	if (tx.Base() == types.Stake || tx.Target() == types.Stake) && bytes.Compare(tx.To().Bytes(), from.Bytes()) != 0 {
+	if (tx.Base() == types.Stake || tx.Target() == types.Stake) && !bytes.Equal(tx.To().Bytes(), from.Bytes()) {
 		return ErrInvalidStakeReceiver
 	}
 

@@ -17,7 +17,6 @@
 package core
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/common"
@@ -95,16 +94,6 @@ func newInsertIterator(chain types.Blocks, results <-chan error, validator Valid
 		results:   results,
 		index:     -1,
 		validator: validator,
-	}
-}
-
-func (it *insertIterator) print(typ string) {
-	fmt.Println("#############################[ITERATOR]###############################")
-	fmt.Println("TYPE :", typ)
-	fmt.Println("LENGTH :", len(it.chain))
-	fmt.Println("INDEX :", it.index)
-	for _, v := range it.chain {
-		fmt.Println("[", v.Number().String(), ",", v.Hash().Hex(), "]")
 	}
 }
 

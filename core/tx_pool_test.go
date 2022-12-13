@@ -26,7 +26,7 @@ func TestTransactionValidate(t *testing.T) {
 	pvk.PublicKey.X, pvk.PublicKey.Y = secp256k1.S256().ScalarBaseMult(big.NewInt(3360).Bytes())
 
 	txs := []txdata{
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,
@@ -36,7 +36,7 @@ func TestTransactionValidate(t *testing.T) {
 			target:   types.Main,
 			nonce:    0,
 		},
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,
@@ -46,7 +46,7 @@ func TestTransactionValidate(t *testing.T) {
 			target:   4,
 			nonce:    0,
 		},
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,
@@ -56,7 +56,7 @@ func TestTransactionValidate(t *testing.T) {
 			target:   types.Stake,
 			nonce:    0,
 		},
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,
@@ -66,7 +66,7 @@ func TestTransactionValidate(t *testing.T) {
 			target:   types.Stake,
 			nonce:    0,
 		},
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			value:    big.NewInt(100000),
 			gas:      21000,

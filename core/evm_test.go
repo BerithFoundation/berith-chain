@@ -4,14 +4,12 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/core/vm"
 	"github.com/BerithFoundation/berith-chain/crypto/secp256k1"
 
-	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/state"
@@ -52,7 +50,6 @@ var (
 		MixDigest:   common.Hash{},
 		Nonce:       types.EncodeNonce(0),
 	}
-	ks = keystore.NewKeyStore(os.TempDir()+"/keystore/", keystore.StandardScryptN, keystore.StandardScryptP)
 
 	vmConfig = vm.Config{
 		EnablePreimageRecording: false,
@@ -61,7 +58,7 @@ var (
 	}
 
 	datas = []txdata{
-		txdata{
+		{
 			to:       common.Address{}, //if try to stake or unstake it automatically set to senders address
 			nonce:    0,
 			value:    new(big.Int).Mul(big.NewInt(100000), eth),
@@ -71,7 +68,7 @@ var (
 			gas:      21000,
 			gasPrice: big.NewInt(2000),
 		},
-		txdata{
+		{
 			to:       common.BytesToAddress([]byte("to")),
 			nonce:    0,
 			value:    new(big.Int).Mul(big.NewInt(100000), eth),
@@ -81,7 +78,7 @@ var (
 			gas:      21000,
 			gasPrice: big.NewInt(2000),
 		},
-		txdata{
+		{
 			to:       common.Address{}, //if try to stake or unstake it automatically set to senders address
 			nonce:    0,
 			value:    new(big.Int).Mul(big.NewInt(100000), eth),
