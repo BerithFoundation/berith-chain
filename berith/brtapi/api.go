@@ -7,10 +7,11 @@ package brtapi
 import (
 	"berith-chain/core"
 	"context"
+	"strconv"
+
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/miner"
 	"github.com/BerithFoundation/berith-chain/rpc"
-	"strconv"
 
 	"math/big"
 
@@ -22,7 +23,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/log"
 )
 
-//PrivateBerithAPI struct of berith private apis
+// PrivateBerithAPI struct of berith private apis
 type PrivateBerithAPI struct {
 	backend        Backend
 	miner          *miner.Miner
@@ -73,6 +74,7 @@ func (s *PrivateBerithAPI) Stake(ctx context.Context, wallet WalletTxArgs) (comm
 	stakingAmount := wallet.Value.ToInt()
 	totalStakingAmount := new(big.Int).Add(stakingAmount, stakedAmount)
 
+	// 본래 Stake 트랜잭션 검증을 IsEIP155 포크 기준으로 하기 때문에 별도의 Berith 포크 또한 필요하지 않음.
 	if config := s.backend.ChainConfig(); config.IsEIP155(s.backend.CurrentBlock().Number()) {
 		err := checkStakeMinimum(totalStakingAmount, config.Bsrr.StakeMinimum)
 		if err != nil {

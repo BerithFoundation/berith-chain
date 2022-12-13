@@ -18,6 +18,7 @@ package core
 
 import (
 	"container/heap"
+	"fmt"
 	"math"
 	"math/big"
 	"sort"
@@ -29,6 +30,8 @@ import (
 
 // nonceHeap is a heap.Interface implementation over 64bit unsigned integers for
 // retrieving sorted transactions from the possibly gapped future queue.
+//
+// noceHeap은 갭이 생길 수 있는 미래 대기열에서 정렬된 트랜잭션을 검색하기 위한 것이다.
 type nonceHeap []uint64
 
 func (h nonceHeap) Len() int           { return len(h) }
@@ -81,12 +84,16 @@ func (m *txSortedMap) Put(tx *types.Transaction) {
 // Forward removes all transactions from the map with a nonce lower than the
 // provided threshold. Every removed transaction is returned for any post-removal
 // maintenance.
+//
+// Forward는 제공된 임계값보다 낮은 nonce의 모든 트랜잭션을 맵에서 제거한다.
+// 제거된 모든 트랜잭션은 제거 후 유지 관리를 위해 반환된다.
 func (m *txSortedMap) Forward(threshold uint64) types.Transactions {
 	var removed types.Transactions
 
 	// Pop off heap items until the threshold is reached
 	for m.index.Len() > 0 && (*m.index)[0] < threshold {
 		nonce := heap.Pop(m.index).(uint64)
+		fmt.Printf("txSortedMap.Forward / Nonce : %v, Threshold : %v\n", nonce, threshold)
 		removed = append(removed, m.items[nonce])
 		delete(m.items, nonce)
 	}
@@ -175,6 +182,9 @@ func (m *txSortedMap) Remove(nonce uint64) bool {
 // Note, all transactions with nonces lower than start will also be returned to
 // prevent getting into and invalid state. This is not something that should ever
 // happen but better to be self correcting than failing!
+//
+// Ready는 처리할 준비가 되면 제공된 start부터 시작하는 트랜잭션의 순차적 증가 목록을 검색한다.
+// 반환된 트랜잭션이 목록에서 제거된다.
 func (m *txSortedMap) Ready(start uint64) types.Transactions {
 	// Short circuit if no transactions are available
 	if m.index.Len() == 0 || (*m.index)[0] > start {
@@ -219,6 +229,9 @@ func (m *txSortedMap) Flatten() types.Transactions {
 // nonce. The same type can be used both for storing contiguous transactions for
 // the executable/pending queue; and for storing gapped transactions for the non-
 // executable/future queue, with minor behavioral changes.
+//
+// txList는 어카운트에 속해있는 어카운트 논스 기준으로 정렬된 트랜잭션들의 리스트이다.
+//
 type txList struct {
 	strict bool         // Whether nonces are strictly continuous or not
 	txs    *txSortedMap // Heap indexed sorted hash map of the transactions
@@ -287,6 +300,9 @@ func (l *txList) Forward(threshold uint64) types.Transactions {
 // a point in calculating all the costs or if the balance covers all. If the threshold
 // is lower than the costgas cap, the caps will be reset to a new high after removing
 // the newly invalidated transactions.
+//
+// Filter는 비용 또는 가스 리밋이 제공된 임계값보다 높은 모든 트랜잭션을 목록에서 제거한다.
+// 제거된 모든 트랜잭션은 제거 후 유지 관리를 위해 반환된다.
 func (l *txList) Filter(mainbal *big.Int, gasLimit uint64) (types.Transactions, types.Transactions) {
 	// If all transactions are below the threshold, short circuit
 	if l.costcap.Cmp(mainbal) <= 0 && l.gascap <= gasLimit {
@@ -300,6 +316,7 @@ func (l *txList) Filter(mainbal *big.Int, gasLimit uint64) (types.Transactions, 
 		[BERITH]
 		Transcaion Filter Logic Definition
 		Standard operation is different by classifying TX type
+		베리드는 트랜잭션 유형을 구분했기 때문에 표준 작업이 다름
 	*/
 	removed := l.txs.Filter(func(tx *types.Transaction) bool {
 		if tx.Base() == types.Main {
@@ -370,6 +387,7 @@ func (l *txList) Empty() bool {
 // Flatten creates a nonce-sorted slice of transactions based on the loosely
 // sorted internals representation. The result of the sorting is cached in case
 // it's requested again before any modifications are made to the contents.
+// Flatten은 느슨하게 정렬된 내부 표현을 기반으로 논스 기준 정렬된 트랜잭션 조각을 만듭니다.
 func (l *txList) Flatten() types.Transactions {
 	return l.txs.Flatten()
 }
@@ -429,6 +447,9 @@ func (l *txPricedList) Put(tx *types.Transaction) {
 // Removed notifies the prices transaction list that an old transaction dropped
 // from the pool. The list will just keep a counter of stale objects and update
 // the heap if a large enough ratio of transactions go stale.
+//
+// Removed는 이전 트랜잭션이 풀에서 삭제되었음을 가격 트랜잭션 목록에 알린다.
+// list는 오래된 개체의 카운터를 유지하고 충분한 트랜잭션 비율이 오래된 경우 힙을 업데이트한다.
 func (l *txPricedList) Removed() {
 	// Bump the stale counter, but exit if still too low (< 25%)
 	l.stales++
@@ -471,10 +492,10 @@ func (l *txPricedList) Cap(threshold *big.Int, local *accountSet) types.Transact
 			drop = append(drop, tx)
 		}
 	}
-	for _, tx := range save {
+	for _, tx := range save { // threshold보다 높은 가스비를 제시한 트랜잭션은 살려서 l.items에 Push 하고
 		heap.Push(l.items, tx)
 	}
-	return drop
+	return drop // 그렇지 못한 저렴한 가스비의 tx들은 TxPool.SetGasPrice 에서 삭제된다.
 }
 
 // Underpriced checks whether a transaction is cheaper than (or as cheap as) the

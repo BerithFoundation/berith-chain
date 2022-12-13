@@ -48,6 +48,11 @@ const (
 // a part of either structure.
 // It is not thread safe either, the encapsulating chain structures should do
 // the necessary mutex locking/unlocking.
+//
+// HeaderChain은 core.BlockChain과 light.LightChain에 의해 공유되는
+// 기본 블록 헤더 체인 로직을 구현한다.
+// 헤더체인은 그 자체로 쓰일 수 없으며 구조체의 일부로만 사용되어야 한다.
+// 스레드 세이프 하지 않기 때문에 캡슐화 체인 구조체는 뮤텍스를 사용해야 한다.
 type HeaderChain struct {
 	config *params.ChainConfig
 

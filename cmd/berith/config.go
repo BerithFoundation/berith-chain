@@ -32,7 +32,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/params"
-	whisper "github.com/BerithFoundation/berith-chain/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 
@@ -42,7 +41,7 @@ var (
 		Name:        "dumpconfig",
 		Usage:       "Show configuration values",
 		ArgsUsage:   "",
-		Flags:       append(append(nodeFlags, rpcFlags...), whisperFlags...),
+		Flags:       append(nodeFlags, rpcFlags...),
 		Category:    "MISCELLANEOUS COMMANDS",
 		Description: `The dumpconfig command shows configuration values.`,
 	}
@@ -76,7 +75,6 @@ type berithStatsConfig struct {
 
 type berConfig struct {
 	Ber         berith.Config
-	Shh         whisper.Config
 	Node        node.Config
 	BerithStats berithStatsConfig
 }
@@ -100,8 +98,10 @@ func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
 	cfg.Version = params.VersionWithCommit(gitCommit)
-	cfg.HTTPModules = append(cfg.HTTPModules, "berith", "shh")
-	cfg.WSModules = append(cfg.WSModules, "berith", "shh")
+	// [Berith]
+	// Added for using "eth_" prefix for metamask connection
+	cfg.HTTPModules = append(cfg.HTTPModules, []string{"berith", "eth"}...)
+	cfg.WSModules = append(cfg.WSModules, []string{"berith", "eth"}...)
 	cfg.IPCPath = "ber.ipc"
 	return cfg
 }
@@ -110,10 +110,8 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 	// Load defaults.
 	cfg := berConfig{
 		Ber:  berith.DefaultConfig,
-		Shh:  whisper.DefaultConfig,
 		Node: defaultNodeConfig(),
 	}
-
 	// Load config file.
 	if file := ctx.GlobalString(configFileFlag.Name); file != "" {
 		if err := loadConfig(file, &cfg); err != nil {
@@ -132,19 +130,7 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, berConfig) {
 		cfg.BerithStats.URL = ctx.GlobalString(utils.BerithStatsURLFlag.Name)
 	}
 
-	utils.SetShhConfig(ctx, stack, &cfg.Shh)
-
 	return stack, cfg
-}
-
-// enableWhisper returns true in case one of the whisper flags is set.
-func enableWhisper(ctx *cli.Context) bool {
-	for _, flag := range whisperFlags {
-		if ctx.GlobalIsSet(flag.GetName()) {
-			return true
-		}
-	}
-	return false
 }
 
 func makeFullNode(ctx *cli.Context) *node.Node {
@@ -153,22 +139,6 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		cfg.Ber.ConstantinopleOverride = new(big.Int).SetUint64(ctx.GlobalUint64(utils.ConstantinopleOverrideFlag.Name))
 	}
 	utils.RegisterBerithService(stack, &cfg.Ber)
-
-	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
-	shhEnabled := enableWhisper(ctx)
-	shhAutoEnabled := !ctx.GlobalIsSet(utils.WhisperEnabledFlag.Name) && ctx.GlobalIsSet(utils.DeveloperFlag.Name)
-	if shhEnabled || shhAutoEnabled {
-		if ctx.GlobalIsSet(utils.WhisperMaxMessageSizeFlag.Name) {
-			cfg.Shh.MaxMessageSize = uint32(ctx.Int(utils.WhisperMaxMessageSizeFlag.Name))
-		}
-		if ctx.GlobalIsSet(utils.WhisperMinPOWFlag.Name) {
-			cfg.Shh.MinimumAcceptedPOW = ctx.Float64(utils.WhisperMinPOWFlag.Name)
-		}
-		if ctx.GlobalIsSet(utils.WhisperRestrictConnectionBetweenLightClientsFlag.Name) {
-			cfg.Shh.RestrictConnectionBetweenLightClients = true
-		}
-		utils.RegisterShhService(stack, &cfg.Shh)
-	}
 
 	// Add the Berith Stats daemon if requested.
 	if cfg.BerithStats.URL != "" {

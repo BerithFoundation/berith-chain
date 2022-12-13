@@ -32,9 +32,11 @@ var (
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
 	nodeConfig     = flag.String("nodeconfig", "", "config file path")
-	//node_berithbase = flag.String("miner.berithbase", "", "berithbase")
-	w        *astilectron.Window
-	WalletDB *walletdb.WalletDB
+	httpFlag       = flag.String("http", "", "open http connection")
+	httpCorsDomain = flag.String("http.corsdomain", "http://localhost:8080", "set cors domain")
+	httpApi        = flag.String("http.api", "", "set http api")
+	w              *astilectron.Window
+	WalletDB       *walletdb.WalletDB
 
 	ctx    context.Context
 	client *rpc.Client

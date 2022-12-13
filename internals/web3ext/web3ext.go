@@ -40,6 +40,7 @@ var Modules = map[string]string{
 	"shh":        Shh_JS,
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
+	"eth":        Eth_JS,
 }
 
 const Chequebook_JS = `
@@ -758,6 +759,19 @@ web3._extend({
 				return status;
 			}
 		}),
+	]
+});
+`
+
+const Eth_JS = `
+web3._extend({
+	property: 'eth',
+	methods: [
+		new web3._extend.Method({
+			name: 'chainId',
+			call: 'eth_chainId',
+			params: 0
+		})
 	]
 });
 `

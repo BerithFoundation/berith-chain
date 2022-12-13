@@ -10,10 +10,11 @@
 *un~
 .DS_Store
 */**/.DS_Store
-cmd/berith/Berith/*
-berith/berith/*
-cmd/berith/berith.exe
-cmd/berith/password.txt
+/cmd/berith/bdata
+/cmd/berith/genesis.json
+/cmd/berith/berith
+/cmd/berith/berith.exe
+/cmd/berith/password.txt
 wallet/Berith/*
 wallet/vendor/
 wallet/output/
