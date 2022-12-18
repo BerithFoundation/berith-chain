@@ -28,7 +28,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/node"
 	"github.com/BerithFoundation/berith-chain/rpc"
-	"github.com/gizak/termui/2.3.0/termui-2.3.0" // Since the library does not support go module, it must be downloaded and installed
+	"github.com/gizak/termui" // Since the library does not support go module, it must be downloaded and installed
 	"gopkg.in/urfave/cli.v1"
 )
 
