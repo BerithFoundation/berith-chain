@@ -14,6 +14,7 @@ import (
 	walletdb "github.com/BerithFoundation/berith-chain/wallet/database"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
+	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
 )
 
@@ -64,9 +65,9 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	}
 
 	if err != nil {
-		l.Error(err.Error())
+		astilog.Error(err.Error())
 	}
-	l.Debugf("Payload: %s", payload)
+	astilog.Debugf("Payload: %s", payload)
 	return
 }
 
@@ -109,7 +110,7 @@ func callDB(api interface{}, args ...interface{}) (interface{}, error) {
 	// acc = strings.ReplaceAll(acc , "\"","")
 	acc = strings.Replace(acc, "\"", "", -1)
 	if err != nil {
-		l.Error(errors.Wrap(err, "insert error"))
+		astilog.Error(errors.Wrap(err, "insert error"))
 	}
 	switch api.(string) {
 

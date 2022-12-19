@@ -57,3 +57,4 @@ cmd/berith/password.txt
 wallet/bind_darwin_amd64.go
 wallet/wallet
 cmd/berith/berith
+wallet/windows.syso
