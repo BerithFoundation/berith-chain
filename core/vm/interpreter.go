@@ -116,7 +116,7 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 		}
 	}
 	// [Berith]
-	// To use recently added opcode
+	// To use recently added opcodes
 	if evm.ChainConfig().IsBIP5(evm.BlockNumber) {
 		cfg.ExtraEips = append(cfg.ExtraEips, []int{2929, 2200, 1884, 1344}...)
 		for i, eip := range cfg.ExtraEips {

@@ -67,8 +67,8 @@ func start_ui() {
 	// Run bootstrap
 	astilog.Debugf("Running app built at %s", BuiltAt)
 	if err := bootstrap.Run(bootstrap.Options{
-		Asset:    nil, // This is temporary value
-		AssetDir: nil, // This is temporary value
+		Asset:    Asset,
+		AssetDir: AssetDir,
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
 			AppIconDarwinPath:  "resources/app/images/common/berith_pa.ico",
@@ -113,7 +113,7 @@ func start_ui() {
 			go Start()
 			return nil
 		},
-		RestoreAssets: nil, // This is temporary value
+		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
 			Homepage: "html/login.html",
 			//Homepage:       "index.html",

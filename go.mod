@@ -4,7 +4,8 @@ go 1.14
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
-	github.com/BerithFoundation/berith-chain v0.0.0-00010101000000-000000000000
+	github.com/Azure/go-autorest/autorest/adal v0.9.21 // indirect
+	github.com/BerithFoundation/berith-chain v0.0.0-20221219065840-27e879990ac5
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e
@@ -36,6 +37,7 @@ require (
 	github.com/mattn/go-colorable v0.1.7
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
 	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/pborman/uuid v1.2.1
@@ -45,7 +47,7 @@ require (
 	github.com/rjeczalik/notify v0.9.2
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
 	github.com/rs/cors v1.7.0
-	github.com/status-im/keycard-go v0.0.0-20220906070205-e43cb0f06ae9
+	github.com/status-im/keycard-go v0.0.0-20190316090335-8537d3370df4
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954
 	golang.org/x/crypto v0.4.0
@@ -55,7 +57,7 @@ require (
 	golang.org/x/text v0.5.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
-	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6
+	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200316214253-d7b0ff38cac9
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
