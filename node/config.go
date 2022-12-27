@@ -84,6 +84,9 @@ type Config struct {
 	// scrypt KDF at the expense of security.
 	UseLightweightKDF bool `toml:",omitempty"`
 
+	// InsecureUnlockAllowed allows user to unlock accounts in unsafe http environment.
+	InsecureUnlockAllowed bool `toml:",omitempty"`
+
 	// NoUSB disables hardware wallet monitoring and connectivity.
 	NoUSB bool `toml:",omitempty"`
 
@@ -124,6 +127,9 @@ type Config struct {
 	// HTTPTimeouts allows for customization of the timeout values used by the HTTP RPC
 	// interface.
 	HTTPTimeouts rpc.HTTPTimeouts
+
+	// HTTPPathPrefix specifies a path prefix on which http-rpc is to be served.
+	HTTPPathPrefix string `toml:",omitempty"`
 
 	// WSHost is the host interface on which to start the websocket RPC server. If
 	// this field is empty, no websocket API endpoint will be started.

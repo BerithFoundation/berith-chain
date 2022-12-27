@@ -28,12 +28,13 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/berith"
 
+	"berith-chain/internals/debug"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/berithclient"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/console"
-	"berith-chain/internals/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -127,6 +128,13 @@ var (
 	}
 
 	rpcFlags = []cli.Flag{
+		utils.HTTPEnabledFlag,
+		utils.HTTPListenAddrFlag,
+		utils.HTTPPortFlag,
+		utils.HTTPCORSDomainFlag,
+		utils.HTTPVirtualHostsFlag,
+		utils.HTTPApiFlag,
+		utils.HTTPPathPrefixFlag,
 		utils.RPCEnabledFlag,
 		utils.RPCListenAddrFlag,
 		utils.RPCPortFlag,
