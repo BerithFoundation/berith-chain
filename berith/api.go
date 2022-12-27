@@ -475,8 +475,8 @@ type PublicEthAPI struct {
 }
 
 // NewPublicEthAPI creates a new Eth protocol API for full nodes.
-func NewPublicEthAPI(e *Berith) *PublicBerithAPI {
-	return &PublicBerithAPI{e}
+func NewPublicEthAPI(e *Berith) *PublicEthAPI {
+	return &PublicEthAPI{e}
 }
 
 // ChainId is the EIP-155 replay-protection chain id for the current berith chain config.
