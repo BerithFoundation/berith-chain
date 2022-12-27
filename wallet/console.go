@@ -38,11 +38,12 @@ import (
 	"github.com/BerithFoundation/berith-chain/berith"
 	"github.com/BerithFoundation/berith-chain/berithclient"
 
+	"berith-chain/internals/debug"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
 	"github.com/BerithFoundation/berith-chain/console"
-	"berith-chain/internals/debug"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/node"
@@ -143,6 +144,13 @@ var (
 		utils.RPCListenAddrFlag,
 		utils.RPCPortFlag,
 		utils.RPCApiFlag,
+		utils.HTTPEnabledFlag,
+		utils.HTTPListenAddrFlag,
+		utils.HTTPPortFlag,
+		utils.HTTPCORSDomainFlag,
+		utils.HTTPVirtualHostsFlag,
+		utils.HTTPApiFlag,
+		utils.HTTPPathPrefixFlag,
 		utils.WSEnabledFlag,
 		utils.WSListenAddrFlag,
 		utils.WSPortFlag,
@@ -258,9 +266,17 @@ func Start() {
 	if *nodePort != "" {
 		args = append(args, "--port", *nodePort)
 	}
-
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
+	}
+	if *httpFlag != "" {
+		args = append(args, "--http")
+	}
+	if *httpCorsDomain != "" {
+		args = append(args, "--http.corsdomain", *httpCorsDomain)
+	}
+	if *httpApi != "" {
+		args = append(args, "--http.api", *httpApi)
 	}
 	defer func() {
 		if r := recover(); r != nil {
