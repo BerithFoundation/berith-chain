@@ -32,8 +32,9 @@ var (
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
 	nodeConfig     = flag.String("nodeconfig", "", "config file path")
-	httpFlag       = flag.String("http", "", "open http connection")
-	httpCorsDomain = flag.String("http.corsdomain", "http://localhost:8080", "set cors domain")
+	nodiscover     = flag.Bool("nodiscover", false, "nodiscover")
+	httpFlag       = flag.Bool("http", false, "open http connection")
+	httpCorsDomain = flag.String("http.corsdomain", "https://remix.ethereum.org/", "set cors domain")
 	httpApi        = flag.String("http.api", "", "set http api")
 	w              *astilectron.Window
 	WalletDB       *walletdb.WalletDB

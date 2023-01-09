@@ -61,3 +61,4 @@ wallet/wallet
 cmd/berith/__debug_bin
 wallet/wallet.exe
 wallet/windows.syso
+cmd/berith/password

@@ -269,7 +269,10 @@ func Start() {
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
 	}
-	if *httpFlag != "" {
+	if *nodiscover {
+		args = append(args, "--nodiscover")
+	}
+	if *httpFlag {
 		args = append(args, "--http")
 	}
 	if *httpCorsDomain != "" {

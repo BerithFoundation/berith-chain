@@ -771,7 +771,20 @@ web3._extend({
 			name: 'chainId',
 			call: 'eth_chainId',
 			params: 0
-		})
+		}),
+		new web3._extend.Method({
+			name: 'getBlockByNumber',
+			call: 'eth_getBlockByNumber',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, function (val) { return !!val; }]
+		}),
+		new web3._extend.Method({
+			name: 'getBalance',
+			call: 'eth_getBalance',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+			outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
 	]
 });
 `

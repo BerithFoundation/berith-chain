@@ -18,7 +18,6 @@ package core
 
 import (
 	"container/heap"
-	"fmt"
 	"math"
 	"math/big"
 	"sort"
@@ -93,7 +92,6 @@ func (m *txSortedMap) Forward(threshold uint64) types.Transactions {
 	// Pop off heap items until the threshold is reached
 	for m.index.Len() > 0 && (*m.index)[0] < threshold {
 		nonce := heap.Pop(m.index).(uint64)
-		fmt.Printf("txSortedMap.Forward / Nonce : %v, Threshold : %v\n", nonce, threshold)
 		removed = append(removed, m.items[nonce])
 		delete(m.items, nonce)
 	}
@@ -231,7 +229,6 @@ func (m *txSortedMap) Flatten() types.Transactions {
 // executable/future queue, with minor behavioral changes.
 //
 // txList는 어카운트에 속해있는 어카운트 논스 기준으로 정렬된 트랜잭션들의 리스트이다.
-//
 type txList struct {
 	strict bool         // Whether nonces are strictly continuous or not
 	txs    *txSortedMap // Heap indexed sorted hash map of the transactions
