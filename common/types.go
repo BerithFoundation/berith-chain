@@ -38,7 +38,7 @@ const (
 	// AddressLength is the expected length of the address
 	AddressLength = 20
 	// AddressPrefix is prefix of the address
-	AddressPrefix = "Bx"
+	AddressPrefix = "0x"
 	// AddressPrefixLength is the expected length of the address prefix
 	AddressPrefixLength = len(AddressPrefix)
 )
