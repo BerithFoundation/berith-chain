@@ -870,3 +870,5 @@ web3._extend({
 	]
 });
 `
+
+// TODO: eth_gasPrice, eth_estimateGas

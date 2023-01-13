@@ -1053,7 +1053,7 @@ require = (function e(t, n, r) {
         var utils = require("../utils/utils");
         var c = require("../utils/config");
         var SolidityParam = require("./param");
-        var addressPrefix = "Bx";
+        var addressPrefix = "0x";
 
         /**
          * Formats input value to byte representation of int
@@ -2096,7 +2096,7 @@ require = (function e(t, n, r) {
         var BigNumber = require("bignumber.js");
         var sha3 = require("./sha3.js");
         var utf8 = require("utf8");
-        var addressPrefix = "Bx";
+        var addressPrefix = "0x";
 
         var unitMap = {
           nober: "0",
@@ -2476,7 +2476,7 @@ require = (function e(t, n, r) {
          * @return {Boolean}
          */
         var isStrictAddress = function (address) {
-          return /^[Bb]x[0-9a-f]{40}$/i.test(address);
+          return /^0x[0-9a-f]{40}$/i.test(address);
         };
 
         /**
@@ -2487,14 +2487,14 @@ require = (function e(t, n, r) {
          * @return {Boolean}
          */
         var isAddress = function (address) {
-          if (!/^([Bb]x)?[0-9a-f]{40}$/i.test(address)) {
+          if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
             // check if it has the basic requirements of an address
             return false;
           } else if (
-            /^([Bb]x)?[0-9a-f]{40}$/.test(address) ||
-            /^([Bb]x)?[0-9A-F]{40}$/.test(address)
+            /^(0x)?[0-9a-f]{40}$/.test(address) ||
+            /^(0x)?[0-9A-F]{40}$/.test(address)
           ) {
-            // If it's all small caps or all all caps, return true
+            // If it's all small caps or all caps, return true
             return true;
           } else {
             // Otherwise check each case
@@ -4365,7 +4365,7 @@ require = (function e(t, n, r) {
           } else if (utils.isAddress(address)) {
             return addressPrefix + address;
           }
-          throw new Error("invalid address");
+          throw new Error("invalid address : ", address);
         };
 
         var outputSyncingFormatter = function (result) {
