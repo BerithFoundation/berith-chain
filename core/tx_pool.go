@@ -645,7 +645,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		unStakable, leftBlocks := checkBreakTransaction(msg, lastStakedBlock, currentBlockNumber, period)
 		// unstaking 하려면 3일 기다려야 함
 		if !unStakable {
-			return fmt.Errorf("cannot unstake yet, %v blocks (%dH) left", leftBlocks, (uint64(leftBlocks)*period)/(3600))
+			return fmt.Errorf("cannot break yet, %v blocks (%dH) left", leftBlocks, (uint64(leftBlocks)*period)/(3600))
 		}
 	}
 

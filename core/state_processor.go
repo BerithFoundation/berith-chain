@@ -177,8 +177,7 @@ Check if the break transaction satisfies the lock up condition
 The Break Transaction has a three-day grace period.
 */
 func checkBreakTransaction(msg types.Message, lastBlock, blockNumber *big.Int, period uint64) (bool, int64) {
-	// lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
-	lockUpPeriod := big.NewInt(5) // Temporary
+	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
 	elapsedBlockNumber := new(big.Int).Sub(blockNumber, lastBlock)
 	if msg.Base() == types.Stake && msg.Target() == types.Main {
 		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
