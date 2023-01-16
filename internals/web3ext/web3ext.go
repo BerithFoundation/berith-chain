@@ -771,7 +771,102 @@ web3._extend({
 			name: 'chainId',
 			call: 'eth_chainId',
 			params: 0
-		})
+		}),
+		new web3._extend.Method({
+			name: 'sign',
+			call: 'eth_sign',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
+		}),
+		new web3._extend.Method({
+			name: 'resend',
+			call: 'eth_resend',
+			params: 3,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter, web3._extend.utils.fromDecimal, web3._extend.utils.fromDecimal]
+		}),
+		new web3._extend.Method({
+			name: 'signTransaction',
+			call: 'eth_signTransaction',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'submitTransaction',
+			call: 'eth_submitTransaction',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRawTransaction',
+			call: 'eth_getRawTransactionByHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getRawTransactionFromBlock',
+			call: function(args) {
+				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'eth_getRawTransactionByBlockHashAndIndex' : 'eth_getRawTransactionByBlockNumberAndIndex';
+			},
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
+		}),
+		new web3._extend.Method({
+			name: 'getProof',
+			call: 'eth_getProof',
+			params: 3,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'stake',
+			call: 'eth_stake',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'stopStaking',
+			call: 'eth_stopStaking',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getStakeBalance',
+			call: 'eth_getStakeBalance',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
+		new web3._extend.Method({
+			name: 'getAccountInfo',
+			call: 'eth_getAccountInfo',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],        	
+		}),
+		new web3._extend.Method({
+			name: 'getSelectionPoint',
+			call: 'eth_getSelectionPoint',
+        	params: 2,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+        	outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
+		new web3._extend.Method({
+			name: 'updateAccount',
+			call: 'eth_updateAccount',
+        	params: 3,
+        	inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null],        	
+		}),
+	],
+	properties: [
+		new web3._extend.Property({
+			name: 'pendingTransactions',
+			getter: 'eth_pendingTransactions',
+			outputFormatter: function(txs) {
+				var formatted = [];
+				for (var i = 0; i < txs.length; i++) {
+					formatted.push(web3._extend.formatters.outputTransactionFormatter(txs[i]));
+					formatted[i].blockHash = null;
+				}
+				return formatted;
+			}
+		}),
 	]
 });
 `
