@@ -209,6 +209,8 @@ func (self *StateDB) GetBalance(addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.Balance()
+	} else {
+		fmt.Println(addr.Hex())
 	}
 	return common.Big0
 }
