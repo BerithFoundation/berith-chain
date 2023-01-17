@@ -269,3 +269,24 @@ func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 	}
 	return originTx
 }
+
+func (o *OriginTransaction) ToBerithTransaction() *Transaction {
+	return &Transaction{
+		data: txdata{
+			AccountNonce: o.data.AccountNonce,
+			Price:        o.data.Price,
+			GasLimit:     o.data.GasLimit,
+			Recipient:    o.data.Recipient,
+			Amount:       o.data.Amount,
+			Payload:      o.data.Payload,
+			Base:         JobWallet(1),
+			Target:       JobWallet(1),
+			V:            o.data.V,
+			R:            o.data.R,
+			S:            o.data.S,
+			Hash:         o.data.Hash},
+		hash: o.hash,
+		size: o.size,
+		from: o.from,
+	}
+}
