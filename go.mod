@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
-	github.com/Azure/go-autorest/autorest/adal v0.9.21 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.9.22 // indirect
 	github.com/BerithFoundation/berith-chain v0.0.0-20221219065840-27e879990ac5
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1

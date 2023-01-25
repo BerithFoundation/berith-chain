@@ -160,9 +160,6 @@ func (am *Manager) Wallet(url string) (Wallet, error) {
 // Find attempts to locate the wallet corresponding to a specific account. Since
 // accounts can be dynamically added to and removed from wallets, this method has
 // a linear runtime in the number of wallets.
-//
-// Find는 특정한 계좌에 해당하는 지갑 탐색을 시도한다. 계좌가 동적으로 지갑에 추가되거나
-// 지워질 수 있던 때 부터 이 메서드는 지갑 수 만큼의 1차원 런타임을 차지했다.
 func (am *Manager) Find(account Account) (Wallet, error) {
 	am.lock.RLock()
 	defer am.lock.RUnlock()

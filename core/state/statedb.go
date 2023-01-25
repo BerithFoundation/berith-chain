@@ -209,8 +209,6 @@ func (s *StateDB) GetBalance(addr common.Address) *big.Int {
 	stateObject := s.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.Balance()
-	} else {
-		fmt.Println(addr.Hex())
 	}
 	return common.Big0
 }
@@ -512,6 +510,15 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
 	stateObject := s.GetOrNewStateObject(addr)
 	if stateObject != nil {
 		stateObject.SetState(s.db, key, value)
+	}
+}
+
+// SetStorage replaces the entire storage for the specified account with given
+// storage. This function should only be used for debugging.
+func (s *StateDB) SetStorage(addr common.Address, storage map[common.Hash]common.Hash) {
+	stateObject := s.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.SetStorage(storage)
 	}
 }
 

@@ -73,9 +73,10 @@ type HeaderChain struct {
 }
 
 // NewHeaderChain creates a new HeaderChain structure.
-//  getValidator should return the parent's validator
-//  procInterrupt points to the parent's interrupt semaphore
-//  wg points to the parent's shutdown wait group
+//
+//	getValidator should return the parent's validator
+//	procInterrupt points to the parent's interrupt semaphore
+//	wg points to the parent's shutdown wait group
 func NewHeaderChain(chainDb berithdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	tdCache, _ := lru.New(tdCacheLimit)
@@ -441,6 +442,10 @@ func (hc *HeaderChain) GetHeaderByNumber(number uint64) *types.Header {
 		return nil
 	}
 	return hc.GetHeader(hash, number)
+}
+
+func (hc *HeaderChain) GetCanonicalHash(number uint64) common.Hash {
+	return rawdb.ReadCanonicalHash(hc.chainDb, number)
 }
 
 // CurrentHeader retrieves the current head header of the canonical chain. The

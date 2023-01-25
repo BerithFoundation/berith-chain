@@ -75,7 +75,7 @@ type txdataMarshaling struct {
 	S            *hexutil.Big
 }
 
-//[Berith] Transaction
+// [Berith] Transaction
 func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
 	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target)
 }
@@ -453,6 +453,6 @@ func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
 
-//[Berith]
+// [Berith]
 func (m Message) Base() JobWallet   { return m.base }
 func (m Message) Target() JobWallet { return m.target }

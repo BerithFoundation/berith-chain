@@ -86,7 +86,7 @@ func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, err
 //
 // Sender는 서명으로부터 주소를 추출해 에러와 함께 반환한다.
 func Sender(signer Signer, tx *Transaction) (common.Address, error) {
-	if sc := tx.from.Load(); sc != nil { // tx의 from도 atomic Value라는건, 다른 어디에선가와 충돌을 피하기 위함이 아닐까?
+	if sc := tx.from.Load(); sc != nil {
 		sigCache := sc.(sigCache)
 		// If the signer used to derive from in a previous
 		// call is not the same as used current, invalidate
