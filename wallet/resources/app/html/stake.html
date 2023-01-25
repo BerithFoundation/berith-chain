@@ -41,7 +41,7 @@
                 </div>
             </div>
             <p class="error_txt">
-                올바른 수량을 입력하세요.(최소 100000 개 이상 )
+                올바른 수량을 입력하세요.(최소 1 개 이상 )
             </p>
         </div><!-- e://inp_group -->
         <div class="row_group">
@@ -190,7 +190,7 @@
         let nonce = $("#nonce").val();
         if (isDecimalNumber(stakeAmount) ) {
             let mainBalance = await berith.getBalance(account);
-            if (parseInt(stakeAmount) > parseInt(mainBalance) || parseInt(stakeAmount) < 100000 ) {
+            if (parseInt(stakeAmount) > parseInt(mainBalance) || parseInt(stakeAmount) < 1 ) {
                 $("#stakeAmount").addClass("error");
                 return false;
             }else if(!isDecimalNumber(gasLimit)) {
