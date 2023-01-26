@@ -269,14 +269,17 @@ func Start() {
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
 	}
-	if *httpFlag != "" {
+	if *httpFlag {
 		args = append(args, "--http")
 	}
 	if *httpCorsDomain != "" {
-		args = append(args, "--http.corsdomain", *httpCorsDomain)
+		args = append(args, *httpCorsDomain)
 	}
 	if *httpApi != "" {
 		args = append(args, "--http.api", *httpApi)
+	}
+	if *nodiscover {
+		args = append(args, "--nodiscover")
 	}
 	defer func() {
 		if r := recover(); r != nil {
