@@ -1,7 +1,6 @@
 package berithapi
 
 import (
-	"berith-chain/accounts/abi"
 	"bytes"
 	"context"
 	"errors"
@@ -301,16 +300,41 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 	return nil
 }
 
-func DoCall(ctx context.Context, b Backend, args CallEth_Args, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride, timeout time.Duration) ([]byte, uint64, bool, error) {
+func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.BlockNumber, timeout time.Duration) ([]byte, uint64, bool, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
-	state, header, err := b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+	state, header, err := b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, 0, false, err
 	}
-	if err := overrides.Apply(state); err != nil {
-		return nil, 0, false, err
+	// Set sender address or use a default if none specified
+	addr := args.From
+	if *addr == (common.Address{}) {
+		if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
+			if accounts := wallets[0].Accounts(); len(accounts) > 0 {
+				addr = &accounts[0].Address
+			}
+		}
 	}
+	// Set default gas & gas price if none were set
+	gas, gasPrice := uint64(*args.Gas), args.GasPrice.ToInt()
+	if gas == 0 {
+		gas = math.MaxUint64 / 2
+	}
+	if gasPrice == nil {
+		gasPrice = new(big.Int).SetUint64(defaultGasPrice)
+	}
+	value := new(big.Int)
+	if args.Value != nil {
+		value = args.Value.ToInt()
+	}
+	var data []byte
+	if args.Data != nil {
+		data = *args.Data
+	}
+	// Create new call message
+	msg := types.NewMessage(*addr, args.To, 0, value, gas, gasPrice, data, false)
+
 	// Setup context so it may be cancelled the call has completed
 	// or, in case of unmetered gas, setup a context with a timeout.
 	var cancel context.CancelFunc
@@ -323,29 +347,7 @@ func DoCall(ctx context.Context, b Backend, args CallEth_Args, blockNrOrHash rpc
 	// this makes sure resources are cleaned up.
 	defer cancel()
 
-	// Set sender address or use a default if none specified
-	addr := *args.From
-	if addr == (common.Address{}) {
-		if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
-			if accounts := wallets[0].Accounts(); len(accounts) > 0 {
-				addr = accounts[0].Address
-			}
-		}
-	}
-	// Set default gas & gas price if none were set
-	gas, gasPrice := uint64(*args.Gas), args.GasPrice.ToInt()
-	if gas == 0 {
-		gas = math.MaxUint64 / 2
-	}
-	if gasPrice.Sign() == 0 {
-		gasPrice = new(big.Int).SetUint64(defaultGasPrice)
-	}
-	var data []byte
-	if args.Data != nil {
-		data = *args.Data
-	}
 	// Get a new instance of the EVM.
-	msg := types.NewMessage(addr, args.To, 0, args.Value.ToInt(), gas, gasPrice, data, false)
 	evm, vmError, err := b.GetEVM(ctx, msg, state, header)
 	if err != nil {
 		return nil, 0, false, err
@@ -367,40 +369,10 @@ func DoCall(ctx context.Context, b Backend, args CallEth_Args, blockNrOrHash rpc
 	return res, gas, failed, err
 }
 
-func newRevertError(result *core.ExecutionResult) *revertError {
-	reason, errUnpack := abi.UnpackRevert(result.Revert())
-	err := errors.New("execution reverted")
-	if errUnpack == nil {
-		err = fmt.Errorf("execution reverted: %v", reason)
-	}
-	return &revertError{
-		error:  err,
-		reason: hexutil.Encode(result.Revert()),
-	}
-}
-
-// revertError is an API error that encompassas an EVM revertal with JSON error
-// code and a binary data blob.
-type revertError struct {
-	error
-	reason string // revert reason hex encoded
-}
-
-// ErrorCode returns the JSON error code for a revertal.
-// See: https://github.com/ethereum/wiki/wiki/JSON-RPC-Error-Codes-Improvement-Proposal
-func (e *revertError) ErrorCode() int {
-	return 3
-}
-
-// ErrorData returns the hex encoded revert reason.
-func (e *revertError) ErrorData() interface{} {
-	return e.reason
-}
-
 // Call executes the given transaction on the state for the given block number.
 // It doesn't make and changes in the state/blockchain and is useful to execute and retrieve values.
 func (s *Eth_PublicBlockChainAPI) Call(ctx context.Context, args CallEth_Args, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (hexutil.Bytes, error) {
-	result, _, _, err := DoCall(ctx, s.b, args, blockNrOrHash, overrides, 5*time.Second)
+	result, _, _, err := doCall(ctx, s.b, args, *blockNrOrHash.BlockNumber, 5*time.Second)
 	return (hexutil.Bytes)(result), err
 }
 
@@ -463,7 +435,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallEth_Args, blockNrOrH
 	executable := func(gas uint64) (bool, []byte, uint64, error) {
 		args.Gas = (*hexutil.Uint64)(&gas)
 
-		res, gas, failed, err := DoCall(ctx, b, args, blockNrOrHash, nil, 0)
+		res, gas, failed, err := doCall(ctx, b, args, *blockNrOrHash.BlockNumber, 0)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, 0, nil // Special case, raise gas limit
@@ -858,11 +830,14 @@ func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, e
 	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
 		return common.Hash{}, err
 	}
-	msg, err := tx.AsMessage(types.NewEIP155Signer(s.b.ChainConfig().ChainID))
+	msg, err := tx.AsMessage(types.MakeSigner(s.b.ChainConfig(), s.b.CurrentBlock().Number()))
 	if err != nil {
 		fmt.Println("SendRawTx Err : ", err)
 	}
-	fmt.Println("To : ", tx.To().Hex(), "From : ", msg.From().Hex())
+	if tx.To() != nil {
+		fmt.Println("To : ", tx.To().Hex())
+	}
+	fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
 	return eth_submitTransaction(ctx, s.b, tx)
 }
 
@@ -882,11 +857,16 @@ func (s *Eth_PublicTransactionPoolAPI) Sign(addr common.Address, data hexutil.By
 		return nil, err
 	}
 	// Sign the requested hash with the wallet
-	signature, err := wallet.SignHash(account, signHash(data))
+	signature, err := wallet.SignHash(account, eth_signHash(data))
 	if err == nil {
 		signature[64] += 27 // Transform V from 0/1 to 27/28 according to the yellow paper
 	}
 	return signature, err
+}
+
+func eth_signHash(data []byte) []byte {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	return crypto.Keccak256([]byte(msg))
 }
 
 // SignTransaction will sign the given transaction with the from account.
