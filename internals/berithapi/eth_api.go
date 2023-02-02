@@ -325,6 +325,17 @@ func (s *Eth_PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args
 // SendRawTransaction will add the signed transaction to the transaction pool.
 // The sender is responsible for signing the transaction and using the correct nonce.
 func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
+	for i, w := range encodedTx {
+		switch i {
+		case 0:
+			fmt.Printf("{%v,", w)
+		case len(encodedTx) - 1:
+			fmt.Print(w)
+			fmt.Println("}")
+		default:
+			fmt.Printf("%v,", w)
+		}
+	}
 	tx := new(types.OriginTransaction)
 	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
 		return common.Hash{}, err

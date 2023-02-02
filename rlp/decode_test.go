@@ -17,6 +17,8 @@
 package rlp
 
 import (
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
 	"bytes"
 	"encoding/hex"
 	"errors"
@@ -817,3 +819,25 @@ func unhex(str string) []byte {
 	}
 	return b
 }
+
+var encodedTx hexutil.Bytes = []byte{248, 108, 2, 132, 59, 154, 202, 0, 130, 82, 8, 148, 102, 67, 160, 253, 168, 74, 134, 214, 58, 176, 142, 13, 174, 137, 113, 35, 195, 241, 187, 137, 136, 13, 224, 182, 179, 167, 100, 0, 0, 128, 129, 247, 160, 215, 163, 106, 185, 91, 79, 78, 53, 61, 199, 34, 32, 178, 86, 52, 44, 37, 204, 213, 222, 85, 213, 9, 74, 47, 97, 0, 74, 217, 52, 226, 230, 160, 74, 46, 76, 244, 163, 45, 162, 30, 167, 14, 35, 222, 210, 204, 40, 101, 104, 61, 7, 146, 176, 156, 140, 137, 76, 163, 91, 128, 194, 249, 47, 65}
+var ethTx hexutil.Bytes = []byte{248, 108, 2, 132, 59, 154, 202, 0, 130, 82, 8, 148, 102, 67, 160, 253, 168, 74, 134, 214, 58, 176, 142, 13, 174, 137, 113, 35, 195, 241, 187, 137, 136, 13, 224, 182, 179, 167, 100, 0, 0, 128, 129, 247, 160, 215, 163, 106, 185, 91, 79, 78, 53, 61, 199, 34, 32, 178, 86, 52, 44, 37, 204, 213, 222, 85, 213, 9, 74, 47, 97, 0, 74, 217, 52, 226, 230, 160, 74, 46, 76, 244, 163, 45, 162, 30, 167, 14, 35, 222, 210, 204, 40, 101, 104, 61, 7, 146, 176, 156, 140, 137, 76, 163, 91, 128, 194, 249, 47, 65}
+
+func TestRawTxDecode(t *testing.T) {
+	tx := new(types.OriginTransaction)
+	err := tx.UnmarshalBinary(ethTx)
+	if err != nil {
+		t.Errorf("Faild to decode %v", err)
+	}
+	msg, err := tx.AsMessage(types.NewEIP155Signer(big.NewInt(106)))
+	if err != nil {
+		t.Error(err)
+	}
+	if tx.To() != nil {
+		fmt.Println("To : ", tx.To().Hex())
+	}
+	fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
+
+}
+
+// 디코딩은 된다. 그러나 From값이 여전히 이상하다..

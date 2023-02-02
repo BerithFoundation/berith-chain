@@ -1,9 +1,11 @@
 package types
 
 import (
+	"errors"
 	"io"
 	"math/big"
 	"sync/atomic"
+	"time"
 
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/crypto"
@@ -35,70 +37,53 @@ type TransactionInterface interface {
 	RawSignatureValues() (*big.Int, *big.Int, *big.Int)
 }
 
-type originTxdata struct {
-	// From의 Nonce
-	AccountNonce uint64          `json:"nonce"    gencodec:"required"`
-	Price        *big.Int        `json:"gasPrice" gencodec:"required"`
-	GasLimit     uint64          `json:"gas"      gencodec:"required"`
-	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
-	Amount       *big.Int        `json:"value"    gencodec:"required"`
-	Payload      []byte          `json:"input"    gencodec:"required"`
-
-	// Signature values
-	V *big.Int `json:"v" gencodec:"required"`
-	R *big.Int `json:"r" gencodec:"required"`
-	S *big.Int `json:"s" gencodec:"required"`
-
-	// This is only used when marshaling to JSON.
-	Hash *common.Hash `json:"hash" rlp:"-"`
-}
-
-func (o *originTxdata) MarshalJSON() ([]byte, error)     { return nil, nil }
-func (o *originTxdata) UnmarshalJSON(input []byte) error { return nil }
-
 type OriginTransaction struct {
-	data originTxdata
+	inner *LegacyTx
+	time  time.Time // Time first seen locally (spam avoidance)
+
 	// caches
 	hash atomic.Value
 	size atomic.Value
 	from atomic.Value
 }
 
-func (o *OriginTransaction) ChainId() *big.Int {
-	return deriveChainId(o.data.V)
+// LegacyTx is the transaction data of regular Ethereum transactions.
+type LegacyTx struct {
+	Nonce    uint64          // nonce of sender account
+	GasPrice *big.Int        // wei per gas
+	Gas      uint64          // gas limit
+	To       *common.Address `rlp:"nil"` // nil means contract creation
+	Value    *big.Int        // wei amount
+	Data     []byte          // contract invocation input data
+	V, R, S  *big.Int        // signature values
 }
 
-// Protected returns whether the transaction is protected from replay protection.
-func (o *OriginTransaction) Protected() bool {
-	return isProtectedV(o.data.V)
-}
+func (o *LegacyTx) ToTxdata() txdata {
+	return txdata{
+		AccountNonce: o.Nonce,
+		Price:        o.GasPrice,
+		GasLimit:     o.Gas,
+		Recipient:    o.To,
+		Amount:       o.Value,
+		Payload:      o.Data,
+		Base:         JobWallet(1),
+		Target:       JobWallet(1),
+		V:            o.V,
+		R:            o.R,
+		S:            o.S,
+		Hash:         &common.Hash{}}
 
-func (o *OriginTransaction) EncodeRLP(w io.Writer) error {
-	return rlp.Encode(w, &o.data)
-}
-
-// DecodeRLP implements rlp.Decoder
-func (o *OriginTransaction) DecodeRLP(s *rlp.Stream) error {
-	_, size, _ := s.Kind()
-	err := s.Decode(&o.data)
-	if err == nil {
-		o.size.Store(common.StorageSize(rlp.ListSize(size)))
-	}
-
-	return err
 }
 
 // MarshalJSON encodes the web3 RPC transaction format.
 func (o *OriginTransaction) MarshalJSON() ([]byte, error) {
-	hash := o.Hash()
-	data := o.data
-	data.Hash = &hash
-	return data.MarshalJSON()
+	inner := o.inner
+	return inner.MarshalJSON()
 }
 
 // UnmarshalJSON decodes the web3 RPC transaction format.
 func (o *OriginTransaction) UnmarshalJSON(input []byte) error {
-	var dec originTxdata
+	var dec LegacyTx
 	if err := dec.UnmarshalJSON(input); err != nil {
 		return err
 	}
@@ -117,15 +102,65 @@ func (o *OriginTransaction) UnmarshalJSON(input []byte) error {
 		}
 	}
 
-	*o = OriginTransaction{data: dec}
+	*o = OriginTransaction{inner: &dec}
 	return nil
 }
 
-func (o *OriginTransaction) Data() []byte       { return common.CopyBytes(o.data.Payload) }
-func (o *OriginTransaction) Gas() uint64        { return o.data.GasLimit }
-func (o *OriginTransaction) GasPrice() *big.Int { return new(big.Int).Set(o.data.Price) }
-func (o *OriginTransaction) Value() *big.Int    { return new(big.Int).Set(o.data.Amount) }
-func (o *OriginTransaction) Nonce() uint64      { return o.data.AccountNonce }
+// UnmarshalBinary decodes the canonical encoding of transactions.
+// It supports legacy RLP transactions and EIP2718 typed transactions.
+func (tx *OriginTransaction) UnmarshalBinary(b []byte) error {
+	if len(b) > 0 && b[0] > 0x7f {
+		// It's a legacy transaction.
+		var data LegacyTx
+		err := rlp.DecodeBytes(b, &data)
+		if err != nil {
+			return err
+		}
+		tx.setDecoded(&data, len(b))
+		return nil
+	} else {
+		return errors.New("cannot unmarshal binary : not berith transaction type")
+	}
+}
+
+// setDecoded sets the inner transaction and size after decoding.
+func (tx *OriginTransaction) setDecoded(inner *LegacyTx, size int) {
+	tx.inner = inner
+	tx.time = time.Now()
+	if size > 0 {
+		tx.size.Store(common.StorageSize(size))
+	}
+}
+
+func (o *OriginTransaction) ChainId() *big.Int {
+	return deriveChainId(o.inner.V)
+}
+
+// Protected returns whether the transaction is protected from replay protection.
+func (o *OriginTransaction) Protected() bool {
+	return isProtectedV(o.inner.V)
+}
+
+func (o *OriginTransaction) EncodeRLP(w io.Writer) error {
+	return rlp.Encode(w, &o.inner)
+}
+
+// DecodeRLP implements rlp.Decoder
+func (o *OriginTransaction) DecodeRLP(s *rlp.Stream) error {
+	_, size, _ := s.Kind()
+	err := s.Decode(&o.inner)
+	if err == nil {
+		o.size.Store(common.StorageSize(rlp.ListSize(size)))
+	}
+
+	return err
+}
+
+func (o *OriginTransaction) Data() []byte       { return common.CopyBytes(o.inner.Data) }
+func (o *OriginTransaction) Gas() uint64        { return o.inner.Gas }
+func (o *OriginTransaction) GasPrice() *big.Int { return new(big.Int).Set(o.inner.GasPrice) }
+func (o *OriginTransaction) Value() *big.Int    { return new(big.Int).Set(o.inner.Value) }
+func (o *OriginTransaction) Nonce() uint64      { return o.inner.Nonce }
 func (o *OriginTransaction) CheckNonce() bool   { return true }
 func (o *OriginTransaction) Base() JobWallet    { return JobWallet(1) } //[Berith] Tx JobWallet Base
 func (o *OriginTransaction) Target() JobWallet  { return JobWallet(1) } //[Berith] Tx JobWallet Target
@@ -133,10 +168,10 @@ func (o *OriginTransaction) Target() JobWallet  { return JobWallet(1) } //[Berit
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
 func (o *OriginTransaction) To() *common.Address {
-	if o.data.Recipient == nil {
+	if o.inner.To == nil {
 		return nil
 	}
-	to := *o.data.Recipient
+	to := *o.inner.To
 	return &to
 }
 
@@ -158,7 +193,7 @@ func (o *OriginTransaction) Size() common.StorageSize {
 		return size.(common.StorageSize)
 	}
 	c := writeCounter(0)
-	rlp.Encode(&c, &o.data)
+	rlp.Encode(&c, &o.inner)
 	o.size.Store(common.StorageSize(c))
 	return common.StorageSize(c)
 }
@@ -170,99 +205,62 @@ func (o *OriginTransaction) Size() common.StorageSize {
 // XXX Rename message to something less arbitrary?
 func (o *OriginTransaction) AsMessage(s Signer) (Message, error) {
 	msg := Message{
-		nonce:      o.data.AccountNonce,
-		gasLimit:   o.data.GasLimit,
-		gasPrice:   new(big.Int).Set(o.data.Price),
-		to:         o.data.Recipient,
-		amount:     o.data.Amount,
-		data:       o.data.Payload,
+		nonce:      o.inner.Nonce,
+		gasLimit:   o.inner.Gas,
+		gasPrice:   new(big.Int).Set(o.inner.GasPrice),
+		to:         o.inner.To,
+		amount:     o.inner.Value,
+		data:       o.inner.Data,
 		checkNonce: true,
 		base:       JobWallet(1),
 		target:     JobWallet(1),
 	}
 
-	tx := &Transaction{
-		data: txdata{
-			AccountNonce: o.data.AccountNonce,
-			Price:        o.data.Price,
-			GasLimit:     o.data.GasLimit,
-			Recipient:    o.data.Recipient,
-			Amount:       o.data.Amount,
-			Payload:      o.data.Payload,
-			Base:         JobWallet(1),
-			Target:       JobWallet(1),
-			V:            o.data.V,
-			R:            o.data.R,
-			S:            o.data.S,
-			Hash:         o.data.Hash},
-		hash: o.hash,
-		size: o.size,
-		from: o.from,
-	}
 	var err error
-	msg.from, err = Sender(s, tx)
+	msg.from, err = Sender(s, o.ToBerithTransaction())
 	return msg, err
 }
 
 // WithSignature returns a new transaction with the given signature.
 // This signature needs to be formatted as described in the yellow paper (v+27).
 func (o *OriginTransaction) WithSignature(signer Signer, sig []byte) (*Transaction, error) {
-	tx := &Transaction{
-		data: txdata{
-			AccountNonce: o.data.AccountNonce,
-			Price:        o.data.Price,
-			GasLimit:     o.data.GasLimit,
-			Recipient:    o.data.Recipient,
-			Amount:       o.data.Amount,
-			Payload:      o.data.Payload,
-			Base:         JobWallet(1),
-			Target:       JobWallet(1),
-			V:            o.data.V,
-			R:            o.data.R,
-			S:            o.data.S,
-			Hash:         o.data.Hash},
-		hash: o.hash,
-		size: o.size,
-		from: o.from,
-	}
-	r, s, v, err := signer.SignatureValues(tx, sig)
+	r, s, v, err := signer.SignatureValues(o, sig)
 	if err != nil {
 		return nil, err
 	}
-	cpy := &Transaction{data: tx.data}
+	cpy := &Transaction{data: o.inner.ToTxdata()}
 	cpy.data.R, cpy.data.S, cpy.data.V = r, s, v
 	return cpy, nil
 }
 
 // Cost returns amount + gasprice * gaslimit.
 func (o *OriginTransaction) Cost() *big.Int {
-	total := new(big.Int).Mul(o.data.Price, new(big.Int).SetUint64(o.data.GasLimit))
-	total.Add(total, o.data.Amount)
+	total := new(big.Int).Mul(o.inner.GasPrice, new(big.Int).SetUint64(o.inner.Gas))
+	total.Add(total, o.inner.Value)
 	return total
 }
 
 func (o *OriginTransaction) MainFee() *big.Int {
-	total := new(big.Int).Mul(o.data.Price, new(big.Int).SetUint64(o.data.GasLimit))
+	total := new(big.Int).Mul(o.inner.GasPrice, new(big.Int).SetUint64(o.inner.Gas))
 	return total
 }
 
 func (o *OriginTransaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {
-	return o.data.V, o.data.R, o.data.S
+	return o.inner.V, o.inner.R, o.inner.S
 }
 
 func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 	originTx := &OriginTransaction{
-		data: originTxdata{
-			AccountNonce: tx.data.AccountNonce,
-			Price:        tx.data.Price,
-			GasLimit:     tx.data.GasLimit,
-			Recipient:    tx.data.Recipient,
-			Amount:       tx.data.Amount,
-			Payload:      tx.data.Payload,
-			V:            tx.data.V,
-			R:            tx.data.R,
-			S:            tx.data.S,
-			Hash:         tx.data.Hash},
+		inner: &LegacyTx{
+			Nonce:    tx.data.AccountNonce,
+			GasPrice: tx.data.Price,
+			Gas:      tx.data.GasLimit,
+			To:       tx.data.Recipient,
+			Value:    tx.data.Amount,
+			Data:     tx.data.Payload,
+			V:        tx.data.V,
+			R:        tx.data.R,
+			S:        tx.data.S},
 		hash: tx.hash,
 		size: tx.size,
 		from: tx.from,
@@ -273,18 +271,18 @@ func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 	return &Transaction{
 		data: txdata{
-			AccountNonce: o.data.AccountNonce,
-			Price:        o.data.Price,
-			GasLimit:     o.data.GasLimit,
-			Recipient:    o.data.Recipient,
-			Amount:       o.data.Amount,
-			Payload:      o.data.Payload,
+			AccountNonce: o.inner.Nonce,
+			Price:        o.inner.GasPrice,
+			GasLimit:     o.inner.Gas,
+			Recipient:    o.inner.To,
+			Amount:       o.inner.Value,
+			Payload:      o.inner.Data,
 			Base:         JobWallet(1),
 			Target:       JobWallet(1),
-			V:            o.data.V,
-			R:            o.data.R,
-			S:            o.data.S,
-			Hash:         o.data.Hash},
+			V:            o.inner.V,
+			R:            o.inner.R,
+			S:            o.inner.S,
+			Hash:         &common.Hash{}},
 		hash: o.hash,
 		size: o.size,
 		from: o.from,
