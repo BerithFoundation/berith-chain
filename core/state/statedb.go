@@ -735,8 +735,6 @@ func (s *StateDB) GetRefund() uint64 {
 
 // Finalise finalises the state by removing the s destructed objects
 // and clears the journal as well as the refunds.
-//
-// Finalise는 스스로 파괴되는 객체를 지움으로써 상태를 종료한다. 그리고 journal과 refuns를 정리한다.
 func (s *StateDB) Finalise(deleteEmptyObjects bool) {
 	for addr := range s.journal.dirties {
 		stateObject, exist := s.stateObjects[addr]

@@ -1213,8 +1213,6 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		}
 		// Validate the state using the default validator
 		if err := bc.Validator().ValidateState(block, parent, state, receipts, usedGas); err != nil {
-			// [Berith]
-			// 에러 발생 지점 - invalid gas used
 			bc.reportBlock(block, receipts, err)
 			return it.index, events, coalescedLogs, err
 		}

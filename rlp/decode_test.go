@@ -829,7 +829,7 @@ func TestRawTxDecode(t *testing.T) {
 	if err != nil {
 		t.Errorf("Faild to decode %v", err)
 	}
-	msg, err := tx.AsMessage(types.NewEIP155Signer(big.NewInt(106)))
+	msg, err := tx.AsMessage(types.NewBIP5Signer(big.NewInt(106)))
 	if err != nil {
 		t.Error(err)
 	}

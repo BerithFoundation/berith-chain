@@ -766,13 +766,16 @@ func (args *Eth_SendTxArgs) toTransaction() *types.Transaction {
 }
 
 // eth_submitTransaction is a helper function that submits tx to txPool and logs a message.
+// use only for metamask
 func eth_submitTransaction(ctx context.Context, b Backend, originTx *types.OriginTransaction) (common.Hash, error) {
 	tx := originTx.ToBerithTransaction()
 	if err := b.SendTx(ctx, tx); err != nil {
 		return common.Hash{}, err
 	}
 	if tx.To() == nil {
-		signer := types.MakeSigner(b.ChainConfig(), b.CurrentBlock().Number())
+		// [Berith]
+		// Metamasksigner was used to clearly decode the sender.
+		signer := types.NewBIP5Signer(b.ChainConfig().ChainID)
 		from, err := types.Sender(signer, tx)
 		if err != nil {
 			return common.Hash{}, err
@@ -826,29 +829,19 @@ func (s *Eth_PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args
 // SendRawTransaction will add the signed transaction to the transaction pool.
 // The sender is responsible for signing the transaction and using the correct nonce.
 func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
-	for i, w := range encodedTx {
-		switch i {
-		case 0:
-			fmt.Printf("{%v,", w)
-		case len(encodedTx) - 1:
-			fmt.Print(w)
-			fmt.Println("}")
-		default:
-			fmt.Printf("%v,", w)
-		}
-	}
+
 	tx := new(types.OriginTransaction)
-	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
+	err := tx.UnmarshalBinary(encodedTx)
+	if err != nil {
 		return common.Hash{}, err
 	}
-	msg, err := tx.AsMessage(types.MakeSigner(s.b.ChainConfig(), s.b.CurrentBlock().Number()))
+	msg, err := tx.AsMessage(types.NewBIP5Signer(s.b.ChainConfig().ChainID))
 	if err != nil {
 		fmt.Println("SendRawTx Err : ", err)
 	}
 	if tx.To() != nil {
-		fmt.Println("To : ", tx.To().Hex())
+		fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
 	}
-	fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
 	return eth_submitTransaction(ctx, s.b, tx)
 }
 
