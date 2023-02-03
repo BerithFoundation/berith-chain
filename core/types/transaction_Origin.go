@@ -35,6 +35,7 @@ type TransactionInterface interface {
 	Cost() *big.Int
 	MainFee() *big.Int
 	RawSignatureValues() (*big.Int, *big.Int, *big.Int)
+	From() *atomic.Value
 }
 
 type OriginTransaction struct {
@@ -165,6 +166,10 @@ func (o *OriginTransaction) CheckNonce() bool   { return true }
 func (o *OriginTransaction) Base() JobWallet    { return JobWallet(1) } //[Berith] Tx JobWallet Base
 func (o *OriginTransaction) Target() JobWallet  { return JobWallet(1) } //[Berith] Tx JobWallet Target
 
+func (o *OriginTransaction) From() *atomic.Value {
+	return &o.from
+}
+
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
 func (o *OriginTransaction) To() *common.Address {
@@ -217,7 +222,7 @@ func (o *OriginTransaction) AsMessage(s Signer) (Message, error) {
 	}
 
 	var err error
-	msg.from, err = Sender(s, o.ToBerithTransaction())
+	msg.from, err = Sender(s, o)
 	return msg, err
 }
 
@@ -268,6 +273,9 @@ func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 	return originTx
 }
 
+// [Berith]
+// ToBerithTransaction converts transactions sent from metamask into Berith transactions
+// with Base and Target set to Main(1) to register with the Berithxpool.
 func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 	return &Transaction{
 		data: txdata{

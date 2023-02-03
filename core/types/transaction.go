@@ -187,6 +187,10 @@ func (tx *Transaction) CheckNonce() bool   { return true }
 func (tx *Transaction) Base() JobWallet    { return tx.data.Base }   //[Berith] Tx JobWallet Base
 func (tx *Transaction) Target() JobWallet  { return tx.data.Target } //[Berith] Tx JobWallet Target
 
+func (tx *Transaction) From() *atomic.Value {
+	return &tx.from
+}
+
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
 func (tx *Transaction) To() *common.Address {
