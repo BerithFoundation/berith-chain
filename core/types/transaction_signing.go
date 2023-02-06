@@ -121,68 +121,6 @@ type Signer interface {
 	Equal(Signer) bool
 }
 
-// [Berith]
-// Signer to communicate with metamask
-type BIP5Signer struct {
-	chainId, chainIdMul *big.Int
-}
-
-func NewBIP5Signer(chainId *big.Int) BIP5Signer {
-	if chainId == nil {
-		chainId = new(big.Int)
-	}
-	return BIP5Signer{
-		chainId:    chainId,
-		chainIdMul: new(big.Int).Mul(chainId, big.NewInt(2)),
-	}
-}
-
-func (s BIP5Signer) Equal(s2 Signer) bool {
-	eip155, ok := s2.(BIP5Signer)
-	return ok && eip155.chainId.Cmp(s.chainId) == 0
-}
-
-func (es BIP5Signer) Sender(tx TransactionInterface) (common.Address, error) {
-	if !tx.Protected() {
-		return HomesteadSigner{}.Sender(tx)
-	}
-	if tx.ChainId().Cmp(es.chainId) != 0 {
-		return common.Address{}, ErrInvalidChainId
-	}
-	v, r, s := tx.RawSignatureValues()
-	V := new(big.Int).Sub(v, es.chainIdMul)
-	V.Sub(V, big8)
-	return recoverPlain(es.Hash(tx), r, s, V, true)
-}
-
-// SignatureValues returns signature values. This signature
-// needs to be in the [R || S || V] format where V is 0 or 1.
-func (s BIP5Signer) SignatureValues(tx TransactionInterface, sig []byte) (R, S, V *big.Int, err error) {
-	R, S, V, err = HomesteadSigner{}.SignatureValues(tx, sig)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if s.chainId.Sign() != 0 {
-		V = big.NewInt(int64(sig[64] + 35))
-		V.Add(V, s.chainIdMul)
-	}
-	return R, S, V, nil
-}
-
-// Hash returns the hash to be signed by the sender.
-// It does not uniquely identify the transaction.
-func (s BIP5Signer) Hash(tx TransactionInterface) common.Hash {
-	return rlpHash([]interface{}{
-		tx.Nonce(),
-		tx.GasPrice(),
-		tx.Gas(),
-		tx.To(),
-		tx.Value(),
-		tx.Data(),
-		s.chainId, uint(0), uint(0),
-	})
-}
-
 type eip2930Signer struct{ EIP155Signer }
 
 // NewEIP2930Signer returns a signer that accepts EIP-2930 access list transactions,
@@ -244,17 +182,29 @@ func (s EIP155Signer) SignatureValues(tx TransactionInterface, sig []byte) (R, S
 // Hash returns the hash to be signed by the sender.
 // It does not uniquely identify the transaction.
 func (s EIP155Signer) Hash(tx TransactionInterface) common.Hash {
-	return rlpHash([]interface{}{
-		tx.Nonce(),
-		tx.GasPrice(),
-		tx.Gas(),
-		tx.To(),
-		tx.Value(),
-		tx.Data(),
-		tx.Base(),
-		tx.Target(),
-		s.chainId, uint(0), uint(0),
-	})
+	if tx.IsEthTransaction() {
+		return rlpHash([]interface{}{
+			tx.Nonce(),
+			tx.GasPrice(),
+			tx.Gas(),
+			tx.To(),
+			tx.Value(),
+			tx.Data(),
+			s.chainId, uint(0), uint(0),
+		})
+	} else {
+		return rlpHash([]interface{}{
+			tx.Nonce(),
+			tx.GasPrice(),
+			tx.Gas(),
+			tx.To(),
+			tx.Value(),
+			tx.Data(),
+			tx.Base(),
+			tx.Target(),
+			s.chainId, uint(0), uint(0),
+		})
+	}
 }
 
 // HomesteadTransaction implements TransactionInterface using the
