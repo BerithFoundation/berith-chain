@@ -309,7 +309,7 @@ func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.Block
 	}
 	// Set sender address or use a default if none specified
 	addr := args.From
-	if *addr == (common.Address{}) {
+	if addr == nil {
 		if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
 			if accounts := wallets[0].Accounts(); len(accounts) > 0 {
 				addr = &accounts[0].Address
@@ -317,12 +317,14 @@ func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.Block
 		}
 	}
 	// Set default gas & gas price if none were set
-	gas, gasPrice := uint64(*args.Gas), args.GasPrice.ToInt()
-	if gas == 0 {
-		gas = math.MaxUint64 / 2
+	var gas uint64 = 25000000
+	if args.Gas != nil {
+		gas = uint64(*args.Gas)
 	}
-	if gasPrice == nil {
-		gasPrice = new(big.Int).SetUint64(defaultGasPrice)
+
+	gasPrice := new(big.Int)
+	if args.GasPrice != nil {
+		gasPrice = args.GasPrice.ToInt()
 	}
 	value := new(big.Int)
 	if args.Value != nil {
@@ -816,12 +818,10 @@ func (s *Eth_PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args
 	if config := s.b.ChainConfig(); config.IsEIP155(s.b.CurrentBlock().Number()) {
 		chainID = config.ChainID
 	}
-	fmt.Println("SendTransaction - Before sign: ", tx.To().Hex())
 	signed, err := wallet.SignTx(account, tx, chainID)
 	if err != nil {
 		return common.Hash{}, err
 	}
-	fmt.Println("SendTransaction - After sign: ", tx.To().Hex())
 	return eth_submitTransaction(ctx, s.b, types.NewOriginTransaction(signed))
 }
 

@@ -329,14 +329,6 @@ func (s *Server) exec(ctx context.Context, codec ServerCodec, req *serverRequest
 	} else {
 		response, callback = s.handle(ctx, codec, req)
 	}
-	fmt.Println("Method : ", req.callb.method.Name)
-	fmt.Print("Args : ")
-	if len(req.args) > 0 {
-		for _, a := range req.args {
-			fmt.Println("\t", a.Interface(), a.Type())
-		}
-	}
-	fmt.Println("Response : ", response)
 	if err := codec.Write(response); err != nil {
 		log.Error(fmt.Sprintf("%v\n", err))
 		codec.Close()
