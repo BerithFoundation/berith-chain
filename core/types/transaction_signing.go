@@ -105,6 +105,14 @@ type Signer interface {
 	Equal(Signer) bool
 }
 
+type eip2930Signer struct{ EIP155Signer }
+
+// NewEIP2930Signer returns a signer that accepts EIP-2930 access list transactions,
+// EIP-155 replay protected transactions, and legacy Homestead transactions.
+func NewEIP2930Signer(chainId *big.Int) Signer {
+	return eip2930Signer{NewEIP155Signer(chainId)}
+}
+
 // EIP155Transaction implements Signer using the EIP155 rules.
 type EIP155Signer struct {
 	chainId, chainIdMul *big.Int
@@ -157,17 +165,29 @@ func (s EIP155Signer) SignatureValues(tx TransactionInterface, sig []byte) (R, S
 // Hash returns the hash to be signed by the sender.
 // It does not uniquely identify the transaction.
 func (s EIP155Signer) Hash(tx TransactionInterface) common.Hash {
-	return rlpHash([]interface{}{
-		tx.Nonce(),
-		tx.GasPrice(),
-		tx.Gas(),
-		tx.To(),
-		tx.Value(),
-		tx.Data(),
-		tx.Base(),
-		tx.Target(),
-		s.chainId, uint(0), uint(0),
-	})
+	if tx.IsEthTransaction() {
+		return rlpHash([]interface{}{
+			tx.Nonce(),
+			tx.GasPrice(),
+			tx.Gas(),
+			tx.To(),
+			tx.Value(),
+			tx.Data(),
+			s.chainId, uint(0), uint(0),
+		})
+	} else {
+		return rlpHash([]interface{}{
+			tx.Nonce(),
+			tx.GasPrice(),
+			tx.Gas(),
+			tx.To(),
+			tx.Value(),
+			tx.Data(),
+			tx.Base(),
+			tx.Target(),
+			s.chainId, uint(0), uint(0),
+		})
+	}
 }
 
 // HomesteadTransaction implements TransactionInterface using the

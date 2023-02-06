@@ -829,7 +829,7 @@ func TestRawTxDecode(t *testing.T) {
 	if err != nil {
 		t.Errorf("Faild to decode %v", err)
 	}
-	msg, err := tx.AsMessage(types.NewBIP5Signer(big.NewInt(106)))
+	msg, err := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()))
 	if err != nil {
 		t.Error(err)
 	}
@@ -839,5 +839,3 @@ func TestRawTxDecode(t *testing.T) {
 	fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
 
 }
-
-// 디코딩은 된다. 그러나 From값이 여전히 이상하다..

@@ -36,6 +36,7 @@ type TransactionInterface interface {
 	MainFee() *big.Int
 	RawSignatureValues() (*big.Int, *big.Int, *big.Int)
 	From() *atomic.Value
+	IsEthTransaction() bool
 }
 
 type OriginTransaction struct {
@@ -43,9 +44,10 @@ type OriginTransaction struct {
 	time  time.Time // Time first seen locally (spam avoidance)
 
 	// caches
-	hash atomic.Value
-	size atomic.Value
-	from atomic.Value
+	hash    atomic.Value
+	size    atomic.Value
+	from    atomic.Value
+	IsEthTx bool
 }
 
 // LegacyTx is the transaction data of regular Ethereum transactions.
@@ -128,6 +130,9 @@ func (tx *OriginTransaction) UnmarshalBinary(b []byte) error {
 func (tx *OriginTransaction) setDecoded(inner *LegacyTx, size int) {
 	tx.inner = inner
 	tx.time = time.Now()
+	// [Berith]
+	// check original eth transaction
+	tx.IsEthTx = true
 	if size > 0 {
 		tx.size.Store(common.StorageSize(size))
 	}
@@ -169,6 +174,7 @@ func (o *OriginTransaction) Target() JobWallet  { return JobWallet(1) } //[Berit
 func (o *OriginTransaction) From() *atomic.Value {
 	return &o.from
 }
+func (o *OriginTransaction) IsEthTransaction() bool { return o.IsEthTx } //[Berith] Tx JobWallet Target
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -266,9 +272,10 @@ func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 			V:        tx.data.V,
 			R:        tx.data.R,
 			S:        tx.data.S},
-		hash: tx.hash,
-		size: tx.size,
-		from: tx.from,
+		hash:    tx.hash,
+		size:    tx.size,
+		from:    tx.from,
+		IsEthTx: true,
 	}
 	return originTx
 }
@@ -294,5 +301,8 @@ func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 		hash: o.hash,
 		size: o.size,
 		from: o.from,
+		// [Berith]
+		// Metamask Transaction에 대해 Base와 Target을 제외하고 Signing하기 위함
+		IsEthTx: true,
 	}
 }

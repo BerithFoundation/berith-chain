@@ -3,7 +3,6 @@ package berithapi
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -270,13 +269,12 @@ func (args *Eth_SendTxArgs) toTransaction() *types.Transaction {
 // use only for metamask
 func eth_submitTransaction(ctx context.Context, b Backend, originTx *types.OriginTransaction) (common.Hash, error) {
 	tx := originTx.ToBerithTransaction()
+
 	if err := b.SendTx(ctx, tx); err != nil {
 		return common.Hash{}, err
 	}
 	if tx.To() == nil {
-		// [Berith]
-		// Metamasksigner was used to clearly decode the sender.
-		signer := types.NewEIP155Signer(b.ChainConfig().ChainID)
+		signer := types.MakeSigner(b.ChainConfig(), b.CurrentBlock().Number())
 		from, err := types.Sender(signer, tx)
 		if err != nil {
 			return common.Hash{}, err
@@ -334,7 +332,6 @@ func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, e
 	if err != nil {
 		return common.Hash{}, err
 	}
-	fmt.Println(hex.EncodeToString(encodedTx))
 	return eth_submitTransaction(ctx, s.b, tx)
 }
 

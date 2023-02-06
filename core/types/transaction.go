@@ -41,6 +41,9 @@ type Transaction struct {
 	hash atomic.Value
 	size atomic.Value
 	from atomic.Value
+	// [Berith]
+	// To identify transaction sent from metamask
+	IsEthTx bool
 }
 
 type txdata struct {
@@ -107,7 +110,7 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		d.Price.Set(gasPrice)
 	}
 
-	return &Transaction{data: d}
+	return &Transaction{data: d, IsEthTx: false}
 }
 
 // ChainId returns which chain id this transaction was signed for (if at all)
@@ -190,6 +193,8 @@ func (tx *Transaction) Target() JobWallet  { return tx.data.Target } //[Berith] 
 func (tx *Transaction) From() *atomic.Value {
 	return &tx.from
 }
+
+func (tx *Transaction) IsEthTransaction() bool { return tx.IsEthTx }
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
