@@ -29,7 +29,7 @@ wallet/output/
 berith/keystore
 berith/history
 berith/berith
-cmd/berith/password.txt
+cmd/berith/password*
 *bind_windows_amd64.go
 
 

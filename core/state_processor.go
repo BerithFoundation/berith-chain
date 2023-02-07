@@ -163,9 +163,10 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 [Berith]
 Check if the break transaction satisfies the lock up condition
 The Break Transaction has a three-day grace period.
+Deprecated
 */
-func checkBreakTransaction(msg types.Message, lastStakedBlock, currentBlock *big.Int, period uint64) (bool, int64) {
-	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
-	elapsedBlockNumber := new(big.Int).Sub(currentBlock, lastStakedBlock)
-	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1, new(big.Int).Sub(lockUpPeriod, elapsedBlockNumber).Int64()
-}
+// func checkBreakTransaction(msg types.Message, lastStakedBlock, currentBlock *big.Int, period uint64) (bool, int64) {
+// 	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
+// 	elapsedBlockNumber := new(big.Int).Sub(currentBlock, lastStakedBlock)
+// 	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1, new(big.Int).Sub(lockUpPeriod, elapsedBlockNumber).Int64()
+// }

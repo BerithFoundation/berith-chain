@@ -605,21 +605,21 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInvalidStakeReceiver
 	}
 
-	currentBlockNumber := pool.chain.CurrentBlock().Number()
-	period := pool.chainconfig.Bsrr.Period
-	msg, err := tx.AsMessage(types.MakeSigner(pool.chainconfig, currentBlockNumber))
-	if err != nil {
-		return fmt.Errorf("cannot conver tx to message %v", err)
-	}
+	// currentBlockNumber := pool.chain.CurrentBlock().Number()
+	// period := pool.chainconfig.Bsrr.Period
+	// msg, err := tx.AsMessage(types.MakeSigner(pool.chainconfig, currentBlockNumber))
+	// if err != nil {
+	// 	return fmt.Errorf("cannot conver tx to message %v", err)
+	// }
 
-	if pool.chainconfig.IsBIP4(currentBlockNumber) && (tx.Base() == types.Stake && tx.Target() == types.Main) {
-		lastStakedBlock := pool.currentState.GetStakeUpdated(from)
-		unStakable, leftBlocks := checkBreakTransaction(msg, lastStakedBlock, currentBlockNumber, period)
-		// unstaking 하려면 3일 기다려야 함
-		if !unStakable {
-			return fmt.Errorf("cannot unstake yet, %v blocks (%dH) left", leftBlocks, (uint64(leftBlocks)*period)/(3600))
-		}
-	}
+	// if pool.chainconfig.IsBIP4(currentBlockNumber) && (tx.Base() == types.Stake && tx.Target() == types.Main) {
+	// 	lastStakedBlock := pool.currentState.GetStakeUpdated(from)
+	// 	unStakable, leftBlocks := checkBreakTransaction(msg, lastStakedBlock, currentBlockNumber, period)
+	// 	// unstaking 하려면 3일 기다려야 함
+	// 	if !unStakable {
+	// 		return fmt.Errorf("cannot unstake yet, %v blocks (%dH) left", leftBlocks, (uint64(leftBlocks)*period)/(3600))
+	// 	}
+	// }
 
 	if tx.Base() == types.Main {
 		if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
