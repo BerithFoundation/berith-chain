@@ -57,11 +57,11 @@ func init() {
 	Init()
 }
 func main() {
-	start_ui()
+	startUi()
 }
 
 // db , 일렉트론 초기설정 후 wallet 프로그램 실행 함수
-func start_ui() {
+func startUi() {
 	// Init
 	flag.Parse()
 	astilog.FlagInit()
