@@ -83,6 +83,12 @@ type Header struct {
 	Extra       []byte         `json:"extraData"        gencodec:"required"`
 	MixDigest   common.Hash    `json:"mixHash"`
 	Nonce       BlockNonce     `json:"nonce"`
+
+	// BaseFee was added by EIP-1559 and is ignored in legacy headers.
+	BaseFee *big.Int `json:"baseFeePerGas" rlp:"optional"`
+
+	// WithdrawalsHash was added by EIP-4895 and is ignored in legacy headers.
+	WithdrawalsHash *common.Hash `json:"withdrawalsRoot" rlp:"optional"`
 }
 
 // field type overrides for gencodec

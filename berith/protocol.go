@@ -123,18 +123,33 @@ type newBlockHashesData []struct {
 	Number uint64      // Number of one particular block being announced
 }
 
-// getBlockHeadersData represents a block header query.
-type getBlockHeadersData struct {
+// GetBlockHeadersData represents a block header query.
+type GetBlockHeadersData struct {
 	Origin  hashOrNumber // Block from which to retrieve headers
 	Amount  uint64       // Maximum number of headers to retrieve
 	Skip    uint64       // Blocks to skip between consecutive headers
 	Reverse bool         // Query direction (false = rising towards latest, true = falling towards genesis)
 }
 
+// GetBlockHeadersPacket66 represents a block header query over eth/66
+type GetBlockHeadersPacket66 struct {
+	RequestId uint64
+	*GetBlockHeadersData
+}
+
 // hashOrNumber is a combined field for specifying an origin block.
 type hashOrNumber struct {
 	Hash   common.Hash // Block hash from which to retrieve headers (excludes Number)
 	Number uint64      // Block hash from which to retrieve headers (excludes Hash)
+}
+
+// BlockHeadersPacket represents a block header response.
+type BlockHeadersPacket []*types.Header
+
+// BlockHeadersPacket66 represents a block header response over eth/66.
+type BlockHeadersPacket66 struct {
+	RequestId uint64
+	BlockHeadersPacket
 }
 
 // EncodeRLP is a specialized encoder for hashOrNumber to encode only one of the

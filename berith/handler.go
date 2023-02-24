@@ -31,7 +31,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/consensus"
-	"github.com/BerithFoundation/berith-chain/consensus/misc"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/event"
@@ -344,7 +343,11 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	// Block header query, collect the requested headers and reply
 	case msg.Code == GetBlockHeadersMsg:
 		// Decode the complex header query
-		var query getBlockHeadersData
+		// var query getBlockHeadersData
+
+		// [Berith]
+		var query GetBlockHeadersPacket66
+
 		if err := msg.Decode(&query); err != nil {
 			return errResp(ErrDecode, "%v: %v", msg, err)
 		}
@@ -431,12 +434,15 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 	case msg.Code == BlockHeadersMsg:
 		// A batch of headers arrived to one of our previous requests
-		var headers []*types.Header
+		// var headers []*types.Header
+
+		// [Berith]
+		var headers = new(BlockHeadersPacket66)
 		if err := msg.Decode(&headers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		// If no headers were received, but we're expending a DAO fork check, maybe it's that
-		if len(headers) == 0 && p.forkDrop != nil {
+		if len(headers.BlockHeadersPacket) == 0 && p.forkDrop != nil {
 			// Possibly an empty reply to the fork header checks, sanity check TDs
 			verifyDAO := true
 
@@ -456,39 +462,39 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			}
 		}
 		// Filter out any explicitly requested headers, deliver the rest to the downloader
-		filter := len(headers) == 1
-		if filter {
-			// If it's a potential DAO fork check, validate against the rules
-			if p.forkDrop != nil && pm.chainconfig.DAOForkBlock.Cmp(headers[0].Number) == 0 {
-				// Disable the fork drop timer
-				p.forkDrop.Stop()
-				p.forkDrop = nil
+		// filter := len(headers.BlockHeadersPacket) == 1
+		// if filter {
+		// 	// If it's a potential DAO fork check, validate against the rules
+		// 	if p.forkDrop != nil && pm.chainconfig.DAOForkBlock.Cmp(headers.BlockHeadersPacket[0].Number) == 0 {
+		// 		// Disable the fork drop timer
+		// 		p.forkDrop.Stop()
+		// 		p.forkDrop = nil
 
-				// Validate the header and either drop the peer or continue
-				if err := misc.VerifyDAOHeaderExtraData(pm.chainconfig, headers[0]); err != nil {
-					p.Log().Debug("Verified to be on the other side of the DAO fork, dropping")
-					return err
-				}
-				p.Log().Debug("Verified to be on the same side of the DAO fork")
-				return nil
-			}
-			// Otherwise if it's a whitelisted block, validate against the set
-			if want, ok := pm.whitelist[headers[0].Number.Uint64()]; ok {
-				if hash := headers[0].Hash(); want != hash {
-					p.Log().Info("Whitelist mismatch, dropping peer", "number", headers[0].Number.Uint64(), "hash", hash, "want", want)
-					return errors.New("whitelist block mismatch")
-				}
-				p.Log().Debug("Whitelist block verified", "number", headers[0].Number.Uint64(), "hash", want)
-			}
-			// Irrelevant of the fork checks, send the header to the fetcher just in case
-			headers = pm.fetcher.FilterHeaders(p.id, headers, time.Now())
-		}
-		if len(headers) > 0 || !filter {
-			err := pm.downloader.DeliverHeaders(p.id, headers)
-			if err != nil {
-				log.Debug("Failed to deliver headers", "err", err)
-			}
-		}
+		// 		// Validate the header and either drop the peer or continue
+		// 		if err := misc.VerifyDAOHeaderExtraData(pm.chainconfig, headers.BlockHeadersPacket[0]); err != nil {
+		// 			p.Log().Debug("Verified to be on the other side of the DAO fork, dropping")
+		// 			return err
+		// 		}
+		// 		p.Log().Debug("Verified to be on the same side of the DAO fork")
+		// 		return nil
+		// 	}
+		// 	// Otherwise if it's a whitelisted block, validate against the set
+		// 	if want, ok := pm.whitelist[headers.BlockHeadersPacket[0].Number.Uint64()]; ok {
+		// 		if hash := headers.BlockHeadersPacket[0].Hash(); want != hash {
+		// 			p.Log().Info("Whitelist mismatch, dropping peer", "number", headers.BlockHeadersPacket[0].Number.Uint64(), "hash", hash, "want", want)
+		// 			return errors.New("whitelist block mismatch")
+		// 		}
+		// 		p.Log().Debug("Whitelist block verified", "number", headers.BlockHeadersPacket[0].Number.Uint64(), "hash", want)
+		// 	}
+		// 	// Irrelevant of the fork checks, send the header to the fetcher just in case
+		// 	headers = pm.fetcher.FilterHeaders(p.id, []*types.Header(headers.BlockHeadersPacket), time.Now())
+		// }
+		// if len(headers) > 0 || !filter {
+		// 	err := pm.downloader.DeliverHeaders(p.id, headers)
+		// 	if err != nil {
+		// 		log.Debug("Failed to deliver headers", "err", err)
+		// 	}
+		// }
 
 	case msg.Code == GetBlockBodiesMsg:
 		// Decode the retrieval message
