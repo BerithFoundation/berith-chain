@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.3.0
-	github.com/BerithFoundation/berith-chain v0.0.0-00010101000000-000000000000
+	github.com/BerithFoundation/berith-chain v0.0.0-20230214041011-136b81292c16
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/allegro/bigcache v1.2.1
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e
@@ -50,6 +50,7 @@ require (
 	golang.org/x/net v0.4.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/sys v0.3.0
+	golang.org/x/tools v0.1.12
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200316214253-d7b0ff38cac9
