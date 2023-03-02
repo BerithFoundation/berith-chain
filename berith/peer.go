@@ -222,7 +222,7 @@ func (p *peer) SendNewBlockHashes(hashes []common.Hash, numbers []uint64) error 
 	for _, hash := range hashes {
 		p.knownBlocks.Add(hash)
 	}
-	request := make(newBlockHashesData, len(hashes))
+	request := make(NewBlockHashesData, len(hashes))
 	for i := 0; i < len(hashes); i++ {
 		request[i].Hash = hashes[i]
 		request[i].Number = numbers[i]
@@ -260,11 +260,11 @@ func (p *peer) AsyncSendNewBlock(block *types.Block, td *big.Int) {
 }
 
 // SendBlockHeaders sends a batch of block headers to the remote peer.
-func (p *peer) SendBlockHeaders(headers []*types.Header) error {
+func (p *peer) SendBlockHeaders(headers []*types.Header, id uint64) error {
 	// return p2p.Send(p.rw, BlockHeadersMsg, headers)
-	id := rand.Uint64()
 
 	var blockHeaderMsg = BlockHeadersPacket66{RequestId: id, BlockHeadersPacket: headers}
+	fmt.Println(blockHeaderMsg.RequestId, "Request sended.", "CODE : ", 4)
 	return p2p.Send(p.rw, BlockHeadersMsg, blockHeaderMsg)
 }
 
@@ -299,7 +299,8 @@ func (p *peer) RequestOneHeader(hash common.Hash) error {
 	// compatibility for ethereum 1.11
 	id := rand.Uint64()
 	p.Log().Debug("Fetching single header", "hash", hash)
-	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: hashOrNumber{Hash: hash}, Amount: uint64(1), Skip: uint64(0), Reverse: false}})
+	fmt.Println(id, "RequestOneHeader sended.", "CODE : ", 3)
+	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: HashOrNumber{Hash: hash}, Amount: uint64(1), Skip: uint64(0), Reverse: false}})
 }
 
 // RequestHeadersByHash fetches a batch of blocks' headers corresponding to the
@@ -310,7 +311,8 @@ func (p *peer) RequestHeadersByHash(origin common.Hash, amount int, skip int, re
 	// compatibility for ethereum 1.11
 	id := rand.Uint64()
 	p.Log().Debug("Fetching batch of headers", "count", amount, "fromhash", origin, "skip", skip, "reverse", reverse)
-	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: hashOrNumber{Hash: origin}, Amount: uint64(amount), Skip: uint64(skip), Reverse: reverse}})
+	fmt.Println(id, "RequestHeadersByHash sended.", "CODE : ", 3)
+	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: HashOrNumber{Hash: origin}, Amount: uint64(amount), Skip: uint64(skip), Reverse: reverse}})
 }
 
 // RequestHeadersByNumber fetches a batch of blocks' headers corresponding to the
@@ -321,7 +323,8 @@ func (p *peer) RequestHeadersByNumber(origin uint64, amount int, skip int, rever
 	// compatibility for ethereum 1.11
 	id := rand.Uint64()
 	p.Log().Debug("Fetching batch of headers", "count", amount, "fromnum", origin, "skip", skip, "reverse", reverse)
-	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: hashOrNumber{Number: origin}, Amount: uint64(amount), Skip: uint64(skip), Reverse: reverse}})
+	fmt.Println(id, "RequestHeadersByNumber sended.", "CODE : ", 3)
+	return p2p.Send(p.rw, GetBlockHeadersMsg, &GetBlockHeadersPacket66{RequestId: id, GetBlockHeadersData: &GetBlockHeadersData{Origin: HashOrNumber{Number: origin}, Amount: uint64(amount), Skip: uint64(skip), Reverse: reverse}})
 }
 
 // RequestBodies fetches a batch of blocks' bodies corresponding to the hashes
@@ -349,10 +352,10 @@ func (p *peer) RequestReceipts(hashes []common.Hash) error {
 func (p *peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis common.Hash) error {
 	// Send out own handshake in a new thread
 	errc := make(chan error, 2)
-	var status statusData // safe to read after two values have been received from errc
+	var status StatusData // safe to read after two values have been received from errc
 
 	go func() {
-		errc <- p2p.Send(p.rw, StatusMsg, &statusData{
+		errc <- p2p.Send(p.rw, StatusMsg, &StatusData{
 			ProtocolVersion: uint32(p.version),
 			NetworkId:       network,
 			TD:              td,
@@ -379,7 +382,7 @@ func (p *peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis 
 	return nil
 }
 
-func (p *peer) readStatus(network uint64, status *statusData, genesis common.Hash) (err error) {
+func (p *peer) readStatus(network uint64, status *StatusData, genesis common.Hash) (err error) {
 	msg, err := p.rw.ReadMsg()
 	if err != nil {
 		return err
