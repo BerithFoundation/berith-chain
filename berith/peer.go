@@ -84,18 +84,23 @@ type peer struct {
 
 	head common.Hash
 	td   *big.Int
-	lock sync.RWMutex
 
 	knownTxs    mapset.Set                // Set of transaction hashes known to be known by this peer
 	knownBlocks mapset.Set                // Set of block hashes known to be known by this peer
 	queuedTxs   chan []*types.Transaction // Queue of transactions to broadcast to the peer
 	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
 	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
-	term        chan struct{}             // Termination channel to stop the broadcaster
+
+	reqDispatch chan *request  // Dispatch channel to send requests and track then until fulfilment
+	reqCancel   chan *cancel   // Dispatch channel to cancel pending requests and untrack them
+	resDispatch chan *response // Dispatch channel to fulfil pending requests and untrack them
+
+	term chan struct{} // Termination channel to stop the broadcaster
+	lock sync.RWMutex
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
-	return &peer{
+	peer := &peer{
 		Peer:        p,
 		rw:          rw,
 		version:     version,
@@ -105,8 +110,13 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps: make(chan *propEvent, maxQueuedProps),
 		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
+		reqDispatch: make(chan *request),
+		reqCancel:   make(chan *cancel),
+		resDispatch: make(chan *response),
 		term:        make(chan struct{}),
 	}
+	go peer.dispatcher()
+	return peer
 }
 
 // broadcast is a write loop that multiplexes block propagations, announcements
@@ -273,10 +283,13 @@ func (p *peer) SendBlockBodies(bodies []*blockBody) error {
 	return p2p.Send(p.rw, BlockBodiesMsg, blockBodiesData(bodies))
 }
 
-// SendBlockBodiesRLP sends a batch of block contents to the remote peer from
-// an already RLP encoded format.
-func (p *peer) SendBlockBodiesRLP(bodies []rlp.RawValue) error {
-	return p2p.Send(p.rw, BlockBodiesMsg, bodies)
+// ReplyBlockBodiesRLP is the eth/66 response to GetBlockBodies.
+func (p *peer) ReplyBlockBodiesRLP(id uint64, bodies []rlp.RawValue) error {
+	// Not packed into BlockBodiesPacket to avoid RLP decoding
+	return p2p.Send(p.rw, BlockBodiesMsg, &BlockBodiesRLPPacket66{
+		RequestId:            id,
+		BlockBodiesRLPPacket: bodies,
+	})
 }
 
 // SendNodeDataRLP sends a batch of arbitrary internals data, corresponding to the

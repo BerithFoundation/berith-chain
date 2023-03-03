@@ -24,10 +24,11 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/berithdb"
 	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/ethdb"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/metrics"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/allegro/bigcache"
+	"github.com/VictoriaMetrics/fastcache"
 )
 
 var (
@@ -70,7 +71,7 @@ type DatabaseReader interface {
 type Database struct {
 	diskdb berithdb.Database // Persistent storage for matured trie nodes
 
-	cleans  *bigcache.BigCache          // GC friendly memory cache of clean node RLPs
+	cleans  *fastcache.Cache            // GC friendly memory cache of clean node RLPs
 	dirties map[common.Hash]*cachedNode // Data and references relationships of dirty nodes
 	oldest  common.Hash                 // Oldest tracked node, flush-list head
 	newest  common.Hash                 // Newest tracked node, flush-list tail
@@ -165,11 +166,14 @@ func (n *cachedNode) rlp() []byte {
 
 // obj returns the decoded and expanded trie node, either directly from the cache,
 // or by regenerating it from the rlp encoded blob.
-func (n *cachedNode) obj(hash common.Hash, cachegen uint16) node {
+func (n *cachedNode) obj(hash common.Hash) node {
 	if node, ok := n.node.(rawNode); ok {
-		return mustDecodeNode(hash[:], node, cachegen)
+		// The raw-blob format nodes are loaded either from the
+		// clean cache or the database, they are all in their own
+		// copy and safe to use unsafe decoder.
+		return mustDecodeNodeUnsafe(hash[:], node)
 	}
-	return expandNode(hash[:], n.node, cachegen)
+	return expandNode(hash[:], n.node)
 }
 
 // childs returns all the tracked children of this node, both the implicit ones
@@ -234,16 +238,15 @@ func simplifyNode(n node) node {
 
 // expandNode traverses the node hierarchy of a collapsed storage node and converts
 // all fields and keys into expanded memory form.
-func expandNode(hash hashNode, n node, cachegen uint16) node {
+func expandNode(hash hashNode, n node) node {
 	switch n := n.(type) {
 	case *rawShortNode:
 		// Short nodes need key and child expansion
 		return &shortNode{
 			Key: compactToHex(n.Key),
-			Val: expandNode(nil, n.Val, cachegen),
+			Val: expandNode(nil, n.Val),
 			flags: nodeFlag{
 				hash: hash,
-				gen:  cachegen,
 			},
 		}
 
@@ -252,12 +255,11 @@ func expandNode(hash hashNode, n node, cachegen uint16) node {
 		node := &fullNode{
 			flags: nodeFlag{
 				hash: hash,
-				gen:  cachegen,
 			},
 		}
 		for i := 0; i < len(node.Children); i++ {
 			if n[i] != nil {
-				node.Children[i] = expandNode(nil, n[i], cachegen)
+				node.Children[i] = expandNode(nil, n[i])
 			}
 		}
 		return node
@@ -274,29 +276,34 @@ func expandNode(hash hashNode, n node, cachegen uint16) node {
 // its written out to disk or garbage collected. No read cache is created, so all
 // data retrievals will hit the underlying disk database.
 func NewDatabase(diskdb berithdb.Database) *Database {
-	return NewDatabaseWithCache(diskdb, 0)
+	return NewDatabaseWithConfig(diskdb, 0)
 }
 
-// NewDatabaseWithCache creates a new trie database to store ephemeral trie content
+// NewDatabaseWithConfig creates a new trie database to store ephemeral trie content
 // before its written out to disk or garbage collected. It also acts as a read cache
 // for nodes loaded from disk.
-func NewDatabaseWithCache(diskdb berithdb.Database, cache int) *Database {
-	var cleans *bigcache.BigCache
-	if cache > 0 {
-		cleans, _ = bigcache.NewBigCache(bigcache.Config{
-			Shards:             1024,
-			LifeWindow:         time.Hour,
-			MaxEntriesInWindow: cache * 1024,
-			MaxEntrySize:       512,
-			HardMaxCacheSize:   cache,
-		})
+func NewDatabaseWithConfig(diskdb ethdb.Database, config *Config) *Database {
+	var cleans *fastcache.Cache
+	if config != nil && config.Cache > 0 {
+		if config.Journal == "" {
+			cleans = fastcache.New(config.Cache * 1024 * 1024)
+		} else {
+			cleans = fastcache.LoadFromFileOrNew(config.Journal, config.Cache*1024*1024)
+		}
 	}
-	return &Database{
-		diskdb:    diskdb,
-		cleans:    cleans,
-		dirties:   map[common.Hash]*cachedNode{{}: {}},
-		preimages: make(map[common.Hash][]byte),
+	var preimage *preimageStore
+	if config != nil && config.Preimages {
+		preimage = newPreimageStore(diskdb)
 	}
+	db := &Database{
+		diskdb: diskdb,
+		cleans: cleans,
+		dirties: map[common.Hash]*cachedNode{{}: {
+			children: make(map[common.Hash]uint16),
+		}},
+		preimages: preimage,
+	}
+	return db
 }
 
 // DiskDB retrieves the persistent storage backing the trie database.
@@ -360,13 +367,16 @@ func (db *Database) insertPreimage(hash common.Hash, preimage []byte) {
 
 // node retrieves a cached trie node from memory, or returns nil if none can be
 // found in the memory cache.
-func (db *Database) node(hash common.Hash, cachegen uint16) node {
+func (db *Database) node(hash common.Hash) node {
 	// Retrieve the node from the clean cache if available
 	if db.cleans != nil {
-		if enc, err := db.cleans.Get(string(hash[:])); err == nil && enc != nil {
+		if enc := db.cleans.Get(nil, hash[:]); enc != nil {
 			memcacheCleanHitMeter.Mark(1)
 			memcacheCleanReadMeter.Mark(int64(len(enc)))
-			return mustDecodeNode(hash[:], enc, cachegen)
+
+			// The returned value from cache is in its own copy,
+			// safe to use mustDecodeNodeUnsafe for decoding.
+			return mustDecodeNodeUnsafe(hash[:], enc)
 		}
 	}
 	// Retrieve the node from the dirty cache if available
@@ -375,19 +385,25 @@ func (db *Database) node(hash common.Hash, cachegen uint16) node {
 	db.lock.RUnlock()
 
 	if dirty != nil {
-		return dirty.obj(hash, cachegen)
+		memcacheDirtyHitMeter.Mark(1)
+		memcacheDirtyReadMeter.Mark(int64(dirty.size))
+		return dirty.obj(hash)
 	}
+	memcacheDirtyMissMeter.Mark(1)
+
 	// Content unavailable in memory, attempt to retrieve from disk
 	enc, err := db.diskdb.Get(hash[:])
 	if err != nil || enc == nil {
 		return nil
 	}
 	if db.cleans != nil {
-		db.cleans.Set(string(hash[:]), enc)
+		db.cleans.Set(hash[:], enc)
 		memcacheCleanMissMeter.Mark(1)
 		memcacheCleanWriteMeter.Mark(int64(len(enc)))
 	}
-	return mustDecodeNode(hash[:], enc, cachegen)
+	// The returned value from database is in its own copy,
+	// safe to use mustDecodeNodeUnsafe for decoding.
+	return mustDecodeNodeUnsafe(hash[:], enc)
 }
 
 // Node retrieves an encoded cached trie node from memory. If it cannot be found
