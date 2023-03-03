@@ -268,15 +268,13 @@ func (p *peer) SendBlockHeaders(headers []*types.Header, id uint64) error {
 	return p2p.Send(p.rw, BlockHeadersMsg, blockHeaderMsg)
 }
 
-// SendBlockBodies sends a batch of block contents to the remote peer.
-func (p *peer) SendBlockBodies(bodies []*blockBody) error {
-	return p2p.Send(p.rw, BlockBodiesMsg, blockBodiesData(bodies))
-}
-
-// SendBlockBodiesRLP sends a batch of block contents to the remote peer from
-// an already RLP encoded format.
-func (p *peer) SendBlockBodiesRLP(bodies []rlp.RawValue) error {
-	return p2p.Send(p.rw, BlockBodiesMsg, bodies)
+// ReplyBlockBodiesRLP is the eth/66 response to GetBlockBodies.
+func (p *peer) ReplyBlockBodiesRLP(id uint64, bodies []rlp.RawValue) error {
+	// Not packed into BlockBodiesPacket to avoid RLP decoding
+	return p2p.Send(p.rw, BlockBodiesMsg, &BlockBodiesRLPPacket66{
+		RequestId:            id,
+		BlockBodiesRLPPacket: bodies,
+	})
 }
 
 // SendNodeDataRLP sends a batch of arbitrary internals data, corresponding to the

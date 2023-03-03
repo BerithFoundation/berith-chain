@@ -152,6 +152,42 @@ type BlockHeadersPacket66 struct {
 	BlockHeadersPacket
 }
 
+// GetBlockBodiesPacket represents a block body query.
+type GetBlockBodiesPacket []common.Hash
+
+// GetBlockBodiesPacket66 represents a block body query over eth/66.
+type GetBlockBodiesPacket66 struct {
+	RequestId uint64
+	GetBlockBodiesPacket
+}
+
+// BlockBodiesPacket is the network packet for block content distribution.
+type BlockBodiesPacket []*BlockBody
+
+// BlockBodiesPacket66 is the network packet for block content distribution over eth/66.
+type BlockBodiesPacket66 struct {
+	RequestId uint64
+	BlockBodiesPacket
+}
+
+// BlockBodiesRLPPacket is used for replying to block body requests, in cases
+// where we already have them RLP-encoded, and thus can avoid the decode-encode
+// roundtrip.
+type BlockBodiesRLPPacket []rlp.RawValue
+
+// BlockBodiesRLPPacket66 is the BlockBodiesRLPPacket over eth/66
+type BlockBodiesRLPPacket66 struct {
+	RequestId uint64
+	BlockBodiesRLPPacket
+}
+
+// BlockBody represents the data content of a single block.
+type BlockBody struct {
+	Transactions []*types.Transaction // Transactions contained within a block
+	Uncles       []*types.Header      // Uncles contained within a block
+	Withdrawals  []*types.Withdrawal  `rlp:"optional"` // Withdrawals contained within a block
+}
+
 // EncodeRLP is a specialized encoder for hashOrNumber to encode only one of the
 // two contained union fields.
 func (hn *HashOrNumber) EncodeRLP(w io.Writer) error {

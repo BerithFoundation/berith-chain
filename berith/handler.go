@@ -51,6 +51,25 @@ const (
 
 	// minimim number of peers to broadcast new blocks to
 	minBroadcastPeers = 4
+
+	// maxHeadersServe is the maximum number of block headers to serve. This number
+	// is there to limit the number of disk lookups.
+	maxHeadersServe = 1024
+
+	// maxBodiesServe is the maximum number of block bodies to serve. This number
+	// is mostly there to limit the number of disk lookups. With 24KB block sizes
+	// nowadays, the practical limit will always be softResponseLimit.
+	maxBodiesServe = 1024
+
+	// maxNodeDataServe is the maximum number of state trie nodes to serve. This
+	// number is there to limit the number of disk lookups.
+	maxNodeDataServe = 1024
+
+	// maxReceiptsServe is the maximum number of block receipts to serve. This
+	// number is mostly there to limit the number of disk lookups. With block
+	// containing 200+ transactions nowadays, the practical limit will always
+	// be softResponseLimit.
+	maxReceiptsServe = 1024
 )
 
 var (
@@ -500,43 +519,28 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		// }
 
 	case msg.Code == GetBlockBodiesMsg:
-		// Decode the retrieval message
-		msgStream := rlp.NewStream(msg.Payload, uint64(msg.Size))
-		if _, err := msgStream.List(); err != nil {
-			return err
+		// Decode the block body retrieval message
+		var query GetBlockBodiesPacket66
+		if err := msg.Decode(&query); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		// Gather blocks until the fetch or network limits is reached
-		var (
-			hash   common.Hash
-			bytes  int
-			bodies []rlp.RawValue
-		)
-		for bytes < softResponseLimit && len(bodies) < downloader.MaxBlockFetch {
-			// Retrieve the hash of the next block
-			if err := msgStream.Decode(&hash); err == rlp.EOL {
-				break
-			} else if err != nil {
-				return errResp(ErrDecode, "msg %v: %v", msg, err)
-			}
-			// Retrieve the requested block body, stopping if enough was found
-			if data := pm.blockchain.GetBodyRLP(hash); len(data) != 0 {
-				bodies = append(bodies, data)
-				bytes += len(data)
-			}
-		}
-		return p.SendBlockBodiesRLP(bodies)
+		fmt.Println(query.RequestId, "Received. CODE : 5")
+		response := ServiceGetBlockBodiesQuery(pm.blockchain, query.GetBlockBodiesPacket)
+		return p.ReplyBlockBodiesRLP(query.RequestId, response)
 
 	case msg.Code == BlockBodiesMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var request blockBodiesData
-		if err := msg.Decode(&request); err != nil {
+		res := new(BlockBodiesPacket66)
+		if err := msg.Decode(&res); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		// Deliver them all to the downloader for queuing
-		transactions := make([][]*types.Transaction, len(request))
-		uncles := make([][]*types.Header, len(request))
+		fmt.Println(res.RequestId, "Received. CODE : 6")
 
-		for i, body := range request {
+		// Deliver them all to the downloader for queuing
+		transactions := make([][]*types.Transaction, len(res.BlockBodiesPacket))
+		uncles := make([][]*types.Header, len(res.BlockBodiesPacket))
+
+		for i, body := range res.BlockBodiesPacket {
 			transactions[i] = body.Transactions
 			uncles[i] = body.Uncles
 		}
@@ -815,4 +819,25 @@ func (pm *ProtocolManager) NodeInfo() *NodeInfo {
 		Config:     pm.blockchain.Config(),
 		Head:       currentBlock.Hash(),
 	}
+}
+
+// ServiceGetBlockBodiesQuery assembles the response to a body query. It is
+// exposed to allow external packages to test protocol behavior.
+func ServiceGetBlockBodiesQuery(chain *core.BlockChain, query GetBlockBodiesPacket) []rlp.RawValue {
+	// Gather blocks until the fetch or network limits is reached
+	var (
+		bytes  int
+		bodies []rlp.RawValue
+	)
+	for lookups, hash := range query {
+		if bytes >= softResponseLimit || len(bodies) >= maxBodiesServe ||
+			lookups >= 2*maxBodiesServe {
+			break
+		}
+		if data := chain.GetBodyRLP(hash); len(data) != 0 {
+			bodies = append(bodies, data)
+			bytes += len(data)
+		}
+	}
+	return bodies
 }

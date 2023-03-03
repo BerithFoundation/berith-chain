@@ -68,9 +68,10 @@ type HeaderChain struct {
 }
 
 // NewHeaderChain creates a new HeaderChain structure.
-//  getValidator should return the parent's validator
-//  procInterrupt points to the parent's interrupt semaphore
-//  wg points to the parent's shutdown wait group
+//
+//	getValidator should return the parent's validator
+//	procInterrupt points to the parent's interrupt semaphore
+//	wg points to the parent's shutdown wait group
 func NewHeaderChain(chainDb berithdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	tdCache, _ := lru.New(tdCacheLimit)
@@ -409,6 +410,9 @@ func (hc *HeaderChain) GetHeader(hash common.Hash, number uint64) *types.Header 
 	hc.headerCache.Add(hash, header)
 	return header
 }
+
+// 7990
+// "ق\x01\x00\x86berith\x88go1.13.4\x85linux\x00\x00\x00\x00\x00\x00ʻ\x9f&\xf5\x11\xc4\x1c\x9d\x88:\x02\x97\x87\x87^\x9c\xed\xa1v\xa8\x81-\x8a\x9a\x05:\xb2\xd9\xfc\xf7Yz+]/\xed\x99\xcf\a\x98i(\x98\x043-\xa3\x96\xf9e\xbc\xa9\xf4\xe2\x17\n<\xc8\xd8Ւ'\x0e\x00"
 
 // GetHeaderByHash retrieves a block header from the database by hash, caching it if
 // found.
