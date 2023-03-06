@@ -30,13 +30,9 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/karalabe/hid v1.0.0
-	github.com/maruel/panicparse v1.6.2 // indirect
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.16
-	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1
-	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/pborman/uuid v1.2.0
 	github.com/peterh/liner v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -47,9 +43,9 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/crypto v0.4.0
-	golang.org/x/net v0.4.0
+	golang.org/x/net v0.7.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/sys v0.3.0
+	golang.org/x/sys v0.5.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200316214253-d7b0ff38cac9
