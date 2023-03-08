@@ -762,9 +762,9 @@ func (args *Eth_SendTxArgs) toTransaction() *types.Transaction {
 	}
 
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main, true)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main, true)
 }
 
 // eth_submitTransaction is a helper function that submits tx to txPool and logs a message.
@@ -833,6 +833,18 @@ func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, e
 	err := tx.UnmarshalBinary(encodedTx)
 	if err != nil {
 		return common.Hash{}, err
+	}
+
+	msg, err := tx.AsMessage(types.NewEIP155Signer(s.b.ChainConfig().ChainID))
+	if err != nil {
+		fmt.Println("SendRawTx Err : ", err)
+	}
+	if tx.To() != nil {
+		fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
+	}
+
+	if tx.From() != nil {
+		fmt.Printf("Message\n\tFrom : %v\n\tValue : %v\n\t", msg.From().Hex(), msg.Value())
 	}
 
 	return eth_submitTransaction(ctx, s.b, tx)

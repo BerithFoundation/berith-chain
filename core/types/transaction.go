@@ -79,15 +79,15 @@ type txdataMarshaling struct {
 }
 
 // [Berith] Transaction
-func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target)
+func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target, isETH)
 }
 
-func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, base, target)
+func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, base, target, isETH)
 }
 
-func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
+func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -111,7 +111,7 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		d.Price.Set(gasPrice)
 	}
 
-	return &Transaction{data: d, IsEthTx: false}
+	return &Transaction{data: d, IsEthTx: isETH}
 }
 
 // ChainId returns which chain id this transaction was signed for (if at all)

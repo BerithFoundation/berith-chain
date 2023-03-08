@@ -17,6 +17,7 @@
 package vm
 
 import (
+	"fmt"
 	"hash"
 	"sync/atomic"
 
@@ -213,8 +214,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		operation := in.cfg.JumpTable[op]
 		cost = operation.constantGas
 		// Validate stack
-		// before := contract.Gas
-		// fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
+		before := contract.Gas
+		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
 		if sLen := stack.len(); sLen < operation.minStack {
 			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
 		} else if sLen > operation.maxStack {
@@ -266,8 +267,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 			logged = true
 		}
-		// after := contract.Gas
-		// fmt.Println(" Used Gas : ", before-after)
+		after := contract.Gas
+		fmt.Println(" Used Gas : ", before-after)
 
 		// execute the operation
 		res, err = operation.execute(&pc, in, contract, mem, stack)

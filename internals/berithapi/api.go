@@ -1282,9 +1282,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	target := types.ConvertJobWallet(args.Target)
 
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target, false)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target, false)
 }
 
 // submitTransaction is a helper function that submits tx to txPool and logs a message.

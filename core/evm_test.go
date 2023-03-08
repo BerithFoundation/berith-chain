@@ -128,7 +128,7 @@ func TestMinimumStake(t *testing.T) {
 			data.to = from
 		}
 
-		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target)
+		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target, false)
 
 		tx, err := types.SignTx(tx, signer, pvk)
 
@@ -251,7 +251,7 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 			data.to = from
 		}
 
-		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target)
+		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target, false)
 
 		tx, err := types.SignTx(tx, signer, pvk)
 

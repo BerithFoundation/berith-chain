@@ -18,7 +18,6 @@ package core
 
 import (
 	"berith-chain/berith/staking"
-	"fmt"
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/common"
@@ -176,11 +175,11 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 Check if the break transaction satisfies the lock up condition
 The Break Transaction has a three-day grace period.
 */
-func checkBreakTransaction(msg types.Message, lastBlock, blockNumber *big.Int, period uint64) (bool, int64) {
-	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
-	elapsedBlockNumber := new(big.Int).Sub(blockNumber, lastBlock)
-	if msg.Base() == types.Stake && msg.Target() == types.Main {
-		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
-	}
-	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1, new(big.Int).Sub(lockUpPeriod, elapsedBlockNumber).Int64()
-}
+// func checkBreakTransaction(msg types.Message, lastBlock, blockNumber *big.Int, period uint64) (bool, int64) {
+// 	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
+// 	elapsedBlockNumber := new(big.Int).Sub(blockNumber, lastBlock)
+// 	if msg.Base() == types.Stake && msg.Target() == types.Main {
+// 		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
+// 	}
+// 	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1, new(big.Int).Sub(lockUpPeriod, elapsedBlockNumber).Int64()
+// }

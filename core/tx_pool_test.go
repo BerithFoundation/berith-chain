@@ -131,7 +131,7 @@ func TestTransactionValidate(t *testing.T) {
 
 	for _, tx := range txs {
 
-		transaction := types.NewTransaction(tx.nonce, tx.to, tx.value, tx.gas, tx.gasPrice, tx.data, tx.base, tx.target)
+		transaction := types.NewTransaction(tx.nonce, tx.to, tx.value, tx.gas, tx.gasPrice, tx.data, tx.base, tx.target, false)
 		transaction, err = types.SignTx(transaction, signer, pvk)
 
 		if err != nil {

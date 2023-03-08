@@ -71,7 +71,9 @@ func HasAddressPrefix(s string) bool {
 	if len(s) < AddressPrefixLength {
 		return false
 	}
-	return strings.EqualFold(AddressPrefix, s[:AddressPrefixLength])
+	// [Berith]
+	// To allow 0x Bx both
+	return strings.EqualFold(AddressPrefix, s[:AddressPrefixLength]) || strings.EqualFold("Bx", s[:AddressPrefixLength])
 }
 
 // RemoveAddressPrefix returns a address without prefix given address string.
