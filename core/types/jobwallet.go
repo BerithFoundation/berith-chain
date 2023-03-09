@@ -11,9 +11,8 @@ type JobWallet uint8
 const (
 	Main = 1 + iota
 	Stake
+	EthTx
 
-	// // [Vote] 임시 상수 추가
-	// Vote
 	end
 )
 
@@ -21,11 +20,13 @@ var (
 	values = [...]string{
 		"main",
 		"stake",
-		// // [vote] 임시 string
-		// "vote",
+		"ethtx",
 	}
 
 	ErrInvalidJobWallet = errors.New("invalid wallet type")
+	ErrStakeToStake     = errors.New("cannot send balance stake to stake")
+	ErrToEthTx          = errors.New("cannot send balance main/stake to ethtx")
+	ErrFromEthTx        = errors.New("cannot send balance ethtx to main/stake")
 )
 
 func (m JobWallet) String() string {
@@ -40,9 +41,8 @@ func ConvertJobWallet(s string) JobWallet {
 	case "stake":
 		return Stake
 
-		// // [Vote] 임시 condition
-	// case "vote":
-	// return Vote
+	case "ethtx":
+		return EthTx
 
 	default:
 		return Main
@@ -59,17 +59,16 @@ func ValidateJobWallet(base JobWallet, target JobWallet) error {
 	}
 
 	if base == Stake && target == Stake {
-		return ErrInvalidJobWallet
+		return ErrStakeToStake
 	}
 
-	// [Vote] 임시 condition
-	// if base == Stake && target == Vote {
-	// return ErrInvalidJobWallet
-	// }
+	if (base == Main || base == Stake) && target == EthTx {
+		return ErrToEthTx
+	}
 
-	// if base == Vote && target == Stake || base == Vote && target == Vote {
-	// return ErrInvalidJobWallet
-	// }
+	if base == EthTx && (target == Main || target == Stake) {
+		return ErrFromEthTx
+	}
 
 	return nil
 }

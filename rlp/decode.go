@@ -534,6 +534,7 @@ func decodeInterface(s *Stream, val reflect.Value) error {
 
 // This decoder is used for non-pointer values of types
 // that implement the Decoder interface using a pointer receiver.
+// Decode transaction
 func decodeDecoderNoPtr(s *Stream, val reflect.Value) error {
 	return val.Addr().Interface().(Decoder).DecodeRLP(s)
 }

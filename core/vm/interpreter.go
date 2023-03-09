@@ -215,7 +215,7 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		cost = operation.constantGas
 		// Validate stack
 		before := contract.Gas
-		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len())
+		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len(), " minStack : ", operation.minStack, " maxStack : ", operation.maxStack)
 		if sLen := stack.len(); sLen < operation.minStack {
 			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
 		} else if sLen > operation.maxStack {

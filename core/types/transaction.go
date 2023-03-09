@@ -145,7 +145,17 @@ func (tx *Transaction) DecodeRLP(s *rlp.Stream) error {
 	if err == nil {
 		tx.size.Store(common.StorageSize(rlp.ListSize(size)))
 	}
-
+	// [Berith]
+	// TODO :  Ethereum tool로부터 전송되었던 Tx와 Berith의 Tx를 구분하여 Journal로부터 Decoding할 방법 찾기
+	// 지금과 같은 방식이면 두 Tx모두 Berith Tx로 여겨짐.
+	// tx.data에 필드를 추가하는 건 기존 체인에 저장된 데이터와 인코딩/디코딩 간 형식 충돌이 일어날 수 있어 피해야 함.
+	//
+	// JobWallet 타입에 세 번째 타입인 EthTx를 추가하여 txdata만을 디코딩 하여도 구분 할 수 있도록 처리함
+	if tx.data.Base == EthTx && tx.data.Target == EthTx {
+		tx.IsEthTx = true // Transaction from Ethereum tool
+	} else {
+		tx.IsEthTx = false // Berith transaction
+	}
 	return err
 }
 
@@ -236,6 +246,9 @@ func (tx *Transaction) Size() common.StorageSize {
 //
 // XXX Rename message to something less arbitrary?
 func (tx *Transaction) AsMessage(s Signer) (Message, error) {
+	if tx.Base() == EthTx || tx.Target() == EthTx {
+		tx.data.Base, tx.data.Target = Main, Main
+	}
 	msg := Message{
 		nonce:      tx.data.AccountNonce,
 		gasLimit:   tx.data.GasLimit,

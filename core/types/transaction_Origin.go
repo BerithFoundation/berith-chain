@@ -158,7 +158,7 @@ func (o *OriginTransaction) DecodeRLP(s *rlp.Stream) error {
 	if err == nil {
 		o.size.Store(common.StorageSize(rlp.ListSize(size)))
 	}
-
+	o.IsEthTx = true
 	return err
 }
 
@@ -292,8 +292,8 @@ func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 			Recipient:    o.inner.To,
 			Amount:       o.inner.Value,
 			Payload:      o.inner.Data,
-			Base:         JobWallet(1),
-			Target:       JobWallet(1),
+			Base:         EthTx, // [Berith]
+			Target:       EthTx, // [Berith]
 			V:            o.inner.V,
 			R:            o.inner.R,
 			S:            o.inner.S,
