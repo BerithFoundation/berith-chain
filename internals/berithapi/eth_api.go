@@ -1,6 +1,7 @@
 package berithapi
 
 import (
+	"berith-chain/accounts/abi"
 	"bytes"
 	"context"
 	"errors"
@@ -300,12 +301,12 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 	return nil
 }
 
-func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.BlockNumber, timeout time.Duration) ([]byte, uint64, bool, error) {
+func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.BlockNumber, timeout time.Duration) (*core.ExecutionResult, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
 	state, header, err := b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
 	// Set sender address or use a default if none specified
 	addr := args.From
@@ -352,7 +353,7 @@ func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.Block
 	// Get a new instance of the EVM.
 	evm, vmError, err := b.GetEVM(ctx, msg, state, header)
 	if err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
 	// Wait for the context to be done and cancel the evm. Even if the
 	// EVM has finished, cancelling may be done (repeatedly)
@@ -364,18 +365,62 @@ func doCall(ctx context.Context, b Backend, args CallEth_Args, blockNr rpc.Block
 	// Setup the gas pool (also for unmetered requests)
 	// and apply the message.
 	gp := new(core.GasPool).AddGas(math.MaxUint64)
-	res, gas, failed, err := core.ApplyMessage(evm, msg, gp)
+	result, err := core.ApplyMessage(evm, msg, gp)
 	if err := vmError(); err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
-	return res, gas, failed, err
+	// If the timer caused an abort, return an appropriate error message
+	if evm.Cancelled() {
+		return nil, fmt.Errorf("execution aborted (timeout = %v)", timeout)
+	}
+	if err != nil {
+		return result, fmt.Errorf("err: %w (supplied gas %d)", err, msg.Gas())
+	}
+	return result, err
+}
+
+func newRevertError(result *core.ExecutionResult) *revertError {
+	reason, errUnpack := abi.UnpackRevert(result.Revert())
+	err := errors.New("execution reverted")
+	if errUnpack == nil {
+		err = fmt.Errorf("execution reverted: %v", reason)
+	}
+	return &revertError{
+		error:  err,
+		reason: hexutil.Encode(result.Revert()),
+	}
+}
+
+// revertError is an API error that encompassas an EVM revertal with JSON error
+// code and a binary data blob.
+type revertError struct {
+	error
+	reason string // revert reason hex encoded
+}
+
+// ErrorCode returns the JSON error code for a revertal.
+// See: https://github.com/ethereum/wiki/wiki/JSON-RPC-Error-Codes-Improvement-Proposal
+func (e *revertError) ErrorCode() int {
+	return 3
+}
+
+// ErrorData returns the hex encoded revert reason.
+func (e *revertError) ErrorData() interface{} {
+	return e.reason
 }
 
 // Call executes the given transaction on the state for the given block number.
 // It doesn't make and changes in the state/blockchain and is useful to execute and retrieve values.
 func (s *Eth_PublicBlockChainAPI) Call(ctx context.Context, args CallEth_Args, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (hexutil.Bytes, error) {
-	result, _, _, err := doCall(ctx, s.b, args, *blockNrOrHash.BlockNumber, 5*time.Second)
-	return (hexutil.Bytes)(result), err
+	result, err := doCall(ctx, s.b, args, *blockNrOrHash.BlockNumber, 5*time.Second)
+	if err != nil {
+		return nil, err
+	}
+	// If the result contains a revert reason, try to unpack and return it.
+	if len(result.Revert()) > 0 {
+		return nil, newRevertError(result)
+	}
+	return result.Return(), result.Err
 }
 
 func DoEstimateGas(ctx context.Context, b Backend, args CallEth_Args, blockNrOrHash rpc.BlockNumberOrHash) (hexutil.Uint64, error) {
@@ -434,22 +479,22 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallEth_Args, blockNrOrH
 	cap = hi
 
 	// Create a helper to check if a gas allowance results in an executable transaction
-	executable := func(gas uint64) (bool, []byte, uint64, error) {
+	executable := func(gas uint64) (bool, *core.ExecutionResult, error) {
 		args.Gas = (*hexutil.Uint64)(&gas)
 
-		res, gas, failed, err := doCall(ctx, b, args, *blockNrOrHash.BlockNumber, 0)
+		result, err := doCall(ctx, b, args, *blockNrOrHash.BlockNumber, 0)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
-				return true, nil, 0, nil // Special case, raise gas limit
+				return true, nil, nil // Special case, raise gas limit
 			}
-			return true, nil, 0, err // Bail out
+			return true, nil, err // Bail out
 		}
-		return failed, res, gas, nil
+		return result.Failed(), result, nil
 	}
 	// Execute the binary search and hone in on an executable gas limit
 	for lo+1 < hi {
 		mid := (hi + lo) / 2
-		failed, _, _, err := executable(mid)
+		failed, _, err := executable(mid)
 
 		// If the error is not nil(consensus error), it means the provided message
 		// call or transaction will never be accepted no matter how much gas it is
@@ -465,7 +510,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallEth_Args, blockNrOrH
 	}
 	// Reject the transaction as invalid if it still fails at the highest allowance
 	if hi == cap {
-		failed, _, _, err := executable(hi)
+		failed, _, err := executable(hi)
 		if err != nil {
 			return 0, err
 		}
@@ -580,17 +625,73 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, 
 }
 
 // GetTransactionByHash returns the transaction for the given hash
-func (s *Eth_PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context, hash common.Hash) *RPCTransaction {
+func (s *Eth_PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context, hash common.Hash) *EthRPCTransaction {
 	// Try to return an already finalized transaction
-	if tx, blockHash, blockNumber, index, base, target := rawdb.ReadTransaction(s.b.ChainDb(), hash); tx != nil {
-		return newRPCTransaction(tx, blockHash, blockNumber, index, base, target)
+	if tx, blockHash, blockNumber, index, _, _ := rawdb.ReadTransaction(s.b.ChainDb(), hash); tx != nil {
+		tx.IsEthTx = true
+		return newEthRPCTransaction(tx, blockHash, blockNumber, index)
 	}
 	// No finalized transaction, try to retrieve it from the pool
 	if tx := s.b.GetPoolTransaction(hash); tx != nil {
-		return newRPCPendingTransaction(tx)
+		tx.IsEthTx = true
+		return newEthRPCPendingTransaction(tx)
 	}
 	// Transaction unknown, return as such
 	return nil
+}
+
+// RPCTransaction represents a transaction that will serialize to the RPC representation of a transaction
+type EthRPCTransaction struct {
+	BlockHash        common.Hash     `json:"blockHash"`
+	BlockNumber      *hexutil.Big    `json:"blockNumber"`
+	From             common.Address  `json:"from"`
+	Gas              hexutil.Uint64  `json:"gas"`
+	GasPrice         *hexutil.Big    `json:"gasPrice"`
+	Hash             common.Hash     `json:"hash"`
+	Input            hexutil.Bytes   `json:"input"`
+	Nonce            hexutil.Uint64  `json:"nonce"`
+	To               *common.Address `json:"to"`
+	TransactionIndex hexutil.Uint    `json:"transactionIndex"`
+	Value            *hexutil.Big    `json:"value"`
+	V                *hexutil.Big    `json:"v"`
+	R                *hexutil.Big    `json:"r"`
+	S                *hexutil.Big    `json:"s"`
+}
+
+// newRPCTransaction returns a transaction that will serialize to the RPC
+// representation, with the given location metadata set (if available).
+func newEthRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber uint64, index uint64) *EthRPCTransaction {
+	var signer types.Signer = types.FrontierSigner{}
+	if tx.Protected() {
+		signer = types.NewEIP155Signer(tx.ChainId())
+	}
+	from, _ := types.Sender(signer, tx)
+	v, r, s := tx.RawSignatureValues()
+
+	result := &EthRPCTransaction{
+		From:     from,
+		Gas:      hexutil.Uint64(tx.Gas()),
+		GasPrice: (*hexutil.Big)(tx.GasPrice()),
+		Hash:     tx.Hash(),
+		Input:    hexutil.Bytes(tx.Data()),
+		Nonce:    hexutil.Uint64(tx.Nonce()),
+		To:       tx.To(),
+		Value:    (*hexutil.Big)(tx.Value()),
+		V:        (*hexutil.Big)(v),
+		R:        (*hexutil.Big)(r),
+		S:        (*hexutil.Big)(s),
+	}
+	if blockHash != (common.Hash{}) {
+		result.BlockHash = blockHash
+		result.BlockNumber = (*hexutil.Big)(new(big.Int).SetUint64(blockNumber))
+		result.TransactionIndex = hexutil.Uint(index)
+	}
+	return result
+}
+
+// newRPCPendingTransaction returns a pending transaction that will serialize to the RPC representation
+func newEthRPCPendingTransaction(tx *types.Transaction) *EthRPCTransaction {
+	return newEthRPCTransaction(tx, common.Hash{}, 0, 0)
 }
 
 // GetRawTransactionByHash returns the bytes of the transaction for the given hash.
@@ -604,6 +705,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Conte
 			return nil, nil
 		}
 	}
+	tx.IsEthTx = true
 	// Serialize to RLP and return
 	return rlp.EncodeToBytes(tx)
 }
@@ -614,7 +716,8 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context
 	if tx == nil {
 		return nil, nil
 	}
-	receipts, err := s.b.GetReceipts(ctx, blockHash)
+	tx.IsEthTx = true
+	receipts, err := s.b.GetReceipts(ctx, blockHash) // 배포된 Contract의 Setter를 호출한 TX의 Receipt가 확인 되어야 Contract의 Setter가 작동함.
 	if err != nil {
 		return nil, err
 	}
@@ -641,6 +744,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context
 		"contractAddress":   nil,
 		"logs":              receipt.Logs,
 		"logsBloom":         receipt.Bloom,
+		"type":              0,
 	}
 
 	// Assign receipt status or post state.

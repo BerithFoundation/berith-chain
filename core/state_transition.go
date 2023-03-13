@@ -26,7 +26,6 @@ import (
 
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/vm"
-	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
 )
 
@@ -122,7 +121,7 @@ func (result *ExecutionResult) Revert() []byte {
 // IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
 //
 // 메시지의 가스 비용을 계산한다. 데이터가 클수록 높은 가스비 책정
-func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error) {
+func IntrinsicGas(data []byte, contractCreation, homestead, isBIP5 bool) (uint64, error) {
 	// Set the starting gas for the raw transaction
 	var gas uint64
 	if contractCreation && homestead { // 컨트랙트 가스비
@@ -141,11 +140,14 @@ func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error)
 		}
 		// Make sure we don't exceed uint64 for all data combinations
 		// 모든 데이터 조합에서 uint64를 초과하지 않는지 검사
-		if (math.MaxUint64-gas)/params.TxDataNonZeroGas < nz {
-			return 0, vm.ErrOutOfGas
+		nonZeroGas := params.TxDataNonZeroGas
+		if isBIP5 {
+			nonZeroGas = params.TxDataNonZeroGasBIP5
 		}
-		// byte 배열 중 0이 아닌 값에 대한 추가 가스비 책정
-		gas += nz * params.TxDataNonZeroGas
+		if (math.MaxUint64-gas)/nonZeroGas < nz {
+			return 0, vm.ErrGasUintOverflow
+		}
+		gas += nz * nonZeroGas
 
 		// Zero byte의 가스비 추가
 		z := uint64(len(data)) - nz
@@ -179,7 +181,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 // state and would never be accepted within a block.
 //
 // ApplyMessage는 환경 내의 이전 state에 대해 주어진 메시지를 적용하여 새 state를 계산한다.
-func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
+func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) (*ExecutionResult, error) {
 	return NewStateTransition(evm, msg, gp).TransitionDb(msg.Base(), msg.Target())
 }
 
@@ -233,9 +235,9 @@ func (st *StateTransition) preCheck() error {
 // An error indicates a consensus issue.
 //
 // TransitionDb는 현재 메시지를 적용하여 상태를 전환하고 사용된 가스량이 포함된 결과를 반환한다.
-func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWallet) (ret []byte, usedGas uint64, failed bool, err error) {
-	if err = st.preCheck(); err != nil {
-		return
+func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWallet) (*ExecutionResult, error) {
+	if err := st.preCheck(); err != nil {
+		return nil, err
 	}
 	msg := st.msg
 	sender := vm.AccountRef(msg.From())
@@ -243,52 +245,47 @@ func (st *StateTransition) TransitionDb(base types.JobWallet, target types.JobWa
 	contractCreation := msg.To() == nil
 
 	if err := types.ValidateJobWallet(base, target); err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
 
 	if !contractCreation && (base == types.Stake || target == types.Stake) && bytes.Compare(sender.Address().Bytes(), msg.To().Bytes()) != 0 {
-		return nil, 0, false, ErrInvalidStakeReceiver
+		return nil, ErrInvalidStakeReceiver
 	}
 
 	// Pay intrinsic gas
-	gas, err := IntrinsicGas(st.data, contractCreation, homestead)
+	gas, err := IntrinsicGas(st.data, contractCreation, homestead, params.MainnetChainConfig.IsBIP5(st.evm.BlockNumber))
 	if err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
 	if err = st.useGas(gas); err != nil {
-		return nil, 0, false, err
+		return nil, err
 	}
 
 	var (
-		evm = st.evm
+		ret []byte
 		// vm errors do not effect consensus and are therefor
 		// not assigned to err, except for insufficient balance
 		// error.
 		vmerr error
 	)
 	if contractCreation {
-		ret, _, st.gas, vmerr = evm.Create(sender, st.data, st.gas, st.value)
+		ret, _, st.gas, vmerr = st.evm.Create(sender, st.data, st.gas, st.value)
 	} else {
 		// Increment the nonce for the next transaction
 		st.state.SetNonce(msg.From(), st.state.GetNonce(sender.Address())+1)
 
 		// [BERITH] staking value false
-		ret, st.gas, vmerr = evm.Call(sender, st.to(), st.data, st.gas, st.value, base, target)
-	}
-	if vmerr != nil {
-		log.Debug("VM returned with error", "err", vmerr)
-		// The only possible consensus-error would be if there wasn't
-		// sufficient balance to make the transfer happen. The first
-		// balance transfer may never fail.
-		if vmerr == vm.ErrInsufficientBalance {
-			return nil, 0, false, vmerr
-		}
+		ret, st.gas, vmerr = st.evm.Call(sender, st.to(), st.data, st.gas, st.value, base, target)
 	}
 	st.refundGas()
 	// [BERITH] Gas Fee
 	st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 
-	return ret, st.gasUsed(), vmerr != nil, err
+	return &ExecutionResult{
+		UsedGas:    st.gasUsed(),
+		Err:        vmerr,
+		ReturnData: ret,
+	}, nil
 }
 
 func (st *StateTransition) refundGas() {

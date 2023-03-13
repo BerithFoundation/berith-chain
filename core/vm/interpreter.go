@@ -17,7 +17,6 @@
 package vm
 
 import (
-	"fmt"
 	"hash"
 	"sync/atomic"
 
@@ -198,6 +197,9 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			}
 		}()
 	}
+	// fmt.Println(strings.Repeat("=", 60), "Start to calculate")
+	// fmt.Println("- CODE\n", contract.Code)
+	// fmt.Println(strings.Repeat("=", 60))
 	// The Interpreter main run loop (contextual). This loop runs until either an
 	// explicit STOP, RETURN or SELFDESTRUCT is executed, an error occurred during
 	// the execution of one of the operations or until the done flag is set by the
@@ -214,8 +216,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		operation := in.cfg.JumpTable[op]
 		cost = operation.constantGas
 		// Validate stack
-		before := contract.Gas
-		fmt.Print("Current OP : ", op, " Current PC : ", pc, " Stack length : ", stack.len(), " minStack : ", operation.minStack, " maxStack : ", operation.maxStack)
+		// before := contract.Gas
+		// fmt.Print("Current OP : ", op, "\t\t| Current PC : ", pc, "\t| Stack length : ", stack.len())
 		if sLen := stack.len(); sLen < operation.minStack {
 			return nil, &ErrStackUnderflow{stackLen: sLen, required: operation.minStack}
 		} else if sLen > operation.maxStack {
@@ -267,8 +269,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 			logged = true
 		}
-		after := contract.Gas
-		fmt.Println(" Used Gas : ", before-after)
+		// after := contract.Gas
+		// fmt.Printf("\t| Used Gas : %d\t| Remain Gas : %v\n", before-after, humanize.Comma(int64(contract.Gas)))
 
 		// execute the operation
 		res, err = operation.execute(&pc, in, contract, mem, stack)

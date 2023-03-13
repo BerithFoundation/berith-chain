@@ -174,7 +174,7 @@ func TestMinimumStake(t *testing.T) {
 		exptFrom := getBalances(from, stateDB)
 		exptTo := getBalances(from, stateDB)
 
-		_, _, _, err = ApplyMessage(evm, msg, gp)
+		_, err = ApplyMessage(evm, msg, gp)
 		if err != nil {
 			t.Error(err)
 		}
@@ -297,7 +297,7 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 		exptFrom := getBalances(from, stateDB)
 		exptTo := getBalances(from, stateDB)
 
-		_, _, _, err = ApplyMessage(evm, msg, gp)
+		_, err = ApplyMessage(evm, msg, gp)
 		if err != nil {
 			t.Error(err)
 		}

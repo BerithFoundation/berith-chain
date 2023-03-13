@@ -331,8 +331,10 @@ func (s *Server) exec(ctx context.Context, codec ServerCodec, req *serverRequest
 	}
 	if err := codec.Write(response); err != nil {
 		log.Error(fmt.Sprintf("%v\n", err))
+		fmt.Printf("Response Error! - REQ : %v,\tRES : %v\n", req.callb.method.Name, response)
 		codec.Close()
 	}
+	fmt.Printf("REQ : %v,\tRES : %v\n", req.callb.method.Name, response)
 
 	// when request was a subscribe request this allows these subscriptions to be actived
 	if callback != nil {
@@ -348,11 +350,13 @@ func (s *Server) execBatch(ctx context.Context, codec ServerCodec, requests []*s
 	for i, req := range requests {
 		if req.err != nil {
 			responses[i] = codec.CreateErrorResponse(&req.id, req.err)
+			fmt.Printf("Response Error of Batch! - REQ : %v,\tRES : %v\n", req.callb.method.Name, responses[i])
 		} else {
 			var callback func()
 			if responses[i], callback = s.handle(ctx, codec, req); callback != nil {
 				callbacks = append(callbacks, callback)
 			}
+			fmt.Printf("Batch response - REQ : %v,\tRES : %v\n", req.callb.method.Name, responses[i])
 		}
 	}
 

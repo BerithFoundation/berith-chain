@@ -664,7 +664,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		}
 	}
 
-	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, pool.homestead)
+	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, pool.homestead, pool.chainconfig.IsBIP5(pool.chain.CurrentBlock().Number()))
 	if err != nil {
 		return err
 	}
