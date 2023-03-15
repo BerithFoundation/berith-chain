@@ -23,7 +23,7 @@ var (
 	VersionAstilectron string
 	VersionElectron    string
 	// === wallet flags
-	debuging = flag.Bool("d", true, "enables the debug mode")
+	debuging = flag.Bool("d", false, "enables the debug mode")
 
 	// === node flags
 	nodePort       = flag.String("nodeport", "", "node's network listening port")
