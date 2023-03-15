@@ -139,7 +139,19 @@
 
     async function sendAll() {
         let mainBalance = await berith.getBalance(account);
-        $('#sendAmount').find('input[type=text]:first').val(mainBalance);
+    let sendGasLimit = $("#sendGasLimit").val();
+    let sendGasPrice = $("#sendGasPrice").val()/Math.pow(10,9);
+
+    if (sendGasLimit == "") {
+      sendGasLimit = 21000;
+    }
+    if (sendGasPrice == "") {
+      sendGasPrice = 1/Math.pow(10,9);
+    }
+    // v1.7.1 모두 보내기 수량 가스량 차감 후 책정하도록 변경
+    $("#sendAmount")
+      .find("input[type=text]:first")
+      .val(Math.floor((mainBalance -  sendGasLimit * sendGasPrice)*Math.pow(10,8))/Math.pow(10,8));
     }
 
     async function confirmation(){

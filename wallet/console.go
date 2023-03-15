@@ -269,6 +269,9 @@ func Start() {
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
 	}
+	if *node_datadir != "" {
+		args = append(args, "--datadir", *node_datadir)
+	}
 	if *httpFlag {
 		args = append(args, "--http")
 	}
