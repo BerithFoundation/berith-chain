@@ -80,9 +80,9 @@ func startUi() {
 			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
 		},
 		Debug: *debuging,
-		MenuOptions: []*astilectron.MenuItemOptions{{
-			Label: astilectron.PtrStr("File"),
-		}},
+		// MenuOptions: []*astilectron.MenuItemOptions{{
+		// 	Label: astilectron.PtrStr("File"),
+		// }},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
 			go func() {
