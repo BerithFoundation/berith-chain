@@ -23,7 +23,7 @@ var (
 	VersionAstilectron string
 	VersionElectron    string
 	// === wallet flags
-	debuging = flag.Bool("d", true, "enables the debug mode")
+	debuging = flag.Bool("d", false, "enables the debug mode")
 
 	// === node flags
 	nodePort       = flag.String("nodeport", "", "node's network listening port")
@@ -79,9 +79,9 @@ func start_ui() {
 			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
 		},
 		Debug: *debuging,
-		MenuOptions: []*astilectron.MenuItemOptions{{
-			Label: astilectron.PtrStr("File"),
-		}},
+		// MenuOptions: []*astilectron.MenuItemOptions{{
+		// 	Label: astilectron.PtrStr("File"),
+		// }},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
 			go func() {

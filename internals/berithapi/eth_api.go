@@ -939,18 +939,6 @@ func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, e
 		return common.Hash{}, err
 	}
 
-	msg, err := tx.AsMessage(types.NewEIP155Signer(s.b.ChainConfig().ChainID))
-	if err != nil {
-		fmt.Println("SendRawTx Err : ", err)
-	}
-	if tx.To() != nil {
-		fmt.Printf("Message\n\tFrom : %v\n\tTo : %v\n\tValue : %v\n\tGas : %v\n\tGasPrice : %v\n\t", msg.From().Hex(), msg.To().Hex(), msg.Value(), msg.Gas(), msg.GasPrice())
-	}
-
-	if tx.From() != nil {
-		fmt.Printf("Message\n\tFrom : %v\n\tValue : %v\n\t", msg.From().Hex(), msg.Value())
-	}
-
 	return eth_submitTransaction(ctx, s.b, tx)
 }
 

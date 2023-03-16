@@ -18,15 +18,12 @@ package vm
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
-	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/log"
-	"github.com/dustin/go-humanize"
 	"github.com/holiman/uint256"
 
 	"github.com/BerithFoundation/berith-chain/common"
@@ -70,9 +67,9 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 				}(evm.interpreter)
 				evm.interpreter = interpreter
 			}
-			fmt.Printf("Run Interpreter : GAS : %v\n", humanize.Comma(int64(contract.Gas)))
+			// fmt.Printf("Run Interpreter : GAS : %v\n", humanize.Comma(int64(contract.Gas)))
 			res, err := interpreter.Run(contract, input, readOnly)
-			fmt.Printf("%sRETURN. ERR : %v\n", strings.Repeat("=", 60), err)
+			// fmt.Printf("%sRETURN. ERR : %v\n", strings.Repeat("=", 60), err)
 			return res, err
 		} else {
 			log.Error("Cannot run contract code", "Contract", contract.CodeAddr.Hex())
