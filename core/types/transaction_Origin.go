@@ -189,10 +189,25 @@ func (o *OriginTransaction) To() *common.Address {
 // Hash hashes the RLP encoding of o.
 // It uniquely identifies the transaction.
 func (o *OriginTransaction) Hash() common.Hash {
-	if hash := o.hash.Load(); hash != nil {
+	var txForhash = struct {
+		inner *LegacyTx
+		time  time.Time // Time first seen locally (spam avoidance)
+
+		// caches
+		hash atomic.Value
+		size atomic.Value
+		from atomic.Value
+	}{
+		inner: o.inner,
+		time:  o.time,
+		hash:  o.hash,
+		size:  o.size,
+		from:  o.from,
+	}
+	if hash := txForhash.hash.Load(); hash != nil {
 		return hash.(common.Hash)
 	}
-	v := rlpHash(o)
+	v := rlpHash(txForhash)
 	o.hash.Store(v)
 	return v
 }

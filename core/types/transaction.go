@@ -266,6 +266,11 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 	return msg, err
 }
 
+func (tx *Transaction) ChangeBaseTarget(base, target JobWallet) {
+	tx.data.Base = base
+	tx.data.Target = target
+}
+
 // WithSignature returns a new transaction with the given signature.
 // This signature needs to be formatted as described in the yellow paper (v+27).
 func (tx *Transaction) WithSignature(signer Signer, sig []byte) (*Transaction, error) {

@@ -629,6 +629,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context,
 	// Try to return an already finalized transaction
 	if tx, blockHash, blockNumber, index, _, _ := rawdb.ReadTransaction(s.b.ChainDb(), hash); tx != nil {
 		tx.IsEthTx = true
+		tx.ChangeBaseTarget(types.EthTx, types.EthTx) // Berith에 저장됐던 당시 Base와 Target 모두 EthTx로 저장되었기 때문에 올바른 Hash값을 도출해 내기 위해 재설정
 		return newEthRPCTransaction(tx, blockHash, blockNumber, index)
 	}
 	// No finalized transaction, try to retrieve it from the pool
