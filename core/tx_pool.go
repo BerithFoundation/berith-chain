@@ -831,7 +831,15 @@ func (pool *TxPool) journalTx(from common.Address, tx *types.Transaction) {
 	if pool.journal == nil || !pool.locals.contains(from) {
 		return
 	}
-	if err := pool.journal.insert(tx); err != nil {
+
+	// Berith
+	// To identify ethTX when save into Journal
+	var toInsertTX types.Transaction = *tx
+	if tx.IsEthTx {
+		toInsertTX.ChangeBaseTarget(types.EthTx, types.EthTx)
+	}
+
+	if err := pool.journal.insert(&toInsertTX); err != nil {
 		log.Warn("Failed to journal local transaction", "err", err)
 	}
 }

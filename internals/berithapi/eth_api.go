@@ -629,7 +629,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context,
 	// Try to return an already finalized transaction
 	if tx, blockHash, blockNumber, index, _, _ := rawdb.ReadTransaction(s.b.ChainDb(), hash); tx != nil {
 		tx.IsEthTx = true
-		tx.ChangeBaseTarget(types.EthTx, types.EthTx) // Berith에 저장됐던 당시 Base와 Target 모두 EthTx로 저장되었기 때문에 올바른 Hash값을 도출해 내기 위해 재설정
+		// fmt.Println("Get req : ", hash.Hex(), "res : ", tx.Hash().Hex())
 		return newEthRPCTransaction(tx, blockHash, blockNumber, index)
 	}
 	// No finalized transaction, try to retrieve it from the pool
@@ -867,9 +867,9 @@ func (args *Eth_SendTxArgs) toTransaction() *types.Transaction {
 	}
 
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.EthTx, types.EthTx, true)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main, true)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.EthTx, types.EthTx, true)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, types.Main, types.Main, true)
 }
 
 // eth_submitTransaction is a helper function that submits tx to txPool and logs a message.
@@ -891,6 +891,7 @@ func eth_submitTransaction(ctx context.Context, b Backend, originTx *types.Origi
 	} else {
 		log.Info("Submitted transaction", "fullhash", tx.Hash().Hex(), "recipient", tx.To())
 	}
+	// fmt.Println("Submit : ", tx.Hash().Hex())
 	return tx.Hash(), nil
 }
 

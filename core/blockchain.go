@@ -1004,11 +1004,9 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 			reorg = true
 		} else if block.NumberU64() == currentBlock.NumberU64() {
 			var currentPreserve, blockPreserve bool
-			fmt.Printf("block.Number %d == currentBlock.Number %d\n", block.NumberU64(), currentBlock.NumberU64())
 			if bc.shouldPreserve != nil {
 				// 블록 채굴자와 체인의 코인베이스가 같은지 판단해 로컬블록인지 외부 블록인지 가려냄
 				currentPreserve, blockPreserve = bc.shouldPreserve(currentBlock), bc.shouldPreserve(block)
-				fmt.Printf(`currentPreserve : %v, blockPreserve : %v\n`, currentPreserve, blockPreserve)
 			}
 			reorg = !currentPreserve && (blockPreserve || mrand.Float64() < 0.5)
 		}

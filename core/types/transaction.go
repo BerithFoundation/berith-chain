@@ -151,8 +151,9 @@ func (tx *Transaction) DecodeRLP(s *rlp.Stream) error {
 	// tx.data에 필드를 추가하는 건 기존 체인에 저장된 데이터와 인코딩/디코딩 간 형식 충돌이 일어날 수 있어 피해야 함.
 	//
 	// JobWallet 타입에 세 번째 타입인 EthTx를 추가하여 txdata만을 디코딩 하여도 구분 할 수 있도록 처리함
-	if tx.data.Base == EthTx && tx.data.Target == EthTx {
+	if tx.data.Base == EthTx || tx.data.Target == EthTx {
 		tx.IsEthTx = true // Transaction from Ethereum tool
+		tx.ChangeBaseTarget(Main, Main)
 	} else {
 		tx.IsEthTx = false // Berith transaction
 	}

@@ -32,7 +32,7 @@ const (
 // Genesis hashes to enforce below configs on.
 var (
 	MainnetGenesisHash = common.HexToHash("0x0c2efaedffcadfc946f140e3fd591628ddd6fd220e235abcf86d0f8de09b76bd")
-	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	TestnetGenesisHash = common.HexToHash("0xa4b38d62b724e0d3aced2d17b31f8ee103a64806866ede8ed8c8ba0d1a6eaedc")
 )
 
 // [BERITH] Config Setting
@@ -76,17 +76,27 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:        big.NewInt(206),
-		HomesteadBlock: big.NewInt(0),
-		EIP155Block:    big.NewInt(0),
-		EIP158Block:    big.NewInt(0),
+		ChainID:             big.NewInt(106),
+		HomesteadBlock:      big.NewInt(0),
+		DAOForkBlock:        nil,
+		DAOForkSupport:      true,
+		EIP150Block:         big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		BIP1Block:           big.NewInt(0),
+		BIP2Block:           big.NewInt(0),
+		BIP3Block:           big.NewInt(0),
+		BIP4Block:           big.NewInt(0),
+		BIP5Block:           big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:            5,
-			Epoch:             40,
-			Rewards:           common.StringToBig("20000"),
+			Epoch:             360,
+			Rewards:           common.StringToBig("360"),
 			StakeMinimum:      common.StringToBig(StakeMinimum),
 			LimitStakeBalance: common.StringToBig(LimitStakeBalance),
-			SlashRound:        500,
+			SlashRound:        0,
 			ForkFactor:        1.0,
 		},
 	}

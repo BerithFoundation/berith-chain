@@ -307,8 +307,8 @@ func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 			Recipient:    o.inner.To,
 			Amount:       o.inner.Value,
 			Payload:      o.inner.Data,
-			Base:         EthTx, // [Berith]
-			Target:       EthTx, // [Berith]
+			Base:         Main, // [Berith]
+			Target:       Main, // [Berith]
 			V:            o.inner.V,
 			R:            o.inner.R,
 			S:            o.inner.S,
