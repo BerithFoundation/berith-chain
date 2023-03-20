@@ -1,6 +1,6 @@
 {
   "config": {
-    "chainId": 106,
+    "chainId": 107,
     "homesteadBlock": 0,
     "eip150Block": 0,
     "eip150Hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -15,7 +15,7 @@
     "bsrr": {
       "period": 5,
       "epoch": 360,
-      "rewards": 1000000000000000000,
+      "rewards": 360,
       "stakeminimum": 1000000000000000000,
       "limitStakeBalance": 50000000000000000000000000,
       "slashRound": 1,
