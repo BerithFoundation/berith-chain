@@ -27,7 +27,7 @@ var (
 
 	// === node flags
 	nodePort       = flag.String("nodeport", "", "node's network listening port")
-	node_verbosity = flag.String("verbosity", "", "logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail")
+	verbosity      = flag.String("verbosity", "", "logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail")
 	node_testnet   = flag.String("testnet", "", "testnet")
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
