@@ -284,6 +284,9 @@ func Start() {
 	if *nodiscover {
 		args = append(args, "--nodiscover")
 	}
+	if *verbosity > 3 {
+		args = append(args, fmt.Sprintf("--verbosity %d", *verbosity))
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("node is down", "err", r)
