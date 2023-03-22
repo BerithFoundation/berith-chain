@@ -92,7 +92,7 @@ var (
 		BIP5Block:           big.NewInt(0),
 		Bsrr: &BSRRConfig{
 			Period:            5,
-			Epoch:             360,
+			Epoch:             15,
 			Rewards:           common.StringToBig("360"),
 			StakeMinimum:      common.StringToBig(StakeMinimum),
 			LimitStakeBalance: common.StringToBig(LimitStakeBalance),

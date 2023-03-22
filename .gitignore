@@ -62,3 +62,4 @@ cmd/berith/__debug_bin
 wallet/wallet.exe
 wallet/windows.syso
 cmd/berith/password
+common/address_test.go

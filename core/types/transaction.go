@@ -135,7 +135,14 @@ func isProtectedV(V *big.Int) bool {
 
 // EncodeRLP implements rlp.Encoder
 func (tx *Transaction) EncodeRLP(w io.Writer) error {
-	return rlp.Encode(w, &tx.data)
+	if tx.IsEthTx {
+		tx.ChangeBaseTarget(EthTx, EthTx)
+	}
+	err := rlp.Encode(w, &tx.data)
+	if tx.Base() == EthTx || tx.Target() == EthTx {
+		tx.ChangeBaseTarget(Main, Main)
+	}
+	return err
 }
 
 // DecodeRLP implements rlp.Decoder
