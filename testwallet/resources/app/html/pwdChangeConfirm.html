@@ -1,75 +1,77 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Berith PC Wallet</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
     <meta name="subject" content="" />
-    <meta name="application-name" content="">
+    <meta name="application-name" content="" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <meta name="copyright" content="Copyrights (c) " />
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
-    
-</head>
-    
-<body>
+  </head>
+
+  <body>
     <div class="wrap">
-        <!-- 콘텐츠 영역 -->
-    </div><!-- e://wrap -->
-
-    <div class="ly_pop hide" id = "pwdChangeConfirm"><!-- view/hide -->
-        <div class="bg_dimmed"></div>
-        <div class="pop_wrap">
-            <div class="pop_header">
-                <h5>비밀번호 변경 확인</h5>
-                <a class="btn_close" onclick="closePwdChangeConfirmPop()">close</a>
-            </div>
-            <div class="pop_body">
-                <p class="pop_con_top">
-                    정말 비밀번호를 변경하시겠습니까 ? <br/>
-                    
-                </p>
-            </div>
-            <div class="pop_footer">
-                <a class="btn white on" onclick="closePwdChangeConfirmPop()">취소</a>
-                <a class="btn red on" onclick="fnPwdChange()">확인</a>
-            </div>
-        </div><!-- e://pop_wrap  -->
-        <div class="one_sec_wrap hide" id = "changePwdPop"><!-- view/hide -->
-            <div class="bg"></div>
-            <p class="complete">변경 완료</p>
-        </div>
+      <!-- 콘텐츠 영역 -->
     </div>
-    <script type="text/javascript" >
-        // let changeAdd , originPwd , changePwd
-        function openPwdChangeConfirmPop(add , pwd , cPwd) {
-            $('#pwdChangeConfirm').removeClass('hide')
-            $('#pwdChangeConfirm').addClass('view')
-        }
-        function closePwdChangeConfirmPop() {
-            $('#pwdChangeConfirm').removeClass('view')
-            $('#pwdChangeConfirm').addClass('hide')
-        }
-        function fnPwdChange() {
-            var pwd = $('#originPwd').val()
-            var cPwd = $('#changePwd').val()
-            // console.log("Add  : " + account + " ,  originPwd : " + pwd + "  ,  changePwd : " + cPwd )
-            berith.updateAccount(account ,pwd, cPwd )
-            database.updateMember(loginId , cPwd)
-        }
-        function succesChange() {
-            $('#changePwdPop').removeClass('hide')
-            $('#changePwdPop').addClass('view')
-            setTimeout(function () {
-                $('#changePwdPop').removeClass('view')
-                $('#changePwdPop').addClass('hide')
-                closePwdChangeConfirmPop()
-            },3000)
-        }
-    </script>
-</body>
+    <!-- e://wrap -->
 
+    <div class="ly_pop hide" id="pwdChangeConfirm">
+      <!-- view/hide -->
+      <div class="bg_dimmed"></div>
+      <div class="pop_wrap">
+        <div class="pop_header">
+          <h5>비밀번호 변경 확인</h5>
+          <a class="btn_close" onclick="closePwdChangeConfirmPop()">close</a>
+        </div>
+        <div class="pop_body">
+          <p class="pop_con_top">정말 비밀번호를 변경하시겠습니까 ? <br /></p>
+        </div>
+        <div class="pop_footer">
+          <a class="btn white on" onclick="closePwdChangeConfirmPop()">취소</a>
+          <a class="btn red on" onclick="fnPwdChange()">확인</a>
+        </div>
+      </div>
+      <!-- e://pop_wrap  -->
+      <div class="one_sec_wrap hide" id="changePwdPop">
+        <!-- view/hide -->
+        <div class="bg"></div>
+        <p class="complete">변경 완료</p>
+      </div>
+    </div>
+    <script type="text/javascript">
+      // let changeAdd , originPwd , changePwd
+      function openPwdChangeConfirmPop(add, pwd, cPwd) {
+        $("#pwdChangeConfirm").removeClass("hide");
+        $("#pwdChangeConfirm").addClass("view");
+      }
+      function closePwdChangeConfirmPop() {
+        $("#pwdChangeConfirm").removeClass("view");
+        $("#pwdChangeConfirm").addClass("hide");
+      }
+      function fnPwdChange() {
+        var pwd = $("#originPwd").val();
+        var cPwd = $("#changePwd").val();
+        // console.log("Add  : " + account + " ,  originPwd : " + pwd + "  ,  changePwd : " + cPwd )
+        berith.updateAccount(account, pwd, cPwd);
+        database.updateMember(loginId, cPwd);
+      }
+      function succesChange() {
+        $("#changePwdPop").removeClass("hide");
+        $("#changePwdPop").addClass("view");
+        setTimeout(function () {
+          $("#changePwdPop").removeClass("view");
+          $("#changePwdPop").addClass("hide");
+          closePwdChangeConfirmPop();
+        }, 3000);
+      }
+    </script>
+  </body>
 </html>

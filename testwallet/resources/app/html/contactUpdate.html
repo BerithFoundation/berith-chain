@@ -1,126 +1,144 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Berith PC Wallet</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
     <meta name="subject" content="" />
-    <meta name="application-name" content="">
+    <meta name="application-name" content="" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <meta name="copyright" content="Copyrights (c) " />
     <meta name="robots" content="ALL" />
     <meta name="robots" content="index,follow" />
+  </head>
 
-</head>
-    
-<body>
-    
-    <div class="ly_pop hide" id ="contactUpdate"><!-- view/hide -->
-        <div class="bg_dimmed"></div>
-        <div class="pop_wrap">
-            <div class="pop_header">
-                <h5>Contact 수정</h5>
-                <a class="btn_close" onclick="closeContactUpdate()">close</a>
-            </div>
-            <div class="pop_body">
-                <div class="inp_group" id = "contactUpdateNameGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                    <h5>이름</h5>
-                    <div class="box_inp">
-                        <span class="inp_wrap">
-                            <input class="inp" type="text" id = "contactUpdateName" placeholder="지갑 이름을 입력해 주세요" />
-                            <a class="del" href="#!">삭제</a>
-                        </span>
-                    </div>
-                    <p class="error_txt" id = "err1"></p>
-                </div>
-                <div class="inp_group" id = "contactUpdateAddrGroup"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
-                    <h5>지갑주소</h5>
-                    <div class="box_inp disabled">
-                        <span class="inp_wrap">
-                            <input class="inp" type="text" id = "contactUpdateAddr" placeholder="지갑 주소를 입력해 주세요" disabled/>
-                            <a class="del" href="#!">삭제</a>
-                        </span>
-                    </div>
-                    <p class="error_txt" id = "err2"></p>
-                </div>
-            </div>
-            <div class="pop_footer">
-                <a class="btn red" id ="btnUpdate" onclick="fnContactUpdate()">확인</a><!-- input 입력시 on -->
-            </div>
-        </div><!-- e://pop_wrap  -->
-        <div class="one_sec_wrap hide" id = "popUpdate"><!-- view/hide -->
-            <div class="bg"></div>
-            <p class="complete">수정 완료</p>
+  <body>
+    <div class="ly_pop hide" id="contactUpdate">
+      <!-- view/hide -->
+      <div class="bg_dimmed"></div>
+      <div class="pop_wrap">
+        <div class="pop_header">
+          <h5>Contact 수정</h5>
+          <a class="btn_close" onclick="closeContactUpdate()">close</a>
         </div>
-
+        <div class="pop_body">
+          <div class="inp_group" id="contactUpdateNameGroup">
+            <!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>이름</h5>
+            <div class="box_inp">
+              <span class="inp_wrap">
+                <input
+                  class="inp"
+                  type="text"
+                  id="contactUpdateName"
+                  placeholder="지갑 이름을 입력해 주세요"
+                />
+                <a class="del" href="#!">삭제</a>
+              </span>
+            </div>
+            <p class="error_txt" id="err1"></p>
+          </div>
+          <div class="inp_group" id="contactUpdateAddrGroup">
+            <!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>지갑주소</h5>
+            <div class="box_inp disabled">
+              <span class="inp_wrap">
+                <input
+                  class="inp"
+                  type="text"
+                  id="contactUpdateAddr"
+                  placeholder="지갑 주소를 입력해 주세요"
+                  disabled
+                />
+                <a class="del" href="#!">삭제</a>
+              </span>
+            </div>
+            <p class="error_txt" id="err2"></p>
+          </div>
+        </div>
+        <div class="pop_footer">
+          <a class="btn red" id="btnUpdate" onclick="fnContactUpdate()">확인</a
+          ><!-- input 입력시 on -->
+        </div>
+      </div>
+      <!-- e://pop_wrap  -->
+      <div class="one_sec_wrap hide" id="popUpdate">
+        <!-- view/hide -->
+        <div class="bg"></div>
+        <p class="complete">수정 완료</p>
+      </div>
     </div>
-<script type="text/javascript">
-    $("#contactUpdateName").on("propertychange change keyup paste input", function() {
-        var currentVal = $(this).val();
-        if( currentVal != ""){
-            $('#btnUpdate').addClass('on')
-        }else{
-            $('#btnUpdate').removeClass('on')
+    <script type="text/javascript">
+      $("#contactUpdateName").on(
+        "propertychange change keyup paste input",
+        function () {
+          var currentVal = $(this).val();
+          if (currentVal != "") {
+            $("#btnUpdate").addClass("on");
+          } else {
+            $("#btnUpdate").removeClass("on");
+          }
         }
-    });
-    function openContactUpdate(value){
-        $('#contactUpdate').removeClass("hide")
-        $('#contactUpdate').addClass("view")
-        var addNum = value.attr('id')
-        var addr = $('#addr'+addNum).text()
-        $('#contactUpdateAddr').val(addr)
-        registerEvents()
-    }
-    function closeContactUpdate(){
-        $('#contactUpdate').removeClass("view")
-        $('#contactUpdate').addClass("hide")
-    }
-    async function fnContactUpdate() {
-        var name = $('#contactUpdateName').val()
-        var addr = $('#contactUpdateAddr').val()
-        var vali = await validationUpdate(name,addr)
-        if ( vali == false){
-            return
+      );
+      function openContactUpdate(value) {
+        $("#contactUpdate").removeClass("hide");
+        $("#contactUpdate").addClass("view");
+        var addNum = value.attr("id");
+        var addr = $("#addr" + addNum).text();
+        $("#contactUpdateAddr").val(addr);
+        registerEvents();
+      }
+      function closeContactUpdate() {
+        $("#contactUpdate").removeClass("view");
+        $("#contactUpdate").addClass("hide");
+      }
+      async function fnContactUpdate() {
+        var name = $("#contactUpdateName").val();
+        var addr = $("#contactUpdateAddr").val();
+        var vali = await validationUpdate(name, addr);
+        if (vali == false) {
+          return;
         }
-        var obj = await database.insertContact(addr, name)
+        var obj = await database.insertContact(addr, name);
         // console.log("add success ::" + obj)
-        if(  obj != null){
-            $('#popUpdate').removeClass('hide')
-            $('#popUpdate').addClass('view')
-            setTimeout(function () {
-                $('#popUpdate').removeClass('view')
-                $('#popUpdate').addClass('hide')
-                closeContactUpdate()
-                closeContactList()
-                openContactList()
-            },3000)
+        if (obj != null) {
+          $("#popUpdate").removeClass("hide");
+          $("#popUpdate").addClass("view");
+          setTimeout(function () {
+            $("#popUpdate").removeClass("view");
+            $("#popUpdate").addClass("hide");
+            closeContactUpdate();
+            closeContactList();
+            openContactList();
+          }, 3000);
         }
-    }
-    async function validationUpdate(name, addr){
-        var obj = await database.selectContact()
+      }
+      async function validationUpdate(name, addr) {
+        var obj = await database.selectContact();
         var keys = Object.keys(obj);
-        if( name == ""){
-            $('#contactUpdateNameGroup').addClass('error')
-            $('#err1').html("저장할 이름을 입력하세요.")
-            $('#contactUpdateName').focus()
-            return false
+        if (name == "") {
+          $("#contactUpdateNameGroup").addClass("error");
+          $("#err1").html("저장할 이름을 입력하세요.");
+          $("#contactUpdateName").focus();
+          return false;
         }
-        for ( var i in keys) {
-            if (name == obj[keys[i]]){
-                // console.log("same Name !!! ")
-                $('#contactUpdateNameGroup').addClass('error')
-                $('#err1').html("이미 존재하는 이름 입니다.")
-                $('#contactUpdateName').focus()
-                return false
-            }
+        for (var i in keys) {
+          if (name == obj[keys[i]]) {
+            // console.log("same Name !!! ")
+            $("#contactUpdateNameGroup").addClass("error");
+            $("#err1").html("이미 존재하는 이름 입니다.");
+            $("#contactUpdateName").focus();
+            return false;
+          }
         }
-        $('#contactUpdateNameGroup').removeClass('error')
-        return true
-    }
-
-</script>
-</body>
-
+        $("#contactUpdateNameGroup").removeClass("error");
+        return true;
+      }
+    </script>
+  </body>
 </html>
