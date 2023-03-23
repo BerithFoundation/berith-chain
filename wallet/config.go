@@ -21,13 +21,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	walletdb "github.com/BerithFoundation/berith-chain/wallet/database"
 	"io"
 	"math/big"
 	"os"
 	"reflect"
 	"strings"
 	"unicode"
+
+	walletdb "github.com/BerithFoundation/berith-chain/wallet/database"
 
 	cli "gopkg.in/urfave/cli.v1"
 
@@ -102,7 +103,7 @@ func loadConfig(file string, cfg *berConfig) error {
 func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
-	cfg.Version = params.VersionWithCommit(gitCommit)
+	cfg.Version = params.VersionWithCommit(gitCommit, "")
 	cfg.HTTPModules = append(cfg.HTTPModules, "berith", "shh")
 	cfg.WSModules = append(cfg.WSModules, "berith", "shh")
 	cfg.IPCPath = "ber.ipc"

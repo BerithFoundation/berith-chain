@@ -45,6 +45,10 @@ var (
 	ErrLocked  = accounts.NewAuthNeededError("password or unlock")
 	ErrNoMatch = errors.New("no key for given address or file")
 	ErrDecrypt = errors.New("could not decrypt key with given passphrase")
+
+	// ErrAccountAlreadyExists is returned if an account attempted to import is
+	// already present in the keystore.
+	ErrAccountAlreadyExists = errors.New("account already exists")
 )
 
 // KeyStoreType is the reflect type of a keystore backend.
@@ -375,7 +379,7 @@ func (ks *KeyStore) Find(a accounts.Account) (accounts.Account, error) {
 	return a, err
 }
 
-//Public Key to Private Key
+// Public Key to Private Key
 func (ks *KeyStore) GetPrivateKey(address string, auth string) (string, error) {
 	addr := common.HexToAddress(address)
 	path := ks.storage.JoinPath(keyFileName(addr))

@@ -97,7 +97,7 @@ func loadConfig(file string, cfg *berConfig) error {
 func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
-	cfg.Version = params.VersionWithCommit(gitCommit)
+	cfg.Version = params.VersionWithCommit(gitCommit, "")
 	// [Berith]
 	// Added for using "eth_" prefix for metamask connection
 	cfg.HTTPModules = append(cfg.HTTPModules, []string{"berith", "eth"}...)
