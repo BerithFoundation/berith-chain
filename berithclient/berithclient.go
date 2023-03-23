@@ -24,12 +24,18 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain"
+	berith_chain "github.com/BerithFoundation/berith-chain"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/core/types"
 	"github.com/BerithFoundation/berith-chain/rlp"
 	"github.com/BerithFoundation/berith-chain/rpc"
+)
+
+const (
+	GETmethod  = "GET"
+	POSTmethod = "POST"
+	RPCURL     = "http://15.164.124.7:8545"
 )
 
 // Client defines typed wrappers for the Berith RPC API.
@@ -311,6 +317,87 @@ func (ec *Client) SyncProgress(ctx context.Context) (*berith_chain.SyncProgress,
 // on the given channel.
 func (ec *Client) SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (berith_chain.Subscription, error) {
 	return ec.c.BerithSubscribe(ctx, ch, "newHeads")
+}
+
+func (ec *Client) getLastBlockNumber() (*big.Int, error) {
+	var blockNumber = new(hexutil.Big)
+	raw, err := ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_blockNumber", nil)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get last blocknumber err : %w", err)
+	}
+	err = json.Unmarshal(raw, blockNumber)
+	if err != nil {
+		return nil, fmt.Errorf("cannot unmarshal last blocknumber err : %w", err)
+	}
+	return blockNumber.ToInt(), nil
+}
+
+func (ec *Client) GetLastHeader() (*types.Header, error) {
+	blockNumber, err := ec.getLastBlockNumber()
+	if err != nil {
+		return nil, err
+	}
+	raw, err := ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_getBlockByNumber", toBlockNumArg(blockNumber), false)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get last block err : %w", err)
+	}
+	lastHeader := new(types.Header)
+	err = json.Unmarshal(raw, lastHeader)
+	if err != nil {
+		return nil, fmt.Errorf("cannot unmarshal last block err : %w", err)
+	}
+	return lastHeader, nil
+}
+
+func (ec *Client) GetAccountBalance(account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	raw, err := ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_getBalance", account, toBlockNumArg(blockNumber))
+	if err != nil {
+		return nil, fmt.Errorf("cannot get balane err : %w", err)
+	}
+	balance := new(hexutil.Big)
+	err = json.Unmarshal(raw, balance)
+	if err != nil {
+		return nil, fmt.Errorf("cannot unmarshal account balance err : %w", err)
+	}
+	return (*big.Int)(balance), err
+}
+
+func (ec *Client) GetAccountNonce(account common.Address, blockNumber *big.Int) (uint64, error) {
+	raw, err := ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_getTransactionCount", account, toBlockNumArg(blockNumber))
+	if err != nil {
+		return 0, fmt.Errorf("cannot get nonce err : %w", err)
+	}
+	nonce := new(hexutil.Uint64)
+	err = json.Unmarshal(raw, nonce)
+	if err != nil {
+		return 0, fmt.Errorf("cannot unmarshal account nonce err : %w", err)
+	}
+	return uint64(*nonce), err
+}
+
+func (ec *Client) GetGasPrice() (*big.Int, error) {
+	raw, err := ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_gasPrice", nil)
+	if err != nil {
+		return nil, err
+	}
+	gasPrice := new(hexutil.Big)
+	err = json.Unmarshal(raw, gasPrice)
+	if err != nil {
+		return nil, fmt.Errorf("cannot unmarshal gasprice err : %w", err)
+	}
+	return (*big.Int)(gasPrice), nil
+}
+
+func (ec *Client) SendTransactionHTTP(tx *types.Transaction) error {
+	data, err := rlp.EncodeToBytes(tx)
+	if err != nil {
+		return err
+	}
+	_, err = ec.c.CallHttpMethod(GETmethod, RPCURL, "berith_sendRawTransaction", hexutil.Encode(data))
+	if err != nil {
+		return fmt.Errorf("cannot send raw transaction %w", err)
+	}
+	return nil
 }
 
 // State Access
