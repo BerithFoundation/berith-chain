@@ -1,0 +1,88 @@
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>비밀번호 입력</h5>
+        <a class="btn_close" onclick="closeExport()">close</a>
+    </div>
+    <div class="pop_body">
+        <p class="pop_con_top" id ="exportTopText"></p>
+        <div class="inp_group" id = "exportPwdGroup"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>비밀번호</h5>
+            <div class="box_inp">
+                <span class="inp_wrap">
+                    <input class="inp" type="password" id = "exportPwd"/><!-- type: password/text -->
+                    <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                    <a class="del" href="#!">삭제</a>
+                </span>
+            </div>
+            <p class="error_txt"></p>
+        </div>
+    </div>
+    <div class="pop_footer">
+        <a class="btn red " id = "btnPrivateKeyCheck" onclick="fnExport(1)">개인키확인</a><!-- 입력 필드 입력시 on 추가 -->
+        <a class="btn red " id = "btnKeystoreExport" onclick="fnExport(2)">내보내기</a><!-- 입력 필드 입력시 on 추가 -->
+    </div>
+</div><!-- e://pop_wrap  -->
+
+<div id = privateKeyCheckPop></div>
+
+<script type = "text/javascript">
+    $("#privateKeyCheckPop").load("privateKeyCheck.html");
+    $('#exportTopText').html('개인키 확인을 위해 <br/> '+loginId+'의 비밀번호를 입력해 주세요')
+
+    $("#exportPwd").on("propertychange change keyup paste input", function() {
+        var currentVal = $(this).val();
+        if( currentVal != "" ){
+            $('#btnPrivateKeyCheck').addClass('on')
+            $('#btnKeystoreExport').addClass('on')
+        }else{
+            $('#btnPrivateKeyCheck').removeClass('on')
+            $('#btnKeystoreExport').removeClass('on')
+        }
+    });
+
+    async function fnExport(type) {
+        var exportPwd = $('#exportPwd').val()
+        if( !validationFields()){
+            return
+        }
+        let apiResult = await database.checkLogin(loginId, exportPwd)
+        var obj = apiResult.payload
+
+        if( exportPwd != obj.Password){
+            $('#exportPwdGroup').addClass("error")
+            $('.error_txt').html("비밀번호가 일치하지 않습니다.")
+        }else {
+            $('#exportPwdGroup').removeClass('error')
+            if(type ==1 ){
+                privateKeyCheck(exportPwd)
+            }else {
+                keystoreExport(exportPwd)
+            }
+        }
+    }
+    async function privateKeyCheck(pwd) {
+        var apiResult = await personal.getPrivateKey(account , pwd)
+        openPrivateKeyPop(apiResult.payload)
+    }
+    async function keystoreExport(pwd) {
+        var apiResult = await berith.exportKeystore(account,pwd , loginId)
+        $('#exportPwd').val("")
+        closeExport()
+    }
+
+    function validationFields() {
+        var vali1 = $('#btnPrivateKeyCheck').attr('class').includes('on')
+        if( !vali1 ){
+            $('#exportPwdGroup').addClass('error')
+            $('.error_txt').html("비밀번호를 입력하세요")
+            $('#exportPwd').focus()
+            return false
+        }
+        return true
+    }
+    function closeExport() {
+        headerPopup('exportPop')
+    }
+
+</script>

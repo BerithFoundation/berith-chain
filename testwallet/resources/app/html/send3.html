@@ -1,0 +1,63 @@
+
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>비밀번호 입력</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('sendInputPwdPopup');">close</a>
+    </div>
+    <div class="pop_body">
+        <p class="pop_con_top">
+            My Wallet의<br/>
+            비밀번호를 입력해 주세요.
+        </p>
+        <div class="inp_group"><!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" id ="sendPwd" type="password" /><!-- type: password/text -->
+                        <a class="icon hide_word" href="#!">보이기</a><!-- hide_word/view_word -->
+                        <a class="del" href="#!">삭제</a>
+                    </span>
+            </div>
+            <p class="error_txt">
+                비밀번호를 입력하세요.
+            </p>
+        </div>
+    </div>
+    <div class="pop_footer">
+        <a class="btn red on" href="#!" onclick="checkPwd()">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->
+<script type="text/javascript">
+    // $(".inp").focus(function () {
+    //     $(this).closest('.inp_group').addClass("active del");
+    // });
+    //
+    // $(".inp").blur(function () {
+    //     //$(this).parent().parent().parent().parent().removeClass("active del");
+    //     $(this).closest('.inp_group').removeClass("active del");
+    // });
+    registerEvents()
+    
+    function checkPwd() {
+        var sendPwd = $('#sendPwd').val()
+        if( valSend()){
+            if( sendPwd != loginPwd){
+                $('.error_txt').html("비밀번호가 맞지 않습니다. 다시입력해주세요.")
+                $('.inp_group').addClass("error")
+            }else{
+                send()
+            }
+        }
+    }
+    
+    function valSend() {
+        var sendPwd = $('#sendPwd').val()
+        if( sendPwd == "") {
+            $('.inp_group').addClass("error")
+            return false
+        }else{
+            $('.inp_group').removeClass("error")
+            return true
+        }
+    }
+</script>

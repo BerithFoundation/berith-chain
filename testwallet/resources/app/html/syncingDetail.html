@@ -1,0 +1,35 @@
+<div class="bg_dimmed"></div>
+<div class="pop_wrap">
+    <div class="pop_header">
+        <h5>동기화 진행 상황</h5>
+        <a class="btn_close" href="#!" onclick="togglePopUp('syncDetailPop')">close</a>
+    </div>
+    <div class="pop_body">
+        <table class="pop_table">
+            <colgroup>
+                <col width="190"/><col/>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <th>남은 블록 수</th>
+                    <td><p id = "remainBlock"></p></td>
+                </tr>
+                <tr>
+                    <th>최종 블록 넘버</th>
+                    <td><p id = "lastBlock"></p></td>
+                </tr>
+                <tr>
+                    <th>전체 진행율</th>
+                    <td><p id ="syncPercent"></p></td>
+                </tr>
+                <tr>
+                    <th>동기화 완료까지 예상 시간</th>
+                    <td><p id = "syncCompleteTime"></p></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pop_footer">
+        <a class="btn red on" href="#!" onclick="togglePopUp('syncDetailPop')">확인</a>
+    </div>
+</div><!-- e://pop_wrap  -->
