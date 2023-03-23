@@ -279,7 +279,7 @@ func Start() {
 		args = append(args, "--nodiscover")
 	}
 	if *verbosity > 3 {
-		args = append(args, fmt.Sprintf("--verbosity %d", *verbosity))
+		args = append(args, "--verbosity", fmt.Sprintf("%d", *verbosity))
 	}
 	defer func() {
 		if r := recover(); r != nil {

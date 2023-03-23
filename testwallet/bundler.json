@@ -1,5 +1,5 @@
 {
-  "app_name": "wallet",
+  "app_name": "testwallet",
   "icon_path_darwin": "resources/app/images/common/berith_pa.ico",
   "icon_path_linux": "resources/icon.png",
   "icon_path_windows": "resources/app/images/common/berith_pa.ico",

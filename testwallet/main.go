@@ -27,7 +27,7 @@ var (
 
 	// === node flags
 	nodePort       = flag.String("nodeport", "", "node's network listening port")
-	verbosity      = flag.String("verbosity", "", "logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail")
+	verbosity      = flag.Int("verbosity", 3, "logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail")
 	node_testnet   = flag.String("testnet", "", "testnet")
 	node_console   = flag.String("console", "", "console")
 	node_datadir   = flag.String("datadir", "", "datadir")
@@ -35,7 +35,7 @@ var (
 	nodiscover     = flag.Bool("nodiscover", false, "nodiscover")
 	httpFlag       = flag.Bool("http", false, "open http connection")
 	httpCorsDomain = flag.String("http.corsdomain", "https://remix.ethereum.org/", "set cors domain")
-	httpApi        = flag.String("http.api", "", "set http api")
+	httpApi        = flag.String("http.api", "web3,berith,eth,personal,net", "set http api")
 	w              *astilectron.Window
 	WalletDB       *walletdb.WalletDB
 
@@ -76,7 +76,7 @@ func start_ui() {
 			AppIconDefaultPath: "resources/app/images/common/berith_pa.ico",
 			VersionAstilectron: VersionAstilectron,
 			VersionElectron:    VersionElectron,
-			DataDirectoryPath:  filepath.Join(node.DefaultDataDir(), "wallet"),
+			DataDirectoryPath:  filepath.Join(node.DefaultTestDataDir(), "wallet"),
 		},
 		Debug: *debuging,
 		// MenuOptions: []*astilectron.MenuItemOptions{{

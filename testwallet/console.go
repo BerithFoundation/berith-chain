@@ -40,6 +40,8 @@ import (
 
 	"berith-chain/internals/debug"
 
+	"github.com/BerithFoundation/berith-chain/p2p/enode"
+
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
 	"github.com/BerithFoundation/berith-chain/cmd/utils"
@@ -169,6 +171,10 @@ var (
 		utils.MetricsInfluxDBPasswordFlag,
 		utils.MetricsInfluxDBHostTagFlag,
 	}
+	nodes []string = []string{
+		"enode://030c27592c48be4ea3dc017091fac786fa5c0a364af62251f69debf3d1725c3c90379c5b1916407571e0499198d7e1f37db3ad32f7e4dae05fccb7986542c8cd@15.164.124.7:40404",
+		"enode://cb086634467b02627901c7b5600e287d81279725e4bd6fbffa8518b0b63adef131f99fffd87c6a7efa03116308a5174bb8cb0faafef47d49f15c018b6416b868@121.141.157.230:40405",
+	}
 )
 
 func Init() {
@@ -256,15 +262,12 @@ func Start() {
 	// TODO : temporary flags
 	var args []string
 	args = append(args, os.Args[0])
-	args = append(args, "--debug")
+	args = append(args, "--testnet", "--networkid=107", fmt.Sprintf("--datadir=%s", node.DefaultTestDataDir()))
 	if *nodePort != "" {
 		args = append(args, "--port", *nodePort)
 	}
 	if *nodeConfig != "" {
 		args = append(args, "--config", *nodeConfig)
-	}
-	if *nodiscover {
-		args = append(args, "--nodiscover")
 	}
 	if *httpFlag {
 		args = append(args, "--http")
@@ -274,6 +277,12 @@ func Start() {
 	}
 	if *httpApi != "" {
 		args = append(args, "--http.api", *httpApi)
+	}
+	if *nodiscover {
+		args = append(args, "--nodiscover")
+	}
+	if *verbosity > 3 {
+		args = append(args, "--verbosity", fmt.Sprintf("%d", *verbosity))
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -361,6 +370,16 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	// Register wallet event handlers to open and auto-derive wallets
 	events := make(chan accounts.WalletEvent, 16)
 	stack.AccountManager().Subscribe(events)
+
+	// berith test net doesn't use bootnodes
+	for _, url := range nodes {
+		node, err := enode.ParseV4(url)
+		if err != nil {
+			utils.Fatalf("Failed to add peer : %v, node : %s", err, url)
+		}
+		stack.Server().AddPeer(node)
+		log.Info("Start p2p connection", "Node", url)
+	}
 
 	go func() {
 		// Create a chain state reader for self-derivation
