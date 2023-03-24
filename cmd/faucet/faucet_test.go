@@ -47,7 +47,7 @@ func TestFacebook(t *testing.T) {
 }
 
 func TestCompile(t *testing.T) {
-	address := "0x2345BF77D1De9eacf66FE81a09a86CfAb212a542"
-	compiled := common.HexToAddress(regexp.MustCompile("0x[0-9a-fA-F]{40}").FindString(address))
+	address := "Bx2345BF77D1De9eacf66FE81a09a86CfAb212a542"
+	compiled := common.HexToAddress(regexp.MustCompile("[B|0]x[0-9a-fA-F]{40}").FindString(address))
 	fmt.Println(compiled.Hex())
 }
