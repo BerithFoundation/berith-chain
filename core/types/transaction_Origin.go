@@ -297,7 +297,7 @@ func NewOriginTransaction(tx *Transaction) *OriginTransaction {
 
 // [Berith]
 // ToBerithTransaction converts transactions sent from metamask into Berith transactions
-// with Base and Target set to Main(1) to register with the Berithxpool.
+// and it also sets Base and Target to Main(1) to register with Berithxpool.
 func (o *OriginTransaction) ToBerithTransaction() *Transaction {
 	return &Transaction{
 		data: txdata{

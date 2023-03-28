@@ -259,9 +259,10 @@ func Init() {
 }
 
 func Start() {
-	// TODO : temporary flags
 	var args []string
 	args = append(args, os.Args[0])
+	// [Berith]
+	// PC wallet 내부 노드를 Testnet으로 실행하기 위해 --testnet flag 지정
 	args = append(args, "--testnet", "--networkid=107", fmt.Sprintf("--datadir=%s", node.DefaultTestDataDir()))
 	if *nodePort != "" {
 		args = append(args, "--port", *nodePort)

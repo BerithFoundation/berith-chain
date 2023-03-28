@@ -164,7 +164,7 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 		return common.Hash{}, err
 	}
 
-	if err := printTxLog(b, tx); err == nil {
+	if err := printTxLog(b, tx); err != nil {
 		return common.Hash{}, err
 	}
 	return tx.Hash(), nil
