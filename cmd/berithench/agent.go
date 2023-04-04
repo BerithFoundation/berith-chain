@@ -513,7 +513,7 @@ func (agent *agent) transferLoop(url string, index int, ch chan bool) {
 			gasLimit := agent.cfg.GasLimit
 			gasPrice := big.NewInt(int64(agent.cfg.GasPrice))
 
-			tx := types.NewTransaction(nonce, to, value, gasLimit, gasPrice, txData, base, target)
+			tx := types.NewTransaction(nonce, to, value, gasLimit, gasPrice, txData, base, target, false)
 
 			tx, err := agent.keystore.SignTx(from, tx, big.NewInt(agent.cfg.ChainID))
 

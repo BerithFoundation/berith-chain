@@ -38,6 +38,9 @@ const (
 	Sha3Gas     uint64 = 30 // Once per SHA3 operation.
 	Sha3WordGas uint64 = 6  // Once per word of the SHA3 operation's data.
 
+	Keccak256Gas     uint64 = 30 // Once per KECCAK256 operation.
+	Keccak256WordGas uint64 = 6  // Once per word of the KECCAK256 operation's data.
+
 	SstoreSetGas    uint64 = 20000 // Once per SLOAD operation.
 	SstoreResetGas  uint64 = 5000  // Once per SSTORE operation if the zeroness changes from zero.
 	SstoreClearGas  uint64 = 5000  // Once per SSTORE operation if the zeroness doesn't change.
@@ -52,22 +55,28 @@ const (
 	NetSstoreResetRefund      uint64 = 4800  // Once per SSTORE operation for resetting to the original non-zero value
 	NetSstoreResetClearRefund uint64 = 19800 // Once per SSTORE operation for resetting to the original zero value
 
-	JumpdestGas      uint64 = 1     // Refunded gas, once per SSTORE operation if the zeroness changes to zero.
-	EpochDuration    uint64 = 30000 // Duration between proof-of-work epochs.
-	CallGas          uint64 = 40    // Once per CALL operation & message call transaction.
-	CreateDataGas    uint64 = 200   //
-	CallCreateDepth  uint64 = 1024  // Maximum depth of call/create stack.
-	ExpGas           uint64 = 10    // Once per EXP instruction
-	LogGas           uint64 = 375   // Per LOG* operation.
-	CopyGas          uint64 = 3     //
-	StackLimit       uint64 = 1024  // Maximum size of VM stack allowed.
-	TierStepGas      uint64 = 0     // Once per operation, for a selection of them.
-	LogTopicGas      uint64 = 375   // Multiplied by the * of the LOG*, per LOG transaction. e.g. LOG0 incurs 0 * c_txLogTopicGas, LOG4 incurs 4 * c_txLogTopicGas.
-	CreateGas        uint64 = 32000 // Once per CREATE operation & contract-creation transaction.
-	Create2Gas       uint64 = 32000 // Once per CREATE2 operation
-	SuicideRefundGas uint64 = 24000 // Refunded following a suicide operation.
-	MemoryGas        uint64 = 3     // Times the address of the (highest referenced byte in memory + 1). NOTE: referencing happens on read, write and in instructions such as RETURN and CALL.
-	TxDataNonZeroGas uint64 = 68    // Per byte of data attached to a transaction that is not equal to zero. NOTE: Not payable on data of calls between transactions.
+	SstoreSentryGasEIP2200            uint64 = 2300  // Minimum gas required to be present for an SSTORE call, not consumed
+	SstoreSetGasEIP2200               uint64 = 20000 // Once per SSTORE operation from clean zero to non-zero
+	SstoreResetGasEIP2200             uint64 = 5000  // Once per SSTORE operation from clean non-zero to something else
+	SstoreClearsScheduleRefundEIP2200 uint64 = 15000 // Once per SSTORE operation for clearing an originally existing storage slot
+
+	JumpdestGas          uint64 = 1     // Refunded gas, once per SSTORE operation if the zeroness changes to zero.
+	EpochDuration        uint64 = 30000 // Duration between proof-of-work epochs.
+	CallGas              uint64 = 40    // Once per CALL operation & message call transaction.
+	CreateDataGas        uint64 = 200   //
+	CallCreateDepth      uint64 = 1024  // Maximum depth of call/create stack.
+	ExpGas               uint64 = 10    // Once per EXP instruction
+	LogGas               uint64 = 375   // Per LOG* operation.
+	CopyGas              uint64 = 3     //
+	StackLimit           uint64 = 1024  // Maximum size of VM stack allowed.
+	TierStepGas          uint64 = 0     // Once per operation, for a selection of them.
+	LogTopicGas          uint64 = 375   // Multiplied by the * of the LOG*, per LOG transaction. e.g. LOG0 incurs 0 * c_txLogTopicGas, LOG4 incurs 4 * c_txLogTopicGas.
+	CreateGas            uint64 = 32000 // Once per CREATE operation & contract-creation transaction.
+	Create2Gas           uint64 = 32000 // Once per CREATE2 operation
+	SuicideRefundGas     uint64 = 24000 // Refunded following a suicide operation.
+	MemoryGas            uint64 = 3     // Times the address of the (highest referenced byte in memory + 1). NOTE: referencing happens on read, write and in instructions such as RETURN and CALL.
+	TxDataNonZeroGas     uint64 = 68    // Per byte of data attached to a transaction that is not equal to zero. NOTE: Not payable on data of calls between transactions.
+	TxDataNonZeroGasBIP5 uint64 = 16    // Per byte of non zero data attached to a transaction after EIP 2028 (part in Istanbul)
 
 	MaxCodeSize = 24576 // Maximum bytecode to permit for a contract
 
@@ -85,6 +94,32 @@ const (
 	Bn256ScalarMulGas       uint64 = 40000  // Gas needed for an elliptic curve scalar multiplication
 	Bn256PairingBaseGas     uint64 = 100000 // Base price for an elliptic curve pairing check
 	Bn256PairingPerPointGas uint64 = 80000  // Per-point price for an elliptic curve pairing check
+
+	SloadGasEIP150        uint64 = 200
+	SloadGasEIP1884       uint64 = 800 // Cost of SLOAD after EIP 1884 (part of Istanbul)
+	SloadGasEIP2200       uint64 = 800 // Cost of SLOAD after EIP 2200 (part of Istanbul)
+	BalanceGasEIP150      uint64 = 400 // The cost of a BALANCE operation after Tangerine
+	BalanceGasEIP1884     uint64 = 700 // The cost of a BALANCE operation after EIP 1884 (part of Istanbul)
+	ExtcodeHashGasEIP1884 uint64 = 700 // Cost of EXTCODEHASH after EIP 1884 (part in Istanbul)
+
+	CallGasEIP150                uint64 = 700 // Static portion of gas for CALL-derivates after EIP 150 (Tangerine)
+	CallGasFrontier              uint64 = 40  // Once per CALL operation & message call transaction.
+	BalanceGasFrontier           uint64 = 20  // The cost of a BALANCE operation
+	ExtcodeSizeGasFrontier       uint64 = 20  // Cost of EXTCODESIZE before EIP 150 (Tangerine)
+	ExtcodeSizeGasEIP150         uint64 = 700 // Cost of EXTCODESIZE after EIP 150 (Tangerine)
+	ExtcodeHashGasConstantinople uint64 = 400 // Cost of EXTCODEHASH (introduced in Constantinople)
+	SloadGasFrontier             uint64 = 50
+	ExtcodeCopyBaseFrontier      uint64 = 20
+	ExtcodeCopyBaseEIP150        uint64 = 700
+
+	SelfdestructGasEIP150 uint64 = 5000 // Cost of SELFDESTRUCT post EIP 150 (Tangerine)
+
+	// EXP has a dynamic portion depending on the size of the exponent
+	ExpByteFrontier uint64 = 10 // was set to 10 in Frontier
+	ExpByteEIP158   uint64 = 50 // was raised to 50 during Eip158 (Spurious Dragon)
+
+	SelfdestructRefundGas   uint64 = 24000 // Refunded following a selfdestruct operation.
+	CreateBySelfdestructGas uint64 = 25000
 )
 
 var (

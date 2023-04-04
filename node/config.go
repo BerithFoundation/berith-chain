@@ -447,13 +447,13 @@ func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
 			backends = append(backends, ledgerhub)
 		}
 		// Start a USB hub for Trezor hardware wallets
-		if trezorhub, err := usbwallet.NewTrezorHub(); err != nil {
+		if trezorhub, err := usbwallet.NewTrezorHubWithHID(); err != nil {
 			log.Warn(fmt.Sprintf("Failed to start Trezor hub, disabling: %v", err))
 		} else {
 			backends = append(backends, trezorhub)
 		}
 	}
-	return accounts.NewManager(backends...), ephemeral, nil
+	return accounts.NewManager(&accounts.Config{InsecureUnlockAllowed: conf.InsecureUnlockAllowed}, backends...), ephemeral, nil
 }
 
 var warnLock sync.Mutex

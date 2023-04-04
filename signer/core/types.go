@@ -67,17 +67,17 @@ const (
 	INFO = "Info"
 )
 
-func (vs *ValidationMessages) crit(msg string) {
+func (vs *ValidationMessages) Crit(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{CRIT, msg})
 }
-func (vs *ValidationMessages) warn(msg string) {
+func (vs *ValidationMessages) Warn(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{WARN, msg})
 }
-func (vs *ValidationMessages) info(msg string) {
+func (vs *ValidationMessages) Info(msg string) {
 	vs.Messages = append(vs.Messages, ValidationInfo{INFO, msg})
 }
 
-/// getWarnings returns an error with all messages of type WARN of above, or nil if no warnings were present
+// / getWarnings returns an error with all messages of type WARN of above, or nil if no warnings were present
 func (v *ValidationMessages) getWarnings() error {
 	var messages []string
 	for _, msg := range v.Messages {
@@ -120,7 +120,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
-		return types.NewContractCreation(uint64(args.Nonce), (*big.Int)(&args.Value), uint64(args.Gas), (*big.Int)(&args.GasPrice), input, types.Main, types.Main)
+		return types.NewContractCreation(uint64(args.Nonce), (*big.Int)(&args.Value), uint64(args.Gas), (*big.Int)(&args.GasPrice), input, types.Main, types.Main, false)
 	}
-	return types.NewTransaction(uint64(args.Nonce), args.To.Address(), (*big.Int)(&args.Value), (uint64)(args.Gas), (*big.Int)(&args.GasPrice), input, types.Main, types.Main)
+	return types.NewTransaction(uint64(args.Nonce), args.To.Address(), (*big.Int)(&args.Value), (uint64)(args.Gas), (*big.Int)(&args.GasPrice), input, types.Main, types.Main, false)
 }

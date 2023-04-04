@@ -23,7 +23,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -277,6 +279,40 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 	default:
 		return json.Unmarshal(resp.Result, &result)
 	}
+}
+
+func (c *Client) CallHttpMethod(restMethod, url, method string, args ...interface{}) (json.RawMessage, error) {
+	msg, err := c.newMessage(method, args...)
+	if err != nil {
+		return nil, err
+	}
+	m, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(restMethod, url, bytes.NewReader(m))
+	if err != nil {
+		return nil, fmt.Errorf("cannot get last blocknumber %w", err)
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	result := new(jsonrpcMessage)
+	err = json.Unmarshal(b, result)
+	if err != nil {
+		return nil, err
+	}
+	return result.Result, nil
 }
 
 // BatchCall sends all given requests as a single batch and waits for the server

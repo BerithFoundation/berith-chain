@@ -311,6 +311,7 @@ func sendTransferTransactions(taskID string, ctx *berithenchContext, addrCtx *ad
 			nil,
 			types.Main,
 			types.Main,
+			false,
 		)
 
 		tx, err := ctx.Keystore.SignTx(addrCtx.account, tx, ctx.ChainID)

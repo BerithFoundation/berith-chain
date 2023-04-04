@@ -1,0 +1,65 @@
+
+    <div class="wrap">
+        <!-- 콘텐츠 영역 -->
+    </div><!-- e://wrap -->
+
+    <div class="ly_pop hide" id = "privateKeyCheck"><!-- view/hide -->
+        <div class="bg_dimmed"></div>
+        <div class="pop_wrap">
+            <div class="pop_header">
+                <h5>개인키확인</h5>
+                <a class="btn_close" onclick="closePrivateKeyPop()">close</a>
+            </div>
+            <div class="pop_body">
+                <p class="pop_con_top" id = "privateKeyCheckTopText">
+
+                </p>
+                <div class="box_inp disabled">
+                    <textarea class="txtarea" id ="privateKeyResult" readonly ></textarea>
+                    <a class="icon copy" onclick="copyToClipboard('#privateKeyResult')" >보이기</a>
+                </div>
+            </div>
+            <div class="pop_footer">
+                <a class="btn red on" onclick="closePrivateKeyPop()">확인</a>
+            </div>
+        </div><!-- e://pop_wrap  -->
+
+
+        <div class="one_sec_wrap hide" id = "privateKeyCopyPop"><!-- view/hide -->
+            <div class="bg"></div>
+            <p class="complete">복사 완료</p>
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        function openPrivateKeyPop(data) {
+            $('#privateKeyCheck').removeClass('hide')
+            $('#privateKeyCheck').addClass('view')
+            $('#privateKeyCheckTopText').html(loginId+"의 개인키입니다.")
+            $('#privateKeyResult').html(JSON.parse(data))
+
+        }
+        function closePrivateKeyPop() {
+            $('#privateKeyCheck').removeClass('view')
+            $('#privateKeyCheck').addClass('hide')
+            $('#exportPwd').val("")
+            $('#btnPrivateKeyCheck').removeClass('on')
+            $('#btnKeystoreExport').removeClass('on')
+            headerPopup('exportPop')
+        }
+
+        function copyToClipboardPrivateKey(element) {
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val($(element).text()).select();
+            document.execCommand("copy");
+            $temp.remove();
+            $('#privateKeyCopyPop').removeClass('hide')
+            $('#privateKeyCopyPop').addClass('view')
+            setTimeout(function () {
+                $('#privateKeyCopyPop').removeClass('view')
+                $('#privateKeyCopyPop').addClass('hide')
+
+            }, 1000);
+        }
+    </script>

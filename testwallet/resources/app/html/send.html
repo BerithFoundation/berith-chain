@@ -1,0 +1,270 @@
+<div class="container">
+    <div class="aside">
+        <h2>SEND</h2>
+        <div class="txt_wrap">
+            <strong>Main Balance</strong>
+            <p class="coin red" id="mainBalance"></p>
+        </div>
+        <hr/>
+
+        <!--1119 법적 책임 문구 추가-->
+        <div class="liability_txt_wrap">	
+            <div class="liability_txt">
+                <p>Berith는 동일 기기에서 다수 계정 등록 및 사용으로 발생하는 </br>문제에 대한 배상, 보상 및 기타 법적 책임을 </br>부담하지 않습니다.</p>
+            </div>
+        </div>
+        
+    </div><!-- e://aside -->
+
+    <div class="content">
+        <h4>정보입력</h4>
+        <div class="inp_group"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>받는 주소</h5>
+            <div class="row_group">
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" type="text" id="sendAddr"/>
+                        <a class="del" href="#!">삭제</a>
+                    </span>
+                </div>
+                <div class="btn_inp">
+                    <a class="btn blue medium2 contact" href="#!" onclick="openContactList();">Contact</a>
+                </div>
+            </div>
+            <p class="error_txt" id="err1">
+                올바른 주소를 입력하세요.
+            </p>
+        </div><!-- e://inp_group -->
+        <div class="inp_group" id="sendAmount"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+            <h5>수량 - BERS<span class="info">소수 점 8자리까지 입력해 주세요.</span></h5>
+            <div class="row_group">
+                <div class="box_inp">
+                    <span class="inp_wrap">
+                        <input class="inp" type="text" value=""/>
+                        <a class="del" href="#!">삭제</a>
+                    </span>
+                </div>
+                <div class="btn_inp">
+                    <a class="btn white medium2" href="#!" onclick="sendAll();">모두 보내기</a>
+                </div>
+            </div>
+            <p class="error_txt" id="err2">
+                올바른 수량을 입력하세요.
+            </p>
+        </div><!-- e://inp_group -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div class="inp_group" id = "sendGasL"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>기본수수료</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id="sendGasLimit" value="21000"/>
+                            <a class="del" href="#!">삭제</a>
+                        </span>
+                    </div>
+                    <p class="error_txt" id = "err3">
+                        올바른 수량을 입력하세요.
+                    </p>
+                </div>
+                <div class="inp_group" id = "sendGasP"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <h5>수수료가격</h5>
+                    <div class="box_inp">
+                        <span class="inp_wrap">
+                            <input class="inp" type="text" id = "sendGasPrice" value="1"/>
+                            <a class="del" href="#!">삭제</a>
+                        </span>
+                    </div>
+                    <p class="error_txt" id = "err4">
+                        올바른 수량을 입력하세요.
+                    </p>
+                </div>
+            </div>
+            <div class="con_box info">
+                <div class="box_info">
+                    <p class="txt">
+                        <strong>TX 비용 = 기본수수료 X 수수료가격</strong>
+                        <span>수수료가격이 높을수록 거래가 빠르게 진행되지만, <br/>
+                                    더 비싼 비용을 지불해야 합니다. </span>
+                        <span>수수료는 <b>Main Balance</b>에서 계산됩니다.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- 191217 : Nonce 설정추가 [s] -->
+        <div class="row_group">
+            <div class="con_box input">
+                <div id="nonceErrContainer" class="inp_group"><!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+                    <div id="onoff" class="onoff_group off"><!-- 버튼 클릭시 on  -->
+                        <div class="tit_onoff"><button id="nonce_btn" type="button" class="btn_onoff"><span class="ico_arr"></span>Nonce 설정</button><span class="info">Nonce를 지정하지 않아도 자동으로 Nonce가 지정되어 트랜잭션이 전송됩니다.</span></div>
+                        <div class="onbox">
+                            <div class="box_inp">
+                                <span class="inp_wrap">
+                                    <input class="inp" type="text" id="nonce" />
+                                </span>
+                                <a class="del" href="#!">삭제</a>
+                            </div>
+                            <p id="nonceErrMsg" class="error_txt">
+                            0이나 자연수의 값을 입력하세요.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 191217 : Nonce 설정추가 [e] -->
+        <div class="btn_area right">
+            <a class="btn red medium on" href="#!" onclick="confirmation()">다음</a>
+        </div>
+    </div><!-- e://content -->
+</div><!-- e://container -->
+
+<div id = "confirmationPopup" class = "ly_pop hide"></div>
+<div id = "sendInputPwdPopup" class="ly_pop hide"></div>
+<div id = "successPopup" class = "ly_pop hide"></div>
+
+<script type="text/javascript">
+    $("#confirmationPopup").load("send2.html");
+    $("#sendInputPwdPopup").load("send3.html");
+    $("#successPopup").load("send4.html");
+
+    onSendLoad();
+
+    async function onSendLoad() {
+        getRealtimeBalance("berith_getBalance",sessionStorage.getItem("account"),$('#mainBalance'));
+        $("#nonce_btn").click(() => {
+            $("#onoff").toggleClass("on");
+            $("#onoff").toggleClass("off");
+        })
+    }
+
+    async function sendAll() {
+        let mainBalance = await berith.getBalance(account);
+        let sendGasLimit = $("#sendGasLimit").val();
+        let sendGasPrice = $("#sendGasPrice").val()/Math.pow(10,9);
+
+        if (sendGasLimit == "") {
+        sendGasLimit = 21000;
+        }
+        if (sendGasPrice == "") {
+        sendGasPrice = 1/Math.pow(10,9);
+        }
+        // v1.7.1 모두 보내기 수량 가스량 차감 후 책정하도록 변경
+        $("#sendAmount")
+        .find("input[type=text]:first")
+        .val(Math.floor((mainBalance -  sendGasLimit * sendGasPrice)*Math.pow(10,8))/Math.pow(10,8));
+    }
+
+    async function confirmation(){
+        if(await  isValidated()) {
+            let sendAmount = $('#sendAmount').find('input[type=text]:first').val();
+            let receiversAddress = $("#sendAddr").val();
+
+            let sendGasLimit = $('#sendGasLimit').val() ;
+            let sendGasPrice = $('#sendGasPrice').val() * 1000000000;
+
+            if( sendGasLimit == "") {sendGasLimit = 21000}
+            if( sendGasPrice == "") {sendGasPrice = 1000000000}
+
+            $("#sendAmtForConfirmation").text(sendAmount);
+            $("#sendAddForConfirmation").text(receiversAddress);
+            $("#sendGasLimitConfirmation").text($('#sendGasLimit').val())
+            $("#sendGasPriceConfirmation").text($('#sendGasPrice').val())
+            togglePopUp("confirmationPopup");
+        }
+    }
+
+    async function send() {
+        let receiversAddress = $("#sendAddr").val();
+        let amount = $('#sendAmount').find('input[type=text]:first').val();
+
+        let sendGasLimit = $('#sendGasLimit').val();
+        let sendGasPrice = $('#sendGasPrice').val()*1000000000;
+
+        if( sendGasLimit == "") {sendGasLimit = 21000}
+        if( sendGasPrice == "") {sendGasPrice = 1000000000}
+
+        let nonce = parseInt($("#nonce").val());
+        
+        let result = await berith.sendTransaction(amount, receiversAddress, sendGasLimit, sendGasPrice, nonce);
+        if (result.name == "error") {
+            alert("전송에 실패하였습니다.");
+        } else {
+            // alert("Transaction submitted successfully");
+            $("#sendSuccessAmt").text(amount);
+            $("#sendSuccessAdd").text(receiversAddress);
+            $("#sendGasLimitSuccess").text(sendGasLimit)
+            $("#sendGasPriceSucess").text((sendGasPrice/1000000000).toFixed(1))
+            togglePopUp("successPopup");
+            // clearing fields
+            $("#sendAddr").val("");
+            $('#sendAmount').find('input[type=text]:first').val("");
+        }
+    }
+
+    function populateAddressField(receiverAddress) {
+        $("#sendAddr").val("");
+        $("#sendAddr").val(receiverAddress);
+    }
+
+    // ------------------------------------------------INPUT FIELDS VALIDATION---------------------------------------------
+    async function isValidated() {  
+        let isValidAddress = await validateAddress();
+        let isValidAmount =  await validateAmount();
+        return isValidAddress && isValidAmount;
+    }
+
+    async function validateAmount() {
+        let amountField = $('#sendAmount').find('input[type=text]:first');
+        let amount = amountField.val();
+        let gasLimit = $('#sendGasLimit').val()
+        let gasPrice = $('#sendGasPrice').val()
+        let nonce = $("#nonce").val()
+
+        if(amount.substr(amount.indexOf('.')).length-1 > DISPLAY_UNIT) {
+            $("#sendAmount").addClass("error");
+                return false;
+        }
+
+        if (isDecimalNumber(amount) ) {
+            let mainBalance = await berith.getBalance(account);
+            if (parseInt(amount) > parseInt(mainBalance)) {
+                $("#sendAmount").addClass("error");
+                return false;
+            }else if(!isDecimalNumber(gasLimit)) {
+                $('#sendGasLimit').val(21000)
+                $('#sendGasL').addClass("error")
+                return false
+            }else if(!isDecimalNumber(gasPrice)) {
+                $('#sendGasPrice').val(1)
+                $('#sendGasL').removeClass("error")
+                $('#sendGasP').addClass("error")
+                return false
+            } else if(nonce.trim() != "" && !isDecimalNumber(nonce)){
+                $('#sendGasP').removeClass("error");
+                $("#sendAmount").removeClass("error");
+                $("#nonceErrContainer").addClass("error");
+                return false
+            } else {
+                $('#sendGasP').removeClass("error");
+                $("#sendAmount").removeClass("error");
+                $("#nonceErrContainer").removeClass("error");
+            }
+        } else {
+            $("#sendAmount").addClass("error");
+            return false;
+        }
+        return true;
+    }
+
+    async function validateAddress() {
+        let receiverAddress = $('#sendAddr').val();
+        // console.log ( " 주소 vali 값 :: " + isAddress(receiverAddress))
+        if (!isAddress(receiverAddress)) {
+            $('#sendAddr').parent().parent().parent().parent().addClass("error");
+            return false;
+        } else {
+            $('#sendAddr').parent().parent().parent().parent().removeClass("error");
+        }
+        return true;
+    }
+</script>

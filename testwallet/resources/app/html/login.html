@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Berith PC Wallet(T)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
+    <meta name="subject" content="" />
+    <meta name="application-name" content="" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="copyright" content="Copyrights (c) " />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+
+    <script src="../static/js/api/miner.js"></script>
+    <script src="../static/js/api/personal.js"></script>
+    <script src="../static/js/api/berith.js"></script>
+
+    <link rel="stylesheet" href="../static/lib/astiloader/astiloader.css" />
+    <link rel="stylesheet" href="../static/lib/astimodaler/astimodaler.css" />
+    <link rel="stylesheet" href="../static/lib/astinotifier/astinotifier.css" />
+    <link
+      rel="stylesheet"
+      href="../static/lib/font-awesome-4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="shortcut icon" href="../images/common/berith_pa.ico" />
+    <script>
+      if (typeof module === "object") {
+        window.module = module;
+        module = undefined;
+      }
+    </script>
+    <script src="../static/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script>
+      if (window.module) module = window.module;
+    </script>
+    <script src="../static/lib/astiloader/astiloader.js"></script>
+    <script src="../static/lib/astimodaler/astimodaler.js"></script>
+    <script src="../static/lib/astinotifier/astinotifier.js"></script>
+    <script src="../static/lib/chart/chart.min.js"></script>
+    <script src="../static/js/bignumber.js"></script>
+    <script src="../static/js/NumberUtils.js"></script>
+    <script src="../static/js/global.js"></script>
+    <script src="../static/js/database.js"></script>
+    <script src="../static/js/qrGen.js"></script>
+    <script src="../static/js/hexConvert.js"></script>
+    <script src="../static/js/index.js"></script>
+  </head>
+
+  <body>
+    <link rel="import" href="../static/common.html" />
+    <script src="../static/js/api/berith.js"></script>
+
+    <div class="wrap">
+      <div class="login">
+        <div class="login_header">
+          <h1 class="logo">berith wallet(t)</h1>
+        </div>
+        <div class="inp_group" id="idGroup">
+          <!--  input 선택 시 active del 추가 / 에러시 error 추가 -->
+          <h5>지갑명</h5>
+          <div class="box_inp">
+            <span class="inp_wrap">
+              <input class="inp" id="loginID" type="text" />
+              <a class="del">삭제</a>
+            </span>
+          </div>
+          <p class="error_txt"></p>
+        </div>
+        <div class="inp_group" id="pwdGroup">
+          <!-- input 선택 시 active del 추가 / 에러시 error 추가 -->
+          <h5>비밀번호</h5>
+          <div class="box_inp">
+            <span class="inp_wrap">
+              <input
+                class="inp"
+                id="loginPwd"
+                type="password"
+              /><!-- type: password/text -->
+              <a class="icon hide_word">보이기</a
+              ><!-- hide_word/view_word -->
+              <a class="del">삭제</a>
+            </span>
+          </div>
+          <p class="error_txt"></p>
+        </div>
+        <div class="btn_area">
+          <a class="btn full red on" onclick="fnLogin()">로그인</a
+          ><!-- on -->
+        </div>
+        <div class="btn_area">
+          <a class="btn white" href="createAccount.html">지갑 생성</a>
+          <a class="btn white" href="keystoreRestore.html"
+            >Keystore File 복원</a
+          >
+        </div>
+
+        <div class="liability_txt">
+          <p class="center">
+            Berith는 동일 기기에서 다수 계정 등록 및 사용으로 발생하는 문제에
+            대한 배상, 보상 및 기타 법적 책임을 부담하지 않습니다.
+          </p>
+        </div>
+
+        <div class="inp_group" id="modeGroup">
+          <h5 style="display: inline-block; margin-right: 5px">실행모드</h5>
+          <select
+            id="gc_mode"
+            disabled
+            style="
+              background-color: white;
+              font-size: 13px;
+              border: 1px solid darkgray;
+            "
+          >
+            <option
+              class="archive"
+              value="archive"
+              data-description="모든 과거 데이터를 저장하는 모드"
+            >
+              Archive
+            </option>
+            <option
+              class="full"
+              value="full"
+              data-description="필요한 데이터만 남기고 주기적으로 삭제하는 모드"
+            >
+              Full
+            </option>
+          </select>
+          <p id="guide" style="display: none; color: red; font-size: 13px">
+            변경한 모드를 적용하기 위해 프로그램을 재실행해주세요.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- e://wrap -->
+
+    <script type="text/javascript">
+      window.addEventListener("DOMContentLoaded", () => {
+        onPageload();
+        setGCModeChangeEvent();
+        setTimeout(() => displayCurrentGCMode(), 5000);
+      });
+
+      async function displayCurrentGCMode() {
+        let selectBox = document.getElementById("gc_mode");
+        selectBox.disabled = false;
+
+        let response = await selectGCMode();
+        if (response !== undefined) {
+          let currentMode = response.payload.gcmode;
+          let count = selectBox.options.length;
+
+          for (let i = 0; i < count; i++) {
+            if (selectBox.options[i].value === currentMode) {
+              selectBox.selectedIndex = i;
+            }
+          }
+        }
+      }
+
+      function setGCModeChangeEvent() {
+        document
+          .getElementById("gc_mode")
+          .addEventListener("change", async function () {
+            let selectBox = document.getElementById("gc_mode");
+            let response = await selectGCMode();
+            let beforeMode =
+              response !== undefined ? response.payload.gcmode : null;
+            let afterMode = selectBox.options[selectBox.selectedIndex].value;
+
+            if (response === undefined || beforeMode !== afterMode) {
+              await updateGCMode(afterMode);
+              document.querySelector("#modeGroup > #guide").style.display =
+                "block";
+            }
+          });
+      }
+
+      function selectGCMode() {
+        return database.selectGCMode();
+      }
+
+      function updateGCMode(afterMode) {
+        let apiResult = database.updateGCMode(afterMode);
+        if (apiResult == undefined) {
+          console.error("Fail to update gc mode");
+        } else {
+          console.log("Success to update gc mode");
+        }
+      }
+
+      function onPageload() {
+        $(".login").keypress(function (e) {
+          if (e.keyCode == "13") fnLogin();
+        });
+        // console.log( "start !! ")
+
+        $("#loginID").focus(function () {
+          $("#idGroup").addClass("active");
+        });
+        $("#loginID").blur(function () {
+          $("#idGroup").removeClass("active");
+        });
+        $("#loginPwd").focus(function () {
+          $("#pwdGroup").addClass("active");
+        });
+        $("#loginPwd").blur(function () {
+          $("#pwdGroup").removeClass("active");
+        });
+        $(".inp").on("propertychange change keyup paste input", function () {
+          var currentVal = $(this).val();
+          if (currentVal == "") {
+            $(this).closest(".inp_group").removeClass("del");
+          } else {
+            $(this).closest(".inp_group").addClass("del");
+          }
+        });
+        $(".del").click(function () {
+          $(this).siblings("input").val("");
+          $(this).closest(".inp_group").removeClass("del");
+        });
+        $(".icon").click(function () {
+          // console.log( "icon click !! ")
+          if ($(this).hasClass("hide_word")) {
+            $(this).removeClass("hide_word");
+            $(this).addClass("view_word");
+            $(this).siblings("input").prop("type", "text");
+          } else {
+            $(this).removeClass("view_word");
+            $(this).addClass("hide_word");
+            $(this).siblings("input").prop("type", "password");
+          }
+        });
+      }
+      async function fnLogin() {
+        var loginId = $("#loginID").val();
+        var loginPwd = $("#loginPwd").val();
+        if (validateFields(loginId, loginPwd)) {
+          let apiResult = await database.checkLogin(loginId, loginPwd);
+          if (apiResult == undefined) {
+            // console.log("no exists !!! ")
+            $("#idGroup").addClass("error");
+            $(".error_txt").html("일치하는 아이디가 존재하지 않습니다.");
+          }
+          var obj = apiResult.payload;
+          if (loginPwd != obj.Password) {
+            $("#pwdGroup").addClass("error");
+            $(".error_txt").html("비밀번호가 일치하지 않습니다.");
+          } else {
+            handleSuccessfulLogin(obj);
+          }
+        }
+      }
+
+      async function handleSuccessfulLogin(obj) {
+        let password = obj.Password;
+        let address = obj.Address;
+        $("#idGroup").removeClass("error");
+        $("#pwdGroup").removeClass("error");
+        // console.log("address :: " + address)
+        let hasAddress = await personal.hasAddress(address);
+        // console.log("hasAddress :: " + hasAddress)
+        if (hasAddress == "true") {
+          let isSetBerithbase = await miner.setBerithbase(address);
+          if (isSetBerithbase == "true") {
+            await personal.unlockAccount(address, password, 0);
+            sessionStorage.setItem("account", address);
+            sessionStorage.setItem("loginId", $("#loginID").val());
+            sessionStorage.setItem("loginPwd", $("#loginPwd").val());
+            location.href = "index.html";
+          } else {
+            console.error("Something went wrong while setting Berithbase!!!");
+          }
+        } else {
+          // console.log("ffffffff")
+          $("#idGroup").addClass("error");
+          $(".error_txt").html(
+            "PC에 저장된 Keystore File이 없어 로그인 할 수 없습니다.\n" +
+              "Keystore File 복원을 진행해 주세요.\n"
+          );
+        }
+      }
+
+      function validateFields(loginId, loginPwd) {
+        if (loginId == "") {
+          $("#idGroup").addClass("error");
+          $(".error_txt").html("아이디를 입력하세요.");
+          $("#loginID").focus();
+          return false;
+        }
+        if (loginPwd == "") {
+          $("#idGroup").removeClass("error");
+          $("#pwdGroup").addClass("error");
+          $(".error_txt").html("비밀번호를 입력하세요.");
+          $("#loginPwd").focus();
+          return false;
+        }
+        return true;
+      }
+    </script>
+  </body>
+</html>

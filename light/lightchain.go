@@ -35,7 +35,7 @@ import (
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/params"
 	"github.com/BerithFoundation/berith-chain/rlp"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 var (
@@ -427,6 +427,11 @@ func (self *LightChain) GetHeaderByHash(hash common.Hash) *types.Header {
 // it if present.
 func (bc *LightChain) HasHeader(hash common.Hash, number uint64) bool {
 	return bc.hc.HasHeader(hash, number)
+}
+
+// GetCanonicalHash returns the canonical hash for a given block number
+func (bc *LightChain) GetCanonicalHash(number uint64) common.Hash {
+	return bc.hc.GetCanonicalHash(number)
 }
 
 // GetBlockHashesFromHash retrieves a number of block hashes starting at a given

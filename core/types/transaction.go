@@ -41,9 +41,13 @@ type Transaction struct {
 	hash atomic.Value
 	size atomic.Value
 	from atomic.Value
+	// [Berith]
+	// To identify transaction sent from metamask
+	IsEthTx bool
 }
 
 type txdata struct {
+	// From의 Nonce
 	AccountNonce uint64          `json:"nonce"    gencodec:"required"`
 	Price        *big.Int        `json:"gasPrice" gencodec:"required"`
 	GasLimit     uint64          `json:"gas"      gencodec:"required"`
@@ -74,16 +78,16 @@ type txdataMarshaling struct {
 	S            *hexutil.Big
 }
 
-//[Berith] Transaction
-func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target)
+// [Berith] Transaction
+func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, base, target, isETH)
 }
 
-func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, base, target)
+func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, base, target, isETH)
 }
 
-func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet) *Transaction {
+func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, base JobWallet, target JobWallet, isETH bool) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -107,7 +111,7 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		d.Price.Set(gasPrice)
 	}
 
-	return &Transaction{data: d}
+	return &Transaction{data: d, IsEthTx: isETH}
 }
 
 // ChainId returns which chain id this transaction was signed for (if at all)
@@ -131,7 +135,14 @@ func isProtectedV(V *big.Int) bool {
 
 // EncodeRLP implements rlp.Encoder
 func (tx *Transaction) EncodeRLP(w io.Writer) error {
-	return rlp.Encode(w, &tx.data)
+	if tx.IsEthTx {
+		tx.ChangeBaseTarget(EthTx, EthTx)
+	}
+	err := rlp.Encode(w, &tx.data)
+	if tx.Base() == EthTx || tx.Target() == EthTx {
+		tx.ChangeBaseTarget(Main, Main)
+	}
+	return err
 }
 
 // DecodeRLP implements rlp.Decoder
@@ -141,7 +152,14 @@ func (tx *Transaction) DecodeRLP(s *rlp.Stream) error {
 	if err == nil {
 		tx.size.Store(common.StorageSize(rlp.ListSize(size)))
 	}
-
+	// [Berith]
+	// JobWallet 타입에 세 번째 타입인 EthTx를 추가하여 txdata만을 디코딩 하여도 구분 할 수 있도록 처리함
+	if tx.data.Base == EthTx || tx.data.Target == EthTx {
+		tx.IsEthTx = true // Transaction from Ethereum tool
+		tx.ChangeBaseTarget(Main, Main)
+	} else {
+		tx.IsEthTx = false // Berith transaction
+	}
 	return err
 }
 
@@ -187,6 +205,12 @@ func (tx *Transaction) CheckNonce() bool   { return true }
 func (tx *Transaction) Base() JobWallet    { return tx.data.Base }   //[Berith] Tx JobWallet Base
 func (tx *Transaction) Target() JobWallet  { return tx.data.Target } //[Berith] Tx JobWallet Target
 
+func (tx *Transaction) From() *atomic.Value {
+	return &tx.from
+}
+
+func (tx *Transaction) IsEthTransaction() bool { return tx.IsEthTx }
+
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
 func (tx *Transaction) To() *common.Address {
@@ -226,6 +250,9 @@ func (tx *Transaction) Size() common.StorageSize {
 //
 // XXX Rename message to something less arbitrary?
 func (tx *Transaction) AsMessage(s Signer) (Message, error) {
+	if tx.Base() == EthTx || tx.Target() == EthTx {
+		tx.data.Base, tx.data.Target = Main, Main
+	}
 	msg := Message{
 		nonce:      tx.data.AccountNonce,
 		gasLimit:   tx.data.GasLimit,
@@ -241,6 +268,11 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 	var err error
 	msg.from, err = Sender(s, tx)
 	return msg, err
+}
+
+func (tx *Transaction) ChangeBaseTarget(base, target JobWallet) {
+	tx.data.Base = base
+	tx.data.Target = target
 }
 
 // WithSignature returns a new transaction with the given signature.
@@ -347,6 +379,8 @@ type TransactionsByPriceAndNonce struct {
 //
 // Note, the input map is reowned so the caller should not interact any more with
 // if after providing it to the constructor.
+//
+// 가격으로 정렬된 트랜잭션 세트를 생성한다.
 func NewTransactionsByPriceAndNonce(signer Signer, txs map[common.Address]Transactions) *TransactionsByPriceAndNonce {
 	// Initialize a price based heap with the head transactions
 	heads := make(TxByPrice, 0, len(txs))
@@ -450,6 +484,6 @@ func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
 
-//[Berith]
+// [Berith]
 func (m Message) Base() JobWallet   { return m.base }
 func (m Message) Target() JobWallet { return m.target }

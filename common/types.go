@@ -38,7 +38,7 @@ const (
 	// AddressLength is the expected length of the address
 	AddressLength = 20
 	// AddressPrefix is prefix of the address
-	AddressPrefix = "Bx"
+	AddressPrefix = "0x"
 	// AddressPrefixLength is the expected length of the address prefix
 	AddressPrefixLength = len(AddressPrefix)
 )
@@ -71,7 +71,9 @@ func HasAddressPrefix(s string) bool {
 	if len(s) < AddressPrefixLength {
 		return false
 	}
-	return strings.EqualFold(AddressPrefix, s[:AddressPrefixLength])
+	// [Berith]
+	// To allow 0x Bx both
+	return strings.EqualFold(AddressPrefix, s[:AddressPrefixLength]) || strings.EqualFold("Bx", s[:AddressPrefixLength])
 }
 
 // RemoveAddressPrefix returns a address without prefix given address string.

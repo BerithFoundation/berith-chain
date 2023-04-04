@@ -31,7 +31,7 @@ const (
 // Genesis hashes to enforce below configs on.
 var (
 	MainnetGenesisHash = common.HexToHash("0x0c2efaedffcadfc946f140e3fd591628ddd6fd220e235abcf86d0f8de09b76bd")
-	TestnetGenesisHash = common.HexToHash("0x88484916701416d7f2990bed1d182c9e6001ed916e387669536f365451253cd0")
+	TestnetGenesisHash = common.HexToHash("0xa4b38d62b724e0d3aced2d17b31f8ee103a64806866ede8ed8c8ba0d1a6eaedc")
 )
 
 // [BERITH] Config Setting
@@ -51,6 +51,8 @@ var (
 		BIP2Block:           big.NewInt(545000),
 		BIP3Block:           big.NewInt(1168000),
 		BIP4Block:           big.NewInt(6130000),
+		//eip 1884,2929,2200,1344 활성화, MainnetGenesis Hash와 Genesis.json으로부터 생성된 블록의 Hash가 다르면 genesis.json 설정에 따른다.
+		BIP5Block: big.NewInt(21314000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,
@@ -73,17 +75,27 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainID:        big.NewInt(206),
-		HomesteadBlock: big.NewInt(0),
-		EIP155Block:    big.NewInt(0),
-		EIP158Block:    big.NewInt(0),
+		ChainID:             big.NewInt(107),
+		HomesteadBlock:      big.NewInt(0),
+		DAOForkBlock:        nil,
+		DAOForkSupport:      true,
+		EIP150Block:         big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		BIP1Block:           big.NewInt(0),
+		BIP2Block:           big.NewInt(0),
+		BIP3Block:           big.NewInt(0),
+		BIP4Block:           big.NewInt(0),
+		BIP5Block:           big.NewInt(720),
 		Bsrr: &BSRRConfig{
 			Period:            5,
-			Epoch:             40,
-			Rewards:           common.StringToBig("20000"),
+			Epoch:             100,
+			Rewards:           common.StringToBig("360"),
 			StakeMinimum:      common.StringToBig(StakeMinimum),
 			LimitStakeBalance: common.StringToBig(LimitStakeBalance),
-			SlashRound:        500,
+			SlashRound:        0,
 			ForkFactor:        1.0,
 		},
 	}
@@ -140,6 +152,7 @@ type ChainConfig struct {
 	BIP2Block *big.Int    `json:"bip2Block,omitempty"`
 	BIP3Block *big.Int    `json:"bip3Block,omitempty"`
 	BIP4Block *big.Int    `json:"bip4Block,omitempty"`
+	BIP5Block *big.Int    `json:"bip5Block,omitempty"`
 }
 
 type BSRRConfig struct {
@@ -165,7 +178,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v BIP1: %v BIP2: %v BIP3: %v BIP4: %v BIP5: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -179,6 +192,7 @@ func (c *ChainConfig) String() string {
 		c.BIP2Block,
 		c.BIP3Block,
 		c.BIP4Block,
+		c.BIP5Block,
 		engine,
 	)
 }
@@ -232,6 +246,10 @@ func (c *ChainConfig) IsBIP3(num *big.Int) bool {
 
 func (c *ChainConfig) IsBIP4(num *big.Int) bool {
 	return isForked(c.BIP4Block, num)
+}
+
+func (c *ChainConfig) IsBIP5(num *big.Int) bool {
+	return isForked(c.BIP5Block, num)
 }
 
 func (c *ChainConfig) IsBIP1Block(num *big.Int) bool {
@@ -326,6 +344,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.BIP4Block, newcfg.BIP4Block, head) {
 		return newCompatError("bip4 fork block", c.BIP4Block, newcfg.BIP4Block)
 	}
+	if isForkIncompatible(c.BIP5Block, newcfg.BIP5Block, head) {
+		return newCompatError("bip5 fork block", c.BIP5Block, newcfg.BIP5Block)
+	}
 	return nil
 }
 
@@ -393,6 +414,7 @@ type Rules struct {
 	ChainID                                   *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158 bool
 	IsByzantium, IsConstantinople             bool
+	IsBIP1, IsBIP2, IsBIP3, IsBIP4, IsBIP5    bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -409,5 +431,10 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsEIP158:         c.IsEIP158(num),
 		IsByzantium:      c.IsByzantium(num),
 		IsConstantinople: c.IsConstantinople(num),
+		IsBIP1:           c.IsBIP1(num),
+		IsBIP2:           c.IsBIP2(num),
+		IsBIP3:           c.IsBIP3(num),
+		IsBIP4:           c.IsBIP4(num),
+		IsBIP5:           c.IsBIP5(num),
 	}
 }

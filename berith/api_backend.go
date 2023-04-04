@@ -18,6 +18,7 @@ package berith
 
 import (
 	"context"
+	"errors"
 	"math/big"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
@@ -86,6 +87,27 @@ func (b *BerAPIBackend) BlockByNumber(ctx context.Context, blockNr rpc.BlockNumb
 	return b.e.blockchain.GetBlockByNumber(uint64(blockNr)), nil
 }
 
+func (b *BerAPIBackend) BlockByNumberOrHash(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (*types.Block, error) {
+	if blockNr, ok := blockNrOrHash.Number(); ok {
+		return b.BlockByNumber(ctx, blockNr)
+	}
+	if hash, ok := blockNrOrHash.Hash(); ok {
+		header := b.e.blockchain.GetHeaderByHash(hash)
+		if header == nil {
+			return nil, errors.New("header for hash not found")
+		}
+		if blockNrOrHash.RequireCanonical && b.e.blockchain.GetCanonicalHash(header.Number.Uint64()) != hash {
+			return nil, errors.New("hash is not currently canonical")
+		}
+		block := b.e.blockchain.GetBlock(hash, header.Number.Uint64())
+		if block == nil {
+			return nil, errors.New("header found, but block body is missing")
+		}
+		return block, nil
+	}
+	return nil, errors.New("invalid arguments; neither block nor hash specified")
+}
+
 func (b *BerAPIBackend) StateAndHeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (*state.StateDB, *types.Header, error) {
 	// Pending state is only known by the miner
 	if blockNr == rpc.PendingBlockNumber {
@@ -99,6 +121,27 @@ func (b *BerAPIBackend) StateAndHeaderByNumber(ctx context.Context, blockNr rpc.
 	}
 	stateDb, err := b.e.BlockChain().StateAt(header.Root)
 	return stateDb, header, err
+}
+
+func (b *BerAPIBackend) StateAndHeaderByNumberOrHash(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (*state.StateDB, *types.Header, error) {
+	if blockNr, ok := blockNrOrHash.Number(); ok {
+		return b.StateAndHeaderByNumber(ctx, blockNr)
+	}
+	if hash, ok := blockNrOrHash.Hash(); ok {
+		header, err := b.HeaderByHash(ctx, hash)
+		if err != nil {
+			return nil, nil, err
+		}
+		if header == nil {
+			return nil, nil, errors.New("header for hash not found")
+		}
+		if blockNrOrHash.RequireCanonical && b.e.blockchain.GetCanonicalHash(header.Number.Uint64()) != hash {
+			return nil, nil, errors.New("hash is not currently canonical")
+		}
+		stateDb, err := b.e.BlockChain().StateAt(header.Root)
+		return stateDb, header, err
+	}
+	return nil, nil, errors.New("invalid arguments; neither block nor hash specified")
 }
 
 func (b *BerAPIBackend) GetBlock(ctx context.Context, hash common.Hash) (*types.Block, error) {

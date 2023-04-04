@@ -38,6 +38,7 @@ var (
 		nil,
 		Main,
 		Main,
+		false,
 	)
 
 	rightvrsTx, _ = NewTransaction(
@@ -49,6 +50,7 @@ var (
 		common.FromHex("5544"),
 		Main,
 		Main,
+		false,
 	).WithSignature(
 		HomesteadSigner{},
 		common.Hex2Bytes("98ff921201554726367d2be8c804a7ff89ccf285ebc57dff8ae4c44b9c19ac4a8887321be575c8095f789dd4c743dfe42c1820f9231f98a962b210e3ac2452a301"),
@@ -143,7 +145,7 @@ func TestTransactionPriceNonceSort(t *testing.T) {
 	for start, key := range keys {
 		addr := crypto.PubkeyToAddress(key.PublicKey)
 		for i := 0; i < 25; i++ {
-			tx, _ := SignTx(NewTransaction(uint64(start+i), common.Address{}, big.NewInt(100), 100, big.NewInt(int64(start+i)), nil, Main, Main), signer, key)
+			tx, _ := SignTx(NewTransaction(uint64(start+i), common.Address{}, big.NewInt(100), 100, big.NewInt(int64(start+i)), nil, Main, Main, false), signer, key)
 			groups[addr] = append(groups[addr], tx)
 		}
 	}
@@ -194,9 +196,9 @@ func TestTransactionJSON(t *testing.T) {
 		var tx *Transaction
 		switch i % 2 {
 		case 0:
-			tx = NewTransaction(i, common.Address{1}, common.Big0, 1, common.Big2, []byte("abcdef"), Main, Main)
+			tx = NewTransaction(i, common.Address{1}, common.Big0, 1, common.Big2, []byte("abcdef"), Main, Main, false)
 		case 1:
-			tx = NewContractCreation(i, common.Big0, 1, common.Big2, []byte("abcdef"), Main, Main)
+			tx = NewContractCreation(i, common.Big0, 1, common.Big2, []byte("abcdef"), Main, Main, false)
 		}
 		transactions = append(transactions, tx)
 
@@ -227,4 +229,21 @@ func TestTransactionJSON(t *testing.T) {
 			t.Errorf("invalid chain id, want %d, got %d", tx.ChainId(), parsedTx.ChainId())
 		}
 	}
+}
+
+type originTxData struct {
+	AccountNonce uint64          `json:"nonce"    gencodec:"required"`
+	Price        *big.Int        `json:"gasPrice" gencodec:"required"`
+	GasLimit     uint64          `json:"gas"      gencodec:"required"`
+	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
+	Amount       *big.Int        `json:"value"    gencodec:"required"`
+	Payload      []byte          `json:"input"    gencodec:"required"`
+
+	// Signature values
+	V *big.Int `json:"v" gencodec:"required"`
+	R *big.Int `json:"r" gencodec:"required"`
+	S *big.Int `json:"s" gencodec:"required"`
+
+	// This is only used when marshaling to JSON.
+	Hash *common.Hash `json:"hash" rlp:"-"`
 }

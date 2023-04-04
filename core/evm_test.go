@@ -89,15 +89,22 @@ var (
 			gasPrice: big.NewInt(2000),
 		},
 	}
+
+	minStkData = []txdata{
+		txdata{
+			to:       common.Address{}, //if try to stake or unstake it automatically set to senders address
+			nonce:    0,
+			value:    new(big.Int).Mul(big.NewInt(10000), eth),
+			data:     make([]byte, 0),
+			base:     types.Main,
+			target:   types.Stake,
+			gas:      21000,
+			gasPrice: big.NewInt(2000),
+		},
+	}
 )
 
-// func Test01(t *testing.T) {
-// 	addr, _ := ks.NewAccount("0000")
-// 	println(addr.Address.Hex())
-// }
-
-func TestApplyAndRevertTransaction(t *testing.T) {
-
+func TestMinimumStake(t *testing.T) {
 	pvk := new(ecdsa.PrivateKey)
 
 	pvk.PublicKey.Curve = secp256k1.S256()
@@ -105,21 +112,20 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 	pvk.PublicKey.X, pvk.PublicKey.Y = secp256k1.S256().ScalarBaseMult(big.NewInt(3360).Bytes())
 
 	from := common.HexToAddress("Bx810722274468C2E5dEE8Aabd41aE61fA4d1A5cDa")
-
 	signer := types.NewEIP155Signer(big.NewInt(206))
 
-	for _, data := range datas {
+	for _, data := range minStkData {
 
 		init, _ := new(big.Int).SetString("100000000000000000000000000000000000000000000000", 10)
 		stateDB.AddBalance(from, init)
-		stateDB.AddStakeBalance(from, init, big.NewInt(1))
+		// stateDB.AddStakeBalance(from, init, big.NewInt(1))
 		stateDB.Commit(true)
 
 		if data.base == types.Stake || data.target == types.Stake {
 			data.to = from
 		}
 
-		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target)
+		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target, false)
 
 		tx, err := types.SignTx(tx, signer, pvk)
 
@@ -165,7 +171,130 @@ func TestApplyAndRevertTransaction(t *testing.T) {
 		exptFrom := getBalances(from, stateDB)
 		exptTo := getBalances(from, stateDB)
 
-		_, _, _, err = ApplyMessage(evm, msg, gp)
+		_, err = ApplyMessage(evm, msg, gp)
+		if err != nil {
+			t.Error(err)
+		}
+
+		exptFrom.bal = new(big.Int).Sub(exptFrom.bal, gasAmt)
+
+		if tx.Target() == types.Main && tx.Base() == types.Main {
+			exptFrom.bal = new(big.Int).Sub(exptFrom.bal, tx.Value())
+			exptTo.bal = new(big.Int).Add(exptTo.bal, tx.Value())
+		} else if tx.Target() == types.Stake {
+			exptFrom.bal = new(big.Int).Sub(exptFrom.bal, tx.Value())
+			exptFrom.stk = new(big.Int).Add(exptFrom.stk, tx.Value())
+			exptFrom.stkUdt = new(big.Int).Set(header.Number)
+			exptTo = exptFrom
+
+		} else {
+			exptFrom.bal = new(big.Int).Add(exptFrom.bal, exptFrom.stk)
+			exptFrom.stk = big.NewInt(0)
+			exptFrom.stkUdt = new(big.Int).Set(header.Number)
+			exptTo = exptFrom
+		}
+
+		resultFrom := getBalances(msg.From(), stateDB)
+		resultTo := getBalances(*msg.To(), stateDB)
+
+		if err := exptFrom.Compare(resultFrom); err != nil {
+			t.Error(err)
+		}
+		if err := exptTo.Compare(resultTo); err != nil {
+			t.Error(err)
+		}
+
+		if err := checkBigInt(stateDB.GetBalance(author), gasAmt); err != nil {
+			t.Error(err)
+		}
+
+		stateDB.RevertToSnapshot(snap)
+
+		revertedFrom := getBalances(msg.From(), stateDB)
+		revertedTo := getBalances(*msg.To(), stateDB)
+
+		if err := originFrom.Compare(revertedFrom); err != nil {
+			t.Error(err)
+		}
+		if err := originTo.Compare(revertedTo); err != nil {
+			t.Error(err)
+		}
+		if err := checkBigInt(stateDB.GetBalance(author), big.NewInt(0)); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestApplyAndRevertTransaction(t *testing.T) {
+
+	pvk := new(ecdsa.PrivateKey)
+
+	pvk.PublicKey.Curve = secp256k1.S256()
+	pvk.D = big.NewInt(3360)
+	pvk.PublicKey.X, pvk.PublicKey.Y = secp256k1.S256().ScalarBaseMult(big.NewInt(3360).Bytes())
+
+	from := common.HexToAddress("Bx810722274468C2E5dEE8Aabd41aE61fA4d1A5cDa")
+
+	signer := types.NewEIP155Signer(big.NewInt(206))
+
+	for _, data := range datas {
+
+		init, _ := new(big.Int).SetString("100000000000000000000000000000000000000000000000", 10)
+		stateDB.AddBalance(from, init)
+		stateDB.AddStakeBalance(from, init, big.NewInt(1))
+		stateDB.Commit(true)
+
+		if data.base == types.Stake || data.target == types.Stake {
+			data.to = from
+		}
+
+		tx := types.NewTransaction(data.nonce, data.to, data.value, data.gas, data.gasPrice, data.data, data.base, data.target, false)
+
+		tx, err := types.SignTx(tx, signer, pvk)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		msg, err := tx.AsMessage(types.NewEIP155Signer(params.TestnetChainConfig.ChainID))
+		if err != nil {
+			t.Error(err)
+		}
+		author := common.BytesToAddress([]byte("gas"))
+		ctx := NewEVMContext(msg, &header, nil, &author)
+		gp := new(GasPool)
+		gp.AddGas(header.GasLimit)
+		evm := vm.NewEVM(ctx, stateDB, params.TestnetChainConfig, vmConfig)
+
+		snap := stateDB.Snapshot()
+
+		stateDB.AddPenalty(from, header.Number)
+
+		pen := stateDB.GetPenalty(from)
+		penUdt := stateDB.GetPenaltyUpdated(from)
+
+		if pen != 1 || penUdt.Cmp(header.Number) != 0 {
+			t.Errorf("expected result is [1,%s] but [%d,%s]", header.Number.String(), pen, penUdt.String())
+		}
+
+		stateDB.RemovePenalty(from, header.Number)
+
+		pen = stateDB.GetPenalty(from)
+		penUdt = stateDB.GetPenaltyUpdated(from)
+
+		if pen != 0 || penUdt.Cmp(header.Number) != 0 {
+			t.Errorf("expected result is [1,%s] but [%d,%s]", header.Number.String(), pen, penUdt.String())
+		}
+
+		originFrom := getBalances(from, stateDB)
+		originTo := getBalances(*tx.To(), stateDB)
+
+		gasAmt := new(big.Int).Mul(tx.GasPrice(), big.NewInt(int64(tx.Gas())))
+
+		exptFrom := getBalances(from, stateDB)
+		exptTo := getBalances(from, stateDB)
+
+		_, err = ApplyMessage(evm, msg, gp)
 		if err != nil {
 			t.Error(err)
 		}

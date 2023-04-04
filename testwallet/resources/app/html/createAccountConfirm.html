@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Berith PC Wallet</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
+    <meta name="subject" content="" />
+    <meta name="application-name" content="" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="copyright" content="Copyrights (c) " />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+    <link rel="stylesheet" href="../static/lib/astiloader/astiloader.css" />
+    <link rel="stylesheet" href="../static/lib/astimodaler/astimodaler.css" />
+    <link rel="stylesheet" href="../static/lib/astinotifier/astinotifier.css" />
+    <link
+      rel="stylesheet"
+      href="../static/lib/font-awesome-4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="shortcut icon" href="../images/common/berith_pa.ico" />
+    <script>
+      if (typeof module === "object") {
+        window.module = module;
+        module = undefined;
+      }
+    </script>
+    <script src="../static/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script>
+      if (window.module) module = window.module;
+    </script>
+    <script src="../static/lib/astiloader/astiloader.js"></script>
+    <script src="../static/lib/astimodaler/astimodaler.js"></script>
+    <script src="../static/lib/astinotifier/astinotifier.js"></script>
+    <script src="../static/lib/chart/chart.min.js"></script>
+    <script src="../static/js/bignumber.js"></script>
+    <script src="../static/js/NumberUtils.js"></script>
+    <script src="../static/js/global.js"></script>
+    <script src="../static/js/database.js"></script>
+    <script src="../static/js/qrGen.js"></script>
+    <script src="../static/js/hexConvert.js"></script>
+    <script src="../static/js/index.js"></script>
+  </head>
+
+  <body>
+    <link rel="import" href="../static/common.html" />
+    <div class="wrap">
+      <!-- 콘텐츠 영역 -->
+    </div>
+    <!-- e://wrap -->
+
+    <div class="ly_pop view">
+      <!-- view/hide -->
+      <div class="bg_dimmed"></div>
+      <div class="pop_wrap">
+        <div class="pop_header">
+          <h5>지갑생성</h5>
+          <a class="btn_close" href="login.html">close</a>
+        </div>
+        <div class="pop_body">
+          <p class="pop_con_top">
+            <i class="ico_complete"></i>
+            지갑 생성이 완료되었습니다.
+          </p>
+          <table class="pop_table">
+            <tbody>
+              <tr>
+                <th>지갑명</th>
+                <td><input type="text" id="userid" readonly="true" /></td>
+              </tr>
+              <tr>
+                <th>내 지갑주소</th>
+                <td>
+                  <span class="table_in_inp">
+                    <textarea class="inp" id="userAdd" readonly></textarea>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>개인키</th>
+                <td>
+                  <span class="table_in_inp">
+                    <textarea class="inp" id="privateKey" readonly></textarea>
+                    <a class="icon copy" onclick="copyText()">보이기</a>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>Keystore File</th>
+                <td>파일 저장 완료</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pop_footer">
+          <a class="btn red on" href="login.html">확인</a>
+        </div>
+      </div>
+      <!-- e://pop_wrap  -->
+
+      <div class="one_sec_wrap hide" id="popCopy">
+        <!-- view/hide -->
+        <div class="bg"></div>
+        <p class="complete">복사 완료</p>
+      </div>
+    </div>
+    <script type="text/javascript">
+      function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+          results = regex.exec(location.search);
+        return results === null
+          ? ""
+          : decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+      var add, id, privateKey;
+      $(document).ready(function () {
+        add = getParameterByName("Address");
+        id = getParameterByName("ID");
+        privateKey = getParameterByName("PrivateKey");
+        // console.log("add confirm :: " + add)
+        // console.log("id confirm :: " + id)
+        // console.log("privateKey confirm :: " + privateKey)
+        $("#userid").val(id);
+        $("#userAdd").val(add);
+        $("#privateKey").val(privateKey);
+      });
+
+      function copyText() {
+        var copyText = document.getElementById("privateKey");
+        copyText.select();
+        document.execCommand("copy");
+        $("#popCopy").removeClass("hide");
+        $("#popCopy").addClass("view");
+        setTimeout(function () {
+          $("#popCopy").removeClass("view");
+          $("#popCopy").addClass("hide");
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>

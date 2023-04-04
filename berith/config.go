@@ -50,6 +50,26 @@ var DefaultConfig = Config{
 	},
 }
 
+var DefaultTestnetConfig = Config{
+	SyncMode:       downloader.FullSync,
+	NetworkId:      107,
+	LightPeers:     100,
+	DatabaseCache:  512,
+	TrieCleanCache: 256,
+	TrieDirtyCache: 256,
+	TrieTimeout:    60 * time.Minute,
+	MinerGasFloor:  8000000,
+	MinerGasCeil:   8000000,
+	MinerGasPrice:  big.NewInt(params.Gmin),
+	MinerRecommit:  3 * time.Second,
+
+	TxPool: core.DefaultTxPoolConfig,
+	GPO: gasprice.Config{
+		Blocks:     20,
+		Percentile: 60,
+	},
+}
+
 func init() {
 	home := os.Getenv("HOME")
 	if home == "" {

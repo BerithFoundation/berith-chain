@@ -23,15 +23,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"os"
 	"reflect"
+
+	"berith-chain/internals/berithapi"
+	"berith-chain/signer/storage"
 
 	"github.com/BerithFoundation/berith-chain/accounts"
 	"github.com/BerithFoundation/berith-chain/accounts/keystore"
+	"github.com/BerithFoundation/berith-chain/accounts/scwallet"
 	"github.com/BerithFoundation/berith-chain/accounts/usbwallet"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/hexutil"
 	"github.com/BerithFoundation/berith-chain/crypto"
-	"berith-chain/internals/berithapi"
 	"github.com/BerithFoundation/berith-chain/log"
 	"github.com/BerithFoundation/berith-chain/rlp"
 )
@@ -87,13 +91,27 @@ type SignerUI interface {
 	OnInputRequired(info UserInputRequest) (UserInputResponse, error)
 }
 
+// Validator defines the methods required to validate a transaction against some
+// sanity defaults as well as any underlying 4byte method database.
+//
+// Use fourbyte.Database as an implementation. It is separated out of this package
+// to allow pieces of the signer package to be used without having to load the
+// 7MB embedded 4byte dump.
+type Validator interface {
+	// ValidateTransaction does a number of checks on the supplied transaction, and
+	// returns either a list of warnings, or an error (indicating that the transaction
+	// should be immediately rejected).
+	ValidateTransaction(selector *string, tx *SendTxArgs) (*ValidationMessages, error)
+}
+
 // SignerAPI defines the actual implementation of ExternalAPI
 type SignerAPI struct {
-	chainID    *big.Int
-	am         *accounts.Manager
-	UI         SignerUI
-	validator  *Validator
-	rejectMode bool
+	chainID     *big.Int
+	am          *accounts.Manager
+	UI          SignerUI
+	validator   Validator
+	rejectMode  bool
+	credentials storage.Storage
 }
 
 // Metadata about a request
@@ -103,6 +121,65 @@ type Metadata struct {
 	Scheme    string `json:"scheme"`
 	UserAgent string `json:"User-Agent"`
 	Origin    string `json:"Origin"`
+}
+
+func StartClefAccountManager(ksLocation string, nousb, lightKDF bool, scpath string) *accounts.Manager {
+	var (
+		backends []accounts.Backend
+		n, p     = keystore.StandardScryptN, keystore.StandardScryptP
+	)
+	if lightKDF {
+		n, p = keystore.LightScryptN, keystore.LightScryptP
+	}
+	// support password based accounts
+	if len(ksLocation) > 0 {
+		backends = append(backends, keystore.NewKeyStore(ksLocation, n, p))
+	}
+	if !nousb {
+		// Start a USB hub for Ledger hardware wallets
+		if ledgerhub, err := usbwallet.NewLedgerHub(); err != nil {
+			log.Warn(fmt.Sprintf("Failed to start Ledger hub, disabling: %v", err))
+		} else {
+			backends = append(backends, ledgerhub)
+			log.Debug("Ledger support enabled")
+		}
+		// Start a USB hub for Trezor hardware wallets (HID version)
+		if trezorhub, err := usbwallet.NewTrezorHubWithHID(); err != nil {
+			log.Warn(fmt.Sprintf("Failed to start HID Trezor hub, disabling: %v", err))
+		} else {
+			backends = append(backends, trezorhub)
+			log.Debug("Trezor support enabled via HID")
+		}
+		// Start a USB hub for Trezor hardware wallets (WebUSB version)
+		if trezorhub, err := usbwallet.NewTrezorHubWithWebUSB(); err != nil {
+			log.Warn(fmt.Sprintf("Failed to start WebUSB Trezor hub, disabling: %v", err))
+		} else {
+			backends = append(backends, trezorhub)
+			log.Debug("Trezor support enabled via WebUSB")
+		}
+	}
+
+	// Start a smart card hub
+	if len(scpath) > 0 {
+		// Sanity check that the smartcard path is valid
+		fi, err := os.Stat(scpath)
+		if err != nil {
+			log.Info("Smartcard socket file missing, disabling", "err", err)
+		} else {
+			if fi.Mode()&os.ModeType != os.ModeSocket {
+				log.Error("Invalid smartcard socket file type", "path", scpath, "type", fi.Mode().String())
+			} else {
+				if schub, err := scwallet.NewHub(scpath, scwallet.Scheme, ksLocation); err != nil {
+					log.Warn(fmt.Sprintf("Failed to start smart card hub, disabling: %v", err))
+				} else {
+					backends = append(backends, schub)
+				}
+			}
+		}
+	}
+
+	// Clef doesn't allow insecure http account unlock.
+	return accounts.NewManager(&accounts.Config{InsecureUnlockAllowed: false}, backends...)
 }
 
 // MetadataFromContext extracts Metadata from a given context.Context
@@ -149,7 +226,6 @@ type (
 		//The UI may make changes to the TX
 		Transaction SendTxArgs `json:"transaction"`
 		Approved    bool       `json:"approved"`
-		Password    string     `json:"password"`
 	}
 	// ExportRequest info about query to export accounts
 	ExportRequest struct {
@@ -223,43 +299,17 @@ var ErrRequestDenied = errors.New("Request denied")
 // key that is generated when a new Account is created.
 // noUSB disables USB support that is required to support hardware devices such as
 // ledger and trezor.
-func NewSignerAPI(chainID int64, ksLocation string, noUSB bool, ui SignerUI, abidb *AbiDb, lightKDF bool, advancedMode bool) *SignerAPI {
-	var (
-		backends []accounts.Backend
-		n, p     = keystore.StandardScryptN, keystore.StandardScryptP
-	)
-	if lightKDF {
-		n, p = keystore.LightScryptN, keystore.LightScryptP
-	}
-	// support password based accounts
-	if len(ksLocation) > 0 {
-		backends = append(backends, keystore.NewKeyStore(ksLocation, n, p))
-	}
+func NewSignerAPI(am *accounts.Manager, chainID int64, noUSB bool, ui SignerUI, validator Validator, advancedMode bool, credentials storage.Storage) *SignerAPI {
 	if advancedMode {
 		log.Info("Clef is in advanced mode: will warn instead of reject")
 	}
-	if !noUSB {
-		// Start a USB hub for Ledger hardware wallets
-		if ledgerhub, err := usbwallet.NewLedgerHub(); err != nil {
-			log.Warn(fmt.Sprintf("Failed to start Ledger hub, disabling: %v", err))
-		} else {
-			backends = append(backends, ledgerhub)
-			log.Debug("Ledger support enabled")
-		}
-		// Start a USB hub for Trezor hardware wallets
-		if trezorhub, err := usbwallet.NewTrezorHub(); err != nil {
-			log.Warn(fmt.Sprintf("Failed to start Trezor hub, disabling: %v", err))
-		} else {
-			backends = append(backends, trezorhub)
-			log.Debug("Trezor support enabled")
-		}
-	}
-	signer := &SignerAPI{big.NewInt(chainID), accounts.NewManager(backends...), ui, NewValidator(abidb), !advancedMode}
+	signer := &SignerAPI{big.NewInt(chainID), am, ui, validator, !advancedMode, credentials}
 	if !noUSB {
 		signer.startUSBListener()
 	}
 	return signer
 }
+
 func (api *SignerAPI) openTrezor(url accounts.URL) {
 	resp, err := api.UI.OnInputRequired(UserInputRequest{
 		Prompt: "Pin required to open Trezor wallet\n" +
@@ -449,13 +499,37 @@ func logDiff(original *SignTxRequest, new *SignTxResponse) bool {
 	return modified
 }
 
+func (api *SignerAPI) lookupPassword(address common.Address) (string, error) {
+	value := api.credentials.Get(address.Hex())
+	if value == "" {
+		return value, errors.New("no value")
+	}
+	return value, nil
+}
+
+func (api *SignerAPI) lookupOrQueryPassword(address common.Address, title, prompt string) (string, error) {
+	// Look up the password and return if available
+	if pw, err := api.lookupPassword(address); err == nil {
+		return pw, nil
+	}
+	// Password unavailable, request it from the user
+	pwResp, err := api.UI.OnInputRequired(UserInputRequest{title, prompt, true})
+	if err != nil {
+		log.Warn("error obtaining password", "error", err)
+		// We'll not forward the error here, in case the error contains info about the response from the UI,
+		// which could leak the password if it was malformed json or something
+		return "", errors.New("internal error")
+	}
+	return pwResp.Text, nil
+}
+
 // SignTransaction signs the given Transaction and returns it both as json and rlp-encoded form
 func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, methodSelector *string) (*berithapi.SignTransactionResult, error) {
 	var (
 		err    error
 		result SignTxResponse
 	)
-	msgs, err := api.validator.ValidateTransaction(&args, methodSelector)
+	msgs, err := api.validator.ValidateTransaction(methodSelector, &args)
 	if err != nil {
 		return nil, err
 	}
@@ -492,9 +566,15 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 	}
 	// Convert fields into a real transaction
 	var unsignedTx = result.Transaction.toTransaction()
+	// Get the password for the transaction
+	pw, err := api.lookupOrQueryPassword(acc.Address, "Account password",
+		fmt.Sprintf("Please enter the password for account %s", acc.Address.String()))
+	if err != nil {
+		return nil, err
+	}
 
 	// The one to sign is the one that was returned from the UI
-	signedTx, err := wallet.SignTxWithPassphrase(acc, result.Password, unsignedTx, api.chainID)
+	signedTx, err := wallet.SignTxWithPassphrase(acc, pw, unsignedTx, api.chainID)
 	if err != nil {
 		api.UI.ShowError(err.Error())
 		return nil, err
@@ -552,7 +632,8 @@ func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, da
 // safely used to calculate a signature from.
 //
 // The hash is calculated as
-//   keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
+//
+//	keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func SignHash(data []byte) ([]byte, string) {

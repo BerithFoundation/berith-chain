@@ -48,6 +48,9 @@ func NewBlockValidator(config *params.ChainConfig, blockchain *BlockChain, engin
 // ValidateBody validates the given block's uncles and verifies the block
 // header's transaction and uncle roots. The headers are assumed to be already
 // validated at this point.
+//
+// ValidateBody는 주어진 블록의 엉클블록을 확인하고 블록헤더의 트랜잭션과 엉클블록의 루트를 검증한다.
+// 이 시점에서 헤더는 이미 검증되었다고 가정한다.
 func (v *BlockValidator) ValidateBody(block *types.Block) error {
 	// Check whether the block's known, and if not, that it's linkable
 	if v.bc.HasBlockAndState(block.Hash(), block.NumberU64()) {

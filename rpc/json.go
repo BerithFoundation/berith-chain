@@ -286,9 +286,16 @@ func (c *jsonCodec) ParseRequestArguments(argTypes []reflect.Type, params interf
 func parsePositionalArguments(rawArgs json.RawMessage, types []reflect.Type) ([]reflect.Value, Error) {
 	// Read beginning of the args array.
 	dec := json.NewDecoder(bytes.NewReader(rawArgs))
+	// fmt.Println("RawArgs : ", string(rawArgs))
 	if tok, _ := dec.Token(); tok != json.Delim('[') {
 		return nil, &invalidParamsError{"non-array args"}
 	}
+	// fmt.Println(types[0].Name())
+	// if types[0].Kind() == reflect.Struct {
+	// for i := 0; i < types[0].NumField(); i++ {
+	// fmt.Println(types[0].Field(i))
+	// }
+	// }
 	// Read args.
 	args := make([]reflect.Value, 0, len(types))
 	for i := 0; dec.More(); i++ {
@@ -297,6 +304,9 @@ func parsePositionalArguments(rawArgs json.RawMessage, types []reflect.Type) ([]
 		}
 		argval := reflect.New(types[i])
 		if err := dec.Decode(argval.Interface()); err != nil {
+			// fmt.Println("Failed to decode : ", argval.Type(), "err : ", err)
+			// myarg := argval.Interface()
+			// fmt.Println("Value", myarg)
 			return nil, &invalidParamsError{fmt.Sprintf("invalid argument %d: %v", i, err)}
 		}
 		if argval.IsNil() && types[i].Kind() != reflect.Ptr {

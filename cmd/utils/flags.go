@@ -40,7 +40,6 @@ import (
 	"github.com/BerithFoundation/berith-chain/berithstats"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/common/fdlimit"
-	"github.com/BerithFoundation/berith-chain/consensus"
 	"github.com/BerithFoundation/berith-chain/core"
 	"github.com/BerithFoundation/berith-chain/core/state"
 	"github.com/BerithFoundation/berith-chain/core/vm"
@@ -369,36 +368,6 @@ var (
 		Name:  "nocompaction",
 		Usage: "Disables db compaction after import",
 	}
-	// RPC settings
-	RPCEnabledFlag = cli.BoolFlag{
-		Name:  "rpc",
-		Usage: "Enable the HTTP-RPC server",
-	}
-	RPCListenAddrFlag = cli.StringFlag{
-		Name:  "rpcaddr",
-		Usage: "HTTP-RPC server listening interface",
-		Value: node.DefaultHTTPHost,
-	}
-	RPCPortFlag = cli.IntFlag{
-		Name:  "rpcport",
-		Usage: "HTTP-RPC server listening port",
-		Value: node.DefaultHTTPPort,
-	}
-	RPCCORSDomainFlag = cli.StringFlag{
-		Name:  "rpccorsdomain",
-		Usage: "Comma separated list of domains from which to accept cross origin requests (browser enforced)",
-		Value: "",
-	}
-	RPCVirtualHostsFlag = cli.StringFlag{
-		Name:  "rpcvhosts",
-		Usage: "Comma separated list of virtual hostnames from which to accept requests (server enforced). Accepts '*' wildcard.",
-		Value: strings.Join(node.DefaultConfig.HTTPVirtualHosts, ","),
-	}
-	RPCApiFlag = cli.StringFlag{
-		Name:  "rpcapi",
-		Usage: "API's offered over the HTTP-RPC interface",
-		Value: "",
-	}
 	IPCDisabledFlag = cli.BoolFlag{
 		Name:  "ipcdisable",
 		Usage: "Disable the IPC-RPC server",
@@ -679,6 +648,7 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(TestnetFlag.Name):
 		urls = params.TestnetBootnodes
+		berith.ProtocolName = "berith_testnet"
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -751,10 +721,10 @@ func splitAndTrim(input string) []string {
 // setHTTP creates the HTTP RPC listener interface string from the set
 // command line flags, returning empty if the HTTP endpoint is disabled.
 func setHTTP(ctx *cli.Context, cfg *node.Config) {
-	if ctx.GlobalBool(RPCEnabledFlag.Name) && cfg.HTTPHost == "" {
+	if ctx.GlobalBool(HTTPEnabledFlag.Name) && cfg.HTTPHost == "" {
 		cfg.HTTPHost = "127.0.0.1"
-		if ctx.GlobalIsSet(RPCListenAddrFlag.Name) {
-			cfg.HTTPHost = ctx.GlobalString(RPCListenAddrFlag.Name)
+		if ctx.GlobalIsSet(HTTPListenAddrFlag.Name) {
+			cfg.HTTPHost = ctx.GlobalString(HTTPListenAddrFlag.Name)
 		}
 	}
 	if ctx.GlobalBool(HTTPEnabledFlag.Name) && cfg.HTTPHost == "" {
@@ -764,26 +734,20 @@ func setHTTP(ctx *cli.Context, cfg *node.Config) {
 		}
 	}
 
-	if ctx.GlobalIsSet(RPCPortFlag.Name) {
-		cfg.HTTPPort = ctx.GlobalInt(RPCPortFlag.Name)
-	}
 	if ctx.GlobalIsSet(HTTPPortFlag.Name) {
 		cfg.HTTPPort = ctx.GlobalInt(HTTPPortFlag.Name)
-	}
-	if ctx.GlobalIsSet(RPCCORSDomainFlag.Name) {
-		cfg.HTTPCors = splitAndTrim(ctx.GlobalString(RPCCORSDomainFlag.Name))
 	}
 	if ctx.GlobalIsSet(HTTPCORSDomainFlag.Name) {
 		cfg.HTTPCors = splitAndTrim(ctx.GlobalString(HTTPCORSDomainFlag.Name))
 	}
-	if ctx.GlobalIsSet(RPCApiFlag.Name) {
-		cfg.HTTPModules = splitAndTrim(ctx.GlobalString(RPCApiFlag.Name))
-	}
 	if ctx.GlobalIsSet(HTTPApiFlag.Name) {
 		cfg.HTTPModules = splitAndTrim(ctx.GlobalString(HTTPApiFlag.Name))
 	}
-	if ctx.GlobalIsSet(RPCVirtualHostsFlag.Name) {
-		cfg.HTTPVirtualHosts = splitAndTrim(ctx.GlobalString(RPCVirtualHostsFlag.Name))
+	if ctx.GlobalIsSet(HTTPVirtualHostsFlag.Name) {
+		cfg.HTTPVirtualHosts = splitAndTrim(ctx.GlobalString(HTTPVirtualHostsFlag.Name))
+	}
+	if ctx.GlobalIsSet(HTTPPathPrefixFlag.Name) {
+		cfg.HTTPPathPrefix = ctx.GlobalString(HTTPPathPrefixFlag.Name)
 	}
 	if ctx.GlobalIsSet(HTTPVirtualHostsFlag.Name) {
 		cfg.HTTPVirtualHosts = splitAndTrim(ctx.GlobalString(HTTPVirtualHostsFlag.Name))
@@ -1126,19 +1090,6 @@ func checkExclusive(ctx *cli.Context, args ...interface{}) {
 	}
 }
 
-// SetShhConfig applies shh-related command line flags to the config.
-func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
-	if ctx.GlobalIsSet(WhisperMaxMessageSizeFlag.Name) {
-		cfg.MaxMessageSize = uint32(ctx.GlobalUint(WhisperMaxMessageSizeFlag.Name))
-	}
-	if ctx.GlobalIsSet(WhisperMinPOWFlag.Name) {
-		cfg.MinimumAcceptedPOW = ctx.GlobalFloat64(WhisperMinPOWFlag.Name)
-	}
-	if ctx.GlobalIsSet(WhisperRestrictConnectionBetweenLightClientsFlag.Name) {
-		cfg.RestrictConnectionBetweenLightClients = true
-	}
-}
-
 // SetBerithConfig applies berith-related command line flags to the config.
 func SetBerithConfig(ctx *cli.Context, stack *node.Node, cfg *berith.Config) {
 	// Avoid conflicting network flags
@@ -1286,15 +1237,6 @@ func RegisterBerithService(stack *node.Node, cfg *berith.Config) {
 	}
 }
 
-// RegisterShhService configures Whisper and adds it to the given node.
-func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
-	if err := stack.Register(func(n *node.ServiceContext) (node.Service, error) {
-		return whisper.New(cfg), nil
-	}); err != nil {
-		Fatalf("Failed to register the Whisper service: %v", err)
-	}
-}
-
 // RegisterBerithStatsService configures the Berith Stats daemon and adds it to
 // the given node.
 func RegisterBerithStatsService(stack *node.Node, url string) {
@@ -1369,8 +1311,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 	if err != nil {
 		Fatalf("%v", err)
 	}
-	var engine consensus.Engine
-	engine = bsrr.New(config.Bsrr, chainDb)
+	engine := bsrr.New(config.Bsrr, chainDb)
 	if gcmode := ctx.GlobalString(GCModeFlag.Name); gcmode != "full" && gcmode != "archive" {
 		Fatalf("--%s must be either 'full' or 'archive'", GCModeFlag.Name)
 	}
@@ -1437,5 +1378,27 @@ func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error 
 			}
 		}
 		return action(ctx)
+	}
+}
+
+// SetShhConfig applies shh-related command line flags to the config.
+func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
+	if ctx.GlobalIsSet(WhisperMaxMessageSizeFlag.Name) {
+		cfg.MaxMessageSize = uint32(ctx.GlobalUint(WhisperMaxMessageSizeFlag.Name))
+	}
+	if ctx.GlobalIsSet(WhisperMinPOWFlag.Name) {
+		cfg.MinimumAcceptedPOW = ctx.GlobalFloat64(WhisperMinPOWFlag.Name)
+	}
+	if ctx.GlobalIsSet(WhisperRestrictConnectionBetweenLightClientsFlag.Name) {
+		cfg.RestrictConnectionBetweenLightClients = true
+	}
+}
+
+// RegisterShhService configures Whisper and adds it to the given node.
+func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
+	if err := stack.Register(func(n *node.ServiceContext) (node.Service, error) {
+		return whisper.New(cfg), nil
+	}); err != nil {
+		Fatalf("Failed to register the Whisper service: %v", err)
 	}
 }

@@ -48,6 +48,11 @@ const (
 // a part of either structure.
 // It is not thread safe either, the encapsulating chain structures should do
 // the necessary mutex locking/unlocking.
+//
+// HeaderChain은 core.BlockChain과 light.LightChain에 의해 공유되는
+// 기본 블록 헤더 체인 로직을 구현한다.
+// 헤더체인은 그 자체로 쓰일 수 없으며 구조체의 일부로만 사용되어야 한다.
+// 스레드 세이프 하지 않기 때문에 캡슐화 체인 구조체는 뮤텍스를 사용해야 한다.
 type HeaderChain struct {
 	config *params.ChainConfig
 
@@ -68,9 +73,10 @@ type HeaderChain struct {
 }
 
 // NewHeaderChain creates a new HeaderChain structure.
-//  getValidator should return the parent's validator
-//  procInterrupt points to the parent's interrupt semaphore
-//  wg points to the parent's shutdown wait group
+//
+//	getValidator should return the parent's validator
+//	procInterrupt points to the parent's interrupt semaphore
+//	wg points to the parent's shutdown wait group
 func NewHeaderChain(chainDb berithdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	tdCache, _ := lru.New(tdCacheLimit)
@@ -436,6 +442,10 @@ func (hc *HeaderChain) GetHeaderByNumber(number uint64) *types.Header {
 		return nil
 	}
 	return hc.GetHeader(hash, number)
+}
+
+func (hc *HeaderChain) GetCanonicalHash(number uint64) common.Hash {
+	return rawdb.ReadCanonicalHash(hc.chainDb, number)
 }
 
 // CurrentHeader retrieves the current head header of the canonical chain. The

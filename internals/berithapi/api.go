@@ -421,7 +421,8 @@ func (s *PrivateAccountAPI) SignTransaction(ctx context.Context, args SendTxArgs
 // safely used to calculate a signature from.
 //
 // The hash is calulcated as
-//   keccak256("\x19Berith Signed Message:\n"${message length}${message}).
+//
+//	keccak256("\x19Berith Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func signHash(data []byte) []byte {
@@ -748,11 +749,11 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 	// Setup the gas pool (also for unmetered requests)
 	// and apply the message.
 	gp := new(core.GasPool).AddGas(math.MaxUint64)
-	res, gas, failed, err := core.ApplyMessage(evm, msg, gp)
+	result, err := core.ApplyMessage(evm, msg, gp)
 	if err := vmError(); err != nil {
 		return nil, 0, false, err
 	}
-	return res, gas, failed, err
+	return result.ReturnData, result.UsedGas, result.Failed(), err
 }
 
 // Call executes the given transaction on the state for the given block number.
@@ -988,6 +989,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		result.BlockNumber = (*hexutil.Big)(new(big.Int).SetUint64(blockNumber))
 		result.TransactionIndex = hexutil.Uint(index)
 	}
+	fmt.Println("GetTransaction : ", result.Hash.Hex())
 	return result
 }
 
@@ -1242,7 +1244,7 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 	if args.Data != nil && args.Input != nil && !bytes.Equal(*args.Data, *args.Input) {
-		return errors.New(`Both "data" and "input" are set and not equal. Please use "input" to pass transaction call data.`)
+		return errors.New(`both "data" and "input" are set and not equal. Please use "input" to pass transaction call data`)
 	}
 
 	/*
@@ -1281,9 +1283,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	target := types.ConvertJobWallet(args.Target)
 
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target, false)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input, base, target, false)
 }
 
 // submitTransaction is a helper function that submits tx to txPool and logs a message.
@@ -1307,7 +1309,7 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 
 // SendTransaction creates a transaction for the given argument, sign it and submit it to the
 // transaction pool.
-func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
+func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args *SendTxArgs) (common.Hash, error) {
 
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: args.From}
@@ -1476,7 +1478,7 @@ func (s *PublicTransactionPoolAPI) Resend(ctx context.Context, sendArgs SendTxAr
 		}
 	}
 
-	return common.Hash{}, fmt.Errorf("Transaction %#x not found", matchTx.Hash())
+	return common.Hash{}, fmt.Errorf("transaction %#x not found", matchTx.Hash())
 }
 
 // PublicDebugAPI is the collection of Berith APIs exposed over the public

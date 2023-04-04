@@ -53,6 +53,9 @@ func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consen
 // the transaction messages using the statedb and applying any rewards to both
 // the processor (coinbase) and any included uncles.
 //
+// Process는 statedb를 사용하는 트랜잭션 메세지의 Berith 규칙에 따라 state를 변경하고
+// 프로세서와 포함된 엉클블록 모두에게 보상을 적용한다.
+//
 // Process returns the receipts and logs accumulated during the process and
 // returns the amount of gas that was used in the process. If any of the
 // transactions failed to execute due to insufficient gas it will return an error.
@@ -71,7 +74,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
-		receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg)
+		receipt, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg)
 		if err != nil {
 			return nil, nil, 0, err
 		}
@@ -88,10 +91,13 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 // and uses the input parameters for its environment. It returns the receipt
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
-func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, uint64, error) {
+//
+// ApplyTransaction은 주어진 state DB로 트랜잭션 적용을 시도하고 해당 환경으로 인풋 파라미터를 사용한다.
+// 트랜잭션에 대한 영수증을 반환하는데, 사용된 가스와 트랜잭션 실패시 반환되는 에러등을 알 수 있다.
+func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, error) {
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	adjustStateForBIP4(config, statedb, header, tx)
@@ -103,9 +109,9 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	// about the transaction and calling mechanisms.
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
 	// Apply the transaction to the current state (included in the env)
-	_, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+	result, err := ApplyMessage(vmenv, msg, gp)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	// Update the state with pending changes
 	var root []byte
@@ -114,14 +120,15 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	} else {
 		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
 	}
-	*usedGas += gas
+	*usedGas += result.UsedGas
 
 	// Create a new receipt for the transaction, storing the intermediate root and gas used by the tx
 	// based on the eip phase, we're passing whether the root touch-delete accounts.
-	receipt := types.NewReceipt(root, failed, *usedGas)
+	receipt := types.NewReceipt(root, result.Failed(), *usedGas)
 	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = gas
+	receipt.GasUsed = result.UsedGas
 	// if the transaction created a contract, store the creation address in the receipt.
+	// 트랜잭션이 컨트랙트를 생성했다면, 생성된 주소를 영수증에 저장한다.
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
 	}
@@ -129,7 +136,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.Logs = statedb.GetLogs(tx.Hash())
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
-	return receipt, gas, err
+	return receipt, err
 }
 
 /*
@@ -157,16 +164,19 @@ func adjustStateForBIP4(config *params.ChainConfig, statedb *state.StateDB, head
 		selectionPoint := staking.CalcPointBigint(config.Bsrr.LimitStakeBalance, big.NewInt(0), currentBlock, lastStkBlock, config.Bsrr.Period)
 		statedb.SetPoint(*recipient, selectionPoint)
 	}
+
 }
 
 /*
 [Berith]
 Check if the break transaction satisfies the lock up condition
 The Break Transaction has a three-day grace period.
-Deprecated
 */
-// func checkBreakTransaction(msg types.Message, lastStakedBlock, currentBlock *big.Int, period uint64) (bool, int64) {
+// func checkBreakTransaction(msg types.Message, lastBlock, blockNumber *big.Int, period uint64) (bool, int64) {
 // 	lockUpPeriod := big.NewInt(int64((60 * 60 * 24 * 3) / int64(period))) // Created blocks in 3 days
-// 	elapsedBlockNumber := new(big.Int).Sub(currentBlock, lastStakedBlock)
+// 	elapsedBlockNumber := new(big.Int).Sub(blockNumber, lastBlock)
+// 	if msg.Base() == types.Stake && msg.Target() == types.Main {
+// 		fmt.Printf("ElapsedBlockNumber : %v, LockupPeriod : %v\n", elapsedBlockNumber, lockUpPeriod)
+// 	}
 // 	return elapsedBlockNumber.Cmp(lockUpPeriod) == 1, new(big.Int).Sub(lockUpPeriod, elapsedBlockNumber).Int64()
 // }

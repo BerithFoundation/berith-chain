@@ -868,7 +868,7 @@ func (c *BSRR) supportBIP1(chain consensus.ChainReader, parent *types.Header, st
 	return stks, nil
 }
 
-//[BERITH] Method to call stakingList from cache or db
+// [BERITH] Method to call stakingList from cache or db
 func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash common.Hash) (staking.Stakers, error) {
 	var (
 		list   staking.Stakers
@@ -941,7 +941,7 @@ func (c *BSRR) getStakers(chain consensus.ChainReader, number uint64, hash commo
 	return list, nil
 }
 
-//[BERITH] Method to check the block and set the value in stakingList
+// [BERITH] Method to check the block and set the value in stakingList
 func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, blocks []*types.Block) error {
 	if len(blocks) == 0 {
 		return nil
@@ -956,7 +956,7 @@ func (c *BSRR) checkBlocks(chain consensus.ChainReader, stks staking.Stakers, bl
 	return nil
 }
 
-//[BERITH] Method to examine transaction array and set value in stakingList
+// [BERITH] Method to examine transaction array and set value in stakingList
 func (c *BSRR) setStakersWithTxs(state *state.StateDB, chain consensus.ChainReader, stks staking.Stakers, txs []*types.Transaction, header *types.Header) error {
 	number := header.Number
 
@@ -1031,7 +1031,7 @@ func (s signers) signersMap() map[common.Address]struct{} {
 	return result
 }
 
-//[BERITH] Method that returns a list of accounts that can create a block of the received block number
+// [BERITH] Method that returns a list of accounts that can create a block of the received block number
 // 1) [0, epoch number) -> Return signers extracted from extra data of genesis
 // 2) [epoch nunber ~ ) -> Return signers extracted from staking list
 func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (signers, error) {
@@ -1058,7 +1058,7 @@ func (c *BSRR) getSigners(chain consensus.ChainReader, target *types.Header) (si
 	return result, nil
 }
 
-//[BERITH] Returns signers from the extra data field.
+// [BERITH] Returns signers from the extra data field.
 func (c *BSRR) getSignersFromExtraData(header *types.Header) (signers, error) {
 	n := (len(header.Extra) - extraVanity - extraSeal) / common.AddressLength
 	if n < 1 {

@@ -17,7 +17,10 @@
 package rpc
 
 import (
+	"berith-chain/common/hexutil"
+	"berith-chain/core/types"
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net"
@@ -588,4 +591,43 @@ func (l *flakeyListener) Accept() (net.Conn, error) {
 		})
 	}
 	return c, err
+}
+
+func TestHttpCall(t *testing.T) {
+	server := newTestServer("service", new(Service))
+	defer server.Stop()
+
+	client, hs := httpTestClient(server, "http", nil)
+	defer hs.Close()
+	defer client.Close()
+
+	raw, err := client.CallHttpMethod("GET", "http://15.164.124.7:8545", "berith_blockNumber", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	blockNumber := new(hexutil.Big)
+
+	err = json.Unmarshal(raw, blockNumber)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(blockNumber.ToInt())
+
+	raw, err = client.CallHttpMethod("GET", "http://15.164.124.7:8545", "berith_getBlockByNumber", hexutil.EncodeBig(blockNumber.ToInt()), false)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if raw == nil {
+		t.Errorf("result is nil, requestd blocknumber : %v", blockNumber.String())
+	}
+
+	lastBlock := new(types.Block)
+	err = json.Unmarshal(raw, lastBlock)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(lastBlock.Header())
 }

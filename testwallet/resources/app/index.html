@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="static/css/base.css"/>
+    <link rel="stylesheet" href="static/lib/astiloader/astiloader.css">
+    <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
+    <link rel="stylesheet" href="static/lib/astinotifier/astinotifier.css">
+    <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
+    <style type="text/css">
+        html {
+            font-family: sans-serif;
+        }
+        td {
+            vertical-align: top;
+            padding-top: 0.2em;
+            padding-bottom: 0.2em;
+        }
+        td:first-child {
+            white-space: pre;
+            padding-right: 0.5em;
+        }
+        input[type=radio], input[type=checkbox] {
+            margin: 0em;
+            padding: 0em;
+        }
+        input[type=radio] + label, input[type=checkbox] + label {
+            margin-right: 0.8em;
+            padding-left: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="static/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script src="static/lib/qrcodegen/qrcode.js"></script>
+
+    <script>if (window.module) module = window.module;</script>
+
+    <script src="static/js/index.js"></script>
+    <script src="static/js/hexConvert.js"></script>
+    <script src="static/js/database.js"></script>
+    <script src="static/js/qrGen.js"></script>
+
+    <script src="static/js/api/berith.js"></script>
+    <script src="static/js/api/admin.js"></script>
+    <script src="static/js/api/personal.js"></script>
+    <script src="static/js/api/miner.js"></script>
+
+
+
+    <script src="static/lib/astiloader/astiloader.js"></script>
+    <script src="static/lib/astimodaler/astimodaler.js"></script>
+    <script src="static/lib/astinotifier/astinotifier.js"></script>
+    <script src="static/lib/chart/chart.min.js"></script>
+    <script type="text/javascript">
+        index.init();
+    </script>
+
+    <button onclick="berith.blockNumber()">Get Block</button>
+    <textarea id="blockNumber"></textarea>
+
+    <button onclick="admin.nodeInfo()">Node Info</button>
+    <textarea id="nodeInfo"></textarea> <br>
+
+    <button onclick="berith.coinbase()">Get Coinbase</button>
+    <textarea id="coinbase"></textarea>
+
+    <button onclick="berith.accounts()">Get Accounts</button>
+    <textarea id="accounts"></textarea> <br>
+
+    <button onclick="berith.getBalance()">Get Balance</button>
+    <textarea id="getBalance"></textarea>
+
+    <button onclick="berith.getStakeBalance()">Get StakeBalance</button>
+    <textarea id="getStakeBalance"></textarea> <br>
+
+    <button onclick="berith.getRewardBalance()">Get RewardBalance</button>
+    <textarea id="getRewardBalance"></textarea>
+
+    <button onclick="personal.newAccount()">Create newAccount</button>
+    <textarea id="newAccount"></textarea> <br> <br>
+
+    <button onclick="miner.setBerithbase($(setAccount).val())">Set Berithbase</button>
+    <input type ="text" id = "setAccount" >변경할계정 </input> <br>
+    <input type ="text" id = "setBerithbase" >결과 </input> <br> <br>
+
+    <button onclick="miner.miningStart()">MiningStart</button>
+    <textarea id="miningStart"></textarea>
+
+    <button onclick="miner.miningStop()">MiningStop</button>
+    <textarea id="miningStop"></textarea> <br> <br>
+
+    <button onclick="personal.unlockAccount()">UnlockAccount </button>
+    <textarea id="unlockAccount"></textarea> <br> <br>
+
+    <button onclick="berith.sendTransaction( $(sendAmount).val() , $(sendAccount).val() )">Send Transaction </button>
+    <input type ="text" id = "sendAmount" value = "1000">보낼 금액 </input> <br>
+    <input type = "text" id = "sendAccount" value = "0x6e04514bd943cf342a614dd4465eb382e4d1d23b">보낼 계정</input> <br>
+    <input type = "text" id = "sendResult" > 결과 </input> <br> <br>
+
+    <button onclick="berith.stakeTransaction($(stakeAmount).val())"> Stake Transaction </button>
+    <input type ="text" id = "stakeAmount" >보낼 금액 </input> <br>
+    <input type ="text" id = "stakeResult" >결과 </input> <br> <br>
+
+    <button onclick="berith.rewardToBalance($(rtbAmount).val())"> RewardToBalance </button>
+    <input type ="text" id = "rtbAmount" >보낼 금액 </input> <br>
+    <input type ="text" id = "rtbResult" >결과 </input> <br> <br>
+
+    <button onclick="berith.rewardToStake($(rtsAmount).val())"> RewardToStake </button>
+    <input type ="text" id = "rtsAmount" >보낼 금액 </input> <br>
+    <input type ="text" id = "rtsResult" >결과 </input> <br> <br>
+
+    <input type ="text" id ="contactAdd" > 저장 계정</input>
+    <input type ="text" id ="contactName" > 저장 이름</input>
+    <button onclick="database.insertContact($(contactAdd).val() , $(contactName).val())" > 주소록 저장 </button> <br> <br>
+    <button onclick="database.selectContact()" > 주소록 조회</button>
+    <table id = "contact" border="1" >
+        <thead>
+        <tr>
+            <th> 주소 </th>
+            <th> 이름</th>
+        </tr>
+        </thead>
+        <tbody id = "contactData">
+        </tbody>
+    </table> <br > <br>
+
+    <input type ="text" id ="memberName" > 지갑 ID</input>
+    <input type ="text" id ="memberPwd" > 지갑 비밀번호</input>
+    <button onclick="database.insertMember($(memberName).val() , $(memberPwd).val())" > 회원정보 저장</button> <br> <br>
+    <button onclick="database.selectMember()" > 회원 조회</button>
+    <table id = "member" border="1" >
+        <thead>
+        <tr>
+            <th> 주소 </th>
+            <th> 아이디</th>
+            <th> 비밀번호</th>
+        </tr>
+        </thead>
+        <tbody id = "memberData">
+        </tbody>
+    </table> <br > <br>
+
+    <input type ="text" id ="getPrivateAdd" > 계정 주소</input>
+    <input type ="text" id ="getPrivatePwd" > 계정 비밀번호</input>
+    <input type = "text" id = "getPrivateResult" > 결과 </input>
+    <button onclick="personal.getPrivateKey($(getPrivateAdd).val() , $(getPrivatePwd).val())" > 개인키 조회</button> <br> <br>
+
+    <input type ="text" id ="importRawKeyAdd" > 개인키 주소</input>
+    <input type ="text" id ="importRawKeyPwd" > 계정 비밀번호</input>
+    <input type = "text" id = "importRawKeyResult" > 결과 </input>
+    <button onclick="personal.importRawKey($(importRawKeyAdd).val() , $(importRawKeyPwd).val())" > keystore 복원</button> <br> <br>
+
+    <input type ="text" id ="updateAccountAdd" > 계정 주소</input>
+    <input type ="text" id ="updateAccountPwd" > 기존 비밀번호</input>
+    <input type ="text" id ="updateAccountNewPwd" > 새 비밀번호</input>
+    <input type = "text" id = "updateAccountResult" > 결과 </input>
+    <button onclick="berith.updateAccount($(updateAccountAdd).val() , $(updateAccountPwd).val() , $(updateAccountNewPwd).val())" > 계정 비밀번호 변경</button> <br> <br>
+
+    <button onclick="berith.pendingTransactions()">pedingTransActions </button>
+    <textarea id="pendingResult"></textarea>
+    <br> <br>
+    <textarea id = "qrtext"></textarea> <br>
+    <button onclick="qrcode.qrgen($(qrtext).val())">qr Create</button> <br> <br>
+    <div style="border: 2px solid #000;width:500px">
+        <div id="qrcode"></div>
+    </div>
+
+    <button onclick="database.checkLogin($(memberName).val() , $(memberPwd).val())" > 조회죟죄호지호짛조</button> <br> <br>
+
+
+    <input type = "password" id = "exportPassword" > Export Password </input>
+    <button onclick="berith.exportKeystore()">Export Keystore</button>
+
+    <br> <br>
+
+    <input id="keystoreFile" type="file">
+    <input type = "password" id = "importPassword" > Import Password </input>
+    <button onclick="berith.importKeystore()">Import Keystore</button>
+    <br><br>
+
+    <textarea id="polling"></textarea>
+    <button onclick="index.nextPage()">Next Page</button> <br> <br>
+
+
+</body>
+</html>

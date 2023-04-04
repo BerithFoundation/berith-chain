@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/BerithFoundation/berith-chain"
+	berith_chain "github.com/BerithFoundation/berith-chain"
 	"github.com/BerithFoundation/berith-chain/accounts/abi"
 	"github.com/BerithFoundation/berith-chain/common"
 	"github.com/BerithFoundation/berith-chain/core/types"
@@ -161,7 +161,7 @@ func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, 
 	if err != nil {
 		return err
 	}
-	return c.abi.Unpack(result, method, output)
+	return c.abi.UnpackIntoInterface(result, method, output)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
@@ -227,9 +227,9 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, i
 	// Create the transaction, sign it and schedule it for execution
 	var rawTx *types.Transaction
 	if contract == nil {
-		rawTx = types.NewContractCreation(nonce, value, gasLimit, gasPrice, input, types.Main, types.Main)
+		rawTx = types.NewContractCreation(nonce, value, gasLimit, gasPrice, input, types.Main, types.Main, false)
 	} else {
-		rawTx = types.NewTransaction(nonce, c.address, value, gasLimit, gasPrice, input, types.Main, types.Main)
+		rawTx = types.NewTransaction(nonce, c.address, value, gasLimit, gasPrice, input, types.Main, types.Main, false)
 	}
 	if opts.Signer == nil {
 		return nil, errors.New("no signer to authorize the transaction with")
@@ -252,7 +252,7 @@ func (c *BoundContract) FilterLogs(opts *FilterOpts, name string, query ...[]int
 		opts = new(FilterOpts)
 	}
 	// Append the event selector to the query parameters and construct the topic set
-	query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
+	query = append([][]interface{}{{c.abi.Events[name].ID}}, query...)
 
 	topics, err := makeTopics(query...)
 	if err != nil {
@@ -301,7 +301,7 @@ func (c *BoundContract) WatchLogs(opts *WatchOpts, name string, query ...[]inter
 		opts = new(WatchOpts)
 	}
 	// Append the event selector to the query parameters and construct the topic set
-	query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
+	query = append([][]interface{}{{c.abi.Events[name].ID}}, query...)
 
 	topics, err := makeTopics(query...)
 	if err != nil {
@@ -327,7 +327,7 @@ func (c *BoundContract) WatchLogs(opts *WatchOpts, name string, query ...[]inter
 // UnpackLog unpacks a retrieved log into the provided output structure.
 func (c *BoundContract) UnpackLog(out interface{}, event string, log types.Log) error {
 	if len(log.Data) > 0 {
-		if err := c.abi.Unpack(out, event, log.Data); err != nil {
+		if err := c.abi.UnpackIntoInterface(out, event, log.Data); err != nil {
 			return err
 		}
 	}

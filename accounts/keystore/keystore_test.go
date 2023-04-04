@@ -21,6 +21,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"os/user"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -387,7 +389,36 @@ func tmpKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
 	return d, new(string(d))
 }
 
-//Public Key >> Private Key
+func homeDir() string {
+	if home := os.Getenv("HOME"); home != "" {
+		return home
+	}
+	if usr, err := user.Current(); err == nil {
+		return usr.HomeDir
+	}
+	return ""
+}
+
+func datadirKeyStore(t *testing.T, encrypted bool) (string, *KeyStore) {
+	home := homeDir()
+	var d string
+	if home != "" {
+		switch runtime.GOOS {
+		case "darwin":
+			d = filepath.Join(home, "berith-test", "keystore")
+		default:
+			d = filepath.Join(home, ".berith")
+		}
+	}
+
+	new := NewPlaintextKeyStore
+	if encrypted {
+		new = func(kd string) *KeyStore { return NewKeyStore(kd, veryLightScryptN, veryLightScryptP) }
+	}
+	return d, new(string(d))
+}
+
+// Public Key >> Private Key
 func TestKeyStore_GetPrivateKey(t *testing.T) {
 	dir, ks := tmpKeyStore(t, true)
 	defer os.RemoveAll(dir)
@@ -404,4 +435,18 @@ func TestKeyStore_GetPrivateKey(t *testing.T) {
 	}
 
 	fmt.Println(pk)
+}
+
+func TestNewAccounts(t *testing.T) {
+	dir, ks := datadirKeyStore(t, true)
+	// defer os.RemoveAll(dir)
+	pass := "berith"
+	for i := 0; i < 10; i++ {
+		acc, err := ks.NewAccount(pass)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println(acc.Address.Hex(), "Generated.")
+	}
+	fmt.Println(dir)
 }

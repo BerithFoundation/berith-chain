@@ -114,8 +114,6 @@ var (
 		utils.VMEnableDebugFlag,
 		utils.NetworkIdFlag,
 		utils.ConstantinopleOverrideFlag,
-		utils.RPCCORSDomainFlag,
-		utils.RPCVirtualHostsFlag,
 		utils.BerithStatsURLFlag,
 		utils.MetricsEnabledFlag,
 		utils.FakePoWFlag,
@@ -135,10 +133,6 @@ var (
 		utils.HTTPVirtualHostsFlag,
 		utils.HTTPApiFlag,
 		utils.HTTPPathPrefixFlag,
-		utils.RPCEnabledFlag,
-		utils.RPCListenAddrFlag,
-		utils.RPCPortFlag,
-		utils.RPCApiFlag,
 		utils.WSEnabledFlag,
 		utils.WSListenAddrFlag,
 		utils.WSPortFlag,
@@ -146,13 +140,6 @@ var (
 		utils.WSAllowedOriginsFlag,
 		utils.IPCDisabledFlag,
 		utils.IPCPathFlag,
-	}
-
-	whisperFlags = []cli.Flag{
-		utils.WhisperEnabledFlag,
-		utils.WhisperMaxMessageSizeFlag,
-		utils.WhisperMinPOWFlag,
-		utils.WhisperRestrictConnectionBetweenLightClientsFlag,
 	}
 
 	metricsFlags = []cli.Flag{
@@ -180,8 +167,7 @@ func init() {
 		copydbCommand,
 		removedbCommand,
 		dumpCommand,
-		// See monitorcmd.go:
-		monitorCommand,
+
 		// See accountcmd.go:
 		accountCommand,
 		walletCommand,
@@ -199,7 +185,6 @@ func init() {
 	app.Flags = append(app.Flags, rpcFlags...)
 	app.Flags = append(app.Flags, consoleFlags...)
 	app.Flags = append(app.Flags, debug.Flags...)
-	app.Flags = append(app.Flags, whisperFlags...)
 	app.Flags = append(app.Flags, metricsFlags...)
 
 	app.Before = func(ctx *cli.Context) error {
@@ -284,6 +269,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 
 	go func() {
 		// Create a chain state reader for self-derivation
+		// pipe 반대편을 dispatch하는 클라이언트
 		rpcClient, err := stack.Attach()
 		if err != nil {
 			utils.Fatalf("Failed to attach to self: %v", err)
