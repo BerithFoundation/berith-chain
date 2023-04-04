@@ -65,8 +65,7 @@ func AzureBlobstoreUpload(path string, name string, config AzureBlobstoreConfig)
 	}
 	defer in.Close()
 
-	blockblob := container.NewBlockBlobClient(name)
-	_, err = blockblob.Upload(context.Background(), in, nil)
+	_, err = blockblob.Upload(context.Background(), in, azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
 	return err
 }
 
@@ -105,10 +104,10 @@ func AzureBlobstoreList(config AzureBlobstoreConfig) ([]azblob.BlobItem, error) 
 
 // AzureBlobstoreDelete iterates over a list of files to delete and removes them
 // from the blobstore.
-func AzureBlobstoreDelete(config AzureBlobstoreConfig, blobs []*azblob.BlobItemInternal) error {
+func AzureBlobstoreDelete(config AzureBlobstoreConfig, blobs []azblob.BlobItem) error {
 	if *DryRunFlag {
 		for _, blob := range blobs {
-			fmt.Printf("would delete %s (%s) from %s/%s\n", *blob.Name, blob.Properties.LastModified, config.Account, config.Container)
+			fmt.Printf("would delete %s (%s) from %s/%s\n", blob.Name, blob.Properties.LastModified, config.Account, config.Container)
 		}
 		return nil
 	}
@@ -127,8 +126,8 @@ func AzureBlobstoreDelete(config AzureBlobstoreConfig, blobs []*azblob.BlobItemI
 
 	// Iterate over the blobs and delete them
 	for _, blob := range blobs {
-		blockblob := container.NewBlockBlobClient(*blob.Name)
-		if _, err := blockblob.Delete(context.Background(), &azblob.DeleteBlobOptions{}); err != nil {
+		blockblob := container.NewBlockBlobURL(blob.Name)
+		if _, err := blockblob.Delete(context.Background(), azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{}); err != nil {
 			return err
 		}
 		fmt.Printf("deleted  %s (%s)\n", blob.Name, blob.Properties.LastModified)
