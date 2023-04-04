@@ -53,7 +53,7 @@ var (
 		BIP3Block:           big.NewInt(1168000),
 		BIP4Block:           big.NewInt(6130000),
 		//eip 1884,2929,2200,1344 활성화, MainnetGenesis Hash와 Genesis.json으로부터 생성된 블록의 Hash가 다르면 genesis.json 설정에 따른다.
-		BIP5Block: big.NewInt(21000000),
+		BIP5Block: big.NewInt(21314000),
 		Bsrr: &BSRRConfig{
 			Period:            5,
 			Epoch:             360,
