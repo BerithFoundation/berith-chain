@@ -30,7 +30,7 @@ var (
 	verbosity      = flag.Int("verbosity", 3, "logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail")
 	node_testnet   = flag.String("testnet", "", "testnet")
 	node_console   = flag.String("console", "", "console")
-	node_datadir   = flag.String("datadir", "", "datadir")
+	datadir        = flag.String("datadir", "", "set the path of data directory")
 	nodeConfig     = flag.String("nodeconfig", "", "config file path")
 	nodiscover     = flag.Bool("nodiscover", false, "nodiscover")
 	httpFlag       = flag.Bool("http", false, "open http connection")

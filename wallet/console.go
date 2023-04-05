@@ -272,8 +272,8 @@ func Start() {
 	if *httpCorsDomain != "" {
 		args = append(args, "--http.corsdomain", *httpCorsDomain)
 	}
-	if *nodiscover {
-		args = append(args, "--nodiscover")
+	if *datadir != "" {
+		args = append(args, "--datadir", *datadir)
 	}
 	if *verbosity > 3 {
 		args = append(args, "--verbosity", fmt.Sprintf("%d", *verbosity))
