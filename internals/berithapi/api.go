@@ -989,7 +989,6 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		result.BlockNumber = (*hexutil.Big)(new(big.Int).SetUint64(blockNumber))
 		result.TransactionIndex = hexutil.Uint(index)
 	}
-	fmt.Println("GetTransaction : ", result.Hash.Hex())
 	return result
 }
 
