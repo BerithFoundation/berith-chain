@@ -626,7 +626,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, 
 
 // GetTransactionByHash returns the transaction for the given hash
 func (s *Eth_PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context, hash common.Hash) *EthRPCTransaction {
-	if s.b.ChainConfig().IsBIP5(s.b.CurrentBlock().Number()) {
+	if s.b.CurrentBlock().Number().Cmp(s.b.ChainConfig().BIP5Block) < 0 {
 		log.Error("eth_getTransactionByHash is not supported untill BIP5")
 		return &EthRPCTransaction{}
 	}
@@ -701,7 +701,7 @@ func newEthRPCPendingTransaction(tx *types.Transaction) *EthRPCTransaction {
 
 // GetRawTransactionByHash returns the bytes of the transaction for the given hash.
 func (s *Eth_PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Context, hash common.Hash) (hexutil.Bytes, error) {
-	if s.b.ChainConfig().IsBIP5(s.b.CurrentBlock().Number()) {
+	if s.b.CurrentBlock().Number().Cmp(s.b.ChainConfig().BIP5Block) < 0 {
 		return common.Hash{}.Bytes(), errors.New("eth_getRawTransactionByHash is not supported untill bip5")
 	}
 	var tx *types.Transaction
@@ -720,7 +720,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Conte
 
 // GetTransactionReceipt returns the transaction receipt for the given transaction hash.
 func (s *Eth_PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, hash common.Hash) (map[string]interface{}, error) {
-	if s.b.ChainConfig().IsBIP5(s.b.CurrentBlock().Number()) {
+	if s.b.CurrentBlock().Number().Cmp(s.b.ChainConfig().BIP5Block) < 0 {
 		return nil, errors.New("eth_getTransactionReceipt is not supported untill bip5")
 	}
 	tx, blockHash, blockNumber, index, _, _ := rawdb.ReadTransaction(s.b.ChainDb(), hash)
@@ -908,7 +908,7 @@ func eth_submitTransaction(ctx context.Context, b Backend, originTx *types.Origi
 // SendTransaction creates a transaction for the given argument, sign it and submit it to the
 // transaction pool.
 func (s *Eth_PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args *Eth_SendTxArgs) (common.Hash, error) {
-	if s.b.ChainConfig().IsBIP5(s.b.CurrentBlock().Number()) {
+	if s.b.CurrentBlock().Number().Cmp(s.b.ChainConfig().BIP5Block) < 0 {
 		return common.Hash{}, errors.New("eth_sendTransaction is not supported untill bip5")
 	}
 
@@ -948,7 +948,7 @@ func (s *Eth_PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args
 // SendRawTransaction will add the signed transaction to the transaction pool.
 // The sender is responsible for signing the transaction and using the correct nonce.
 func (s *Eth_PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
-	if s.b.ChainConfig().IsBIP5(s.b.CurrentBlock().Number()) {
+	if s.b.CurrentBlock().Number().Cmp(s.b.ChainConfig().BIP5Block) < 0 {
 		return common.Hash{}, errors.New("eth_sendRawTransaction is not supported untill bip5")
 	}
 
