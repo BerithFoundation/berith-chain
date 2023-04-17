@@ -642,7 +642,6 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	if tx.Base() == types.Main {
 		if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
-			fmt.Println("From : ", from.Hex())
 			return ErrInsufficientFunds
 		}
 	}
