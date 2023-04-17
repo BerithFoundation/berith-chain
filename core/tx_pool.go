@@ -951,9 +951,6 @@ func (pool *TxPool) addTxsLocked(txs []*types.Transaction, local bool) []error {
 			dirty[from] = struct{}{}
 		}
 	}
-	for d := range dirty {
-		fmt.Printf("\t%v\n", d.Hash().Hex())
-	}
 	// Only reprocess the internals state if something was actually added
 	if len(dirty) > 0 {
 		addrs := make([]common.Address, 0, len(dirty))
