@@ -64,12 +64,13 @@ func (v *BlockValidator) ValidateBody(block *types.Block) error {
 	if hash := types.CalcUncleHash(block.Uncles()); hash != header.UncleHash {
 		return fmt.Errorf("uncle root hash mismatch: have %x, want %x", hash, header.UncleHash)
 	}
+	// [Berith]
+	// Metamask transaction can be processed after BIP5
+	if header.Number.Cmp(v.bc.Config().BIP5Block) < 0 && block.Transactions().ContainEthTx() {
+		return fmt.Errorf("metamask transaction can not be included until BIP5")
+	}
 	if hash := types.DeriveSha(block.Transactions()); hash != header.TxHash {
-		var ethTxs string
-		for i, tx := range block.Transactions() {
-			ethTxs += fmt.Sprintf("%02d - %v\n", i+1, tx.IsEthTx)
-		}
-		return fmt.Errorf("transaction root hash mismatch: have %x, want %x, \nEthTxs %s", hash, header.TxHash, ethTxs)
+		return fmt.Errorf("transaction root hash mismatch: have %x, want %x", hash, header.TxHash)
 	}
 	if !v.bc.HasBlockAndState(block.ParentHash(), block.NumberU64()-1) {
 		if !v.bc.HasBlock(block.ParentHash(), block.NumberU64()-1) {

@@ -81,6 +81,7 @@ var (
 	ErrUnderStakeBalance    = errors.New("insufficient transaction value")
 	ErrExceedStakeLimit     = errors.New("exceeds stake balance limit")
 	ErrInvalidStakeReceiver = errors.New("berith account only can stake token on itself")
+	ErrMetamaskTx           = errors.New("metamask transaction can be added after BIP5")
 )
 
 var (
@@ -622,6 +623,10 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	if (tx.Base() == types.Stake || tx.Target() == types.Stake) && !bytes.Equal(tx.To().Bytes(), from.Bytes()) {
 		return ErrInvalidStakeReceiver
+	}
+
+	if !pool.chainconfig.IsBIP5(pool.chain.CurrentBlock().Number()) && tx.IsEthTx {
+		return ErrMetamaskTx
 	}
 
 	// currentBlockNumber := pool.chain.CurrentBlock().Number()

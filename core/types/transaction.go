@@ -318,6 +318,26 @@ func (s Transactions) GetRlp(i int) []byte {
 	return enc
 }
 
+func (s Transactions) RecoverEthtx() Transactions {
+	for _, t := range s {
+		if t.IsEthTx {
+			t.IsEthTx = false
+		}
+	}
+	return s
+}
+
+func (s Transactions) ContainEthTx() bool {
+	var contain bool
+	for _, t := range s {
+		if t.IsEthTx {
+			contain = true
+			break
+		}
+	}
+	return contain
+}
+
 // TxDifference returns a new set which is the difference between a and b.
 func TxDifference(a, b Transactions) Transactions {
 	keep := make(Transactions, 0, len(a))
