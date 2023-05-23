@@ -247,3 +247,8 @@ type originTxData struct {
 	// This is only used when marshaling to JSON.
 	Hash *common.Hash `json:"hash" rlp:"-"`
 }
+
+func TestDeriveChainID(t *testing.T) {
+	chainID := deriveChainId(big.NewInt(2044))
+	t.Log(chainID.Int64())
+}

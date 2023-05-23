@@ -489,6 +489,9 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallEth_Args, blockNrOrH
 			}
 			return true, nil, err // Bail out
 		}
+		if !result.Failed() {
+			fmt.Println("Failed", args, gas)
+		}
 		return result.Failed(), result, nil
 	}
 	// Execute the binary search and hone in on an executable gas limit
@@ -755,7 +758,7 @@ func (s *Eth_PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context
 		"contractAddress":   nil,
 		"logs":              receipt.Logs,
 		"logsBloom":         receipt.Bloom,
-		"type":              0,
+		"type":              hexutil.Uint64(receipt.Status),
 	}
 
 	// Assign receipt status or post state.

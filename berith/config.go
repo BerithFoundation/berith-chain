@@ -38,8 +38,8 @@ var DefaultConfig = Config{
 	TrieCleanCache: 256,
 	TrieDirtyCache: 256,
 	TrieTimeout:    60 * time.Minute,
-	MinerGasFloor:  8000000,
-	MinerGasCeil:   8000000,
+	MinerGasFloor:  30000000,
+	MinerGasCeil:   30000000,
 	MinerGasPrice:  big.NewInt(params.Gmin),
 	MinerRecommit:  3 * time.Second,
 
@@ -58,8 +58,8 @@ var DefaultTestnetConfig = Config{
 	TrieCleanCache: 256,
 	TrieDirtyCache: 256,
 	TrieTimeout:    60 * time.Minute,
-	MinerGasFloor:  8000000,
-	MinerGasCeil:   8000000,
+	MinerGasFloor:  30000000,
+	MinerGasCeil:   30000000,
 	MinerGasPrice:  big.NewInt(params.Gmin),
 	MinerRecommit:  3 * time.Second,
 

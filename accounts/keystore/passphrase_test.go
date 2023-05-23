@@ -17,10 +17,12 @@
 package keystore
 
 import (
+	"encoding/hex"
 	"io/ioutil"
 	"testing"
 
 	"github.com/BerithFoundation/berith-chain/common"
+	"github.com/BerithFoundation/berith-chain/crypto"
 )
 
 const (
@@ -57,4 +59,24 @@ func TestKeyEncryptDecrypt(t *testing.T) {
 			t.Errorf("test %d: failed to recrypt key %v", i, err)
 		}
 	}
+}
+
+func TestGetPublicKey(t *testing.T) {
+	keyjson, err := ioutil.ReadFile("testdata/getpublickey.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	password := "123"
+	address := common.HexToAddress("2345bf77d1de9eacf66fe81a09a86cfab212a542")
+
+	// Decrypt with the correct password
+	key, err := DecryptKey(keyjson, password)
+	if err != nil {
+		t.Fatalf("json key failed to decrypt: %v", err)
+	}
+	if key.Address != address {
+		t.Errorf("key address mismatch: have %x, want %x", key.Address, address)
+	}
+	t.Log(hex.EncodeToString(crypto.FromECDSA(key.PrivateKey)))
+	t.Log(hex.EncodeToString(crypto.FromECDSAPub(&key.PrivateKey.PublicKey)))
 }
